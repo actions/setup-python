@@ -1,0 +1,12 @@
+name: 'Setup Node.js for use with actions'
+description: 'Setup a Node.js environment and add it to the PATH, additionally providing proxy support'
+author: 'GitHub'
+inputs: 
+  version:
+    description: 'Version range or exact version of a Python version to use, using semver's version range syntax.'
+    default: '3.x'
+  architecture:
+    description: 'The target architecture (x86, x64) of the Python interpreter.'
+runs:
+  using: 'node'
+  main: 'lib/setup-python.js'
