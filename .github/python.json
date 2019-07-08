@@ -4,7 +4,7 @@
             "owner": "python",
             "pattern": [
                 {
-                    "regexp": "^\s*raise\s(.*)\(\'(.*)\'\)$",
+                    "regexp": "^\\s*raise\\s(.*)\\(\\'(.*)\\'\\)$",
                     "severity": 1,
                     "message": 2
                 }
