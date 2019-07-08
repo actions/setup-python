@@ -4,9 +4,11 @@
             "owner": "python",
             "pattern": [
                 {
-                    "regexp": "^\\s*raise\\s(.*)\\(\\'(.*)\\'\\)$",
-                    "severity": 1,
-                    "message": 2
+                    "regexp": "^\\s*File\\s\\\"(.*)\\\",\\sline\\s(\\d+),\\sin\\s(.*)\\s*raise\\s(.*)\\(\\'(.*)\\'\\)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 4,
+                    "message": 5
                 }
             ]
         }
