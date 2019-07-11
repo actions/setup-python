@@ -1,9 +1,9 @@
 {
-  "name": "node12-template-action",
+  "name": "setup-python",
   "version": "0.0.0",
   "private": true,
-  "description": "Node 12 template action",
-  "main": "lib/main.js",
+  "description": "Setup python action",
+  "main": "lib/setup-python.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/start-vm-action.git"
+    "url": "git+https://github.com/actions/ssetup-python.git"
   },
   "keywords": [
     "actions",
