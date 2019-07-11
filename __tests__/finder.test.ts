@@ -24,6 +24,7 @@ const tempDir = path.join(
 );
 
 process.env['RUNNER_TOOLSDIRECTORY'] = toolDir;
+process.env['AGENT_TOOLSDIRECTORY'] = toolDir;
 process.env['RUNNER_TEMPDIRECTORY'] = tempDir;
 
 import * as finder from '../src/find-python';
