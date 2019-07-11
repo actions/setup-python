@@ -3,7 +3,7 @@ import fs = require('fs');
 import path = require('path');
 
 const toolDir = path.join(
-  process.cwd(),
+  __dirname,
   'runner',
   path.join(
     Math.random()
@@ -13,7 +13,7 @@ const toolDir = path.join(
   'tools'
 );
 const tempDir = path.join(
-  process.cwd(),
+  __dirname,
   'runner',
   path.join(
     Math.random()
@@ -24,7 +24,6 @@ const tempDir = path.join(
 );
 
 process.env['RUNNER_TOOLSDIRECTORY'] = toolDir;
-process.env['AGENT_TOOLSDIRECTORY'] = toolDir;
 process.env['RUNNER_TEMPDIRECTORY'] = tempDir;
 
 import * as finder from '../src/find-python';
