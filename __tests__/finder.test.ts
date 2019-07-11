@@ -31,11 +31,11 @@ import * as finder from '../src/find-python';
 
 describe('Finder tests', () => {
   it('Finds Python if it is installed', async () => {
-    const pythonDir: string = path.join(toolDir, 'python', '2.0.0', 'x64');
+    const pythonDir: string = path.join(toolDir, 'python', '3.0.0', 'x64');
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await finder.findPythonVersion('2.x', 'x64');
+    await finder.findPythonVersion('3.x', 'x64');
   });
 
   it('Errors if Python is not installed', async () => {
