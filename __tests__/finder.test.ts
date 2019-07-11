@@ -1,6 +1,5 @@
 import io = require('@actions/io');
 import fs = require('fs');
-import os = require('os');
 import path = require('path');
 
 const toolDir = path.join(
@@ -42,7 +41,7 @@ describe('Finder tests', () => {
     // This will throw if it doesn't find it in the cache (because no such version exists)
     let thrown = false;
     try {
-      await finder.findPythonVersion('3.x', 'x64');
+      await finder.findPythonVersion('3.300000', 'x64');
     } catch {
       thrown = true;
     }
@@ -55,16 +54,5 @@ describe('Finder tests', () => {
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache (because no such version exists)
     await finder.findPythonVersion('pypy2', 'x64');
-  });
-
-  it('Errors if PyPy is not installed', async () => {
-    // This will throw if it doesn't find it in the cache (because no such version exists)
-    let thrown = false;
-    try {
-      await finder.findPythonVersion('pypy3', 'x64');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBeTruthy();
   });
 });
