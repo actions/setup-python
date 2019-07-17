@@ -2,7 +2,7 @@
 
 This action sets up a python environment for use in actions by:
 
-- optionally downloading and caching a version of python by version and adding to PATH
+- optionally installing a version of python and adding to PATH. Note that this action only uses versions of Python already installed in the cache. The action will fail if no matching versions are found.
 - registering problem matchers for error output
 
 # Usage
