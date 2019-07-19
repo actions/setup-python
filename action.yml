@@ -7,6 +7,7 @@ inputs:
     default: '3.x'
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
+    default: 'x64'
 runs:
   using: 'node12'
   main: 'lib/setup-python.js'
