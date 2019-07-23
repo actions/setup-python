@@ -12,8 +12,8 @@ See [action.yml](action.yml)
 Basic:
 ```yaml
 actions:
-- uses: actions/checkout@latest
-- uses: actions/setup-python@latest
+- uses: actions/checkout@master
+- uses: actions/setup-python@master
   with:
     version: 3.x // Version range or exact version of a Python version to use, using semvers version range syntax.
     architecture: x64 // (x64 or x86)
@@ -29,9 +29,9 @@ jobs:
         python: [ 2.x, 3.x, pypy3 ]
     name: Python ${{ matrix.python }} sample
     actions:
-      - uses: actions/checkout@latest
+      - uses: actions/checkout@master
       - name: Setup python
-        uses: actions/setup-python@latest
+        uses: actions/setup-python@master
         with:
           version: ${{ matrix.python }}
           architecture: x64
