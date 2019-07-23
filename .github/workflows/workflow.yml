@@ -8,6 +8,9 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest, windows-latest]
     actions:
+    - name: Checkout
+      uses: actions/checkout@master
+
     - name: Set Node.js 10.x
       uses: actions/setup-node@master
       with:
