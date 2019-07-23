@@ -12,6 +12,7 @@ See [action.yml](action.yml)
 Basic:
 ```yaml
 actions:
+- uses: actions/checkout@latest
 - uses: actions/setup-python@latest
   with:
     version: 3.x // Version range or exact version of a Python version to use, using semvers version range syntax.
@@ -28,6 +29,7 @@ jobs:
         python: [ 2.x, 3.x, pypy3 ]
     name: Python ${{ matrix.python }} sample
     actions:
+      - uses: actions/checkout@latest
       - name: Setup python
         uses: actions/setup-python@latest
         with:
