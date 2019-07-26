@@ -11,7 +11,7 @@ See [action.yml](action.yml)
 
 Basic:
 ```yaml
-actions:
+steps:
 - uses: actions/checkout@master
 - uses: actions/setup-python@master
   with:
@@ -28,7 +28,7 @@ jobs:
       matrix:
         python: [ 2.x, 3.x, pypy3 ]
     name: Python ${{ matrix.python }} sample
-    actions:
+    steps:
       - uses: actions/checkout@master
       - name: Setup python
         uses: actions/setup-python@master
