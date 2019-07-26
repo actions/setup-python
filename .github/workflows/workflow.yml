@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest]
-    actions:
+    steps:
     - name: Checkout
       uses: actions/checkout@master
 
