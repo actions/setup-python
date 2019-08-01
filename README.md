@@ -13,7 +13,7 @@ Basic:
 ```yaml
 steps:
 - uses: actions/checkout@master
-- uses: actions/setup-python@master
+- uses: actions/setup-python@v1
   with:
     version: 3.x // Version range or exact version of a Python version to use, using semvers version range syntax.
     architecture: x64 // (x64 or x86)
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Setup python
-        uses: actions/setup-python@master
+        uses: actions/setup-python@v1
         with:
           version: ${{ matrix.python }}
           architecture: x64
