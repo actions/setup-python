@@ -15,8 +15,8 @@ steps:
 - uses: actions/checkout@master
 - uses: actions/setup-python@v1
   with:
-    version: 3.x // Version range or exact version of a Python version to use, using semvers version range syntax.
-    architecture: x64 // (x64 or x86)
+    version: '3.x' // Version range or exact version of a Python version to use, using semvers version range syntax.
+    architecture: 'x64' // (x64 or x86)
 - run: python my_script.py
 ```
 
@@ -24,9 +24,10 @@ Matrix Testing:
 ```yaml
 jobs:
   build:
+    runs-on: ubuntu-16.04
     strategy:
       matrix:
-        python: [ 2.x, 3.x, pypy3 ]
+        python: [ '2.x', '3.x', 'pypy3' ]
     name: Python ${{ matrix.python }} sample
     steps:
       - uses: actions/checkout@master
