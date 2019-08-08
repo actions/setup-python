@@ -1,5 +1,5 @@
-name: 'Setup Node.js for use with actions'
-description: 'Setup a Node.js environment and add it to the PATH, additionally providing proxy support'
+name: 'Setup Python for use with actions'
+description: 'Setup a Python environment and add it to the PATH, additionally providing proxy support'
 author: 'GitHub'
 inputs: 
   version:
