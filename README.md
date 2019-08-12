@@ -1,5 +1,9 @@
 # setup-python
 
+<p align="left">
+  <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
+</p>
+
 This action sets up a python environment for use in actions by:
 
 - optionally installing a version of python and adding to PATH. Note that this action only uses versions of Python already installed in the cache. The action will fail if no matching versions are found.
