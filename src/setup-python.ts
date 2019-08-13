@@ -4,7 +4,10 @@ import * as path from 'path';
 
 async function run() {
   try {
-    const version: string = core.getInput('version');
+    let version = core.getInput('version');
+    if (!version) {
+      version = core.getInput('python-version');
+    }
     if (version) {
       const arch: string = core.getInput('architecture', {required: true});
       await finder.findPythonVersion(version, arch);
