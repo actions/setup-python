@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-16.04
     strategy:
       matrix:
-        python: [ '2.x', '3.x', , 'pypy2', 'pypy3' ]
+        python: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
     name: Python ${{ matrix.python }} sample
     steps:
       - uses: actions/checkout@master
