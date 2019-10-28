@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/ssetup-python.git"
+    "url": "git+https://github.com/actions/setup-python.git"
   },
   "keywords": [
     "actions",
