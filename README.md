@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-16.04
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy3' ]
+        python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@master
