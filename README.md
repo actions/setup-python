@@ -4,9 +4,9 @@
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
 </p>
 
-This action sets up a python environment for use in actions by:
+This action sets up a Python environment for use in actions by:
 
-- optionally installing a version of python and adding to PATH. Note that this action only uses versions of Python already installed in the cache. The action will fail if no matching versions are found.
+- optionally installing a version of Python and adding to PATH. Note that this action only uses versions of Python already installed in the cache. The action will fail if no matching versions are found.
 - registering problem matchers for error output
 
 # Usage
@@ -31,14 +31,14 @@ jobs:
     runs-on: ubuntu-16.04
     strategy:
       matrix:
-        python: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
-    name: Python ${{ matrix.python }} sample
+        python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
+    name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@master
       - name: Setup python
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ matrix.python-version }}
           architecture: x64
       - run: python my_script.py
 ```
