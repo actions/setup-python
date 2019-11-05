@@ -8,10 +8,6 @@ inputs:
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
     default: 'x64'
-# Deprecated option, do not use. Will not be supported after October 1, 2019
-  version:
-    description: 'Deprecated. Use python-version instead. Will not be supported after October 1, 2019'
-    deprecationMessage: 'The version property will not be supported after October 1, 2019. Use python-version instead'
 runs:
   using: 'node12'
   main: 'lib/setup-python.js'
