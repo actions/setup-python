@@ -10,4 +10,7 @@ inputs:
     default: 'x64'
 runs:
   using: 'node12'
-  main: 'lib/setup-python.js'
+  main: 'dist/index.js'
+branding:
+  icon: 'play'
+  color: 'yellow'
