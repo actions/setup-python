@@ -8,7 +8,7 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "release": "ncc build -o dist/restore src/restore.ts && ncc build -o dist/save src/save.ts && git add -f dist/",
+    "release": "ncc build && git add -f dist/",
     "test": "jest"
   },
   "repository": {
