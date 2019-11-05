@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "description": "Setup python action",
-  "main": "lib/setup-python.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
+    "release": "ncc build -o dist/restore src/restore.ts && ncc build -o dist/save src/save.ts && git add -f dist/",
     "test": "jest"
   },
   "repository": {
@@ -31,6 +32,7 @@
     "@types/jest": "^24.0.13",
     "@types/node": "^12.0.4",
     "@types/semver": "^6.0.0",
+    "@zeit/ncc": "^0.20.5",
     "husky": "^2.3.0",
     "jest": "^24.8.0",
     "jest-circus": "^24.7.1",
