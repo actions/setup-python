@@ -43,7 +43,7 @@
   "husky": {
     "skipCI": true,
     "hooks": {
-      "pre-commit": "npm run build && npm run format && npm run format-check"
+      "pre-commit": "npm run build && npm run format"
     }
   }
 }
