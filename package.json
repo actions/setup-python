@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "description": "Setup python action",
-  "main": "lib/setup-python.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
+    "release": "ncc build && git add -f dist/",
     "test": "jest"
   },
   "repository": {
@@ -31,7 +32,8 @@
     "@types/jest": "^24.0.13",
     "@types/node": "^12.0.4",
     "@types/semver": "^6.0.0",
-    "husky": "^2.3.0",
+    "@zeit/ncc": "^0.20.5",
+    "husky": "^3.0.9",
     "jest": "^24.8.0",
     "jest-circus": "^24.7.1",
     "prettier": "^1.17.1",
@@ -41,8 +43,7 @@
   "husky": {
     "skipCI": true,
     "hooks": {
-      "pre-commit": "npm run build && npm run format",
-      "post-commit": "npm prune --production && git add node_modules/* && git commit -m \"Husky commit correct node modules\""
+      "pre-commit": "npm run build && npm run format"
     }
   }
 }
