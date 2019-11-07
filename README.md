@@ -44,7 +44,7 @@ jobs:
 ```
 # Available versions of Python
 
-For detailed information regarding the available versions of Python that are installed on GitHub hosted runners see: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
+For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners)
 
 # License
 
