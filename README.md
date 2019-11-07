@@ -42,6 +42,9 @@ jobs:
           architecture: x64
       - run: python my_script.py
 ```
+# Available versions of Python
+
+For detailed information regarding the available versions of Python that are installed on GitHub hosted runners see: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
 
 # License
 
