@@ -1,5 +1,5 @@
-name: 'Setup Python environment'
-description: 'Setup a Python environment and add it to the PATH, additionally providing proxy support'
+name: 'Setup Python'
+description: 'Set up a specific version of Python and add the command-line tools to the PATH'
 author: 'GitHub'
 inputs:
   python-version:
