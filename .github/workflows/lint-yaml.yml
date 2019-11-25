@@ -1,0 +1,12 @@
+name: Lint YAML
+on: [pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Lint action.yml
+      uses: ibiqlik/action-yamllint@master
+      with:
+        file_or_dir: action.yml
+        config_file: yaml-lint-config.yml
