@@ -20,7 +20,7 @@ steps:
 - uses: actions/setup-python@v1
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
-    architecture: 'x64' # (x64 or x86)
+    architecture: 'x64' # (x64 or x86), optional. Defaults to x64
 - run: python my_script.py
 ```
 
