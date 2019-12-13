@@ -16,7 +16,7 @@ See [action.yml](action.yml)
 Basic:
 ```yaml
 steps:
-- uses: actions/checkout@master
+- uses: actions/checkout@v1
 - uses: actions/setup-python@v1
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
