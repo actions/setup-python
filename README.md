@@ -34,7 +34,7 @@ jobs:
         python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
       - name: Setup python
         uses: actions/setup-python@v1
         with:
