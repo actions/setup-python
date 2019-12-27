@@ -1,7 +1,7 @@
 extends: default
 
 rules:
-  # 80 chars should be enough, but don't fail if a line is longer
+  # 120 chars should be enough, but don't fail if a line is longer
   line-length:
-    max: 80
+    max: 120
     level: warning
