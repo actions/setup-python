@@ -2,9 +2,9 @@
 
 ### Checkin
 
-- Do checkin source (src)
-- Do checkin a single index.js file after running `ncc`
-- Do not checkin node_modules
+- Do check in source (src)
+- Do check in a single index.js file after running `ncc`
+- Do not check in node_modules
 
 ### NCC
 
@@ -12,7 +12,7 @@ In order to avoid uploading `node_modules` to the repository, we use [zeit/ncc](
 
 ### Developing
 
-If you're developing locally you can run
+If you're developing locally, you can run
 ```
 npm install
 tsc
@@ -24,7 +24,7 @@ During the commit step, Husky will take care of formatting all files with [Prett
 
 ### Testing
 
-We ask that you include a link to a succesfull run that utilizes the changes you are working on. For example, if your changes are in the branch `newAwesomeFeature`, then show an example run that uses `setup-python@newAwesomeFeature` or `my-fork@newAwesomeFeature`. This will help speed up testing and help us confirm that there are no breaking changes or bugs.
+We ask that you include a link to a successful run that utilizes the changes you are working on. For example, if your changes are in the branch `newAwesomeFeature`, then show an example run that uses `setup-python@newAwesomeFeature` or `my-fork@newAwesomeFeature`. This will help speed up testing and help us confirm that there are no breaking changes or bugs.
 
 ### Releases
 
