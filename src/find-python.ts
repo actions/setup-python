@@ -57,7 +57,7 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): void {
 
   if (!installDir && IS_WINDOWS) {
     // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
-    // On Hosted VS2017, we only install an x86 version.
+    // On our Windows virtual environments, we only install an x86 version.
     // Fall back to x86.
     installDir = findPyPy('x86');
   }
@@ -120,7 +120,7 @@ async function useCpythonVersion(
 
   if (IS_WINDOWS) {
     // Add --user directory
-    // `installDir` from tool cache should look like $AGENT_TOOLSDIRECTORY/Python/<semantic version>/x64/
+    // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
     // So if `findLocalTool` succeeded above, we must have a conformant `installDir`
     const version = path.basename(path.dirname(installDir));
     const major = semver.major(version);
