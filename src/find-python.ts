@@ -51,7 +51,7 @@ function binDir(installDir: string): string {
 // A particular version of PyPy may contain one or more versions of the Python interpreter.
 // For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
 // We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(majorVersion: 2 | 3, architecture: string): void {
+function usePyPy(majorVersion: 2 | 3, architecture: string): string {
   const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion.toString());
   let installDir: string | null = findPyPy(architecture);
 
@@ -77,12 +77,14 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): void {
 
   core.addPath(installDir);
   core.addPath(_binDir);
+
+  return versionFromPath(installDir);
 }
 
 async function useCpythonVersion(
   version: string,
   architecture: string
-): Promise<void> {
+): Promise<string> {
   const desugaredVersionSpec = desugarDevVersion(version);
   const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
@@ -135,6 +137,8 @@ async function useCpythonVersion(
     core.addPath(userScriptsDir);
   }
   // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
+
+  return versionFromPath(installDir);
 }
 
 /** Convert versions like `3.8-dev` to a version like `>= 3.8.0-a0`. */
@@ -145,6 +149,14 @@ function desugarDevVersion(versionSpec: string) {
   } else {
     return versionSpec;
   }
+}
+
+/** Extracts python version from install path from hosted tool cache as described in README.md */
+function versionFromPath(installDir: string) {
+  let parts = installDir.split(path.sep);
+  let idx = parts.findIndex(part => part === 'PyPy' || part === 'Python');
+
+  return parts.slice(idx, idx + 2).join(' ');
 }
 
 /**
@@ -160,7 +172,7 @@ export function pythonVersionToSemantic(versionSpec: string) {
 export async function findPythonVersion(
   version: string,
   architecture: string
-): Promise<void> {
+): Promise<string> {
   switch (version.toUpperCase()) {
     case 'PYPY2':
       return usePyPy(2, architecture);
