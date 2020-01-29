@@ -3005,7 +3005,9 @@ function usePyPy(majorVersion, architecture) {
     core.exportVariable('pythonLocation', pythonLocation);
     core.addPath(installDir);
     core.addPath(_binDir);
-    return versionFromPath(installDir);
+    const impl = 'pypy' + majorVersion.toString();
+    core.setOutput('python-version', impl);
+    return { impl: impl, version: versionFromPath(installDir) };
 }
 function useCpythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -3044,7 +3046,9 @@ function useCpythonVersion(version, architecture) {
             core.addPath(userScriptsDir);
         }
         // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
-        return versionFromPath(installDir);
+        const installed = versionFromPath(installDir);
+        core.setOutput('python-version', installed);
+        return { impl: 'CPython', version: installed };
     });
 }
 /** Convert versions like `3.8-dev` to a version like `>= 3.8.0-a0`. */
@@ -3059,9 +3063,9 @@ function desugarDevVersion(versionSpec) {
 }
 /** Extracts python version from install path from hosted tool cache as described in README.md */
 function versionFromPath(installDir) {
-    let parts = installDir.split(path.sep);
-    let idx = parts.findIndex(part => part === 'PyPy' || part === 'Python');
-    return parts.slice(idx, idx + 2).join(' ');
+    const parts = installDir.split(path.sep);
+    const idx = parts.findIndex(part => part === 'PyPy' || part === 'Python');
+    return parts[idx + 1] || '';
 }
 /**
  * Python's prelease versions look like `3.7.0b2`.
@@ -3714,8 +3718,8 @@ function run() {
             let version = core.getInput('python-version');
             if (version) {
                 const arch = core.getInput('architecture', { required: true });
-                let installed = yield finder.findPythonVersion(version, arch);
-                console.log(`Successfully setup ${installed}.`);
+                const installed = yield finder.findPythonVersion(version, arch);
+                console.log(`Successfully setup ${installed.impl} (${installed.version}).`);
             }
             const matchersPath = path.join(__dirname, '..', '.github');
             console.log(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
