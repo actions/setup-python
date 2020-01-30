@@ -16,7 +16,7 @@ See [action.yml](action.yml)
 Basic:
 ```yaml
 steps:
-- uses: actions/checkout@v1
+- uses: actions/checkout@v2
 - uses: actions/setup-python@v1
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
@@ -34,7 +34,7 @@ jobs:
         python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Setup python
         uses: actions/setup-python@v1
         with:
@@ -58,7 +58,7 @@ jobs:
           - os: windows-latest
             python-version: 3.6
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
