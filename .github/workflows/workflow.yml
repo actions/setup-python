@@ -1,5 +1,5 @@
 name: Main workflow
-on: [push, pull_request]
+on: [push]
 jobs:
   run:
     name: Run
@@ -14,7 +14,7 @@ jobs:
     - name: Set Node.js 10.x
       uses: actions/setup-node@master
       with:
-        node-version: 10.x
+        version: 10.x
 
     - name: npm install
       run: npm install
