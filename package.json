@@ -8,7 +8,7 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "release": "ncc build && git add -f dist/",
+    "release": "ncc build src/setup-python.ts && git add -f dist/",
     "test": "jest"
   },
   "repository": {
@@ -24,11 +24,11 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@actions/tool-cache": "^1.3.2",
     "semver": "^6.1.1"
   },
   "devDependencies": {
     "@actions/io": "^1.0.2",
+    "@actions/tool-cache": "^1.3.2",
     "@types/jest": "^24.9.1",
     "@types/node": "^12.12.29",
     "@types/semver": "^6.2.1",

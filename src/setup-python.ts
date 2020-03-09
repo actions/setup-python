@@ -8,9 +8,7 @@ async function run() {
     if (version) {
       const arch: string = core.getInput('architecture', {required: true});
       const installed = await finder.findPythonVersion(version, arch);
-      core.info(
-        `Successfully setup ${installed.impl} (${installed.version})`
-      );
+      core.info(`Successfully setup ${installed.impl} (${installed.version})`);
     }
     const matchersPath = path.join(__dirname, '..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
