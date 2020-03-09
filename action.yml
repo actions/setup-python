@@ -1,13 +1,20 @@
+---
 name: 'Setup Python'
-description: 'Set up a specific version of Python and add the command-line tools to the PATH'
+description: 'Set up a specific version of Python and add the command-line tools to the PATH.'
 author: 'GitHub'
 inputs:
   python-version:
-    description: 'Version range or exact version of a Python version to use, using semvers version range syntax.'
+    description: "Version range or exact version of a Python version to use, using SemVer's version range syntax."
     default: '3.x'
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
     default: 'x64'
+outputs:
+  python-version:
+    description: "The installed python version. Useful when given a version range as input."
 runs:
   using: 'node12'
-  main: 'lib/setup-python.js'
+  main: 'dist/index.js'
+branding:
+  icon: 'code'
+  color: 'yellow'
