@@ -5,13 +5,21 @@ import path = require('path');
 const toolDir = path.join(
   __dirname,
   'runner',
-  path.join(Math.random().toString(36).substring(7)),
+  path.join(
+    Math.random()
+      .toString(36)
+      .substring(7)
+  ),
   'tools'
 );
 const tempDir = path.join(
   __dirname,
   'runner',
-  path.join(Math.random().toString(36).substring(7)),
+  path.join(
+    Math.random()
+      .toString(36)
+      .substring(7)
+  ),
   'temp'
 );
 
