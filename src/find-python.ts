@@ -3,6 +3,8 @@ import * as path from 'path';
 
 import * as semver from 'semver';
 
+import * as downloader from './download-python';
+
 let cacheDirectory = process.env['RUNNER_TOOLSDIRECTORY'] || '';
 
 if (!cacheDirectory) {
@@ -24,6 +26,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
 const IS_WINDOWS = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
@@ -92,11 +95,16 @@ async function useCpythonVersion(
   const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
 
-  const installDir: string | null = tc.find(
+  let installDir: string | null = tc.find(
     'Python',
     semanticVersionSpec,
     architecture
   );
+  if (!installDir && IS_LINUX) {
+    core.info(`Can't find installed CPython ${version}; trying to download`);
+    installDir = await downloader.downloadLinuxCpython(version);
+  }
+
   if (!installDir) {
     // Fail and list available versions
     const x86Versions = tc
