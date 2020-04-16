@@ -20,7 +20,7 @@ ncc build src/setup-python.ts
 ```
 Any files generated using `tsc` will be added to `lib/`, however those files also are not uploaded to the repository and are exluded using `.gitignore`.
 
-During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier) (to run manually, use `prettier --write **/*.ts`).
+During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier) (to run manually, use `npm run format`).
 
 ### Testing
 
