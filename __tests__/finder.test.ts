@@ -18,19 +18,48 @@ const tempDir = path.join(
 process.env['RUNNER_TOOL_CACHE'] = toolDir;
 process.env['RUNNER_TEMP'] = tempDir;
 
+import * as tc from '@actions/tool-cache';
 import * as finder from '../src/find-python';
+import * as installer from '../src/install-python';
+
+const pythonRelease = require('./data/python-release.json');
 
 describe('Finder tests', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
   it('Finds Python if it is installed', async () => {
     const pythonDir: string = path.join(toolDir, 'Python', '3.0.0', 'x64');
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
-    // This will throw if it doesn't find it in the cache (because no such version exists)
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await finder.findPythonVersion('3.x', 'x64');
   });
 
+  it('Finds Python if it is not installed, but exists in the manifest', async () => {
+    const findSpy: jest.SpyInstance = jest.spyOn(
+      installer,
+      'findReleaseFromManifest'
+    );
+    findSpy.mockImplementation(() => <tc.IToolRelease>pythonRelease);
+
+    const installSpy: jest.SpyInstance = jest.spyOn(
+      installer,
+      'installCpythonFromRelease'
+    );
+    installSpy.mockImplementation(async () => {
+      const pythonDir: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
+      await io.mkdirP(pythonDir);
+      fs.writeFileSync(`${pythonDir}.complete`, 'hello');
+    });
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
+    await finder.findPythonVersion('1.2.3', 'x64');
+  });
+
   it('Errors if Python is not installed', async () => {
-    // This will throw if it doesn't find it in the cache (because no such version exists)
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
       await finder.findPythonVersion('3.300000', 'x64');
