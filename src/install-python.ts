@@ -29,7 +29,7 @@ export async function findReleaseFromManifest(
   );
 }
 
-async function _installPython(workingDirectory: string) {
+async function installPython(workingDirectory: string) {
   const options: ExecOptions = {
     cwd: workingDirectory,
     silent: true,
@@ -64,5 +64,5 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   }
 
   core.info('Execute installation script');
-  await _installPython(pythonExtractedFolder);
+  await installPython(pythonExtractedFolder);
 }
