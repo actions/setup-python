@@ -8,11 +8,8 @@ inputs:
     default: '3.x'
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
-    default: 'x64'
   token:
-    description: >
-      Personal access token (PAT) used to fetch the manifest file from master of repository
-      [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+    description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
     default: ${{ github.token }}
 outputs:
   python-version:

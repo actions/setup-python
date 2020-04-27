@@ -10,7 +10,7 @@ const MANIFEST_REPO_NAME = 'python-versions';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
 
 const IS_WINDOWS = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
+const IS_MACOS = process.platform === 'darwin';
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -29,6 +29,26 @@ export async function findReleaseFromManifest(
   );
 }
 
+async function _installPython(workingDirectory: string) {
+  const options: ExecOptions = {
+    cwd: workingDirectory,
+    silent: true,
+    listeners: {
+      stdout: (data: Buffer) => {
+        core.debug(data.toString().trim());
+      }
+    }
+  };
+
+  if (IS_WINDOWS) {
+    await exec.exec('powershell', ['./setup.ps1'], options);
+  } else if (IS_MACOS) {
+    await exec.exec('bash', ['./setup.sh'], options);
+  } else {
+    await exec.exec('sudo', ['-n', 'bash', './setup.sh'], options);
+  }
+}
+
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = release.files[0].download_url;
 
@@ -43,22 +63,6 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     pythonExtractedFolder = await tc.extractTar(pythonPath, `./${fileName}`);
   }
 
-  const options: ExecOptions = {
-    cwd: pythonExtractedFolder,
-    silent: true,
-    listeners: {
-      stdout: (data: Buffer) => {
-        core.debug(data.toString().trim());
-      }
-    }
-  };
-
   core.info('Execute installation script');
-  if (IS_WINDOWS) {
-    await exec.exec('powershell', ['./setup.ps1'], options);
-  } else if (IS_LINUX) {
-    await exec.exec('sudo', ['bash', './setup.sh'], options);
-  } else {
-    await exec.exec('bash', ['./setup.sh'], options);
-  }
+  await _installPython(pythonExtractedFolder);
 }

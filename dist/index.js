@@ -2500,12 +2500,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(696));
 const finder = __importStar(__webpack_require__(507));
 const path = __importStar(__webpack_require__(622));
+const os = __importStar(__webpack_require__(87));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let version = core.getInput('python-version');
             if (version) {
-                const arch = core.getInput('architecture', { required: true });
+                const arch = core.getInput('architecture') || os.arch();
                 const installed = yield finder.findPythonVersion(version, arch);
                 core.info(`Successfully setup ${installed.impl} (${installed.version})`);
             }
@@ -2600,7 +2601,7 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
 const IS_WINDOWS = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
+const IS_MACOS = process.platform === 'darwin';
 function findReleaseFromManifest(semanticVersionSpec, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         const manifest = yield tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH_TOKEN);
@@ -2608,6 +2609,28 @@ function findReleaseFromManifest(semanticVersionSpec, architecture) {
     });
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
+function _installPython(workingDirectory) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const options = {
+            cwd: workingDirectory,
+            silent: true,
+            listeners: {
+                stdout: (data) => {
+                    core.debug(data.toString().trim());
+                }
+            }
+        };
+        if (IS_WINDOWS) {
+            yield exec.exec('powershell', ['./setup.ps1'], options);
+        }
+        else if (IS_MACOS) {
+            yield exec.exec('bash', ['./setup.sh'], options);
+        }
+        else {
+            yield exec.exec('sudo', ['-n', 'bash', './setup.sh'], options);
+        }
+    });
+}
 function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
         const downloadUrl = release.files[0].download_url;
@@ -2622,25 +2645,8 @@ function installCpythonFromRelease(release) {
         else {
             pythonExtractedFolder = yield tc.extractTar(pythonPath, `./${fileName}`);
         }
-        const options = {
-            cwd: pythonExtractedFolder,
-            silent: true,
-            listeners: {
-                stdout: (data) => {
-                    core.debug(data.toString().trim());
-                }
-            }
-        };
         core.info('Execute installation script');
-        if (IS_WINDOWS) {
-            yield exec.exec('powershell', ['./setup.ps1'], options);
-        }
-        else if (IS_LINUX) {
-            yield exec.exec('sudo', ['bash', './setup.sh'], options);
-        }
-        else {
-            yield exec.exec('bash', ['./setup.sh'], options);
-        }
+        yield _installPython(pythonExtractedFolder);
     });
 }
 exports.installCpythonFromRelease = installCpythonFromRelease;
@@ -3648,23 +3654,6 @@ const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(305));
 const installer = __importStar(__webpack_require__(400));
-let cacheDirectory = process.env['RUNNER_TOOLSDIRECTORY'] || '';
-if (!cacheDirectory) {
-    let baseLocation;
-    if (process.platform === 'win32') {
-        // On windows use the USERPROFILE env variable
-        baseLocation = process.env['USERPROFILE'] || 'C:\\';
-    }
-    else {
-        if (process.platform === 'darwin') {
-            baseLocation = '/Users';
-        }
-        else {
-            baseLocation = '/home';
-        }
-    }
-    cacheDirectory = path.join(baseLocation, 'actions', 'cache');
-}
 const core = __importStar(__webpack_require__(696));
 const tc = __importStar(__webpack_require__(475));
 const IS_WINDOWS = process.platform === 'win32';

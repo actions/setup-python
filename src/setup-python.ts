@@ -1,12 +1,13 @@
 import * as core from '@actions/core';
 import * as finder from './find-python';
 import * as path from 'path';
+import * as os from 'os';
 
 async function run() {
   try {
     let version = core.getInput('python-version');
     if (version) {
-      const arch: string = core.getInput('architecture', {required: true});
+      const arch: string = core.getInput('architecture') || os.arch();
       const installed = await finder.findPythonVersion(version, arch);
       core.info(`Successfully setup ${installed.impl} (${installed.version})`);
     }

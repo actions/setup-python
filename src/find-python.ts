@@ -5,23 +5,6 @@ import * as semver from 'semver';
 
 import * as installer from './install-python';
 
-let cacheDirectory = process.env['RUNNER_TOOLSDIRECTORY'] || '';
-
-if (!cacheDirectory) {
-  let baseLocation;
-  if (process.platform === 'win32') {
-    // On windows use the USERPROFILE env variable
-    baseLocation = process.env['USERPROFILE'] || 'C:\\';
-  } else {
-    if (process.platform === 'darwin') {
-      baseLocation = '/Users';
-    } else {
-      baseLocation = '/home';
-    }
-  }
-  cacheDirectory = path.join(baseLocation, 'actions', 'cache');
-}
-
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
