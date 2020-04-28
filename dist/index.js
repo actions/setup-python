@@ -2623,11 +2623,8 @@ function installPython(workingDirectory) {
         if (IS_WINDOWS) {
             yield exec.exec('powershell', ['./setup.ps1'], options);
         }
-        else if (IS_MACOS) {
-            yield exec.exec('bash', ['./setup.sh'], options);
-        }
         else {
-            yield exec.exec('sudo', ['-n', 'bash', './setup.sh'], options);
+            yield exec.exec('bash', ['./setup.sh'], options);
         }
     });
 }

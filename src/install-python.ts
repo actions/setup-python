@@ -42,10 +42,8 @@ async function installPython(workingDirectory: string) {
 
   if (IS_WINDOWS) {
     await exec.exec('powershell', ['./setup.ps1'], options);
-  } else if (IS_MACOS) {
-    await exec.exec('bash', ['./setup.sh'], options);
   } else {
-    await exec.exec('sudo', ['-n', 'bash', './setup.sh'], options);
+    await exec.exec('bash', ['./setup.sh'], options);
   }
 }
 
