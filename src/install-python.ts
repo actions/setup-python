@@ -10,7 +10,6 @@ const MANIFEST_REPO_NAME = 'python-versions';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
 
 const IS_WINDOWS = process.platform === 'win32';
-const IS_MACOS = process.platform === 'darwin';
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
