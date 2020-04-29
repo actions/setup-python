@@ -91,7 +91,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 
 # Available versions of Python
 
-`setup-python` is able to configure python from two sources
+`setup-python` is able to configure Python from two sources
 
 - Preinstalled versions of Python in the tools cache on GitHub-hosted runners
     - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners)
