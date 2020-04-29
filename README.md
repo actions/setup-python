@@ -117,7 +117,7 @@ GitHub virtual environments are setup in [actions/virtual-environments](https://
 - [Tools cache setup for Ubuntu](https://github.com/actions/virtual-environments/blob/master/images/linux/scripts/installers/hosted-tool-cache.sh)
 - [Tools cache setup for Windows](https://github.com/actions/virtual-environments/blob/master/images/win/scripts/Installers/Download-ToolCache.ps1)
 
-# Specifying a python version
+# Specifying a Python version
 
 If there is a specific version of Python that you need and you don't want to worry about any potential breaking changes due to patch updates (going from `3.7.5` to `3.7.6` for example), you should specify the exact major, minor, and patch version (such as `3.7.5`)
   - The only downside to this is that setup will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions
