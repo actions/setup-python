@@ -91,10 +91,10 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 
 # Available versions of Python
 
-`setup-python` is able to configure Python from two sources
+`setup-python` is able to configure Python from two sources:
 
 - Preinstalled versions of Python in the tools cache on GitHub-hosted runners
-    - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners)
+    - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners).
     - For every minor version of Python, expect only the latest patch to be preinstalled. See [Semantic Versioning](https://semver.org/) for more information
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases))
@@ -147,14 +147,14 @@ If you would like to use `setup-python` and a self-hosted runner, you have two o
 
 # Need to open an issue?
 
-Python versions that we compile and setup can be found in the [actions/python-versions](https://github.com/actions/python-versions) repository. You can see the build scripts, configurations, and everything that is used. You should open an issue in the `python-versions` repository if:
+Python versions available for `setup-python` can be found in the [actions/python-versions](https://github.com/actions/python-versions) repository. You can see the build scripts, configurations, and everything that is used. You should open an issue in the `python-versions` repository if:
   - something might be compiled incorrectly
   - certain modules might be missing
   - there is a version of Python that you would like that is currently not available
 
-If you suspect something might be wrong with the tools cache or how Python gets installed on GitHub hosted runners, please open an issue in [actions/virtual-environments](https://github.com/actions/virtual-environments)
+If you suspect something might be wrong with the tools cache or how Python gets installed on GitHub hosted runners, please open an issue in [actions/virtual-environments](https://github.com/actions/virtual-environments).
 
-Any remaining issues can be filed in this repository
+Any remaining issues can be filed in this repository.
 
 # License
 
