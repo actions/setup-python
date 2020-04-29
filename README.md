@@ -98,7 +98,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners).
     - For every minor version of Python, expect only the latest patch to be preinstalled
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache
-    - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec 3.8 will use the 3.8.2 python version found in the cache
+    - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases))
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/master/versions-manifest.json) file
     - If there is a specific version of Python that is not available, you can open an issue in the `python-versions` repository 
@@ -120,8 +120,8 @@ GitHub virtual environments are setup in [actions/virtual-environments](https://
 # Specifying a Python version
 
 If there is a specific version of Python that you need and you don't want to worry about any potential breaking changes due to patch updates (going from `3.7.5` to `3.7.6` for example), you should specify the exact major, minor, and patch version (such as `3.7.5`)
-  - The only downside to this is that setup will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions
-  - MSI installers are used on Windows for this, so runs will take a little longer to setup vs Mac and Linux
+  - The only downside to this is that set up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions
+  - MSI installers are used on Windows for this, so runs will take a little longer to set up vs Mac and Linux
 
 You should specify only a major and minor version if you are okay with the most recent patch version being used
   - For example, if you just want a `3.8` version of Python, and it doesn't matter if `3.8.1` is used or the more recent `3.8.2`,
@@ -131,13 +131,13 @@ You should specify only a major and minor version if you are okay with the most 
 
 # Using `setup-python` with a self hosted runner
 
-If you would like to use `setup-python` and a self-hosted runner, there isn't much that you need to do. When `setup-python` is run for the first time with a version of Python that it doesn't have, it will download the appropriate version, and setup the tools cache on your machine. Any subsequent runs will use the python versions that were previously downloaded.
+If you would like to use `setup-python` and a self-hosted runner, there isn't much that you need to do. When `setup-python` is run for the first time with a version of Python that it doesn't have, it will download the appropriate version, and set up the tools cache on your machine. Any subsequent runs will use the Python versions that were previously downloaded.
 
 A few things to look out for when `setup-python` is first setting up the tools cache
 - If using Windows, your runner needs to be running as an administrator so that the appropriate directories and files can be setup. On Linux and Mac, you also need to be running with elevated permissions
 - On Windows, you need `7zip` installed and added to your `PATH` so that files can be extracted properly during setup
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings
-- The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps and Features" in the Windows settings and uninstalling any
+- The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
 
 # Using Python without `setup-python`
 
