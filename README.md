@@ -119,7 +119,7 @@ GitHub virtual environments are setup in [actions/virtual-environments](https://
 
 If you would like to use `setup-python` and a self-hosted runner, you have two options
   - Setup a tools cache locally and download all the versions of Python & PyPy that you would like once
-      - Takes a little bit to time to initially setup
+      - Takes a little bit of time to initially setup
       - This will be the most stable and fastest option long-term as it will require no extra downloads every-time there is a run
   - Download and setup a version of python every-time
       - Requires no extra setup (good if you want to quickly get up and running, discouraged for long term use)
