@@ -75,7 +75,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-        python-version: [3.5.4, 3.6.6, 3.7.4, 3.8.1]
+        python-version: [3.5, 3.6, 3.7.4, 3.8]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
