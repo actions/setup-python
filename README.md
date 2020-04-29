@@ -6,7 +6,9 @@
 
 This action sets up a Python environment for use in actions by:
 
-- optionally installing a version of Python and adding to PATH. Note that this action only uses versions of Python already installed in the cache. The action will fail if no matching versions are found.
+- optionally installing and adding to PATH a version of Python that is already installed in the tools cache
+- downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache
+- failing if a specific version of Python is not preinstalled or available for download
 - registering problem matchers for error output
 
 # Usage
@@ -67,13 +69,41 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 ```
 
+Download and setup a version of Python that does not come pre-installed on an image:
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+        python-version: [3.5.4, 3.6.6, 3.7.4, 3.8.1]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - run: python my_script.py
+
+```
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).
 
+# Available versions of Python
+
+`setup-python` is able to configure python from two sources
+
+- Preinstalled versions of Python in the tools cache on GitHub-hosted runners
+    - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners)
+    - For every minor version of Python, expect only the latest patch to be preinstalled. See [Semantic Versioning](https://semver.org/) for more information
+    - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache
+- Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases))
+    - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/master/versions-manifest.json) file
+    - If there is a specific version of Python that is not available, you can open an issue in the `python-versions` repository 
+
 # Hosted Tool Cache
 
-GitHub hosted runners have a tools cache that comes with Python + PyPy already installed. This tools cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of this tools cache and there is where you will find Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy in this tools cache and adding it to PATH.
+GitHub hosted runners have a tools cache that comes with a few versions of Python + PyPy already installed. This tools cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of this tools cache and there is where you will find Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy in this tools cache and adding it to PATH.
 
 || Location |
 |------|-------|
@@ -87,9 +117,18 @@ GitHub virtual environments are setup in [actions/virtual-environments](https://
 
 # Using `setup-python` with a self hosted runner
 
-If you would like to use `setup-python` on a self-hosted runner, you will need to download all versions of Python & PyPy that you would like and setup a similar tools cache locally for your runner.
+If you would like to use `setup-python` and a self-hosted runner, you have two options
+  - Setup a tools cache locally and download all the versions of Python & PyPy that you would like once
+      - Takes a little bit to time to initially setup
+      - This will be the most stable and fastest option long-term as it will require no extra downloads every-time there is a run
+  - Download and setup a version of python every-time
+      - Requires no extra setup (good if you want to quickly get up and running, discouraged for long term use)
+      - `setup-python` will take a little longer to run
+      - Note: when downloading versions of Python for Windows, an MSI installer is used which can modify some registry settings
 
-- Create an global environment variable called `AGENT_TOOLSDIRECTORY` that will point to the root directory of where you want the tools installed. The env variable is preferrably global as it must be set in the shell that will install the tools cache, along with the shell that the runner will be using.
+### Setting up a local tools cache
+
+- Create an global environment variable called `AGENT_TOOLSDIRECTORY` that will point to the root directory of where you want the tools installed. The env variable is preferably global as it must be set in the shell that will install the tools cache, along with the shell that the runner will be using.
     - This env variable is used internally by the runner to set the `RUNNER_TOOL_CACHE` env variable
     - Example for Administrator Powershell: `[System.Environment]::SetEnvironmentVariable("AGENT_TOOLSDIRECTORY", "C:\hostedtoolcache\windows", [System.EnvironmentVariableTarget]::Machine)` (restart the shell afterwards)
 -  Download the appropriate NPM packages from the [GitHub Actions NPM registry](https://github.com/orgs/actions/packages)
@@ -106,9 +145,16 @@ If you would like to use `setup-python` on a self-hosted runner, you will need t
 
 `setup-python` helps keep your dependencies explicit and ensures consistent behavior between different runners. If you use `python` in a shell on a GitHub hosted runner without `setup-python` it will default to whatever is in PATH. The default version of Python in PATH vary between runners and can change unexpectedly so we recommend you always use `setup-python`.
 
-# Available versions of Python
+# Need to open an issue?
 
-For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners)
+Python versions that we compile and setup can be found in the [actions/python-versions](https://github.com/actions/python-versions) repository. You can see the build scripts, configurations, and everything that is used. You should open an issue in the `python-versions` repository if:
+  - something might be compiled incorrectly
+  - certain modules might be missing
+  - there is a version of Python that you would like that is currently not available
+
+If you suspect something might be wrong with the tools cache or how Python gets installed on GitHub hosted runners, please open an issue in [actions/virtual-environments](https://github.com/actions/virtual-environments)
+
+Any remaining issues can be filed in this repository
 
 # License
 
@@ -116,4 +162,4 @@ The scripts and documentation in this project are released under the [MIT Licens
 
 # Contributions
 
-Contributions are welcome!  See [Contributor's Guide](docs/contributors.md)
+Contributions are welcome! See our [Contributor's Guide](docs/contributors.md)
