@@ -3,22 +3,7 @@ import * as path from 'path';
 
 import * as semver from 'semver';
 
-let cacheDirectory = process.env['RUNNER_TOOLSDIRECTORY'] || '';
-
-if (!cacheDirectory) {
-  let baseLocation;
-  if (process.platform === 'win32') {
-    // On windows use the USERPROFILE env variable
-    baseLocation = process.env['USERPROFILE'] || 'C:\\';
-  } else {
-    if (process.platform === 'darwin') {
-      baseLocation = '/Users';
-    } else {
-      baseLocation = '/home';
-    }
-  }
-  cacheDirectory = path.join(baseLocation, 'actions', 'cache');
-}
+import * as installer from './install-python';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
@@ -92,29 +77,33 @@ async function useCpythonVersion(
   const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
 
-  const installDir: string | null = tc.find(
+  let installDir: string | null = tc.find(
     'Python',
     semanticVersionSpec,
     architecture
   );
   if (!installDir) {
-    // Fail and list available versions
-    const x86Versions = tc
-      .findAllVersions('Python', 'x86')
-      .map(s => `${s} (x86)`)
-      .join(os.EOL);
+    core.info(
+      `Version ${semanticVersionSpec} was not found in the local cache`
+    );
+    const foundRelease = await installer.findReleaseFromManifest(
+      semanticVersionSpec,
+      architecture
+    );
 
-    const x64Versions = tc
-      .findAllVersions('Python', 'x64')
-      .map(s => `${s} (x64)`)
-      .join(os.EOL);
+    if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
+      core.info(`Version ${semanticVersionSpec} is available for downloading`);
+      await installer.installCpythonFromRelease(foundRelease);
 
+      installDir = tc.find('Python', semanticVersionSpec, architecture);
+    }
+  }
+
+  if (!installDir) {
     throw new Error(
       [
         `Version ${version} with arch ${architecture} not found`,
-        'Available versions:',
-        x86Versions,
-        x64Versions
+        `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
       ].join(os.EOL)
     );
   }

@@ -1,0 +1,57 @@
+name: Validate 'setup-python'
+on: 
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  default-version:
+    name: Setup default version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup default python 
+      uses: ./
+
+    - name: Validate version
+      run: python --version
+
+    - name: Run simple python code
+      run: python -c 'import math; print(math.factorial(5))'
+
+  setup-versions-from-manifest:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        python: [3.5.4, 3.6.7, 3.7.5, 3.8.1]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup-python ${{ matrix.python }}
+      uses: ./
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Validate version
+      run: |
+        $pythonVersion = (python --version)
+        if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
+          Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          exit 1
+        }
+        $pythonVersion
+      shell: pwsh
+
+    - name: Run simple code
+      run: python -c 'import math; print(math.factorial(5))'
