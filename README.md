@@ -96,12 +96,12 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 
 - Preinstalled versions of Python in the tools cache on GitHub-hosted runners
     - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners).
-    - For every minor version of Python, expect only the latest patch to be preinstalled
-    - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache
-    - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache
+    - For every minor version of Python, expect only the latest patch to be preinstalled.
+    - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
+    - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases))
-    - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/master/versions-manifest.json) file
-    - If there is a specific version of Python that is not available, you can open an issue in the `python-versions` repository 
+    - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/master/versions-manifest.json) file.
+    - If there is a specific version of Python that is not available, you can open an issue in the `python-versions` repository. 
 
 # Hosted Tool Cache
 
@@ -120,14 +120,13 @@ GitHub virtual environments are setup in [actions/virtual-environments](https://
 # Specifying a Python version
 
 If there is a specific version of Python that you need and you don't want to worry about any potential breaking changes due to patch updates (going from `3.7.5` to `3.7.6` for example), you should specify the exact major, minor, and patch version (such as `3.7.5`)
-  - The only downside to this is that set up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions
-  - MSI installers are used on Windows for this, so runs will take a little longer to set up vs Mac and Linux
+  - The only downside to this is that set up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions.
+  - MSI installers are used on Windows for this, so runs will take a little longer to set up vs Mac and Linux.
 
-You should specify only a major and minor version if you are okay with the most recent patch version being used
-  - For example, if you just want a `3.8` version of Python, and it doesn't matter if `3.8.1` is used or the more recent `3.8.2`,
-  - There will be a single patch version already installed on each runner for every minor version of Python that is supported
-  - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced
-  - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used
+You should specify only a major and minor version if you are okay with the most recent patch version being used.
+  - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
+  - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
+  - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used.
 
 # Using `setup-python` with a self hosted runner
 
