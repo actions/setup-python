@@ -142,15 +142,6 @@ A few things to look out for when `setup-python` is first setting up the tools c
 
 `setup-python` helps keep your dependencies explicit and ensures consistent behavior between different runners. If you use `python` in a shell on a GitHub hosted runner without `setup-python` it will default to whatever is in PATH. The default version of Python in PATH vary between runners and can change unexpectedly so we recommend you always use `setup-python`.
 
-# Need to open an issue?
-
-Python versions available for `setup-python` can be found in the [actions/python-versions](https://github.com/actions/python-versions) repository. You can see the build scripts, configurations, and everything that is used. You should open an issue in the `python-versions` repository if:
-  - something might be compiled incorrectly
-  - certain modules might be missing
-  - there is a version of Python that you would like that is currently not available
-
-Any remaining issues can be filed in this repository
-
 # License
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE)
