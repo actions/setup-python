@@ -11,6 +11,12 @@ This action sets up a Python environment for use in actions by:
 - failing if a specific version of Python is not preinstalled or available for download
 - registering problem matchers for error output
 
+# What's new
+
+- Ability to download, install and set up Python packages from `actions/python-versions` that do not come preinstalled on runners
+  - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed
+- Automatic setup and download of Python packages if using a self-hosted runner
+
 # Usage
 
 See [action.yml](action.yml)
