@@ -1,7 +1,8 @@
 name: Validate 'setup-python'
 on: 
   push:
-    - master
+    branches:
+      - master
     paths-ignore:
       - '**.md'
   pull_request:
