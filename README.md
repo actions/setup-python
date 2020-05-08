@@ -136,13 +136,33 @@ You should specify only a major and minor version if you are okay with the most 
 
 # Using `setup-python` with a self hosted runner
 
-If you would like to use `setup-python` and a self-hosted runner, there isn't much that you need to do. When `setup-python` is run for the first time with a version of Python that it doesn't have, it will download the appropriate version, and set up the tools cache on your machine. Any subsequent runs will use the Python versions that were previously downloaded.
+If you would like to use `setup-python` and a self-hosted runner, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
 
-A few things to look out for when `setup-python` is first setting up the tools cache
-- If using Windows, your runner needs to be running as an administrator so that the appropriate directories and files can be setup. On Linux and Mac, you also need to be running with elevated permissions
-- On Windows, you need `7zip` installed and added to your `PATH` so that files can be extracted properly during setup
-- MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings
+### Windows
+
+- Your runner needs to be running with administrator privileges so that the appropriate directories and files can be setup when downloading and installing a new version of Python for the first time.
+- You need `7zip` installed and added to your `PATH` so that the downloaded versions of Python files can be extracted properly during first-time setup.
+- MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
+
+### Linux
+
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag which makes them non portable.
+- Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This is used to control where Python gets set up and installed.
+  - In the same shell that your runner is using, type `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`
+  - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
+- It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. To get around this you can change certain permissions.
+  - Create a directory called `hostedtoolcache` inside `/opt`.
+  - Change Permissions using `chown`
+    - Change the user and group to be the same as the runners. You can get this information by using the `ls -l` command inside the runners root directory.
+    - `sudo chown runner-user:runner-group hostedtoolcache/`
+
+### Mac
+
+- The same setup that applies to `Linux` also applies to `Mac`, just with a different tools cache directory.
+- Set the `AGENT_TOOLSDIRECTORY` environment variable to `/Users/runner/hostedtoolcache`.
+- Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
+
 
 # Using Python without `setup-python`
 
