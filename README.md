@@ -148,15 +148,15 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 
 ### Linux
 
-- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag which makes them non-relocatable.
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
 - Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
   - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`
   - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
 - Create a directory called `hostedtoolcache` inside `/opt`.
 - The user starting the runner must have write permission to the `/opt/hostedtoolcache` directory. It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. Check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.
 - The runner can be granted write access to the `/opt/hostedtoolcache` directory using a few techniques:
-  - Runner user is the owner, and the owner has write permission
-  - Runner user is in the owning group, and the owning group has write permission
+  - The user starting the runner is the owner, and the owner has write permission
+  - The user starting the runner is in the owning group, and the owning group has write permission
   - All users have write permission 
 - One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`
     - `sudo chown runner-user:runner-group opt/hostedtoolcache/`
