@@ -140,15 +140,15 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 
 ### Windows
 
-- Your runner needs to be running with administrator privileges so that the appropriate directories and files can be setup when downloading and installing a new version of Python for the first time.
+- Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
 - You need `7zip` installed and added to your `PATH` so that the downloaded versions of Python files can be extracted properly during first-time setup.
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
 
 ### Linux
 
-- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag which makes them non portable.
-- Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This is used to control where Python gets set up and installed.
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag which makes them non-relocatable.
+- Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
   - In the same shell that your runner is using, type `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`
   - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
 - It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. To get around this you can change certain permissions.
