@@ -141,6 +141,7 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 ### Windows
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
+- If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient. 
 - You need `7zip` installed and added to your `PATH` so that the downloaded versions of Python files can be extracted properly during first-time setup.
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
@@ -149,17 +150,22 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 
 - The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag which makes them non-relocatable.
 - Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
-  - In the same shell that your runner is using, type `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`
+  - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`
   - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
-- It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. To get around this you can change certain permissions.
-  - Create a directory called `hostedtoolcache` inside `/opt`.
-  - Change Permissions using `chown`
-    - Change the user and group to be the same as the runners. You can get this information by using the `ls -l` command inside the runners root directory.
-    - `sudo chown runner-user:runner-group hostedtoolcache/`
+- Create a directory called `hostedtoolcache` inside `/opt`.
+- The user starting the runner must have write permission to the `/opt/hostedtoolcache` directory. It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. Check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.
+- The runner can be granted write access to the `/opt/hostedtoolcache` directory using a few techniques:
+  - Runner user is the owner, and the owner has write permission
+  - Runner user is in the owning group, and the owning group has write permission
+  - All users have write permission 
+- One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`
+    - `sudo chown runner-user:runner-group opt/hostedtoolcache/`
+- If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://help.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
 
 ### Mac
 
 - The same setup that applies to `Linux` also applies to `Mac`, just with a different tools cache directory.
+- Create a directory called `/Users/runner/hostedtoolcache`
 - Set the `AGENT_TOOLSDIRECTORY` environment variable to `/Users/runner/hostedtoolcache`.
 - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
 
