@@ -4,7 +4,8 @@ import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 
-const AUTH_TOKEN = core.getInput('token');
+const TOKEN = core.getInput('token');
+const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
@@ -18,7 +19,7 @@ export async function findReleaseFromManifest(
   const manifest: tc.IToolRelease[] = await tc.getManifestFromRepo(
     MANIFEST_REPO_OWNER,
     MANIFEST_REPO_NAME,
-    AUTH_TOKEN
+    AUTH
   );
   return await tc.findFromManifest(
     semanticVersionSpec,
@@ -50,7 +51,7 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
-  const pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH_TOKEN);
+  const pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
   const fileName = path.basename(pythonPath, '.zip');
   core.info('Extract downloaded archive');
   let pythonExtractedFolder;
@@ -62,4 +63,11 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
 
   core.info('Execute installation script');
   await installPython(pythonExtractedFolder);
+}
+
+function isGhes(): boolean {
+  const ghUrl = new URL(
+    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+  );
+  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
 }
