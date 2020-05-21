@@ -22,6 +22,8 @@ A clear and concise description of what the bug is.
 - [ ] Windows
 - [ ] Mac
 
+If applicable, please specify if you're using a container
+
 **Python Versions**
 Please list all of the effected versions of Python (`3.8.2`, etc.)
 
