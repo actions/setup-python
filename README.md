@@ -87,7 +87,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python }}
+        python-version: ${{ matrix.python-version }}
     - run: python my_script.py
 
 ```
@@ -141,7 +141,7 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 ### Windows
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
-- If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient. 
+- If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient.
 - You need `7zip` installed and added to your `PATH` so that the downloaded versions of Python files can be extracted properly during first-time setup.
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
@@ -157,7 +157,7 @@ If you would like to use `setup-python` and a self-hosted runner, there are a fe
 - The runner can be granted write access to the `/opt/hostedtoolcache` directory using a few techniques:
   - The user starting the runner is the owner, and the owner has write permission
   - The user starting the runner is in the owning group, and the owning group has write permission
-  - All users have write permission 
+  - All users have write permission
 - One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`
     - `sudo chown runner-user:runner-group opt/hostedtoolcache/`
 - If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://help.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
