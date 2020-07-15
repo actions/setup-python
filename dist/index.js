@@ -6356,6 +6356,9 @@ function installPython(workingDirectory) {
             listeners: {
                 stdout: (data) => {
                     core.debug(data.toString().trim());
+                },
+                stderr: (data) => {
+                    core.error(data.toString().trim());
                 }
             }
         };
