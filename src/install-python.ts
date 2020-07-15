@@ -38,7 +38,7 @@ async function installPython(workingDirectory: string) {
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {
-        core.debug(data.toString().trim());
+        core.info(data.toString().trim());
       },
       stderr: (data: Buffer) => {
         core.error(data.toString().trim());
