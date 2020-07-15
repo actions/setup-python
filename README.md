@@ -92,6 +92,30 @@ jobs:
 
 ```
 
+Download and set up a specific unstable version of Python:
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9.0-beta.4'
+    architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+    stable: false # optional true or false. Defaults to true if not specified
+- run: python my_script.py
+```
+
+Download and set up a latest available unstable version of Python (including a stable version):
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9.0-alpha - 3.9.0' # SemVer's version range syntax
+    architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+    stable: false # optional true or false. Defaults to true if not specified
+- run: python my_script.py
+```
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).

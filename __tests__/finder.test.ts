@@ -22,7 +22,7 @@ import * as tc from '@actions/tool-cache';
 import * as finder from '../src/find-python';
 import * as installer from '../src/install-python';
 
-const pythonRelease = require('./data/python-release.json');
+const manifestData = require('./data/versions-manifest.json');
 
 describe('Finder tests', () => {
   afterEach(() => {
@@ -35,15 +35,12 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.findPythonVersion('3.x', 'x64');
+    await finder.findPythonVersion('3.x', 'x64', true);
   });
 
-  it('Finds Python if it is not installed, but exists in the manifest', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'findReleaseFromManifest'
-    );
-    findSpy.mockImplementation(() => <tc.IToolRelease>pythonRelease);
+  it('Finds stable Python version if it is not installed, but exists in the manifest', async () => {
+    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
+    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
 
     const installSpy: jest.SpyInstance = jest.spyOn(
       installer,
@@ -55,14 +52,36 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.findPythonVersion('1.2.3', 'x64');
+    await finder.findPythonVersion('1.2.3', 'x64', true);
+  });
+
+  it('Finds unstable Python version in the manifest', async () => {
+    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
+    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+
+    const installSpy: jest.SpyInstance = jest.spyOn(
+      installer,
+      'installCpythonFromRelease'
+    );
+    installSpy.mockImplementation(async () => {
+      const pythonDir: string = path.join(
+        toolDir,
+        'Python',
+        '1.2.3-beta.2',
+        'x64'
+      );
+      await io.mkdirP(pythonDir);
+      fs.writeFileSync(`${pythonDir}.complete`, 'hello');
+    });
+    // This will throw if it doesn't find it in the manifest (because no such version exists)
+    await finder.findPythonVersion('1.2.3-beta.2', 'x64', false);
   });
 
   it('Errors if Python is not installed', async () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.findPythonVersion('3.300000', 'x64');
+      await finder.findPythonVersion('3.300000', 'x64', true);
     } catch {
       thrown = true;
     }
@@ -74,6 +93,6 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await finder.findPythonVersion('pypy2', 'x64');
+    await finder.findPythonVersion('pypy2', 'x64', true);
   });
 });
