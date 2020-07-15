@@ -55,7 +55,7 @@ describe('Finder tests', () => {
     await finder.findPythonVersion('1.2.3', 'x64', true);
   });
 
-  it('Finds unstable Python version in the manifest', async () => {
+  it('Finds pre-release Python version in the manifest', async () => {
     const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
     findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
 
