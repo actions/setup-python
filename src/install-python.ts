@@ -8,7 +8,8 @@ const TOKEN = core.getInput('token');
 const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
-export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
+const MANIFEST_REPO_BRANCH = 'main';
+export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 
 const IS_WINDOWS = process.platform === 'win32';
 
@@ -19,7 +20,8 @@ export async function findReleaseFromManifest(
   const manifest: tc.IToolRelease[] = await tc.getManifestFromRepo(
     MANIFEST_REPO_OWNER,
     MANIFEST_REPO_NAME,
-    AUTH
+    AUTH,
+    MANIFEST_REPO_BRANCH
   );
   return await tc.findFromManifest(
     semanticVersionSpec,
