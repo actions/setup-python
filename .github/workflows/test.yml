@@ -81,8 +81,8 @@ jobs:
     - name: Validate version
       run: |
         $pythonVersion = (python --version)
-        if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-          Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+        if ("Python 3.9.0b4" -ne "$pythonVersion"){
+          Write-Host "The current version is $pythonVersion; expected version is 3.9.0b4"
           exit 1
         }
         $pythonVersion
