@@ -1157,7 +1157,10 @@ function installPython(workingDirectory) {
             silent: true,
             listeners: {
                 stdout: (data) => {
-                    core.debug(data.toString().trim());
+                    core.info(data.toString().trim());
+                },
+                stderr: (data) => {
+                    core.error(data.toString().trim());
                 }
             }
         };
