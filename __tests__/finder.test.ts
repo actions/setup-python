@@ -35,7 +35,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.findPythonVersion('3.x', 'x64', true);
+    await finder.findPythonVersion('3.x', 'x64');
   });
 
   it('Finds stable Python version if it is not installed, but exists in the manifest', async () => {
@@ -52,7 +52,7 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.findPythonVersion('1.2.3', 'x64', true);
+    await finder.findPythonVersion('1.2.3', 'x64');
   });
 
   it('Finds pre-release Python version in the manifest', async () => {
@@ -74,14 +74,14 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the manifest (because no such version exists)
-    await finder.findPythonVersion('1.2.3-beta.2', 'x64', false);
+    await finder.findPythonVersion('1.2.3-beta.2', 'x64');
   });
 
   it('Errors if Python is not installed', async () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.findPythonVersion('3.300000', 'x64', true);
+      await finder.findPythonVersion('3.300000', 'x64');
     } catch {
       thrown = true;
     }
@@ -93,6 +93,6 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await finder.findPythonVersion('pypy2', 'x64', true);
+    await finder.findPythonVersion('pypy2', 'x64');
   });
 });

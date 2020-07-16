@@ -71,8 +71,7 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
 
 async function useCpythonVersion(
   version: string,
-  architecture: string,
-  stable: boolean
+  architecture: string
 ): Promise<InstalledVersion> {
   const desugaredVersionSpec = desugarDevVersion(version);
   const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
@@ -89,8 +88,7 @@ async function useCpythonVersion(
     );
     const foundRelease = await installer.findReleaseFromManifest(
       semanticVersionSpec,
-      architecture,
-      stable
+      architecture
     );
 
     if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
@@ -173,8 +171,7 @@ export function pythonVersionToSemantic(versionSpec: string) {
 
 export async function findPythonVersion(
   version: string,
-  architecture: string,
-  stable: boolean
+  architecture: string
 ): Promise<InstalledVersion> {
   switch (version.toUpperCase()) {
     case 'PYPY2':
@@ -182,6 +179,6 @@ export async function findPythonVersion(
     case 'PYPY3':
       return usePyPy(3, architecture);
     default:
-      return await useCpythonVersion(version, architecture, stable);
+      return await useCpythonVersion(version, architecture);
   }
 }

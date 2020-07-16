@@ -99,7 +99,6 @@ steps:
 - uses: actions/setup-python@v2
   with:
     python-version: '3.9.0-beta.4'
-    stable: false # optional true or false. Defaults to true if not specified
 - run: python my_script.py
 ```
 
@@ -110,7 +109,6 @@ steps:
 - uses: actions/setup-python@v2
   with:
     python-version: '3.9.0-alpha - 3.9.0' # SemVer's version range syntax
-    stable: false # optional true or false. Defaults to true if not specified
 - run: python my_script.py
 ```
 

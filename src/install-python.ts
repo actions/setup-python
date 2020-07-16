@@ -15,8 +15,7 @@ const IS_WINDOWS = process.platform === 'win32';
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
-  architecture: string,
-  stable: boolean
+  architecture: string
 ): Promise<tc.IToolRelease | undefined> {
   const manifest: tc.IToolRelease[] = await tc.getManifestFromRepo(
     MANIFEST_REPO_OWNER,
@@ -26,7 +25,7 @@ export async function findReleaseFromManifest(
   );
   return await tc.findFromManifest(
     semanticVersionSpec,
-    stable,
+    false,
     manifest,
     architecture
   );

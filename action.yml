@@ -8,9 +8,6 @@ inputs:
     default: '3.x'
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
-  stable:
-    description: 'Whether to download only stable versions'
-    default: 'true'
   token:
     description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
     default: ${{ github.token }}

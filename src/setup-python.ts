@@ -8,8 +8,7 @@ async function run() {
     let version = core.getInput('python-version');
     if (version) {
       const arch: string = core.getInput('architecture') || os.arch();
-      let stable = (core.getInput('stable') || 'true').toUpperCase() === 'TRUE';
-      const installed = await finder.findPythonVersion(version, arch, stable);
+      const installed = await finder.findPythonVersion(version, arch);
       core.info(`Successfully setup ${installed.impl} (${installed.version})`);
     }
     const matchersPath = path.join(__dirname, '..', '.github');

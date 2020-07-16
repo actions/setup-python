@@ -1143,10 +1143,10 @@ const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 const IS_WINDOWS = process.platform === 'win32';
-function findReleaseFromManifest(semanticVersionSpec, architecture, stable) {
+function findReleaseFromManifest(semanticVersionSpec, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         const manifest = yield tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
-        return yield tc.findFromManifest(semanticVersionSpec, stable, manifest, architecture);
+        return yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
     });
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
@@ -1627,8 +1627,7 @@ function run() {
             let version = core.getInput('python-version');
             if (version) {
                 const arch = core.getInput('architecture') || os.arch();
-                let stable = (core.getInput('stable') || 'true').toUpperCase() === 'TRUE';
-                const installed = yield finder.findPythonVersion(version, arch, stable);
+                const installed = yield finder.findPythonVersion(version, arch);
                 core.info(`Successfully setup ${installed.impl} (${installed.version})`);
             }
             const matchersPath = path.join(__dirname, '..', '.github');
@@ -2308,7 +2307,7 @@ function usePyPy(majorVersion, architecture) {
     core.setOutput('python-version', impl);
     return { impl: impl, version: versionFromPath(installDir) };
 }
-function useCpythonVersion(version, architecture, stable) {
+function useCpythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         const desugaredVersionSpec = desugarDevVersion(version);
         const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
@@ -2316,7 +2315,7 @@ function useCpythonVersion(version, architecture, stable) {
         let installDir = tc.find('Python', semanticVersionSpec, architecture);
         if (!installDir) {
             core.info(`Version ${semanticVersionSpec} was not found in the local cache`);
-            const foundRelease = yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, stable);
+            const foundRelease = yield installer.findReleaseFromManifest(semanticVersionSpec, architecture);
             if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
                 core.info(`Version ${semanticVersionSpec} is available for downloading`);
                 yield installer.installCpythonFromRelease(foundRelease);
@@ -2374,7 +2373,7 @@ function pythonVersionToSemantic(versionSpec) {
     return versionSpec.replace(prereleaseVersion, '$1-$2');
 }
 exports.pythonVersionToSemantic = pythonVersionToSemantic;
-function findPythonVersion(version, architecture, stable) {
+function findPythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (version.toUpperCase()) {
             case 'PYPY2':
@@ -2382,7 +2381,7 @@ function findPythonVersion(version, architecture, stable) {
             case 'PYPY3':
                 return usePyPy(3, architecture);
             default:
-                return yield useCpythonVersion(version, architecture, stable);
+                return yield useCpythonVersion(version, architecture);
         }
     });
 }
