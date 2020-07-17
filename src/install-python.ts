@@ -56,9 +56,9 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   core.info('Extract downloaded archive');
   let pythonExtractedFolder;
   if (IS_WINDOWS) {
-    pythonExtractedFolder = await tc.extractZip(pythonPath, `./${fileName}`);
+    pythonExtractedFolder = await tc.extractZip(pythonPath);
   } else {
-    pythonExtractedFolder = await tc.extractTar(pythonPath, `./${fileName}`);
+    pythonExtractedFolder = await tc.extractTar(pythonPath);
   }
 
   core.info('Execute installation script');
