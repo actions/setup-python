@@ -16,6 +16,7 @@ This action sets up a Python environment for use in actions by:
 - Ability to download, install and set up Python packages from `actions/python-versions` that do not come preinstalled on runners
   - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed
 - Automatic setup and download of Python packages if using a self-hosted runner
+- Support for pre-release versions of Python
 
 # Usage
 
@@ -92,7 +93,7 @@ jobs:
 
 ```
 
-Download and set up the accurate pre-release version of Python:
+Download and set up a accurate pre-release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v2
@@ -102,7 +103,7 @@ steps:
 - run: python my_script.py
 ```
 
-Download and set up the latest available version of Python (including both pre-release and stable versions):
+Download and set up the latest available version of Python (includes both pre-release and stable versions):
 ```yaml
 steps:
 - uses: actions/checkout@v2
