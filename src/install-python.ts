@@ -26,7 +26,7 @@ export async function findReleaseFromManifest(
   );
   return await tc.findFromManifest(
     semanticVersionSpec,
-    true,
+    false,
     manifest,
     architecture
   );
