@@ -16,6 +16,7 @@ This action sets up a Python environment for use in actions by:
 - Ability to download, install and set up Python packages from `actions/python-versions` that do not come preinstalled on runners
   - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed
 - Automatic setup and download of Python packages if using a self-hosted runner
+- Support for pre-release versions of Python
 
 # Usage
 
@@ -92,6 +93,26 @@ jobs:
 
 ```
 
+Download and set up a accurate pre-release version of Python:
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9.0-beta.4'
+- run: python my_script.py
+```
+
+Download and set up the latest available version of Python (includes both pre-release and stable versions):
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9.0-alpha - 3.9.0' # SemVer's version range syntax
+- run: python my_script.py
+```
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).
@@ -106,7 +127,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases))
-    - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/master/versions-manifest.json) file.
+    - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
 
 # Hosted Tool Cache
@@ -136,7 +157,9 @@ You should specify only a major and minor version if you are okay with the most 
 
 # Using `setup-python` with a self hosted runner
 
-If you would like to use `setup-python` and a self-hosted runner, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
+Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
+
+If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
 
 ### Windows
 
