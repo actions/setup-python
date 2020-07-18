@@ -61,3 +61,32 @@ jobs:
 
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
+
+  setup-pre-release-version-from-manifest:
+    name: Setup 3.9.0-beta.4 ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup-python 3.9.0-beta.4
+      uses: ./
+      with:
+        python-version: '3.9.0-beta.4'
+
+    - name: Validate version
+      run: |
+        $pythonVersion = (python --version)
+        if ("Python 3.9.0b4" -ne "$pythonVersion"){
+          Write-Host "The current version is $pythonVersion; expected version is 3.9.0b4"
+          exit 1
+        }
+        $pythonVersion
+      shell: pwsh
+
+    - name: Run simple code
+      run: python -c 'import math; print(math.factorial(5))'
