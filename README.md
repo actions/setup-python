@@ -82,6 +82,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      matrix:
         # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
         python-version: [3.5, 3.6, 3.7.4, 3.8]
     steps:
