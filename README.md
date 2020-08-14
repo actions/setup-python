@@ -94,7 +94,7 @@ jobs:
 
 ```
 
-Download and set up a accurate pre-release version of Python:
+Download and set up an accurate pre-release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v2
