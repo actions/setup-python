@@ -8,7 +8,7 @@
 
 ### NCC
 
-In order to avoid uploading `node_modules/` to the repository, we use [zeit/ncc](https://github.com/zeit/ncc) to create a single `index.js` file that gets saved in `dist/`.
+In order to avoid uploading `node_modules/` to the repository, we use [vercel/ncc](https://github.com/vercel/ncc) to create a single `index.js` file that gets saved in `dist/`.
 
 ### Developing
 
