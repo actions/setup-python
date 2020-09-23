@@ -123,7 +123,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 `setup-python` is able to configure Python from two sources:
 
 - Preinstalled versions of Python in the tools cache on GitHub-hosted runners
-    - For detailed information regarding the available versions of Python that are installed see [Software installed on GitHub-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners).
+    - For detailed information regarding the available versions of Python that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
     - For every minor version of Python, expect only the latest patch to be preinstalled.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
@@ -142,8 +142,8 @@ GitHub hosted runners have a tools cache that comes with a few versions of Pytho
 |**PyPy Tool Cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
 GitHub virtual environments are setup in [actions/virtual-environments](https://github.com/actions/virtual-environments). During the setup, the available versions of Python and PyPy are automatically downloaded, setup and documented.
-- [Tools cache setup for Ubuntu](https://github.com/actions/virtual-environments/blob/master/images/linux/scripts/installers/hosted-tool-cache.sh)
-- [Tools cache setup for Windows](https://github.com/actions/virtual-environments/blob/master/images/win/scripts/Installers/Download-ToolCache.ps1)
+- [Tools cache setup for Ubuntu](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/hosted-tool-cache.sh)
+- [Tools cache setup for Windows](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Download-ToolCache.ps1)
 
 # Specifying a Python version
 
