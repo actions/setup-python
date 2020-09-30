@@ -1,4 +1,4 @@
-# setup-python V2
+# `Setup_Python V2`
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
@@ -6,15 +6,15 @@
 
 This action sets up a Python environment for use in actions by:
 
-- optionally installing and adding to PATH a version of Python that is already installed in the tools cache
-- downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache
-- failing if a specific version of Python is not preinstalled or available for download
-- registering problem matchers for error output
+- Optionally installing and adding to PATH a version of Python that is already installed in the tools cache
+- Downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache
+- Failing if a specific version of Python is not preinstalled or available for download
+-Registering problem matchers for error output
 
 # What's new
 
-- Ability to download, install and set up Python packages from `actions/python-versions` that do not come preinstalled on runners
-  - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed
+- Ability to download, install and set up Python packages from `Actions/Python-Versions` that do not come preinstalled on runners
+- Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed
 - Automatic setup and download of Python packages if using a self-hosted runner
 - Support for pre-release versions of Python
 
@@ -76,7 +76,7 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 ```
 
-Download and set up a version of Python that does not come preinstalled on an image:
+Download and set up a version of Python that does not come PRE_INSTALLED on an image:
 ```yaml
 jobs:
   build:
@@ -94,7 +94,7 @@ jobs:
 
 ```
 
-Download and set up an accurate pre-release version of Python:
+Download and set up an accurate Pre_Release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v2
@@ -156,13 +156,13 @@ You should specify only a major and minor version if you are okay with the most 
   - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
   - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used.
 
-# Using `setup-python` with a self hosted runner
+# Using `Setup_Python` with a self hosted runner
 
 Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
 
 If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
 
-### Windows
+### `WINDOWS`
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
 - If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient.
@@ -170,7 +170,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
 
-### Linux
+### `LINUX`
 
 - The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
 - Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
