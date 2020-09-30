@@ -1,4 +1,4 @@
-# setup-python V2
+# setup-python V 2.0
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
