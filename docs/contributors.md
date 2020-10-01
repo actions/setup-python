@@ -13,12 +13,14 @@ In order to avoid uploading `node_modules/` to the repository, we use [vercel/nc
 ### Developing
 
 If you're developing locally, you can run
-```
+
+```sh
 npm install
 tsc
 ncc build src/setup-python.ts
 ```
-Any files generated using `tsc` will be added to `lib/`, however those files also are not uploaded to the repository and are exluded using `.gitignore`.
+
+Any files generated using `tsc` will be added to `lib/`, however those files also are not uploaded to the repository and are excluded using `.gitignore`.
 
 During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier) (to run manually, use `npm run format`).
 
