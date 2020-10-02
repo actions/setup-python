@@ -158,7 +158,7 @@ You should specify only a major and minor version if you are okay with the most 
 
 # Using `setup-python` with a self hosted runner
 
-Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
+Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure that they are set up so that new versions of Python can be downloaded and configured on your runner.
 
 If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
 
