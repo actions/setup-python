@@ -6422,6 +6422,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const path = __importStar(__webpack_require__(622));
 const core = __importStar(__webpack_require__(470));
 const tc = __importStar(__webpack_require__(533));
 const exec = __importStar(__webpack_require__(986));
@@ -6432,6 +6433,7 @@ const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 const IS_WINDOWS = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 function findReleaseFromManifest(semanticVersionSpec, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         const manifest = yield tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
@@ -6443,6 +6445,7 @@ function installPython(workingDirectory) {
     return __awaiter(this, void 0, void 0, function* () {
         const options = {
             cwd: workingDirectory,
+            env: Object.assign(Object.assign({}, process.env), IS_LINUX && { 'LD_LIBRARY_PATH': path.join(workingDirectory, 'lib') }),
             silent: true,
             listeners: {
                 stdout: (data) => {
@@ -6688,6 +6691,7 @@ const installer = __importStar(__webpack_require__(824));
 const core = __importStar(__webpack_require__(470));
 const tc = __importStar(__webpack_require__(533));
 const IS_WINDOWS = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
 // There is a seperate directory for `pip install --user`.
@@ -6760,6 +6764,13 @@ function useCpythonVersion(version, architecture) {
             ].join(os.EOL));
         }
         core.exportVariable('pythonLocation', installDir);
+        if (IS_LINUX) {
+            const libPath = (process.env.LD_LIBRARY_PATH) ? `:${process.env.LD_LIBRARY_PATH}` : '';
+            const pyLibPath = path.join(installDir, 'lib');
+            if (!libPath.split(':').includes(pyLibPath)) {
+                core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
+            }
+        }
         core.addPath(installDir);
         core.addPath(binDir(installDir));
         if (IS_WINDOWS) {

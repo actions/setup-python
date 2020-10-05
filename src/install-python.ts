@@ -13,6 +13,7 @@ const MANIFEST_REPO_BRANCH = 'main';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 
 const IS_WINDOWS = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -35,6 +36,10 @@ export async function findReleaseFromManifest(
 async function installPython(workingDirectory: string) {
   const options: ExecOptions = {
     cwd: workingDirectory,
+    env: {
+      ...process.env,
+      ...(IS_LINUX && {LD_LIBRARY_PATH: path.join(workingDirectory, 'lib')})
+    },
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {

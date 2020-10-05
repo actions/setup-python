@@ -9,6 +9,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
 const IS_WINDOWS = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
@@ -109,6 +110,18 @@ async function useCpythonVersion(
   }
 
   core.exportVariable('pythonLocation', installDir);
+
+  if (IS_LINUX) {
+    const libPath = process.env.LD_LIBRARY_PATH
+      ? `:${process.env.LD_LIBRARY_PATH}`
+      : '';
+    const pyLibPath = path.join(installDir, 'lib');
+
+    if (!libPath.split(':').includes(pyLibPath)) {
+      core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
+    }
+  }
+
   core.addPath(installDir);
   core.addPath(binDir(installDir));
 
