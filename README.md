@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
+        python-version: [ '2.x', '3.x', 'pypy2', 'pypy3.7' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v2
@@ -60,7 +60,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [2.7, 3.6, 3.7, 3.8, pypy2, pypy3]
+        python-version: [2.7, 3.6, 3.7, 3.8, pypy2, pypy3.7]
         exclude:
           - os: macos-latest
             python-version: 3.8

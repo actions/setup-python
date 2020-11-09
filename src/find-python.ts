@@ -33,12 +33,12 @@ function binDir(installDir: string): string {
 }
 
 // Note on the tool cache layout for PyPy:
-// PyPy has its own versioning scheme that doesn't follow the Python versioning scheme.
+// PyPy has a versioning scheme that uses both an internal version and the python version.
 // A particular version of PyPy may contain one or more versions of the Python interpreter.
-// For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
+// For example, PyPy 7.3.2 contains Python 2.7, 3.6, and 3.7-alpha.
 // We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
-  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion.toString());
+function usePyPy(version: string, architecture: string): InstalledVersion {
+  const findPyPy = tc.find.bind(undefined, 'PyPy', version.toString());
   let installDir: string | null = findPyPy(architecture);
 
   if (!installDir && IS_WINDOWS) {
@@ -50,7 +50,7 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
 
   if (!installDir) {
     // PyPy not installed in $(Agent.ToolsDirectory)
-    throw new Error(`PyPy ${majorVersion} not found`);
+    throw new Error(`PyPy ${version} not found`);
   }
 
   // For PyPy, Windows uses 'bin', not 'Scripts'.
@@ -64,7 +64,7 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
   core.addPath(installDir);
   core.addPath(_binDir);
 
-  const impl = 'pypy' + majorVersion.toString();
+  const impl = 'pypy' + version.toString();
   core.setOutput('python-version', impl);
 
   return {impl: impl, version: versionFromPath(installDir)};
@@ -187,10 +187,14 @@ export async function findPythonVersion(
   architecture: string
 ): Promise<InstalledVersion> {
   switch (version.toUpperCase()) {
+    /* TODO: extract this into a function */
     case 'PYPY2':
       return usePyPy(2, architecture);
+    case 'PYPY3.6':
+      return usePyPy(3.6, architecture);
     case 'PYPY3':
-      return usePyPy(3, architecture);
+    case 'PYPY3.7':
+      return usePyPy(3.7, architecture);
     default:
       return await useCpythonVersion(version, architecture);
   }
