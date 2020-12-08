@@ -51,8 +51,11 @@ function binDir(installDir: string): string {
 // A particular version of PyPy may contain one or more versions of the Python interpreter.
 // For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
 // We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
-  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion.toString());
+function usePyPy(
+  majorVersion: '2' | '3.6',
+  architecture: string
+): InstalledVersion {
+  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion);
   let installDir: string | null = findPyPy(architecture);
 
   if (!installDir && IS_WINDOWS) {
@@ -186,9 +189,10 @@ export async function findPythonVersion(
 ): Promise<InstalledVersion> {
   switch (version.toUpperCase()) {
     case 'PYPY2':
-      return usePyPy(2, architecture);
+      return usePyPy('2', architecture);
     case 'PYPY3':
-      return usePyPy(3, architecture);
+      // keep pypy3 pointing to 3.6 for backward compatibility
+      return usePyPy('3.6', architecture);
     default:
       return await useCpythonVersion(version, architecture);
   }

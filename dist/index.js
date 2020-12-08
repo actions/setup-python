@@ -6417,7 +6417,7 @@ function binDir(installDir) {
 // For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
 // We only care about the Python version, so we don't use the PyPy version for the tool cache.
 function usePyPy(majorVersion, architecture) {
-    const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion.toString());
+    const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion);
     let installDir = findPyPy(architecture);
     if (!installDir && IS_WINDOWS) {
         // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
@@ -6513,9 +6513,9 @@ function findPythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (version.toUpperCase()) {
             case 'PYPY2':
-                return usePyPy(2, architecture);
+                return usePyPy('2', architecture);
             case 'PYPY3':
-                return usePyPy(3, architecture);
+                return usePyPy('3.6', architecture);
             default:
                 return yield useCpythonVersion(version, architecture);
         }
