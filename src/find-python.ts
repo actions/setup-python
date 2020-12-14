@@ -1,5 +1,6 @@
 import * as os from 'os';
 import * as path from 'path';
+import {IS_WINDOWS, IS_LINUX} from './utils';
 
 import * as semver from 'semver';
 
@@ -7,9 +8,6 @@ import * as installer from './install-python';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
-
-const IS_WINDOWS = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
