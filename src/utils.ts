@@ -49,3 +49,7 @@ export function validateVersion(version: string) {
 export function isNightlyKeyword(pypyVersion: string) {
   return pypyVersion === 'nightly';
 }
+
+export function getPyPyVersionFromPath(installDir: string) {
+  return path.basename(path.dirname(installDir));
+}

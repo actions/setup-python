@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as pypyInstall from './install-pypy';
-import {IS_WINDOWS, validateVersion} from './utils';
+import {IS_WINDOWS, validateVersion, getPyPyVersionFromPath} from './utils';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';
@@ -54,7 +54,7 @@ export async function findPyPyVersion(
   return {resolvedPyPyVersion, resolvedPythonVersion};
 }
 
-function findPyPyToolCache(
+export function findPyPyToolCache(
   pythonVersion: string,
   pypyVersion: string,
   architecture: string
@@ -89,14 +89,13 @@ function findPyPyToolCache(
   return {installDir, resolvedPythonVersion, resolvedPyPyVersion};
 }
 
-function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
+export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
   const versions = versionSpec.split('-').filter(item => !!item);
 
-  if (versions.length < 2) {
-    core.setFailed(
+  if (versions.length < 2 || versions[0] != 'pypy') {
+    throw new Error(
       "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
     );
-    process.exit();
   }
 
   const pythonVersion = versions[1];
@@ -108,18 +107,13 @@ function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
   }
 
   if (!validateVersion(pythonVersion) || !validateVersion(pypyVersion)) {
-    core.setFailed(
+    throw new Error(
       "Invalid 'version' property for PyPy. Both Python version and PyPy versions should satisfy SemVer notation. See README for examples and documentation."
     );
-    process.exit();
   }
 
   return {
     pypyVersion: pypyVersion,
     pythonVersion: pythonVersion
   };
-}
-
-function getPyPyVersionFromPath(installDir: string) {
-  return path.basename(path.dirname(installDir));
 }
