@@ -1154,7 +1154,8 @@ function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
 function parsePyPyVersion(versionSpec) {
     const versions = versionSpec.split('-').filter(item => !!item);
     if (versions.length < 2) {
-        throw new Error("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See readme for more examples.");
+        core.setFailed("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation.");
+        process.exit();
     }
     const pythonVersion = versions[1];
     let pypyVersion;
@@ -1163,6 +1164,10 @@ function parsePyPyVersion(versionSpec) {
     }
     else {
         pypyVersion = 'x';
+    }
+    if (!utils_1.validateVersion(pythonVersion) || !utils_1.validateVersion(pypyVersion)) {
+        core.setFailed("Invalid 'version' property for PyPy. Both Python version and PyPy versions should satisfy SemVer notation. See README for examples and documentation.");
+        process.exit();
     }
     return {
         pypyVersion: pypyVersion,
@@ -2316,6 +2321,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
+const semver = __importStar(__webpack_require__(876));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
 /** create Symlinks for downloaded PyPy
@@ -2334,6 +2340,14 @@ function createSymlinkInFolder(folderPath, sourceName, targetName, setExecutable
     }
 }
 exports.createSymlinkInFolder = createSymlinkInFolder;
+function validateVersion(version) {
+    return isNightlyKeyword(version) || Boolean(semver.validRange(version));
+}
+exports.validateVersion = validateVersion;
+function isNightlyKeyword(pypyVersion) {
+    return pypyVersion === 'nightly';
+}
+exports.isNightlyKeyword = isNightlyKeyword;
 
 
 /***/ }),
@@ -2766,9 +2780,14 @@ function installPyPy(pypyVersion, pythonVersion, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
         const releases = yield getAvailablePyPyVersions();
+        if (!releases || releases.length === 0) {
+            core.setFailed('No release was found in PyPy version.json');
+            process.exit();
+        }
         const releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture);
         if (!releaseData || !releaseData.foundAsset) {
-            throw new Error(`PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`);
+            core.setFailed(`PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`);
+            process.exit();
         }
         const { foundAsset, resolvedPythonVersion, resolvedPyPyVersion } = releaseData;
         let downloadUrl = `${foundAsset.download_url}`;
@@ -2786,7 +2805,7 @@ function installPyPy(pypyVersion, pythonVersion, architecture) {
         const archiveName = fs.readdirSync(downloadDir)[0];
         const toolDir = path.join(downloadDir, archiveName);
         let installDir = toolDir;
-        if (!isNightlyKeyword(resolvedPyPyVersion)) {
+        if (!utils_1.isNightlyKeyword(resolvedPyPyVersion)) {
             installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
         }
         writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
@@ -2803,7 +2822,8 @@ function getAvailablePyPyVersions() {
         const http = new httpm.HttpClient('tool-cache');
         const response = yield http.getJson(url);
         if (!response.result) {
-            throw new Error(`Unable to retrieve the list of available PyPy versions from '${url}'`);
+            core.setFailed(`Unable to retrieve the list of available PyPy versions from '${url}'`);
+            process.exit();
         }
         return response.result;
     });
@@ -2830,12 +2850,13 @@ function installPip(pythonLocation) {
 }
 function findRelease(releases, pythonVersion, pypyVersion, architecture) {
     const filterReleases = releases.filter(item => {
-        const isPythonVersionSatisfies = semver.satisfies(semver.coerce(item.python_version), pythonVersion);
-        const isPyPyNightly = isNightlyKeyword(pypyVersion) && isNightlyKeyword(item.pypy_version);
-        const isPyPyVersionSatisfies = isPyPyNightly ||
+        const isPythonVersionSatisfied = semver.satisfies(semver.coerce(item.python_version), pythonVersion);
+        const isPyPyNightly = utils_1.isNightlyKeyword(pypyVersion) && utils_1.isNightlyKeyword(item.pypy_version);
+        const isPyPyVersionSatisfied = isPyPyNightly ||
             semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
-        const isArchExists = item.files.some(file => file.arch === architecture && file.platform === process.platform);
-        return isPythonVersionSatisfies && isPyPyVersionSatisfies && isArchExists;
+        const isArchPresent = item.files &&
+            item.files.some(file => file.arch === architecture && file.platform === process.platform);
+        return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
     });
     if (filterReleases.length === 0) {
         return null;
@@ -2884,9 +2905,6 @@ function getPyPyBinaryPath(installDir) {
     return utils_1.IS_WINDOWS ? installDir : _binDir;
 }
 exports.getPyPyBinaryPath = getPyPyBinaryPath;
-function isNightlyKeyword(pypyVersion) {
-    return pypyVersion === 'nightly';
-}
 function pypyVersionToSemantic(versionSpec) {
     const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc))(\d*)/g;
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');

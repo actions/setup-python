@@ -1,4 +1,4 @@
-name: Validate 'setup-python'
+name: Validate Python e2e
 on: 
   push:
     branches:
@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
         python: [3.5.4, 3.6.7, 3.7.5, 3.8.1]
     steps:
     - name: Checkout
@@ -68,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -91,13 +91,13 @@ jobs:
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
 
-  setup-pypy:
+  setup-pypy-legacy-way:
     name: Setup PyPy ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
     steps:
     - name: Checkout
       uses: actions/checkout@v2

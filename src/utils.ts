@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as semver from 'semver';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
@@ -39,4 +40,12 @@ export function createSymlinkInFolder(
   if (!IS_WINDOWS && setExecutable) {
     fs.chmodSync(targetPath, '755');
   }
+}
+
+export function validateVersion(version: string) {
+  return isNightlyKeyword(version) || Boolean(semver.validRange(version));
+}
+
+export function isNightlyKeyword(pypyVersion: string) {
+  return pypyVersion === 'nightly';
 }

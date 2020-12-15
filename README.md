@@ -17,6 +17,7 @@ This action sets up a Python environment for use in actions by:
   - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed.
 - Automatic setup and download of Python packages if using a self-hosted runner.
 - Support for pre-release versions of Python.
+- Support for installation any version of PyPy on-flight
 
 # Usage
 
@@ -40,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy2', 'pypy3' ]
+        python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.6', 'pypy-3.7' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v2
@@ -60,7 +61,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [2.7, 3.6, 3.7, 3.8, pypy2, pypy3]
+        python-version: [2.7, 3.6, 3.7, 3.8, pypy-2.7, pypy-3.6]
         exclude:
           - os: macos-latest
             python-version: 3.8
@@ -91,7 +92,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
-
 ```
 
 Download and set up an accurate pre-release version of Python:
@@ -114,6 +114,27 @@ steps:
 - run: python my_script.py
 ```
 
+Download and set up PyPy:  
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+        - pypy-3.6 # the latest available version of PyPy
+        - pypy-3.7 # the latest available version of PyPy
+        - pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - run: python my_script.py
+```
+More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in [Available versions of PyPy](#available-versions-of-pypy) section.
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).
@@ -129,7 +150,21 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
-    - If there is a specific version of Python that is not available, you can open an issue here.
+    - If there is a specific version of Python that is not available, you can open an issue here
+    
+ # Available versions of PyPy
+ 
+ `setup-python` is able to configure PyPy from two sources:
+ 
+- Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
+  - For detailed information regarding the available versions of PyPy that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
+  - For the latest PyPy release, all version of Python are cached.
+  - Cache is updated with 1-2 weeks delay. if you specify PyPy as `pypy-3.6`, the version from cache will be used although a new version is available. If you need to start using the recently released version right after release, you should specify exact PyPy version `pypy-3.6-v7.3.3`.
+
+- Downloadable PyPy versions from [official PyPy site](https://downloads.python.org/pypy/).
+  - All available versions are listed in the [versions.json](https://downloads.python.org/pypy/versions.json) file.
+  - PyPy < 7.3.3 are not available to install on-flight.
+  - If some versions are not available, you can open an issue in https://foss.heptapod.net/pypy/pypy/
 
 # Hosted Tool Cache
 
@@ -155,6 +190,20 @@ You should specify only a major and minor version if you are okay with the most 
   - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
   - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
   - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used.
+  
+# Specifying a PyPy version
+The version of PyPy should be specified in the format `pypy-<python_version>[-v<pypy_version>]`.  
+Parameter `<pypy_version>` is optional and can be skipped. The latest version will be used in this case.
+
+```
+pypy-3.6 # the latest available version of PyPy
+pypy-3.7 # the latest available version of PyPy
+pypy-2.7 # the latest available version of PyPy
+pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
+pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
+pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
+pypy-3.7-nightly # Python 3.7 and nightly PyPy
+```
 
 # Using `setup-python` with a self hosted runner
 

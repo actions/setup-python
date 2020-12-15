@@ -6,7 +6,12 @@ import * as httpm from '@actions/http-client';
 import * as exec from '@actions/exec';
 import * as fs from 'fs';
 
-import {IS_WINDOWS, IPyPyManifestRelease, createSymlinkInFolder} from './utils';
+import {
+  IS_WINDOWS,
+  IPyPyManifestRelease,
+  createSymlinkInFolder,
+  isNightlyKeyword
+} from './utils';
 
 const PYPY_VERSION_FILE = 'PYPY_VERSION';
 
@@ -18,6 +23,11 @@ export async function installPyPy(
   let downloadDir;
 
   const releases = await getAvailablePyPyVersions();
+  if (!releases || releases.length === 0) {
+    core.setFailed('No release was found in PyPy version.json');
+    process.exit();
+  }
+
   const releaseData = findRelease(
     releases,
     pythonVersion,
@@ -26,9 +36,10 @@ export async function installPyPy(
   );
 
   if (!releaseData || !releaseData.foundAsset) {
-    throw new Error(
+    core.setFailed(
       `PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`
     );
+    process.exit();
   }
 
   const {foundAsset, resolvedPythonVersion, resolvedPyPyVersion} = releaseData;
@@ -74,9 +85,10 @@ async function getAvailablePyPyVersions() {
 
   const response = await http.getJson<IPyPyManifestRelease[]>(url);
   if (!response.result) {
-    throw new Error(
+    core.setFailed(
       `Unable to retrieve the list of available PyPy versions from '${url}'`
     );
+    process.exit();
   }
 
   return response.result;
@@ -124,19 +136,21 @@ function findRelease(
   architecture: string
 ) {
   const filterReleases = releases.filter(item => {
-    const isPythonVersionSatisfies = semver.satisfies(
+    const isPythonVersionSatisfied = semver.satisfies(
       semver.coerce(item.python_version)!,
       pythonVersion
     );
     const isPyPyNightly =
       isNightlyKeyword(pypyVersion) && isNightlyKeyword(item.pypy_version);
-    const isPyPyVersionSatisfies =
+    const isPyPyVersionSatisfied =
       isPyPyNightly ||
       semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
-    const isArchExists = item.files.some(
-      file => file.arch === architecture && file.platform === process.platform
-    );
-    return isPythonVersionSatisfies && isPyPyVersionSatisfies && isArchExists;
+    const isArchPresent =
+      item.files &&
+      item.files.some(
+        file => file.arch === architecture && file.platform === process.platform
+      );
+    return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
   });
 
   if (filterReleases.length === 0) {
@@ -204,10 +218,6 @@ function writeExactPyPyVersionFile(
 export function getPyPyBinaryPath(installDir: string) {
   const _binDir = path.join(installDir, 'bin');
   return IS_WINDOWS ? installDir : _binDir;
-}
-
-function isNightlyKeyword(pypyVersion: string) {
-  return pypyVersion === 'nightly';
 }
 
 export function pypyVersionToSemantic(versionSpec: string) {
