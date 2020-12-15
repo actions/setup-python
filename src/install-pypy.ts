@@ -24,8 +24,7 @@ export async function installPyPy(
 
   const releases = await getAvailablePyPyVersions();
   if (!releases || releases.length === 0) {
-    core.setFailed('No release was found in PyPy version.json');
-    process.exit();
+    throw new Error('No release was found in PyPy version.json');
   }
 
   const releaseData = findRelease(
@@ -36,10 +35,9 @@ export async function installPyPy(
   );
 
   if (!releaseData || !releaseData.foundAsset) {
-    core.setFailed(
+    throw new Error(
       `PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`
     );
-    process.exit();
   }
 
   const {foundAsset, resolvedPythonVersion, resolvedPyPyVersion} = releaseData;
@@ -85,10 +83,9 @@ async function getAvailablePyPyVersions() {
 
   const response = await http.getJson<IPyPyManifestRelease[]>(url);
   if (!response.result) {
-    core.setFailed(
+    throw new Error(
       `Unable to retrieve the list of available PyPy versions from '${url}'`
     );
-    process.exit();
   }
 
   return response.result;
@@ -123,13 +120,13 @@ async function installPip(pythonLocation: string) {
   core.info('Installing and updating pip');
   const pythonBinary = path.join(pythonLocation, 'python');
   await exec.exec(`${pythonBinary} -m ensurepip`);
-  // TO-DO should we skip updating of pip ?
+
   await exec.exec(
     `${pythonLocation}/python -m pip install --ignore-installed pip`
   );
 }
 
-function findRelease(
+export function findRelease(
   releases: IPyPyManifestRelease[],
   pythonVersion: string,
   pypyVersion: string,
