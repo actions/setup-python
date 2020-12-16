@@ -17,7 +17,7 @@ This action sets up a Python environment for use in actions by:
   - Allows for pinning to a specific patch version of Python without the worry of it ever being removed or changed.
 - Automatic setup and download of Python packages if using a self-hosted runner.
 - Support for pre-release versions of Python.
-- Support for installation any version of PyPy on-flight
+- Support for installing any version of PyPy on-flight
 
 # Usage
 
@@ -123,8 +123,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - pypy-3.6 # the latest available version of PyPy
-        - pypy-3.7 # the latest available version of PyPy
+        - pypy-3.6 # the latest available version of PyPy that supports Python 3.6
+        - pypy-3.7 # the latest available version of PyPy that supports Python 3.7
         - pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
     steps:
     - uses: actions/checkout@v2
@@ -133,7 +133,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
 ```
-More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in [Available versions of PyPy](#available-versions-of-pypy) section.
+More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in the [Available versions of PyPy](#available-versions-of-pypy) section.
 
 # Getting started with Python + Actions
 
@@ -158,11 +158,11 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
  
 - Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
-  - For the latest PyPy release, all version of Python are cached.
-  - Cache is updated with 1-2 weeks delay. if you specify PyPy as `pypy-3.6`, the version from cache will be used although a new version is available. If you need to start using the recently released version right after release, you should specify exact PyPy version `pypy-3.6-v7.3.3`.
+  - For the latest PyPy release, all versions of Python are cached.
+  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy-3.6`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy-3.6-v7.3.3`.
 
-- Downloadable PyPy versions from [official PyPy site](https://downloads.python.org/pypy/).
-  - All available versions are listed in the [versions.json](https://downloads.python.org/pypy/versions.json) file.
+- Downloadable PyPy versions from the [official PyPy site](https://downloads.python.org/pypy/).
+  - All available versions that we can download are listed in [versions.json](https://downloads.python.org/pypy/versions.json) file.
   - PyPy < 7.3.3 are not available to install on-flight.
   - If some versions are not available, you can open an issue in https://foss.heptapod.net/pypy/pypy/
 
@@ -193,12 +193,12 @@ You should specify only a major and minor version if you are okay with the most 
   
 # Specifying a PyPy version
 The version of PyPy should be specified in the format `pypy-<python_version>[-v<pypy_version>]`.  
-Parameter `<pypy_version>` is optional and can be skipped. The latest version will be used in this case.
+The `<pypy_version>` parameter is optional and can be skipped. The latest version will be used in this case.
 
 ```
-pypy-3.6 # the latest available version of PyPy
-pypy-3.7 # the latest available version of PyPy
-pypy-2.7 # the latest available version of PyPy
+pypy-3.6 # the latest available version of PyPy that supports Python 3.6
+pypy-3.7 # the latest available version of PyPy that supports Python 3.7
+pypy-2.7 # the latest available version of PyPy that supports Python 2.7
 pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
 pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
 pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy

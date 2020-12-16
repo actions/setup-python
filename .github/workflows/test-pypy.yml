@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: 0 0 * * *
+    - cron: 30 3 * * *
 
 jobs:
   setup-pypy:

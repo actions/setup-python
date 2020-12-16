@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: 0 0 * * *
+    - cron: 30 3 * * *
 
 jobs:
   default-version:
@@ -91,7 +91,7 @@ jobs:
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
 
-  setup-pypy-legacy-way:
+  setup-pypy-legacy:
     name: Setup PyPy ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:

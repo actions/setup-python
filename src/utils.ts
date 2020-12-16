@@ -1,9 +1,10 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
+const PYPY_VERSION_FILE = 'PYPY_VERSION';
 
 export interface IPyPyManifestAsset {
   filename: string;
@@ -52,4 +53,30 @@ export function isNightlyKeyword(pypyVersion: string) {
 
 export function getPyPyVersionFromPath(installDir: string) {
   return path.basename(path.dirname(installDir));
+}
+
+/**
+ * In tool-cache, we put PyPy to '<toolcache_root>/PyPy/<python_version>/x64'
+ * There is no easy way to determine what PyPy version is located in specific folder
+ * 'pypy --version' is not reliable enough since it is not set properly for preview versions
+ * "7.3.3rc1" is marked as '7.3.3' in 'pypy --version'
+ * so we put PYPY_VERSION file to PyPy directory when install it to VM and read it when we need to know version
+ * PYPY_VERSION contains exact version from 'versions.json'
+ */
+export function readExactPyPyVersionFile(installDir: string) {
+  let pypyVersion = '';
+  let fileVersion = path.join(installDir, PYPY_VERSION_FILE);
+  if (fs.existsSync(fileVersion)) {
+    pypyVersion = fs.readFileSync(fileVersion).toString();
+  }
+
+  return pypyVersion;
+}
+
+export function writeExactPyPyVersionFile(
+  installDir: string,
+  resolvedPyPyVersion: string
+) {
+  const pypyFilePath = path.join(installDir, PYPY_VERSION_FILE);
+  fs.writeFileSync(pypyFilePath, resolvedPyPyVersion);
 }

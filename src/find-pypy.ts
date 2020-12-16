@@ -1,6 +1,11 @@
 import * as path from 'path';
 import * as pypyInstall from './install-pypy';
-import {IS_WINDOWS, validateVersion, getPyPyVersionFromPath} from './utils';
+import {
+  IS_WINDOWS,
+  validateVersion,
+  getPyPyVersionFromPath,
+  readExactPyPyVersionFile
+} from './utils';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';
@@ -67,7 +72,7 @@ export function findPyPyToolCache(
     // 'tc.find' finds tool based on Python version but we also need to check
     // whether PyPy version satisfies requested version.
     resolvedPythonVersion = getPyPyVersionFromPath(installDir);
-    resolvedPyPyVersion = pypyInstall.readExactPyPyVersion(installDir);
+    resolvedPyPyVersion = readExactPyPyVersionFile(installDir);
 
     const isPyPyVersionSatisfies = semver.satisfies(
       resolvedPyPyVersion,
