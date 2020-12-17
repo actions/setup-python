@@ -4,7 +4,8 @@ import {
   IS_WINDOWS,
   validateVersion,
   getPyPyVersionFromPath,
-  readExactPyPyVersionFile
+  readExactPyPyVersionFile,
+  validatePythonVersionFormatForPyPy
 } from './utils';
 
 import * as semver from 'semver';
@@ -114,6 +115,12 @@ export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
   if (!validateVersion(pythonVersion) || !validateVersion(pypyVersion)) {
     throw new Error(
       "Invalid 'version' property for PyPy. Both Python version and PyPy versions should satisfy SemVer notation. See README for examples and documentation."
+    );
+  }
+
+  if (!validatePythonVersionFormatForPyPy(pythonVersion)) {
+    throw new Error(
+      "Invalid format of Python version for PyPy. Python version should be specified in format 'x.y'. See README for examples and documentation."
     );
   }
 

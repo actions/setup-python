@@ -80,3 +80,13 @@ export function writeExactPyPyVersionFile(
   const pypyFilePath = path.join(installDir, PYPY_VERSION_FILE);
   fs.writeFileSync(pypyFilePath, resolvedPyPyVersion);
 }
+
+/**
+ * Python version should be specified explicitly like "x.y" (2.7, 3.6, 3.7)
+ * "3.x" or "3" are not supported
+ * because it could cause ambiguity when both PyPy version and Python version are not precise
+ */
+export function validatePythonVersionFormatForPyPy(version: string) {
+  const re = /^\d+\.\d+$/;
+  return re.test(version);
+}

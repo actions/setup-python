@@ -1168,6 +1168,9 @@ function parsePyPyVersion(versionSpec) {
     if (!utils_1.validateVersion(pythonVersion) || !utils_1.validateVersion(pypyVersion)) {
         throw new Error("Invalid 'version' property for PyPy. Both Python version and PyPy versions should satisfy SemVer notation. See README for examples and documentation.");
     }
+    if (!utils_1.validatePythonVersionFormatForPyPy(pythonVersion)) {
+        throw new Error("Invalid format of Python version for PyPy. Python version should be specified in format 'x.y'. See README for examples and documentation.");
+    }
     return {
         pypyVersion: pypyVersion,
         pythonVersion: pythonVersion
@@ -2375,6 +2378,16 @@ function writeExactPyPyVersionFile(installDir, resolvedPyPyVersion) {
     fs_1.default.writeFileSync(pypyFilePath, resolvedPyPyVersion);
 }
 exports.writeExactPyPyVersionFile = writeExactPyPyVersionFile;
+/**
+ * Python version should be specified explicitly like "x.y" (2.7, 3.6, 3.7)
+ * "3.x" or "3" are not supported
+ * because it could cause ambiguity when both PyPy version and Python version are not precise
+ */
+function validatePythonVersionFormatForPyPy(version) {
+    const re = /^\d+\.\d+$/;
+    return re.test(version);
+}
+exports.validatePythonVersionFormatForPyPy = validatePythonVersionFormatForPyPy;
 
 
 /***/ }),
