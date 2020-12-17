@@ -49,23 +49,6 @@ describe('parsePyPyVersion', () => {
   });
 });
 
-describe('validateVersion', () => {
-  it.each([
-    ['v7.3.3', true],
-    ['v7.3.x', true],
-    ['v7.x', true],
-    ['x', true],
-    ['v7.3.3-rc.1', true],
-    ['nightly', true],
-    ['v7.3.b', false],
-    ['3.6', true],
-    ['3.b', false],
-    ['3', true]
-  ])('%s -> %s', (input, expected) => {
-    expect(validateVersion(input)).toEqual(expected);
-  });
-});
-
 describe('getPyPyVersionFromPath', () => {
   it('/fake/toolcache/PyPy/3.6.5/x64 -> 3.6.5', () => {
     expect(getPyPyVersionFromPath('/fake/toolcache/PyPy/3.6.5/x64')).toEqual(
@@ -223,6 +206,12 @@ describe('findPyPyVersion', () => {
     ).rejects.toThrow();
   });
 
+  it('throw on invalid input format pypy3.7-7.3.x', async () => {
+    await expect(
+      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture)
+    ).rejects.toThrow();
+  });
+
   it('found and install successfully', async () => {
     spyCacheDir = jest.spyOn(tc, 'cacheDir');
     spyCacheDir.mockImplementation(() =>
@@ -240,9 +229,9 @@ describe('findPyPyVersion', () => {
 
   it('throw if release is not found', async () => {
     await expect(
-      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture)
+      finder.findPyPyVersion('pypy-3.7-v7.5.x', architecture)
     ).rejects.toThrowError(
-      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
+      `PyPy version 3.7 (v7.5.x) with arch ${architecture} not found`
     );
   });
 });
