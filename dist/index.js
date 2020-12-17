@@ -6742,10 +6742,6 @@ function usePyPy(majorVersion, architecture) {
     if (IS_WINDOWS) {
         core.addPath(path.join(installDir, 'Scripts'));
     }
-    if (IS_WINDOWS) {
-        const scriptDir = path.join(installDir, 'Scripts');
-        core.addPath(scriptDir);
-    }
     const impl = 'pypy' + majorVersion.toString();
     core.setOutput('python-version', impl);
     return { impl: impl, version: versionFromPath(installDir) };
