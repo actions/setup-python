@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
-import {stderr} from 'process';
+import {IS_WINDOWS, IS_LINUX} from './utils';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
@@ -11,9 +11,6 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
-
-const IS_WINDOWS = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
