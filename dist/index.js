@@ -6437,6 +6437,10 @@ function usePyPy(majorVersion, architecture) {
     core.exportVariable('pythonLocation', pythonLocation);
     core.addPath(installDir);
     core.addPath(_binDir);
+    // Starting from PyPy 7.3.1, the folder that is used for pip and anything that pip installs should be "Scripts" on Windows.
+    if (IS_WINDOWS) {
+        core.addPath(path.join(installDir, 'Scripts'));
+    }
     const impl = 'pypy' + majorVersion.toString();
     core.setOutput('python-version', impl);
     return { impl: impl, version: versionFromPath(installDir) };
@@ -6515,6 +6519,7 @@ function findPythonVersion(version, architecture) {
             case 'PYPY2':
                 return usePyPy('2', architecture);
             case 'PYPY3':
+                // keep pypy3 pointing to 3.6 for backward compatibility
                 return usePyPy('3.6', architecture);
             default:
                 return yield useCpythonVersion(version, architecture);
