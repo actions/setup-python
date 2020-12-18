@@ -7085,7 +7085,7 @@ function usePyPy(majorVersion, architecture) {
     core.addPath(installDir);
     core.addPath(_binDir);
     // Starting from PyPy 7.3.1, the folder that is used for pip and anything that pip installs should be "Scripts" on Windows.
-    if (IS_WINDOWS) {
+    if (utils_1.IS_WINDOWS) {
         core.addPath(path.join(installDir, 'Scripts'));
     }
     const impl = 'pypy' + majorVersion.toString();
