@@ -1,0 +1,77 @@
+name: Validate 'setup-python'
+on: 
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  default-version:
+    name: Setup default version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup default python 
+      uses: ./
+
+    - name: Validate version
+      run: python --version
+
+    - name: Run simple python code
+      run: python -c 'import math; print(math.factorial(5))'
+
+  setup-python:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        python: [3.5, 3.6, 3.7, 3.8, 3.9]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup-python ${{ matrix.python }}
+      uses: ./
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Validate version
+      run: |
+        $pythonVersion = (python --version)
+        if ("$pythonVersion" -notlike "Python ${{ matrix.python }}.*"){
+          Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          exit 1
+        }
+        $pythonVersion
+      shell: pwsh
+
+    - name: Run simple code
+      run: python -c 'import math; print(math.factorial(5))'
+
+  setup-pypy:
+    name: Setup PyPy ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: setup-python pypy3
+      uses: ./
+      with:
+        python-version: 'pypy3'
+
+    - name: setup-python pypy2
+      uses: ./
+      with:
+        python-version: 'pypy2'
