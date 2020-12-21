@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
         python: [3.5, 3.6, 3.7, 3.8, 3.9]
     steps:
     - name: Checkout
@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-16.04, ubuntu-18.04]
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
