@@ -61,12 +61,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [2.7, 3.6, 3.7, 3.8, pypy-2.7, pypy-3.6]
+        python-version: ['2.7', '3.6', '3.7', '3.8', 'pypy-2.7', 'pypy-3.6']
         exclude:
           - os: macos-latest
-            python-version: 3.8
+            python-version: '3.8'
           - os: windows-latest
-            python-version: 3.6
+            python-version: '3.6'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -85,7 +85,7 @@ jobs:
     strategy:
       matrix:
         # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
-        python-version: [3.5, 3.6, 3.7.4, 3.8]
+        python-version: ['3.5', '3.6', '3.7.4', '3.8']
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -114,7 +114,7 @@ steps:
 - run: python my_script.py
 ```
 
-Download and set up PyPy:  
+Download and set up PyPy:
 
 ```yaml
 jobs:
@@ -123,9 +123,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - pypy-3.6 # the latest available version of PyPy that supports Python 3.6
-        - pypy-3.7 # the latest available version of PyPy that supports Python 3.7
-        - pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
+        - 'pypy-3.6' # the latest available version of PyPy that supports Python 3.6
+        - 'pypy-3.7' # the latest available version of PyPy that supports Python 3.7
+        - 'pypy-3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -151,11 +151,11 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
-    
+
  # Available versions of PyPy
- 
+
  `setup-python` is able to configure PyPy from two sources:
- 
+
 - Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
@@ -190,9 +190,9 @@ You should specify only a major and minor version if you are okay with the most 
   - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
   - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
   - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used.
-  
+
 # Specifying a PyPy version
-The version of PyPy should be specified in the format `pypy-<python_version>[-v<pypy_version>]`.  
+The version of PyPy should be specified in the format `pypy-<python_version>[-v<pypy_version>]`.
 The `<pypy_version>` parameter is optional and can be skipped. The latest version will be used in this case.
 
 ```
