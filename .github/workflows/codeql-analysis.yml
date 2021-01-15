@@ -2,6 +2,7 @@ name: "Code scanning - action"
 
 on:
   push:
+  pull_request:
   schedule:
     - cron: '25 3 * * 5'
 
