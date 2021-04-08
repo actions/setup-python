@@ -41,7 +41,13 @@
         "arch": "s390x",
         "platform": "linux",
         "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.3.3-s390x.tar.bz2"
-      }
+      },
+      {
+        "filename": "pypy2.7-v7.3.4rc1-win64.zip",
+        "arch": "x64",
+        "platform": "win64",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-win64.zip"
+        }
     ]
   },
   {
