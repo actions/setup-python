@@ -2908,7 +2908,9 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
             semver.compare(semver.coerce(current.python_version), semver.coerce(previous.python_version)));
     });
     const foundRelease = sortedReleases[0];
-    const foundAsset = foundRelease.files.find(item => item.arch === architecture && item.platform === process.platform);
+    const foundAsset = utils_1.IS_WINDOWS
+        ? findAssetForWindows(foundRelease)
+        : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
     return {
         foundAsset,
         resolvedPythonVersion: foundRelease.python_version,
@@ -2940,6 +2942,15 @@ function isArchPresentForMacOrLinux(item, architecture, platform) {
     return item.files.some((file) => file.arch === architecture && file.platform === platform);
 }
 exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
+function findAssetForWindows(releases) {
+    return releases.files.find((item) => utils_1.WINDOWS_ARCHS.includes(item.arch) &&
+        utils_1.WINDOWS_PLATFORMS.includes(item.platform));
+}
+exports.findAssetForWindows = findAssetForWindows;
+function findAssetForMacOrLinux(releases, architecture, platform) {
+    return releases.files.find((item) => item.arch === architecture && item.platform === platform);
+}
+exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
 
 
 /***/ }),

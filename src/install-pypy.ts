@@ -169,9 +169,9 @@ export function findRelease(
   });
 
   const foundRelease = sortedReleases[0];
-  const foundAsset = foundRelease.files.find(
-    item => item.arch === architecture && item.platform === process.platform
-  );
+  const foundAsset = IS_WINDOWS
+    ? findAssetForWindows(foundRelease)
+    : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
 
   return {
     foundAsset,
@@ -210,5 +210,23 @@ export function isArchPresentForMacOrLinux(
 ) {
   return item.files.some(
     (file: any) => file.arch === architecture && file.platform === platform
+  );
+}
+
+export function findAssetForWindows(releases: any) {
+  return releases.files.find(
+    (item: any) =>
+      WINDOWS_ARCHS.includes(item.arch) &&
+      WINDOWS_PLATFORMS.includes(item.platform)
+  );
+}
+
+export function findAssetForMacOrLinux(
+  releases: any,
+  architecture: string,
+  platform: string
+) {
+  return releases.files.find(
+    (item: any) => item.arch === architecture && item.platform === platform
   );
 }
