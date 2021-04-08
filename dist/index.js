@@ -2931,6 +2931,7 @@ function pypyVersionToSemantic(versionSpec) {
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
 function isArchPresentForWindows(item) {
+    core.info(item);
     return item.files.some((file) => utils_1.WINDOWS_ARCHS.includes(file.arch) &&
         utils_1.WINDOWS_PLATFORMS.includes(file.platform));
 }
