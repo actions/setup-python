@@ -1133,7 +1133,9 @@ exports.findPyPyVersion = findPyPyVersion;
 function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
     let resolvedPyPyVersion = '';
     let resolvedPythonVersion = '';
-    let installDir = tc.find('PyPy', pythonVersion, architecture);
+    let installDir = utils_1.IS_WINDOWS
+        ? findPyPyInstallDirForWindows(pythonVersion)
+        : tc.find('PyPy', pythonVersion, architecture);
     if (installDir) {
         // 'tc.find' finds tool based on Python version but we also need to check
         // whether PyPy version satisfies requested version.
@@ -1177,6 +1179,12 @@ function parsePyPyVersion(versionSpec) {
     };
 }
 exports.parsePyPyVersion = parsePyPyVersion;
+function findPyPyInstallDirForWindows(pythonVersion) {
+    let installDir = '';
+    utils_1.WINDOWS_ARCHS.forEach(architecture => (installDir = installDir || tc.find('PyPy', pythonVersion, architecture)));
+    return installDir;
+}
+exports.findPyPyInstallDirForWindows = findPyPyInstallDirForWindows;
 
 
 /***/ }),
@@ -2933,7 +2941,6 @@ function pypyVersionToSemantic(versionSpec) {
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
 function isArchPresentForWindows(item) {
-    core.info(JSON.stringify(item));
     return item.files.some((file) => utils_1.WINDOWS_ARCHS.includes(file.arch) &&
         utils_1.WINDOWS_PLATFORMS.includes(file.platform));
 }

@@ -96,38 +96,38 @@
     "latest_pypy": false,
     "date": "2021-03-19",
     "files": [
-    {
-    "filename": "pypy2.7-v7.3.4rc1-aarch64.tar.bz2",
-    "arch": "aarch64",
-    "platform": "linux",
-    "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-aarch64.tar.bz2"
-    },
-    {
-    "filename": "pypy2.7-v7.3.4rc1-linux32.tar.bz2",
-    "arch": "i686",
-    "platform": "linux",
-    "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-linux32.tar.bz2"
-    },
-    {
-    "filename": "pypy2.7-v7.3.4rc1-linux64.tar.bz2",
-    "arch": "x64",
-    "platform": "linux",
-    "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-linux64.tar.bz2"
-    },
-    {
-    "filename": "pypy2.7-v7.3.4rc1-osx64.tar.bz2",
-    "arch": "x64",
-    "platform": "darwin",
-    "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-osx64.tar.bz2"
-    },
-    {
-    "filename": "pypy2.7-v7.3.4rc1-win64.zip",
-    "arch": "x64",
-    "platform": "win64",
-    "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-win64.zip"
-    }
+      {
+        "filename": "pypy2.7-v7.3.4rc1-aarch64.tar.bz2",
+        "arch": "aarch64",
+        "platform": "linux",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-aarch64.tar.bz2"
+      },
+      {
+        "filename": "pypy2.7-v7.3.4rc1-linux32.tar.bz2",
+        "arch": "i686",
+        "platform": "linux",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-linux32.tar.bz2"
+      },
+      {
+        "filename": "pypy2.7-v7.3.4rc1-linux64.tar.bz2",
+        "arch": "x64",
+        "platform": "linux",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-linux64.tar.bz2"
+      },
+      {
+        "filename": "pypy2.7-v7.3.4rc1-osx64.tar.bz2",
+        "arch": "x64",
+        "platform": "darwin",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-osx64.tar.bz2"
+      },
+      {
+        "filename": "pypy2.7-v7.3.4rc1-win64.zip",
+        "arch": "x64",
+        "platform": "win64",
+        "download_url": "https://test.downloads.python.org/pypy/pypy2.7-v7.3.4rc1-win64.zip"
+      }
     ]
-    },
+  },
   {
     "pypy_version": "7.3.3rc2",
     "python_version": "3.7.7",
