@@ -144,7 +144,10 @@ export function findRelease(
       isPyPyNightly ||
       semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
     const isArchPresent =
-      item.files && (IS_WINDOWS ? isArchPresentForWindows(item) : isArchPresentForMacOrLinux(item, architecture, process.platform));
+      item.files &&
+      (IS_WINDOWS
+        ? isArchPresentForWindows(item)
+        : isArchPresentForMacOrLinux(item, architecture, process.platform));
     return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
   });
 
@@ -193,12 +196,18 @@ export function pypyVersionToSemantic(versionSpec: string) {
 
 export function isArchPresentForWindows(item: any) {
   return item.files.some(
-    file => WINDOWS_ARCHS.includes(file.arch) && WINDOWS_PLATFORMS.includes( file.platform)
+    (file: any) =>
+      WINDOWS_ARCHS.includes(file.arch) &&
+      WINDOWS_PLATFORMS.includes(file.platform)
   );
 }
 
-export function isArchPresentForMacOrLinux(item: any, architecture: string, platform: string) {
+export function isArchPresentForMacOrLinux(
+  item: any,
+  architecture: string,
+  platform: string
+) {
   return item.files.some(
-    file => file.arch === architecture && file.platform === platform
+    (file: any) => file.arch === architecture && file.platform === platform
   );
 }
