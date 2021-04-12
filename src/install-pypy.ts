@@ -8,6 +8,8 @@ import fs from 'fs';
 
 import {
   IS_WINDOWS,
+  WINDOWS_ARCHS,
+  WINDOWS_PLATFORMS,
   IPyPyManifestRelease,
   createSymlinkInFolder,
   isNightlyKeyword,
@@ -143,9 +145,9 @@ export function findRelease(
       semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
     const isArchPresent =
       item.files &&
-      item.files.some(
-        file => file.arch === architecture && file.platform === process.platform
-      );
+      (IS_WINDOWS
+        ? isArchPresentForWindows(item)
+        : isArchPresentForMacOrLinux(item, architecture, process.platform));
     return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
   });
 
@@ -167,9 +169,9 @@ export function findRelease(
   });
 
   const foundRelease = sortedReleases[0];
-  const foundAsset = foundRelease.files.find(
-    item => item.arch === architecture && item.platform === process.platform
-  );
+  const foundAsset = IS_WINDOWS
+    ? findAssetForWindows(foundRelease)
+    : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
 
   return {
     foundAsset,
@@ -190,4 +192,40 @@ export function getPyPyBinaryPath(installDir: string) {
 export function pypyVersionToSemantic(versionSpec: string) {
   const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc))(\d*)/g;
   return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
+}
+
+export function isArchPresentForWindows(item: any) {
+  return item.files.some(
+    (file: any) =>
+      WINDOWS_ARCHS.includes(file.arch) &&
+      WINDOWS_PLATFORMS.includes(file.platform)
+  );
+}
+
+export function isArchPresentForMacOrLinux(
+  item: any,
+  architecture: string,
+  platform: string
+) {
+  return item.files.some(
+    (file: any) => file.arch === architecture && file.platform === platform
+  );
+}
+
+export function findAssetForWindows(releases: any) {
+  return releases.files.find(
+    (item: any) =>
+      WINDOWS_ARCHS.includes(item.arch) &&
+      WINDOWS_PLATFORMS.includes(item.platform)
+  );
+}
+
+export function findAssetForMacOrLinux(
+  releases: any,
+  architecture: string,
+  platform: string
+) {
+  return releases.files.find(
+    (item: any) => item.arch === architecture && item.platform === platform
+  );
 }

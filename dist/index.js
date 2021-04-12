@@ -1108,10 +1108,6 @@ function findPyPyVersion(versionSpec, architecture) {
         let resolvedPythonVersion = '';
         let installDir;
         const pypyVersionSpec = parsePyPyVersion(versionSpec);
-        // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
-        if (utils_1.IS_WINDOWS && architecture === 'x64') {
-            architecture = 'x86';
-        }
         ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
         if (!installDir) {
             ({
@@ -1133,7 +1129,9 @@ exports.findPyPyVersion = findPyPyVersion;
 function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
     let resolvedPyPyVersion = '';
     let resolvedPythonVersion = '';
-    let installDir = tc.find('PyPy', pythonVersion, architecture);
+    let installDir = utils_1.IS_WINDOWS
+        ? findPyPyInstallDirForWindows(pythonVersion)
+        : tc.find('PyPy', pythonVersion, architecture);
     if (installDir) {
         // 'tc.find' finds tool based on Python version but we also need to check
         // whether PyPy version satisfies requested version.
@@ -1177,6 +1175,12 @@ function parsePyPyVersion(versionSpec) {
     };
 }
 exports.parsePyPyVersion = parsePyPyVersion;
+function findPyPyInstallDirForWindows(pythonVersion) {
+    let installDir = '';
+    utils_1.WINDOWS_ARCHS.forEach(architecture => (installDir = installDir || tc.find('PyPy', pythonVersion, architecture)));
+    return installDir;
+}
+exports.findPyPyInstallDirForWindows = findPyPyInstallDirForWindows;
 
 
 /***/ }),
@@ -2327,6 +2331,8 @@ const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(876));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
+exports.WINDOWS_ARCHS = ['x86', 'x64'];
+exports.WINDOWS_PLATFORMS = ['win32', 'win64'];
 const PYPY_VERSION_FILE = 'PYPY_VERSION';
 /** create Symlinks for downloaded PyPy
  *  It should be executed only for downloaded versions in runtime, because
@@ -2893,7 +2899,9 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
         const isPyPyVersionSatisfied = isPyPyNightly ||
             semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
         const isArchPresent = item.files &&
-            item.files.some(file => file.arch === architecture && file.platform === process.platform);
+            (utils_1.IS_WINDOWS
+                ? isArchPresentForWindows(item)
+                : isArchPresentForMacOrLinux(item, architecture, process.platform));
         return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
     });
     if (filterReleases.length === 0) {
@@ -2904,7 +2912,9 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
             semver.compare(semver.coerce(current.python_version), semver.coerce(previous.python_version)));
     });
     const foundRelease = sortedReleases[0];
-    const foundAsset = foundRelease.files.find(item => item.arch === architecture && item.platform === process.platform);
+    const foundAsset = utils_1.IS_WINDOWS
+        ? findAssetForWindows(foundRelease)
+        : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
     return {
         foundAsset,
         resolvedPythonVersion: foundRelease.python_version,
@@ -2926,6 +2936,24 @@ function pypyVersionToSemantic(versionSpec) {
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
+function isArchPresentForWindows(item) {
+    return item.files.some((file) => utils_1.WINDOWS_ARCHS.includes(file.arch) &&
+        utils_1.WINDOWS_PLATFORMS.includes(file.platform));
+}
+exports.isArchPresentForWindows = isArchPresentForWindows;
+function isArchPresentForMacOrLinux(item, architecture, platform) {
+    return item.files.some((file) => file.arch === architecture && file.platform === platform);
+}
+exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
+function findAssetForWindows(releases) {
+    return releases.files.find((item) => utils_1.WINDOWS_ARCHS.includes(item.arch) &&
+        utils_1.WINDOWS_PLATFORMS.includes(item.platform));
+}
+exports.findAssetForWindows = findAssetForWindows;
+function findAssetForMacOrLinux(releases, architecture, platform) {
+    return releases.files.find((item) => item.arch === architecture && item.platform === platform);
+}
+exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
 
 
 /***/ }),

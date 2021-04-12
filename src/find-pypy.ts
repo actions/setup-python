@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as pypyInstall from './install-pypy';
 import {
   IS_WINDOWS,
+  WINDOWS_ARCHS,
   validateVersion,
   getPyPyVersionFromPath,
   readExactPyPyVersionFile,
@@ -26,11 +27,6 @@ export async function findPyPyVersion(
   let installDir: string | null;
 
   const pypyVersionSpec = parsePyPyVersion(versionSpec);
-
-  // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
-  if (IS_WINDOWS && architecture === 'x64') {
-    architecture = 'x86';
-  }
 
   ({installDir, resolvedPythonVersion, resolvedPyPyVersion} = findPyPyToolCache(
     pypyVersionSpec.pythonVersion,
@@ -67,7 +63,9 @@ export function findPyPyToolCache(
 ) {
   let resolvedPyPyVersion = '';
   let resolvedPythonVersion = '';
-  let installDir: string | null = tc.find('PyPy', pythonVersion, architecture);
+  let installDir: string | null = IS_WINDOWS
+    ? findPyPyInstallDirForWindows(pythonVersion)
+    : tc.find('PyPy', pythonVersion, architecture);
 
   if (installDir) {
     // 'tc.find' finds tool based on Python version but we also need to check
@@ -128,4 +126,15 @@ export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
     pypyVersion: pypyVersion,
     pythonVersion: pythonVersion
   };
+}
+
+export function findPyPyInstallDirForWindows(pythonVersion: string): string {
+  let installDir = '';
+
+  WINDOWS_ARCHS.forEach(
+    architecture =>
+      (installDir = installDir || tc.find('PyPy', pythonVersion, architecture))
+  );
+
+  return installDir;
 }
