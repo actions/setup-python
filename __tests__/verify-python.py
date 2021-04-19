@@ -1,4 +1,6 @@
+# The sys module provides information about constants, functions and methods of the Python interpreter.
 import sys
+#The len() function returns the number of items in an object. When the object is a string, the len() function returns the number of characters in the string.
 argCount = len(sys.argv) - 1
 
 if argCount == 1:
