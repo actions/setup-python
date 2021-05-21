@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
@@ -49,7 +50,21 @@ async function installPython(workingDirectory: string) {
   };
 
   if (IS_WINDOWS) {
-    await exec.exec('powershell', ['./setup.ps1'], options);
+    const ps1 = './setup.ps1';
+
+    // augment default options to include debug libraries
+    const installArgs =
+      'DefaultAllUsersTargetDir=$PythonArchPath InstallAllUsers=1';
+
+    const data = fs.readFileSync(ps1, 'utf8');
+    const result = data.replace(
+      /`(${installArgs})`/g,
+      '$1 Include_debug=1 Include_symbols=1'
+    );
+
+    fs.writeFileSync(ps1, result, 'utf8');
+
+    await exec.exec('powershell', [ps1], options);
   } else {
     await exec.exec('bash', ['./setup.sh'], options);
   }
