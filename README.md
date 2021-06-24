@@ -247,6 +247,12 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 `setup-python` helps keep your dependencies explicit and ensures consistent behavior between different runners. If you use `python` in a shell on a GitHub hosted runner without `setup-python` it will default to whatever is in PATH. The default version of Python in PATH vary between runners and can change unexpectedly so we recommend you always use `setup-python`.
 
+# Using `setup-python` on GHES
+
+`setup-python` comes pre-installed on the appliance with GHES if Actions are enabled. When dynamically downloading Python distributions, `setup-python` reaches out and downloads distribtions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unathenticated requests which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time-frame than you will start to see rate-limit errors during downlod that read `##[error]API rate limit exceeded for..`.
+
+To avoid hitting rate-limit problems, we recommend [setting up your own runner tool cache](https://docs.github.com/en/enterprise-server@2.22/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access#about-the-included-setup-actions-and-the-runner-tool-cache).
+
 # License
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE).
