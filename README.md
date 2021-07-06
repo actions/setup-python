@@ -232,7 +232,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
   - The user starting the runner is in the owning group, and the owning group has write permission.
   - All users have write permission.
 - One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`.
-    - `sudo chown runner-user:runner-group opt/hostedtoolcache/`.
+    - `sudo chown runner-user:runner-group /opt/hostedtoolcache/`.
 - If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://help.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
 
 ### Mac
