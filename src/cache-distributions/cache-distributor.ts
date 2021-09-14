@@ -3,6 +3,8 @@ import * as cache from '@actions/cache';
 import * as glob from '@actions/glob';
 import * as core from '@actions/core';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 interface PackageManager {
   command?: string;
@@ -36,11 +38,12 @@ abstract class CacheDistributor {
   }
 
   protected isCacheDirectoryExists(cacheDirectory: string[]) {
-    const result = cacheDirectory.reduce(
-      (previousValue, currentValue) =>
-        previousValue || fs.existsSync(currentValue),
-      false
-    );
+    const result = cacheDirectory.reduce((previousValue, currentValue) => {
+      const resolvePath = currentValue.includes('~')
+        ? path.join(currentValue.slice(1), os.homedir())
+        : currentValue;
+      return previousValue || fs.existsSync(currentValue);
+    }, false);
 
     return result;
   }

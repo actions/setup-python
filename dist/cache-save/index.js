@@ -35036,6 +35036,8 @@ const cache = __importStar(__webpack_require__(692));
 const glob = __importStar(__webpack_require__(281));
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
+const path = __importStar(__webpack_require__(622));
+const os = __importStar(__webpack_require__(87));
 class CacheDistributor {
     constructor(packageManager) {
         this.packageManager = packageManager;
@@ -35060,7 +35062,12 @@ class CacheDistributor {
         });
     }
     isCacheDirectoryExists(cacheDirectory) {
-        const result = cacheDirectory.reduce((previousValue, currentValue) => previousValue || fs.existsSync(currentValue), false);
+        const result = cacheDirectory.reduce((previousValue, currentValue) => {
+            const resolvePath = currentValue.includes('~')
+                ? path.join(currentValue.slice(1), os.homedir())
+                : currentValue;
+            return previousValue || fs.existsSync(currentValue);
+        }, false);
         return result;
     }
     saveCache() {
