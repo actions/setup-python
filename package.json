@@ -6,9 +6,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
-    "release": "ncc build src/setup-python.ts && git add -f dist/",
+    "format": "prettier --write \"{,!(node_modules)/**/}*.ts\"",
+    "format-check": "prettier --check \"{,!(node_modules)/**/}*.ts\"",
+    "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
     "test": "jest"
   },
   "repository": {
@@ -23,7 +23,10 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
+    "@actions/cache": "^1.0.7",
     "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.1.0",
+    "@actions/glob": "^0.2.0",
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^1.5.5",
     "semver": "^7.1.3"
