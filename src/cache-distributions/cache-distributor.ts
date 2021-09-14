@@ -40,7 +40,7 @@ abstract class CacheDistributor {
   protected isCacheDirectoryExists(cacheDirectory: string[]) {
     const result = cacheDirectory.reduce((previousValue, currentValue) => {
       const resolvePath = currentValue.includes('~')
-        ? path.join(currentValue.slice(1), os.homedir())
+        ? path.join(os.homedir(), currentValue.slice(1))
         : currentValue;
       return previousValue || fs.existsSync(resolvePath);
     }, false);

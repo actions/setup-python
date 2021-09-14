@@ -35064,7 +35064,7 @@ class CacheDistributor {
     isCacheDirectoryExists(cacheDirectory) {
         const result = cacheDirectory.reduce((previousValue, currentValue) => {
             const resolvePath = currentValue.includes('~')
-                ? path.join(currentValue.slice(1), os.homedir())
+                ? path.join(os.homedir(), currentValue.slice(1))
                 : currentValue;
             return previousValue || fs.existsSync(resolvePath);
         }, false);
@@ -46564,10 +46564,16 @@ const core = __importStar(__webpack_require__(470));
 const cache_factory_1 = __webpack_require__(633);
 function cacheSave() {
     return __awaiter(this, void 0, void 0, function* () {
-        const cache = core.getInput('cache');
-        if (cache) {
-            const cacheManager = cache_factory_1.getCache(cache, '');
-            cacheManager.saveCache();
+        try {
+            const cache = core.getInput('cache');
+            if (cache) {
+                const cacheManager = cache_factory_1.getCache(cache, '');
+                cacheManager.saveCache();
+            }
+        }
+        catch (error) {
+            const err = error;
+            core.setFailed(err.message);
         }
     });
 }
