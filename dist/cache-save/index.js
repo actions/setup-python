@@ -35052,7 +35052,12 @@ class CacheDistributor {
             if (stderr) {
                 throw new Error(`failed to procceed with caching with error: ${exitCode}`);
             }
-            return [stdout];
+            let resolvedPath = stdout;
+            if (stdout.includes('~')) {
+                resolvedPath = path.join(os.homedir(), stdout.slice(1));
+            }
+            core.info(`global cache directory path is ${resolvedPath}`);
+            return [resolvedPath];
         });
     }
     computePrimaryKey() {
@@ -35063,10 +35068,7 @@ class CacheDistributor {
     }
     isCacheDirectoryExists(cacheDirectory) {
         const result = cacheDirectory.reduce((previousValue, currentValue) => {
-            const resolvePath = currentValue.includes('~')
-                ? path.join(os.homedir(), currentValue.slice(1))
-                : currentValue;
-            return previousValue || fs.existsSync(resolvePath);
+            return previousValue || fs.existsSync(currentValue);
         }, false);
         return result;
     }
