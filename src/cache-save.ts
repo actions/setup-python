@@ -8,3 +8,5 @@ export async function cacheSave() {
     cacheManager.saveCache();
   }
 }
+
+cacheSave();

@@ -46565,6 +46565,7 @@ function cacheSave() {
     });
 }
 exports.cacheSave = cacheSave;
+cacheSave();
 
 
 /***/ }),
