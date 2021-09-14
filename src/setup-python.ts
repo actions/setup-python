@@ -35,7 +35,7 @@ async function run() {
         cacheDistributor.restoreCache();
       }
     }
-    const matchersPath = path.join(__dirname, '..', '.github');
+    const matchersPath = path.join(__dirname, '../..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
   } catch (err) {
     core.setFailed((err as Error).message);
