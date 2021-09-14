@@ -29,10 +29,10 @@ abstract class CacheDistributor {
       );
     }
 
-    let resolvedPath = stdout;
+    let resolvedPath = stdout.trim();
 
-    if (stdout.includes('~')) {
-      resolvedPath = path.join(os.homedir(), stdout.slice(1));
+    if (resolvedPath.includes('~')) {
+      resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
     }
 
     core.info(`global cache directory path is ${resolvedPath}`);

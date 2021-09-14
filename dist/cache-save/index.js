@@ -35052,9 +35052,9 @@ class CacheDistributor {
             if (stderr) {
                 throw new Error(`failed to procceed with caching with error: ${exitCode}`);
             }
-            let resolvedPath = stdout;
-            if (stdout.includes('~')) {
-                resolvedPath = path.join(os.homedir(), stdout.slice(1));
+            let resolvedPath = stdout.trim();
+            if (resolvedPath.includes('~')) {
+                resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
             }
             core.info(`global cache directory path is ${resolvedPath}`);
             return [resolvedPath];
