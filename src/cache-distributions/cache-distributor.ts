@@ -42,7 +42,7 @@ abstract class CacheDistributor {
       const resolvePath = currentValue.includes('~')
         ? path.join(currentValue.slice(1), os.homedir())
         : currentValue;
-      return previousValue || fs.existsSync(currentValue);
+      return previousValue || fs.existsSync(resolvePath);
     }, false);
 
     return result;
