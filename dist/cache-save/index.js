@@ -1748,7 +1748,7 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __webpack_require__(413);
+                tunnel = __webpack_require__(856);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
@@ -4602,7 +4602,7 @@ function isSpanContext(spanContext) {
 /* 152 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var Stream = __webpack_require__(794).Stream;
+var Stream = __webpack_require__(413).Stream;
 var util = __webpack_require__(669);
 
 module.exports = DelayedStream;
@@ -5383,22 +5383,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const glob = __importStar(__webpack_require__(281));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
 class PipenvCache extends cache_distributor_1.default {
-    constructor(pythonVersion) {
+    constructor(cacheManager) {
         super({
             patterns: ['Pipfile.lock'],
             toolName: 'pipenv'
         });
-        this.pythonVersion = pythonVersion;
+        this.cacheManager = cacheManager;
     }
-    getCacheGlobalDirectory() {
+    getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
             return ['~/.local/share/virtualenvs'];
         });
     }
-    computePrimaryKey() {
+    computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles('Pipfile.lock');
-            return `setup-python-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-pipenv-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.cacheManager.pythonVersion}-${this.packageManager.toolName}-${hash}`;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.cacheManager.pythonVersion}-${this.packageManager.toolName}`;
+            return {
+                primaryKey,
+                restoreKey
+            };
         });
     }
 }
@@ -5634,7 +5639,7 @@ const http_client_1 = __webpack_require__(22);
 const storage_blob_1 = __webpack_require__(373);
 const buffer = __importStar(__webpack_require__(293));
 const fs = __importStar(__webpack_require__(747));
-const stream = __importStar(__webpack_require__(794));
+const stream = __importStar(__webpack_require__(413));
 const util = __importStar(__webpack_require__(669));
 const utils = __importStar(__webpack_require__(15));
 const constants_1 = __webpack_require__(931);
@@ -8614,7 +8619,7 @@ var logger$1 = __webpack_require__(928);
 var abortController = __webpack_require__(106);
 var os = __webpack_require__(87);
 var crypto = __webpack_require__(417);
-var stream = __webpack_require__(794);
+var stream = __webpack_require__(413);
 __webpack_require__(510);
 var coreLro = __webpack_require__(889);
 var events = __webpack_require__(614);
@@ -34091,17 +34096,62 @@ exports.PrefixSecurityEnum = PrefixSecurityEnum;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const glob = __importStar(__webpack_require__(281));
+const core = __importStar(__webpack_require__(470));
+const exec = __importStar(__webpack_require__(986));
+const path = __importStar(__webpack_require__(622));
+const os = __importStar(__webpack_require__(87));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
 class PipCache extends cache_distributor_1.default {
-    constructor() {
+    constructor(info) {
         super({
-            command: 'pip cache dir',
-            patterns: ['**/requirements.txt'],
-            toolName: 'pip'
+            patterns: info.patterns.length == 0 ? ['**/requirements.txt'] : info.patterns,
+            toolName: info.toolName
+        });
+    }
+    getCacheGlobalDirectories() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { stdout, stderr, exitCode } = yield exec.getExecOutput('pip cache dir');
+            if (stderr) {
+                throw new Error(`failed to procceed with caching with error: ${exitCode}`);
+            }
+            let resolvedPath = stdout.trim();
+            if (resolvedPath.includes('~')) {
+                resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
+            }
+            core.info(`global cache directory path is ${resolvedPath}`);
+            return [resolvedPath];
+        });
+    }
+    computeKeys() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const hash = yield glob.hashFiles(this.packageManager.patterns.join('\n'));
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}-${hash}`;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}-`;
+            return {
+                primaryKey,
+                restoreKey
+            };
         });
     }
 }
@@ -34188,10 +34238,9 @@ exports.ProxyTracer = ProxyTracer;
 /* 411 */,
 /* 412 */,
 /* 413 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-module.exports = __webpack_require__(141);
-
+module.exports = require("stream");
 
 /***/ }),
 /* 414 */,
@@ -35031,40 +35080,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const exec = __importStar(__webpack_require__(986));
 const cache = __importStar(__webpack_require__(692));
-const glob = __importStar(__webpack_require__(281));
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
-const path = __importStar(__webpack_require__(622));
-const os = __importStar(__webpack_require__(87));
 class CacheDistributor {
     constructor(packageManager) {
         this.packageManager = packageManager;
         this.CACHE_KEY_PREFIX = 'setup-python';
         this.STATE_CACHE_PRIMARY_KEY = 'cache-primary-key';
         this.CACHE_MATCHED_KEY = 'cache-matched-key';
-    }
-    getCacheGlobalDirectory() {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr, exitCode } = yield exec.getExecOutput((_a = this.packageManager.command) !== null && _a !== void 0 ? _a : '');
-            if (stderr) {
-                throw new Error(`failed to procceed with caching with error: ${exitCode}`);
-            }
-            let resolvedPath = stdout.trim();
-            if (resolvedPath.includes('~')) {
-                resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
-            }
-            core.info(`global cache directory path is ${resolvedPath}`);
-            return [resolvedPath];
-        });
-    }
-    computePrimaryKey() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.packageManager.patterns.join('\n'));
-            return `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}-${hash}`;
-        });
     }
     isCacheDirectoryExists(cacheDirectory) {
         const result = cacheDirectory.reduce((previousValue, currentValue) => {
@@ -35074,7 +35098,7 @@ class CacheDistributor {
     }
     saveCache() {
         return __awaiter(this, void 0, void 0, function* () {
-            const cachePath = yield this.getCacheGlobalDirectory();
+            const cachePath = yield this.getCacheGlobalDirectories();
             if (!this.isCacheDirectoryExists(cachePath)) {
                 throw new Error('No one cache directory exists');
             }
@@ -35106,15 +35130,15 @@ class CacheDistributor {
     }
     restoreCache() {
         return __awaiter(this, void 0, void 0, function* () {
-            const primaryKey = yield this.computePrimaryKey();
-            const cachePath = yield this.getCacheGlobalDirectory();
+            const { primaryKey, restoreKey } = yield this.computeKeys();
+            const cachePath = yield this.getCacheGlobalDirectories();
             core.saveState(this.STATE_CACHE_PRIMARY_KEY, primaryKey);
             if (primaryKey.endsWith('-')) {
                 throw new Error(`No file in ${process.cwd()} matched to [${this.packageManager.patterns}], make sure you have checked out the target repository`);
             }
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, [
-                `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}`
-            ]);
+                restoreKey
+            ]); // `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}`
             if (matchedKey) {
                 core.saveState(this.CACHE_MATCHED_KEY, matchedKey);
                 core.info(`Cache restored from key: ${matchedKey}`);
@@ -35402,7 +35426,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__webpack_require__(794));
+var Stream = _interopDefault(__webpack_require__(413));
 var http = _interopDefault(__webpack_require__(605));
 var Url = _interopDefault(__webpack_require__(835));
 var https = _interopDefault(__webpack_require__(211));
@@ -38501,7 +38525,7 @@ var DiagLogLevel;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 var util = __webpack_require__(669);
-var Stream = __webpack_require__(794).Stream;
+var Stream = __webpack_require__(413).Stream;
 var DelayedStream = __webpack_require__(152);
 
 module.exports = CombinedStream;
@@ -40392,6 +40416,15 @@ module.exports = require("net");
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -40403,15 +40436,46 @@ var Caches;
     Caches["Pip"] = "pip";
     Caches["Pipenv"] = "pipenv";
 })(Caches = exports.Caches || (exports.Caches = {}));
-function getCache(cacheType, pythonVersion) {
-    switch (cacheType) {
-        case Caches.Pip:
-            return new pip_cache_1.default();
-        case Caches.Pipenv:
-            return new pipenv_cache_1.default(pythonVersion);
-        default:
-            throw new Error('No cache distributor');
+exports.supportedPackageManagers = {
+    pip: {
+        patterns: ['**/requirements.txt'],
+        toolName: 'pip'
+    },
+    pipenv: {
+        patterns: ['pnpm-lock.yaml'],
+        toolName: 'pipenv'
     }
+};
+exports.getPackageManagerInfo = (packageManager) => __awaiter(void 0, void 0, void 0, function* () {
+    if (packageManager === 'pip') {
+        return exports.supportedPackageManagers.pip;
+    }
+    else if (packageManager === 'pipenv') {
+        return exports.supportedPackageManagers.pipenv;
+    }
+    else {
+        throw new Error('package manager is not supported');
+    }
+});
+function getCache(cacheManager) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const info = yield exports.getPackageManagerInfo(cacheManager.toolName);
+        if (!info) {
+            throw new Error('No cache distributor');
+        }
+        info.pythonVersion = cacheManager.pythonVersion;
+        if (cacheManager.patterns.length) {
+            info.patterns = cacheManager.patterns;
+        }
+        switch (cacheManager.toolName) {
+            case Caches.Pip:
+                return new pip_cache_1.default(info);
+            case Caches.Pipenv:
+                return new pipenv_cache_1.default(info);
+            default:
+                throw new Error('No cache distributor');
+        }
+    });
 }
 exports.getCache = getCache;
 
@@ -40988,7 +41052,7 @@ var __createBinding;
 
   var Stream
   try {
-    Stream = __webpack_require__(794).Stream
+    Stream = __webpack_require__(413).Stream
   } catch (ex) {
     Stream = function () {}
   }
@@ -44406,7 +44470,7 @@ exports.hashFiles = void 0;
 const crypto = __importStar(__webpack_require__(417));
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
-const stream = __importStar(__webpack_require__(794));
+const stream = __importStar(__webpack_require__(413));
 const util = __importStar(__webpack_require__(669));
 const path = __importStar(__webpack_require__(622));
 function hashFiles(globber) {
@@ -45956,7 +46020,7 @@ var http = __webpack_require__(605);
 var https = __webpack_require__(211);
 var parseUrl = __webpack_require__(835).parse;
 var fs = __webpack_require__(747);
-var Stream = __webpack_require__(794).Stream;
+var Stream = __webpack_require__(413).Stream;
 var mime = __webpack_require__(779);
 var asynckit = __webpack_require__(334);
 var populate = __webpack_require__(766);
@@ -46533,12 +46597,7 @@ FormData.prototype.toString = function () {
 /***/ }),
 /* 792 */,
 /* 793 */,
-/* 794 */
-/***/ (function(module) {
-
-module.exports = require("stream");
-
-/***/ }),
+/* 794 */,
 /* 795 */,
 /* 796 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -46569,8 +46628,8 @@ function cacheSave() {
         try {
             const cache = core.getInput('cache');
             if (cache) {
-                const cacheManager = cache_factory_1.getCache(cache, '');
-                cacheManager.saveCache();
+                const cacheManager = yield cache_factory_1.getCache({ toolName: cache, patterns: [] });
+                yield cacheManager.saveCache();
             }
         }
         catch (error) {
@@ -46856,7 +46915,13 @@ var _default = stringify;
 exports.default = _default;
 
 /***/ }),
-/* 856 */,
+/* 856 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(141);
+
+
+/***/ }),
 /* 857 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -52560,9 +52625,9 @@ var abortController = __webpack_require__(106);
 var FormData = _interopDefault(__webpack_require__(790));
 var util = __webpack_require__(669);
 var url = __webpack_require__(835);
-var stream = __webpack_require__(794);
+var stream = __webpack_require__(413);
 var logger$1 = __webpack_require__(928);
-var tunnel = __webpack_require__(413);
+var tunnel = __webpack_require__(856);
 var tslib = __webpack_require__(865);
 var coreAuth = __webpack_require__(229);
 var xml2js = __webpack_require__(992);

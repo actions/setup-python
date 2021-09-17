@@ -1,22 +1,27 @@
 import * as glob from '@actions/glob';
 
-import CacheDistributor from './cache-distributor';
+import CacheDistributor, {IPackageManager} from './cache-distributor';
 
 class PipenvCache extends CacheDistributor {
-  constructor(private pythonVersion: string) {
+  constructor(private cacheManager: IPackageManager) {
     super({
       patterns: ['Pipfile.lock'],
       toolName: 'pipenv'
     });
   }
 
-  protected async getCacheGlobalDirectory() {
+  protected async getCacheGlobalDirectories() {
     return ['~/.local/share/virtualenvs'];
   }
 
-  protected async computePrimaryKey() {
+  protected async computeKeys() {
     const hash = await glob.hashFiles('Pipfile.lock');
-    return `setup-python-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-pipenv-${hash}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.cacheManager.pythonVersion}-${this.packageManager.toolName}-${hash}`;
+    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.cacheManager.pythonVersion}-${this.packageManager.toolName}`;
+    return {
+      primaryKey,
+      restoreKey
+    };
   }
 }
 

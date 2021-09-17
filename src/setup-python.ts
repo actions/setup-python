@@ -3,7 +3,11 @@ import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
-import {getCache} from './cache-distributions/cache-factory';
+import {
+  getCache,
+  getPackageManagerInfo
+} from './cache-distributions/cache-factory';
+import {getInputAsArray} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy-');
@@ -30,8 +34,15 @@ async function run() {
       }
 
       const cache = core.getInput('cache');
+      const patterns = getInputAsArray('cache-dependency-path');
       if (cache) {
-        const cacheDistributor = getCache(cache, pythonVersion);
+        const packageManager = getPackageManagerInfo(cache);
+
+        const cacheDistributor = await getCache({
+          toolName: cache,
+          patterns: patterns,
+          pythonVersion: pythonVersion
+        });
         cacheDistributor.restoreCache();
       }
     }

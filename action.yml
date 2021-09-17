@@ -14,6 +14,8 @@ inputs:
   token:
     description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
     default: ${{ github.token }}
+  cache-dependency-path:
+    description: 'Used to specify the path to a dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."

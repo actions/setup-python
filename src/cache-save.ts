@@ -5,8 +5,8 @@ export async function cacheSave() {
   try {
     const cache = core.getInput('cache');
     if (cache) {
-      const cacheManager = getCache(cache, '');
-      cacheManager.saveCache();
+      const cacheManager = await getCache({toolName: cache, patterns: []});
+      await cacheManager.saveCache();
     }
   } catch (error) {
     const err = error as Error;

@@ -1,3 +1,5 @@
+import * as core from '@actions/core';
+
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -91,4 +93,15 @@ export function writeExactPyPyVersionFile(
 export function validatePythonVersionFormatForPyPy(version: string) {
   const re = /^\d+\.\d+$/;
   return re.test(version);
+}
+
+export function getInputAsArray(
+  name: string,
+  options?: core.InputOptions
+): string[] {
+  return core
+    .getInput(name, options)
+    .split('\n')
+    .map(s => s.trim())
+    .filter(x => x !== '');
 }

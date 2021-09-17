@@ -1,49 +1,29 @@
-import * as exec from '@actions/exec';
 import * as cache from '@actions/cache';
-import * as glob from '@actions/glob';
 import * as core from '@actions/core';
 import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
 
-interface PackageManager {
-  command?: string;
+export interface IPackageManager {
   patterns: string[];
   toolName: string;
+  pythonVersion?: string;
+  key_prefix?: string;
+  cacheFolder?: string[];
+  command?: string;
+  isPythonVersionAdded?: boolean;
 }
 
 abstract class CacheDistributor {
-  private CACHE_KEY_PREFIX = 'setup-python';
+  protected CACHE_KEY_PREFIX = 'setup-python';
   private STATE_CACHE_PRIMARY_KEY = 'cache-primary-key';
   private CACHE_MATCHED_KEY = 'cache-matched-key';
 
-  constructor(private packageManager: PackageManager) {}
+  constructor(protected packageManager: IPackageManager) {}
 
-  protected async getCacheGlobalDirectory() {
-    const {stdout, stderr, exitCode} = await exec.getExecOutput(
-      this.packageManager.command ?? ''
-    );
-    if (stderr) {
-      throw new Error(
-        `failed to procceed with caching with error: ${exitCode}`
-      );
-    }
-
-    let resolvedPath = stdout.trim();
-
-    if (resolvedPath.includes('~')) {
-      resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
-    }
-
-    core.info(`global cache directory path is ${resolvedPath}`);
-
-    return [resolvedPath];
-  }
-
-  protected async computePrimaryKey() {
-    const hash = await glob.hashFiles(this.packageManager.patterns.join('\n'));
-    return `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}-${hash}`;
-  }
+  protected abstract getCacheGlobalDirectories(): Promise<string[]>;
+  protected abstract computeKeys(): Promise<{
+    primaryKey: string;
+    restoreKey: string;
+  }>;
 
   protected isCacheDirectoryExists(cacheDirectory: string[]) {
     const result = cacheDirectory.reduce((previousValue, currentValue) => {
@@ -54,7 +34,7 @@ abstract class CacheDistributor {
   }
 
   public async saveCache() {
-    const cachePath = await this.getCacheGlobalDirectory();
+    const cachePath = await this.getCacheGlobalDirectories();
     if (!this.isCacheDirectoryExists(cachePath)) {
       throw new Error('No one cache directory exists');
     }
@@ -85,8 +65,8 @@ abstract class CacheDistributor {
   }
 
   public async restoreCache() {
-    const primaryKey = await this.computePrimaryKey();
-    const cachePath = await this.getCacheGlobalDirectory();
+    const {primaryKey, restoreKey} = await this.computeKeys();
+    const cachePath = await this.getCacheGlobalDirectories();
     core.saveState(this.STATE_CACHE_PRIMARY_KEY, primaryKey);
     if (primaryKey.endsWith('-')) {
       throw new Error(
@@ -97,8 +77,8 @@ abstract class CacheDistributor {
     }
 
     const matchedKey = await cache.restoreCache(cachePath, primaryKey, [
-      `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}`
-    ]);
+      restoreKey
+    ]); // `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager.toolName}`
     if (matchedKey) {
       core.saveState(this.CACHE_MATCHED_KEY, matchedKey);
       core.info(`Cache restored from key: ${matchedKey}`);
