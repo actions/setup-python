@@ -1,7 +1,12 @@
 ---
+
 name: 'Setup Python'
 description: 'Set up a specific version of Python and add the command-line tools to the PATH.'
 author: 'GitHub'
+
+- name: Setup Python
+  uses: actions/setup-python@v2.2.2
+
 inputs:
   python-version:
     description: "Version range or exact version of a Python version to use, using SemVer's version range syntax."
