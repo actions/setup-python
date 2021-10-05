@@ -77,6 +77,17 @@ steps:
         **/requirements.txt
 ```
 
+
+```
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: 3.9
+    cache: pip
+    cache-dependency-path: **/requirements-dev.txt
+```
+
 ## Release process
 
 As soon as the functionality is implemented, we will release a minor update of the action. No need to bump the major version since there are no breaking changes for existing users. After that, we will update [starter-workflows](https://github.com/actions/starter-workflows/blob/main/ci/python-app.yml) and [GitHub Action documentation](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#caching-dependencies).
