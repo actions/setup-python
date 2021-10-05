@@ -45,7 +45,7 @@ jobs:
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v2
-      - name: Setup python
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
