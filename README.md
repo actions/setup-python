@@ -100,7 +100,7 @@ steps:
 - uses: actions/checkout@v2
 - uses: actions/setup-python@v2
   with:
-    python-version: '3.11.0-alpha.0'
+    python-version: '3.11.0-alpha.1'
 - run: python my_script.py
 ```
 
