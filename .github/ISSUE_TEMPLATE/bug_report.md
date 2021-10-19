@@ -1,44 +1,38 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a bug report
 title: ''
-labels: bug
+labels: bug, needs triage
 assignees: ''
 
 ---
 
-**Describe the bug**
+<!--- Please direct any generic questions related to actions to our support community forum at https://github.community/c/code-to-cloud/github-actions/41 --->
+<!--- Before opening up a new bug report, please make sure to check for similar existing issues -->
+
+**Description:**
 A clear and concise description of what the bug is.
 
-**Which version of the action are you using?**
+**Action version:**
+Specify the action version
 
-- [ ] `v1`
-- [ ] `v2`
-- [ ] Some other tag (such as `v2.0.1` or `master`)
-
-**Environment**
-- [ ] self-hosted
-- [ ] Linux
+**Platform:**
+- [ ] Ubuntu
+- [ ] macOS
 - [ ] Windows
-- [ ] Mac
 
-If applicable, please specify if you're using a container
+**Runner type:**
+- [ ] Hosted
+- [ ] Self-hosted
 
-**Python Versions**
-Please list all of the effected versions of Python (`3.8.2`, etc.)
+**Tools version:**
+<!--- Please list all of the affected Python versions (`3.8.2`, etc.)-->
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Repro steps:**  
+A description with steps to reproduce the issue. If your have a public example or repo to share, please provide the link.
 
-**Run/Repo Url**
-If applicable, and if your repo/run is public, please include a URL so it is easier for us to investigate.
+**Expected behavior:**
+A description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Additional context**
-Add any other context about the problem here.
+**Actual behavior:**
+A description of what is actually happening.
