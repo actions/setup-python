@@ -21,12 +21,11 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
         pypy:
         - 'pypy-2.7'
-        - 'pypy-3.6'
         - 'pypy-3.7'
-        - 'pypy-2.7-v7.3.2'
-        - 'pypy-3.6-v7.3.2'
-        - 'pypy-3.7-v7.3.2'
-        - 'pypy-3.6-v7.3.x'
+        - 'pypy-2.7-v7.3.4'
+        - 'pypy-3.7-v7.3.5'
+        - 'pypy-3.7-v7.3.4'
+        - 'pypy-3.7-v7.3.x'
         - 'pypy-3.7-v7.x'
         - 'pypy-2.7-v7.3.4rc1'
         - 'pypy-3.7-nightly'
