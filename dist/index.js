@@ -2651,17 +2651,18 @@ function isPyPyVersion(versionSpec) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let version = core.getInput('python-version');
-            if (version) {
-                const arch = core.getInput('architecture') || os.arch();
-                if (isPyPyVersion(version)) {
-                    const installed = yield finderPyPy.findPyPyVersion(version, arch);
-                    core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
-                }
-                else {
-                    const installed = yield finder.findPythonVersion(version, arch);
-                    core.info(`Successfully setup ${installed.impl} (${installed.version})`);
-                }
+            const version = core.getInput('python-version');
+            if (!version) {
+                throw new Error(`Invalid python version: ${version}`);
+            }
+            const arch = core.getInput('architecture') || os.arch();
+            if (isPyPyVersion(version)) {
+                const installed = yield finderPyPy.findPyPyVersion(version, arch);
+                core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+            }
+            else {
+                const installed = yield finder.findPythonVersion(version, arch);
+                core.info(`Successfully setup ${installed.impl} (${installed.version})`);
             }
             const matchersPath = path.join(__dirname, '..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
