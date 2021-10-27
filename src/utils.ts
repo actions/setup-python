@@ -1,3 +1,5 @@
+import * as core from '@actions/core';
+
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -91,4 +93,11 @@ export function writeExactPyPyVersionFile(
 export function validatePythonVersionFormatForPyPy(version: string) {
   const re = /^\d+\.\d+$/;
   return re.test(version);
+}
+
+export function isGhes(): boolean {
+  const ghUrl = new URL(
+    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+  );
+  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
 }
