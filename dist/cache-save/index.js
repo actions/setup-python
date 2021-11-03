@@ -37180,22 +37180,22 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State = exports.State || (exports.State = {}));
 class CacheDistributor {
-    constructor(toolName, patterns) {
+    constructor(toolName, cacheDependencyPath) {
         this.toolName = toolName;
-        this.patterns = patterns;
+        this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
     restoreCache() {
         return __awaiter(this, void 0, void 0, function* () {
             const { primaryKey, restoreKey } = yield this.computeKeys();
-            const cachePath = yield this.getCacheGlobalDirectories();
-            core.saveState(State.CACHE_PATHS, cachePath);
-            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             if (primaryKey.endsWith('-')) {
-                throw new Error(`No file in ${process.cwd()} matched to [${this.patterns
+                throw new Error(`No file in ${process.cwd()} matched to [${this.cacheDependencyPath
                     .split('\n')
                     .join(',')}], make sure you have checked out the target repository`);
             }
+            const cachePath = yield this.getCacheGlobalDirectories();
+            core.saveState(State.CACHE_PATHS, cachePath);
+            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
             if (matchedKey) {
                 core.saveState(State.CACHE_MATCHED_KEY, matchedKey);
@@ -45796,7 +45796,7 @@ function run() {
         try {
             const cache = core.getInput('cache');
             if (cache) {
-                yield saveCache();
+                yield saveCache(cache);
             }
         }
         catch (error) {
@@ -45805,12 +45805,12 @@ function run() {
         }
     });
 }
-function saveCache() {
+function saveCache(packageManager) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cacheDirPaths = JSON.parse(core.getState(cache_distributor_1.State.CACHE_PATHS));
-        core.debug(`paths for caching are ${cacheDirPaths.join(', ')}`);
-        if (!isCacheDirectoryExists(cacheDirPaths)) {
-            throw new Error('Cache directories do not exist');
+        const cachePaths = JSON.parse(core.getState(cache_distributor_1.State.CACHE_PATHS));
+        core.debug(`paths for caching are ${cachePaths.join(', ')}`);
+        if (!isCacheDirectoryExists(cachePaths)) {
+            throw new Error(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}`);
         }
         const primaryKey = core.getState(cache_distributor_1.State.STATE_CACHE_PRIMARY_KEY);
         const matchedKey = core.getState(cache_distributor_1.State.CACHE_MATCHED_KEY);
@@ -45824,7 +45824,7 @@ function saveCache() {
             return;
         }
         try {
-            yield cache.saveCache(cacheDirPaths, primaryKey);
+            yield cache.saveCache(cachePaths, primaryKey);
             core.info(`Cache saved with the key: ${primaryKey}`);
         }
         catch (error) {

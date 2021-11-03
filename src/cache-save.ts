@@ -8,7 +8,7 @@ async function run() {
   try {
     const cache = core.getInput('cache');
     if (cache) {
-      await saveCache();
+      await saveCache(cache);
     }
   } catch (error) {
     const err = error as Error;
@@ -16,14 +16,17 @@ async function run() {
   }
 }
 
-async function saveCache() {
-  const cacheDirPaths = JSON.parse(
+async function saveCache(packageManager: string) {
+  const cachePaths = JSON.parse(
     core.getState(State.CACHE_PATHS)
   ) as string[];
-  core.debug(`paths for caching are ${cacheDirPaths.join(', ')}`);
-  if (!isCacheDirectoryExists(cacheDirPaths)) {
-    throw new Error('Cache directories do not exist');
+
+  core.debug(`paths for caching are ${cachePaths.join(', ')}`);
+
+  if (!isCacheDirectoryExists(cachePaths)) {
+    throw new Error(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}`);
   }
+
   const primaryKey = core.getState(State.STATE_CACHE_PRIMARY_KEY);
   const matchedKey = core.getState(State.CACHE_MATCHED_KEY);
 
@@ -37,8 +40,9 @@ async function saveCache() {
     );
     return;
   }
+
   try {
-    await cache.saveCache(cacheDirPaths, primaryKey);
+    await cache.saveCache(cachePaths, primaryKey);
     core.info(`Cache saved with the key: ${primaryKey}`);
   } catch (error) {
     const err = error as Error;

@@ -9,13 +9,13 @@ export enum PackageManagers {
 export async function getCacheDistributor(
   packageManager: string,
   pythonVersion: string,
-  patterns: string | undefined
+  cacheDependencyPath: string | undefined
 ) {
   switch (packageManager) {
     case PackageManagers.Pip:
-      return new PipCache(patterns);
+      return new PipCache(cacheDependencyPath);
     case PackageManagers.Pipenv:
-      return new PipenvCache(pythonVersion, patterns);
+      return new PipenvCache(pythonVersion, cacheDependencyPath);
     default:
       throw new Error(`Caching for '${packageManager}' is not supported`);
   }

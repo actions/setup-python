@@ -7156,9 +7156,9 @@ class PipenvCache extends cache_distributor_1.default {
     }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
-            const cachePath = path.join(os.homedir(), this.getVirtualenvsPath());
-            core.debug(`Pipenv virtualenvs path is ${cachePath}`);
-            return [cachePath];
+            const resolvedPath = path.join(os.homedir(), this.getVirtualenvsPath());
+            core.debug(`global cache directory path is ${resolvedPath}`);
+            return [resolvedPath];
         });
     }
     computeKeys() {
@@ -34460,8 +34460,8 @@ const path = __importStar(__webpack_require__(622));
 const os_1 = __importDefault(__webpack_require__(87));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
 class PipCache extends cache_distributor_1.default {
-    constructor(patterns = '**/requirements.txt') {
-        super('pip', patterns);
+    constructor(cacheDependencyPath = '**/requirements.txt') {
+        super('pip', cacheDependencyPath);
     }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -34479,9 +34479,9 @@ class PipCache extends cache_distributor_1.default {
     }
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.patterns);
+            const hash = yield glob.hashFiles(this.cacheDependencyPath);
             const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-${hash}`;
-            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-`;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}`;
             return {
                 primaryKey,
                 restoreKey: [restoreKey]
@@ -35424,22 +35424,22 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State = exports.State || (exports.State = {}));
 class CacheDistributor {
-    constructor(toolName, patterns) {
+    constructor(toolName, cacheDependencyPath) {
         this.toolName = toolName;
-        this.patterns = patterns;
+        this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
     restoreCache() {
         return __awaiter(this, void 0, void 0, function* () {
             const { primaryKey, restoreKey } = yield this.computeKeys();
-            const cachePath = yield this.getCacheGlobalDirectories();
-            core.saveState(State.CACHE_PATHS, cachePath);
-            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             if (primaryKey.endsWith('-')) {
-                throw new Error(`No file in ${process.cwd()} matched to [${this.patterns
+                throw new Error(`No file in ${process.cwd()} matched to [${this.cacheDependencyPath
                     .split('\n')
                     .join(',')}], make sure you have checked out the target repository`);
             }
+            const cachePath = yield this.getCacheGlobalDirectories();
+            core.saveState(State.CACHE_PATHS, cachePath);
+            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
             if (matchedKey) {
                 core.saveState(State.CACHE_MATCHED_KEY, matchedKey);
@@ -43887,13 +43887,13 @@ var PackageManagers;
     PackageManagers["Pip"] = "pip";
     PackageManagers["Pipenv"] = "pipenv";
 })(PackageManagers = exports.PackageManagers || (exports.PackageManagers = {}));
-function getCacheDistributor(packageManager, pythonVersion, patterns) {
+function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (packageManager) {
             case PackageManagers.Pip:
-                return new pip_cache_1.default(patterns);
+                return new pip_cache_1.default(cacheDependencyPath);
             case PackageManagers.Pipenv:
-                return new pipenv_cache_1.default(pythonVersion, patterns);
+                return new pipenv_cache_1.default(pythonVersion, cacheDependencyPath);
             default:
                 throw new Error(`Caching for '${packageManager}' is not supported`);
         }

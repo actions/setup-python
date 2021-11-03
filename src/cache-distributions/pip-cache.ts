@@ -8,14 +8,15 @@ import os from 'os';
 import CacheDistributor from './cache-distributor';
 
 class PipCache extends CacheDistributor {
-  constructor(patterns: string = '**/requirements.txt') {
-    super('pip', patterns);
+  constructor(cacheDependencyPath: string = '**/requirements.txt') {
+    super('pip', cacheDependencyPath);
   }
 
   protected async getCacheGlobalDirectories() {
     const {stdout, stderr, exitCode} = await exec.getExecOutput(
       'pip cache dir'
     );
+
     if (stderr) {
       throw new Error(
         `Could not get cache folder path for pip package manager`
@@ -34,9 +35,10 @@ class PipCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash = await glob.hashFiles(this.patterns);
+    const hash = await glob.hashFiles(this.cacheDependencyPath);
     const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-${hash}`;
-    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-`;
+    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}`;
+
     return {
       primaryKey,
       restoreKey: [restoreKey]

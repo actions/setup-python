@@ -22,10 +22,10 @@ class PipenvCache extends CacheDistributor {
   }
 
   protected async getCacheGlobalDirectories() {
-    const cachePath = path.join(os.homedir(), this.getVirtualenvsPath());
-    core.debug(`Pipenv virtualenvs path is ${cachePath}`);
+    const resolvedPath = path.join(os.homedir(), this.getVirtualenvsPath());
+    core.debug(`global cache directory path is ${resolvedPath}`);
 
-    return [cachePath];
+    return [resolvedPath];
   }
 
   protected async computeKeys() {
