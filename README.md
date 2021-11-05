@@ -48,7 +48,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-          python: ${{ matrix.python }}
+          python-version: ${{ matrix.python }}
           architecture: x64
       - run: python my_script.py
 ```
