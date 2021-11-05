@@ -41,14 +41,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.6', 'pypy-3.7' ]
-    name: Python ${{ matrix.python-version }} sample
+        python: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.6', 'pypy-3.7' ]
+    name: Python ${{ matrix.python }} sample
     steps:
       - uses: actions/checkout@v2
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python: ${{ matrix.python }}
           architecture: x64
       - run: python my_script.py
 ```
@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['2.7', '3.6', '3.7', '3.8', 'pypy-2.7', 'pypy-3.6']
+        python: ['2.7', '3.6', '3.7', '3.8', 'pypy-2.7', 'pypy-3.6']
         exclude:
           - os: macos-latest
             python-version: '3.8'
@@ -72,7 +72,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
 ```
@@ -85,12 +85,12 @@ jobs:
     strategy:
       matrix:
         # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
-        python-version: ['3.5', '3.6', '3.7.4', '3.8']
+        python: ['3.5', '3.6', '3.7.4', '3.8']
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python }}
     - run: python my_script.py
 ```
 
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version:
+        python:
         - 'pypy-3.6' # the latest available version of PyPy that supports Python 3.6
         - 'pypy-3.7' # the latest available version of PyPy that supports Python 3.7
         - 'pypy-3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
@@ -130,7 +130,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python }}
     - run: python my_script.py
 ```
 More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in the [Available versions of PyPy](#available-versions-of-pypy) section.
