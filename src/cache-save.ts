@@ -17,14 +17,16 @@ export async function run() {
 }
 
 async function saveCache(packageManager: string) {
-  const cachePaths = JSON.parse(
-    core.getState(State.CACHE_PATHS)
-  ) as string[];
+  const cachePaths = JSON.parse(core.getState(State.CACHE_PATHS)) as string[];
 
   core.debug(`paths for caching are ${cachePaths.join(', ')}`);
 
   if (!isCacheDirectoryExists(cachePaths)) {
-    throw new Error(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}`);
+    throw new Error(
+      `Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(
+        ', '
+      )}`
+    );
   }
 
   const primaryKey = core.getState(State.STATE_CACHE_PRIMARY_KEY);

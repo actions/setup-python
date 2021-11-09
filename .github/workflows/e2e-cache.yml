@@ -22,8 +22,6 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x', 'pypy-2.7-v7.3.4']
     steps:
       - uses: actions/checkout@v2
-      - name: Clean global cache
-        run: pip cache purge
       - name: Setup Python
         uses: ./
         with:
@@ -50,8 +48,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install dependencies
-        run: pipenv install
-        working-directory: __tests__/data
+        run: pipenv install flake8
 
   python-pip-depencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -63,8 +60,6 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x', 'pypy-2.7-v7.3.4']
     steps:
       - uses: actions/checkout@v2
-      - name: Clean global cache
-        run: pip cache purge
       - name: Setup Python
         uses: ./
         with:
@@ -93,5 +88,4 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/requirements-linux.txt'
       - name: Install dependencies
-        run: pipenv install
-        working-directory: __tests__/data
+        run: pipenv install flake8
