@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Install dependencies
-        run: pip install -r __tests__/data/requirements.txt
+        run: pip install numpy pandas requests
 
   python-pipenv-depencies-caching:
     name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install pipenv
-        run: pip install pipenv
+        run: pipx install pipenv
       - name: Setup Python
         uses: ./
         with:
@@ -67,7 +67,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: __tests__/data/requirements.txt
       - name: Install dependencies
-        run: pip install -r __tests__/data/requirements.txt
+        run: pip install numpy pandas requests
 
   python-pipenv-depencies-caching-path:
     name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -80,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install pipenv
-        run: pip install pipenv
+        run: pipx install pipenv
       - name: Setup Python
         uses: ./
         with:
