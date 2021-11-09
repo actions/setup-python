@@ -8,21 +8,19 @@ import CacheDistributor from './cache-distributor';
 class PipenvCache extends CacheDistributor {
   constructor(
     private pythonVersion: string,
-    protected patterns: string = 'Pipfile.lock'
+    protected patterns: string = '**/Pipfile.lock'
   ) {
     super('pipenv', patterns);
   }
 
-  private getVirtualenvsPath() {
-    if (process.platform === 'win32') {
-      return '.virtualenvs';
-    } else {
-      return '.local/share/virtualenvs';
-    }
-  }
-
   protected async getCacheGlobalDirectories() {
-    const resolvedPath = path.join(os.homedir(), this.getVirtualenvsPath());
+    let virtualEnvRelativePath;
+    if (process.platform === 'win32') {
+      virtualEnvRelativePath = '.virtualenvs';
+    } else {
+      virtualEnvRelativePath = '.local/share/virtualenvs';
+    }
+    const resolvedPath = path.join(os.homedir(), virtualEnvRelativePath);
     core.debug(`global cache directory path is ${resolvedPath}`);
 
     return [resolvedPath];
@@ -30,7 +28,7 @@ class PipenvCache extends CacheDistributor {
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.patterns);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.toolName}-${hash}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
     const restoreKey = undefined;
     return {
       primaryKey,

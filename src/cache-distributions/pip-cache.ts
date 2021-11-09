@@ -17,7 +17,7 @@ class PipCache extends CacheDistributor {
       'pip cache dir'
     );
 
-    if (stderr) {
+    if (exitCode && stderr) {
       throw new Error(
         `Could not get cache folder path for pip package manager`
       );
@@ -29,15 +29,15 @@ class PipCache extends CacheDistributor {
       resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
     }
 
-    core.info(`global cache directory path is ${resolvedPath}`);
+    core.debug(`global cache directory path is ${resolvedPath}`);
 
     return [resolvedPath];
   }
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.cacheDependencyPath);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-${hash}`;
-    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}-${hash}`;
+    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}`;
 
     return {
       primaryKey,

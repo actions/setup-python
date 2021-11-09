@@ -37180,8 +37180,8 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State = exports.State || (exports.State = {}));
 class CacheDistributor {
-    constructor(toolName, cacheDependencyPath) {
-        this.toolName = toolName;
+    constructor(packageManager, cacheDependencyPath) {
+        this.packageManager = packageManager;
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
@@ -37202,7 +37202,7 @@ class CacheDistributor {
                 core.info(`Cache restored from key: ${matchedKey}`);
             }
             else {
-                core.info(`${this.toolName} cache is not found`);
+                core.info(`${this.packageManager} cache is not found`);
             }
         });
     }
@@ -45805,6 +45805,7 @@ function run() {
         }
     });
 }
+exports.run = run;
 function saveCache(packageManager) {
     return __awaiter(this, void 0, void 0, function* () {
         const cachePaths = JSON.parse(core.getState(cache_distributor_1.State.CACHE_PATHS));

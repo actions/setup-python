@@ -1,0 +1,47 @@
+altgraph==0.17.2
+
+certifi==2020.6.20
+
+chardet==3.0.4
+
+docutils==0.16
+
+future==0.18.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2'
+
+idna==2.9
+
+itsdangerous==1.1.0
+
+kivy-deps-angle==0.3.0
+
+kivy-deps.glew==0.1.12
+
+kivy-deps.gstreamer==0.1.17
+
+kivy-deps.sdl2==0.1.22
+
+kivy-garden==0.1.4
+
+kivy==1.11.1
+
+packaging==21.0
+
+pdf2image==1.12.1
+
+pefile==2021.9.3; python_full_version >= '3.6.0'
+
+pillow==7.2
+
+pygments==2.6.1
+
+pyinstaller==3.6
+
+pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2'
+
+pywin32-ctypes==0.2.0
+
+requests==2.24.0
+
+urllib3==1.25.9
+
+xlrd==1.2.0

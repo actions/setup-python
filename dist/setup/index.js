@@ -7141,22 +7141,21 @@ const path = __importStar(__webpack_require__(622));
 const core = __importStar(__webpack_require__(470));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
 class PipenvCache extends cache_distributor_1.default {
-    constructor(pythonVersion, patterns = 'Pipfile.lock') {
+    constructor(pythonVersion, patterns = '**/Pipfile.lock') {
         super('pipenv', patterns);
         this.pythonVersion = pythonVersion;
         this.patterns = patterns;
     }
-    getVirtualenvsPath() {
-        if (process.platform === 'win32') {
-            return '.virtualenvs';
-        }
-        else {
-            return '.local/share/virtualenvs';
-        }
-    }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
-            const resolvedPath = path.join(os.homedir(), this.getVirtualenvsPath());
+            let virtualEnvRelativePath;
+            if (process.platform === 'win32') {
+                virtualEnvRelativePath = '.virtualenvs';
+            }
+            else {
+                virtualEnvRelativePath = '.local/share/virtualenvs';
+            }
+            const resolvedPath = path.join(os.homedir(), virtualEnvRelativePath);
             core.debug(`global cache directory path is ${resolvedPath}`);
             return [resolvedPath];
         });
@@ -7164,7 +7163,7 @@ class PipenvCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.toolName}-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -34466,22 +34465,22 @@ class PipCache extends cache_distributor_1.default {
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
             const { stdout, stderr, exitCode } = yield exec.getExecOutput('pip cache dir');
-            if (stderr) {
+            if (exitCode && stderr) {
                 throw new Error(`Could not get cache folder path for pip package manager`);
             }
             let resolvedPath = stdout.trim();
             if (resolvedPath.includes('~')) {
                 resolvedPath = path.join(os_1.default.homedir(), resolvedPath.slice(1));
             }
-            core.info(`global cache directory path is ${resolvedPath}`);
+            core.debug(`global cache directory path is ${resolvedPath}`);
             return [resolvedPath];
         });
     }
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}-${hash}`;
-            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.toolName}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}-${hash}`;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}`;
             return {
                 primaryKey,
                 restoreKey: [restoreKey]
@@ -35424,8 +35423,8 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State = exports.State || (exports.State = {}));
 class CacheDistributor {
-    constructor(toolName, cacheDependencyPath) {
-        this.toolName = toolName;
+    constructor(packageManager, cacheDependencyPath) {
+        this.packageManager = packageManager;
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
@@ -35446,7 +35445,7 @@ class CacheDistributor {
                 core.info(`Cache restored from key: ${matchedKey}`);
             }
             else {
-                core.info(`${this.toolName} cache is not found`);
+                core.info(`${this.packageManager} cache is not found`);
             }
         });
     }

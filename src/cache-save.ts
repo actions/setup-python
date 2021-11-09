@@ -4,7 +4,7 @@ import * as cache from '@actions/cache';
 import fs from 'fs';
 import {State} from './cache-distributions/cache-distributor';
 
-async function run() {
+export async function run() {
   try {
     const cache = core.getInput('cache');
     if (cache) {

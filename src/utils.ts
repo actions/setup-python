@@ -1,5 +1,3 @@
-import * as core from '@actions/core';
-
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
