@@ -63,11 +63,9 @@ describe('restore-cache', () => {
     it.each(['npm', 'pip2', 'pip21', 'pip21.3', 'pipenv32'])(
       'Throw an error because %s is not supported',
       async packageManager => {
-        await expect(
+        expect(() =>
           getCacheDistributor(packageManager, '3.8.12', undefined)
-        ).rejects.toThrowError(
-          `Caching for '${packageManager}' is not supported`
-        );
+        ).toThrowError(`Caching for '${packageManager}' is not supported`);
       }
     );
   });
