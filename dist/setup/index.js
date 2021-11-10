@@ -6633,6 +6633,19 @@ const utils_1 = __webpack_require__(163);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy-');
 }
+function cacheDepencies(pythonVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cache = core.getInput('cache');
+        if (cache) {
+            if (utils_1.isGhes()) {
+                throw new Error('Caching is not supported on GHES');
+            }
+            const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
+            const cacheDistributor = yield cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
+            yield cacheDistributor.restoreCache();
+        }
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -6650,15 +6663,7 @@ function run() {
                     pythonVersion = installed.version;
                     core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
                 }
-                const cache = core.getInput('cache');
-                if (cache) {
-                    if (utils_1.isGhes()) {
-                        throw new Error('Caching is not supported on GHES');
-                    }
-                    const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
-                    const cacheDistributor = yield cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
-                    yield cacheDistributor.restoreCache();
-                }
+                yield cacheDepencies(pythonVersion);
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);

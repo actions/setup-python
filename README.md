@@ -9,6 +9,7 @@ This action sets up a Python environment for use in actions by:
 - optionally installing and adding to PATH a version of Python that is already installed in the tools cache.
 - downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache.
 - failing if a specific version of Python is not preinstalled or available for download.
+- optionally caching dependencies for pip and pipenv.
 - registering problem matchers for error output.
 
 # What's new
@@ -18,6 +19,7 @@ This action sets up a Python environment for use in actions by:
 - Automatic setup and download of Python packages if using a self-hosted runner.
 - Support for pre-release versions of Python.
 - Support for installing any version of PyPy on-flight
+- Support for built-in caching of pip and pipenv dependencies
 
 # Usage
 
@@ -203,6 +205,72 @@ pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
 pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
 pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
 pypy-3.7-nightly # Python 3.7 and nightly PyPy
+```
+
+# Caching packages dependencies
+
+The action has a built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/cache) under hood for caching dependencies but requires less configuration settings. Supported package managers are `pip` and `pipenv`. The `cache` input is optional, and caching is turned off by default.
+
+The action defaults to search for the dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases when multiple dependency files are used, they are located in different subdirectories or different files for hash want to be used.
+
+ - For pip action will cache global cache ditrectory
+ - For pipenv action will cache virtuenv directory
+
+**Caching pip dependencies:**  
+
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9'
+    cache: 'pip'
+- run: pip install -r requirements.txt
+- run: pip test
+```
+
+**Caching pipenv dependencies:**
+```yaml
+steps:
+- uses: actions/checkout@v2
+- name: Install pipenv
+  run: pipx install pipenv
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9'
+    cache: 'pipenv'
+- run: pipenv install
+- run: pipenv test
+```
+
+**Using wildcard patterns to cache dependencies**
+```yaml
+steps:
+- uses: actions/checkout@v2
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9'
+    cache: 'pip'
+    cache-dependency-path: '**/requirements-dev.txt'
+- run: pip install -r subdirectory/requirements-dev.txt
+- run: pip test
+```
+
+**Using a list of file paths to cache dependencies**
+```yaml
+steps:
+- uses: actions/checkout@v2
+- name: Install pipenv
+  run: pipx install pipenv
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9'
+    cache: 'pipenv'
+    cache-dependency-path: |
+      server/app/Pipfile.lock
+      __test__/app/Pipfile.lock
+- run: pipenv install
+- run: pipenv test
 ```
 
 # Using `setup-python` with a self hosted runner
