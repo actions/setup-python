@@ -18,7 +18,7 @@ async function cacheDepencies(pythonVersion: string) {
     }
     const cacheDependencyPath =
       core.getInput('cache-dependency-path') || undefined;
-    const cacheDistributor = await getCacheDistributor(
+    const cacheDistributor = getCacheDistributor(
       cache,
       pythonVersion,
       cacheDependencyPath

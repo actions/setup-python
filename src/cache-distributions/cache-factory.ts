@@ -6,7 +6,7 @@ export enum PackageManagers {
   Pipenv = 'pipenv'
 }
 
-export async function getCacheDistributor(
+export function getCacheDistributor(
   packageManager: string,
   pythonVersion: string,
   cacheDependencyPath: string | undefined

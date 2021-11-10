@@ -6641,7 +6641,7 @@ function cacheDepencies(pythonVersion) {
                 throw new Error('Caching is not supported on GHES');
             }
             const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
-            const cacheDistributor = yield cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
+            const cacheDistributor = cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
             yield cacheDistributor.restoreCache();
         }
     });
@@ -43871,15 +43871,6 @@ module.exports = require("net");
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -43892,16 +43883,14 @@ var PackageManagers;
     PackageManagers["Pipenv"] = "pipenv";
 })(PackageManagers = exports.PackageManagers || (exports.PackageManagers = {}));
 function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        switch (packageManager) {
-            case PackageManagers.Pip:
-                return new pip_cache_1.default(cacheDependencyPath);
-            case PackageManagers.Pipenv:
-                return new pipenv_cache_1.default(pythonVersion, cacheDependencyPath);
-            default:
-                throw new Error(`Caching for '${packageManager}' is not supported`);
-        }
-    });
+    switch (packageManager) {
+        case PackageManagers.Pip:
+            return new pip_cache_1.default(cacheDependencyPath);
+        case PackageManagers.Pipenv:
+            return new pipenv_cache_1.default(pythonVersion, cacheDependencyPath);
+        default:
+            throw new Error(`Caching for '${packageManager}' is not supported`);
+    }
 }
 exports.getCacheDistributor = getCacheDistributor;
 
