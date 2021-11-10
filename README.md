@@ -205,6 +205,8 @@ pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
 pypy-3.7-nightly # Python 3.7 and nightly PyPy
 ```
 
+Note: `pypy2` and `pypy3` are deprecated and are not available in newer images. Use the format above.
+
 # Using `setup-python` with a self hosted runner
 
 Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
