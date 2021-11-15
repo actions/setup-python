@@ -10,21 +10,18 @@ function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy-');
 }
 
-async function cacheDepencies(pythonVersion: string) {
-  const cache = core.getInput('cache');
-  if (cache) {
-    if (isGhes()) {
-      throw new Error('Caching is not supported on GHES');
-    }
-    const cacheDependencyPath =
-      core.getInput('cache-dependency-path') || undefined;
-    const cacheDistributor = getCacheDistributor(
-      cache,
-      pythonVersion,
-      cacheDependencyPath
-    );
-    await cacheDistributor.restoreCache();
+async function cacheDepencies(cache: string, pythonVersion: string) {
+  if (isGhes()) {
+    throw new Error('Caching is not supported on GHES');
   }
+  const cacheDependencyPath =
+    core.getInput('cache-dependency-path') || undefined;
+  const cacheDistributor = getCacheDistributor(
+    cache,
+    pythonVersion,
+    cacheDependencyPath
+  );
+  await cacheDistributor.restoreCache();
 }
 
 async function run() {
@@ -45,7 +42,10 @@ async function run() {
         core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
       }
 
-      await cacheDepencies(pythonVersion);
+      const cache = core.getInput('cache');
+      if (cache) {
+        await cacheDepencies(cache, pythonVersion);
+      }
     }
     const matchersPath = path.join(__dirname, '../..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);

@@ -10,7 +10,9 @@ on:
       - releases/*
     paths-ignore:
       - '**.md'
-      
+
+permissions:
+  contents: read
 jobs:
   python-pip-depencies-caching:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -30,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: pip install numpy pandas requests
 
-  python-pipenv-depencies-caching:
+  python-pipenv-dependencies-caching:
     name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -50,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: pipenv install flake8
 
-  python-pip-depencies-caching-path:
+  python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -69,7 +71,7 @@ jobs:
       - name: Install dependencies
         run: pip install numpy pandas requests
 
-  python-pipenv-depencies-caching-path:
+  python-pipenv-dependencies-caching-path:
     name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:

@@ -209,12 +209,16 @@ pypy-3.7-nightly # Python 3.7 and nightly PyPy
 
 # Caching packages dependencies
 
-The action has a built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/cache) under hood for caching dependencies but requires less configuration settings. Supported package managers are `pip` and `pipenv`. The `cache` input is optional, and caching is turned off by default.
+The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip` and `pipenv`. The `cache` input is optional, and caching is turned off by default.
 
-The action defaults to search for the dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases when multiple dependency files are used, they are located in different subdirectories or different files for hash want to be used.
+The action defaults to searching for a dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
 
- - For pip action will cache global cache ditrectory
- - For pipenv action will cache virtuenv directory
+ - For pip, action will cache global cache directory
+ - For pipenv, action will cache virtuenv directory
+
+**Please Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available that can lead to an increase in total build time.
+
+The requirements file format allows to specify dependency versions using logical operators (for example chardet>=3.0.4) or specify dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
 
 **Caching pip dependencies:**  
 

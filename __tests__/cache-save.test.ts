@@ -31,7 +31,7 @@ describe('run', () => {
 
   beforeEach(() => {
     process.env['RUNNER_OS'] = process.env['RUNNER_OS'] ?? 'linux';
-    // process.env['GITHUB_WORKSPACE'] = path.join(__dirname, 'data');
+
     infoSpy = jest.spyOn(core, 'info');
     infoSpy.mockImplementation(input => undefined);
 
