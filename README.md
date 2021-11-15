@@ -213,8 +213,8 @@ The action has built-in functionality for caching and restoring dependencies. It
 
 The action defaults to searching for a dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
 
- - For pip, action will cache global cache directory
- - For pipenv, action will cache virtuenv directory
+ - For pip, the action will cache global cache directory
+ - For pipenv, the action will cache virtualenv directory
 
 **Please Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available that can lead to an increase in total build time.
 
