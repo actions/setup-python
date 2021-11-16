@@ -7154,7 +7154,7 @@ class PipenvCache extends cache_distributor_1.default {
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
             let virtualEnvRelativePath;
-            // Default virtualenv directories are hardcoded, 
+            // Default virtualenv directories are hardcoded,
             // because pipenv is not preinstalled on hosted images and virtualenv is not created:
             // https://github.com/pypa/pipenv/blob/1daaa0de9a0b00d386c6baeb809d8d4ee6795cfd/pipenv/utils.py#L1990-L2002
             if (process.platform === 'win32') {
