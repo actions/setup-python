@@ -10,7 +10,7 @@ function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy-');
 }
 
-async function cacheDepencies(cache: string, pythonVersion: string) {
+async function cacheDependencies(cache: string, pythonVersion: string) {
   if (isGhes()) {
     throw new Error('Caching is not supported on GHES');
   }
@@ -44,7 +44,7 @@ async function run() {
 
       const cache = core.getInput('cache');
       if (cache) {
-        await cacheDepencies(cache, pythonVersion);
+        await cacheDependencies(cache, pythonVersion);
       }
     }
     const matchersPath = path.join(__dirname, '../..', '.github');

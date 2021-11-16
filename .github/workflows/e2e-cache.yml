@@ -14,7 +14,7 @@ on:
 permissions:
   contents: read
 jobs:
-  python-pip-depencies-caching:
+  python-pip-dependencies-caching:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:

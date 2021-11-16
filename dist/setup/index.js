@@ -6633,7 +6633,7 @@ const utils_1 = __webpack_require__(163);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy-');
 }
-function cacheDepencies(cache, pythonVersion) {
+function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         if (utils_1.isGhes()) {
             throw new Error('Caching is not supported on GHES');
@@ -6662,7 +6662,7 @@ function run() {
                 }
                 const cache = core.getInput('cache');
                 if (cache) {
-                    yield cacheDepencies(cache, pythonVersion);
+                    yield cacheDependencies(cache, pythonVersion);
                 }
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
@@ -7154,6 +7154,9 @@ class PipenvCache extends cache_distributor_1.default {
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
             let virtualEnvRelativePath;
+            // Default virtualenv directories are hardcoded, 
+            // because pipenv is not preinstalled on hosted images and virtualenv is not created:
+            // https://github.com/pypa/pipenv/blob/1daaa0de9a0b00d386c6baeb809d8d4ee6795cfd/pipenv/utils.py#L1990-L2002
             if (process.platform === 'win32') {
                 virtualEnvRelativePath = '.virtualenvs';
             }
