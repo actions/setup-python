@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
-import {IS_WINDOWS, IS_LINUX} from './utils';
+import {IS_WINDOWS, IS_LINUX, isGhes} from './utils';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
@@ -70,11 +70,4 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
 
   core.info('Execute installation script');
   await installPython(pythonExtractedFolder);
-}
-
-function isGhes(): boolean {
-  const ghUrl = new URL(
-    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
-  );
-  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
 }
