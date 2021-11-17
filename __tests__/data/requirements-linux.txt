@@ -8,5 +8,5 @@ packaging==20.7
 pdf2image==1.12.1
 Pygments==2.6.1
 requests==2.24.0
-urllib3==1.25.10
+urllib3==1.26.5
 xlrd==1.2.0
