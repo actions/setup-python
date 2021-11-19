@@ -146,7 +146,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 `setup-python` is able to configure Python from two sources:
 
 - Preinstalled versions of Python in the tools cache on GitHub-hosted runners.
-    - For detailed information regarding the available versions of Python that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
+    - For detailed information regarding the available versions of Python that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
     - For every minor version of Python, expect only the latest patch to be preinstalled.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
@@ -159,7 +159,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
  `setup-python` is able to configure PyPy from two sources:
 
 - Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
-  - For detailed information regarding the available versions of PyPy that are installed see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
+  - For detailed information regarding the available versions of PyPy that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
   - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy-3.6`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy-3.6-v7.3.3`.
 
