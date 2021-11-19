@@ -1,0 +1,93 @@
+name: e2e-cache
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    branches:
+      - main
+      - releases/*
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: read
+jobs:
+  python-pip-dependencies-caching:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install numpy pandas requests
+
+  python-pipenv-dependencies-caching:
+    name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pipenv
+        run: pipx install pipenv
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pipenv'
+      - name: Install dependencies
+        run: pipenv install flake8
+
+  python-pip-dependencies-caching-path:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: __tests__/data/requirements.txt
+      - name: Install dependencies
+        run: pip install numpy pandas requests
+
+  python-pipenv-dependencies-caching-path:
+    name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pipenv
+        run: pipx install pipenv
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pipenv'
+          cache-dependency-path: '**/requirements-linux.txt'
+      - name: Install dependencies
+        run: pipenv install flake8
