@@ -10,6 +10,15 @@ describe('restore-cache', () => {
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
+  const poetryLockHash = '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
+  const poetryConfigOutput = `
+cache-dir = "/Users/patrick/Library/Caches/pypoetry"
+experimental.new-installer = false
+installer.parallel = true
+virtualenvs.create = true
+virtualenvs.in-project = true
+virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/pypoetry/virtualenvs
+  `;
 
   // core spy
   let infoSpy: jest.SpyInstance;
@@ -47,6 +56,9 @@ describe('restore-cache', () => {
       if (input.includes('pip')) {
         return {stdout: 'pip', stderr: '', exitCode: 0};
       }
+      if (input.includes('poetry')) {
+        return {stdout: poetryConfigOutput, stderr: '', exitCode: 0};
+      }
 
       return {stdout: '', stderr: 'Error occured', exitCode: 2};
     });
@@ -82,7 +94,8 @@ describe('restore-cache', () => {
       ],
       ['pip', '3.8.12', '__tests__/data/requirements.txt', requirementsHash],
       ['pipenv', '3.9.1', undefined, pipFileLockHash],
-      ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash]
+      ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash],
+      ['poetry', '3.9.1', undefined, poetryLockHash]
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
@@ -138,7 +151,8 @@ describe('restore-cache', () => {
       ],
       ['pip', '3.8.12', '__tests__/data/requirements.txt', pipFileLockHash],
       ['pipenv', '3.9.1', undefined, requirementsHash],
-      ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash]
+      ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash],
+      ['poetry', '3.9.1', undefined, requirementsHash]
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
@@ -154,10 +168,17 @@ describe('restore-cache', () => {
         );
         await cacheDistributor.restoreCache();
         let result = '';
-        if (packageManager !== 'pipenv') {
-          result = `Cache restored from key: ${fileHash}`;
-        } else {
-          result = 'pipenv cache is not found';
+
+        switch (packageManager) {
+          case 'pip':
+            result = `Cache restored from key: ${fileHash}`;
+            break;
+          case 'pipenv':
+            result = 'pipenv cache is not found';
+            break;
+          case 'poetry':
+            result = 'poetry cache is not found';
+            break;
         }
 
         expect(infoSpy).toHaveBeenCalledWith(result);

@@ -42,17 +42,20 @@ class PoetryCache extends CacheDistributor {
   }
 
   private async getPoetryConfiguration() {
-    const {stdout, stderr, exitCode} = await exec.getExecOutput(
-      'poetry config --list'
-    );
+    const {stdout, stderr, exitCode} = await exec.getExecOutput('poetry', [
+      'config',
+      '--list'
+    ]);
 
     if (exitCode && stderr) {
+      console.log(stdout, stderr, exitCode);
+
       throw new Error(
         `Could not get cache folder path for poetry package manager`
       );
     }
 
-    const lines = stdout.split(os.EOL);
+    const lines = stdout.trim().split(os.EOL);
 
     const config = {} as {
       'cache-dir': string;
