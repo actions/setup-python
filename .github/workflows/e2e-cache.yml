@@ -52,6 +52,26 @@ jobs:
       - name: Install dependencies
         run: pipenv install numpy
 
+  python-poetry-dependencies-caching:
+    name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - name: Install dependencies
+        run: poetry add flake8
+
   python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
