@@ -11,6 +11,7 @@ describe('run', () => {
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
+  const poetryLockHash = '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
 
   // core spy
   let infoSpy: jest.SpyInstance;
@@ -114,6 +115,22 @@ describe('run', () => {
       );
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
+
+    it('should not save cache for pipenv', async () => {
+      inputs['cache'] = 'pipenv';
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(debugSpy).toHaveBeenCalledWith(
+        `paths for caching are ${__dirname}`
+      );
+      expect(getStateSpy).toHaveBeenCalledTimes(3);
+      expect(infoSpy).toHaveBeenCalledWith(
+        `Cache hit occurred on the primary key ${requirementsHash}, not saving cache.`
+      );
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('action saves the cache', () => {
@@ -161,6 +178,32 @@ describe('run', () => {
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith(
         `Cache hit occurred on the primary key ${pipFileLockHash}, not saving cache.`
+      );
+      expect(saveCacheSpy).toHaveBeenCalled();
+      expect(infoSpy).toHaveBeenLastCalledWith(
+        `Cache saved with the key: ${requirementsHash}`
+      );
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('saves cache from poetry', async () => {
+      inputs['cache'] = 'poetry';
+      getStateSpy.mockImplementation((name: string) => {
+        if (name === State.CACHE_MATCHED_KEY) {
+          return poetryLockHash;
+        } else if (name === State.CACHE_PATHS) {
+          return JSON.stringify([__dirname]);
+        } else {
+          return requirementsHash;
+        }
+      });
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(getStateSpy).toHaveBeenCalledTimes(3);
+      expect(infoSpy).not.toHaveBeenCalledWith(
+        `Cache hit occurred on the primary key ${poetryLockHash}, not saving cache.`
       );
       expect(saveCacheSpy).toHaveBeenCalled();
       expect(infoSpy).toHaveBeenLastCalledWith(
