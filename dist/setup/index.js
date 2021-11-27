@@ -38798,7 +38798,7 @@ class PoetryCache extends cache_distributor_1.default {
             const cacheDir = poetryConfig['cache-dir'];
             const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
             const paths = [virtualenvsPath];
-            if (poetryConfig['virtualenvs.in-project'] === 'true') {
+            if (poetryConfig['virtualenvs.in-project'] === true) {
                 paths.push(path.join(process.cwd(), '.venv'));
             }
             return paths;
@@ -38830,7 +38830,7 @@ class PoetryCache extends cache_distributor_1.default {
             for (let line of lines) {
                 line = line.replace(/#.*$/, '');
                 const [key, value] = line.split('=').map(part => part.trim());
-                config[key] = value;
+                config[key] = JSON.parse(value);
             }
             return config;
         });

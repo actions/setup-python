@@ -24,7 +24,7 @@ class PoetryCache extends CacheDistributor {
 
     const paths = [virtualenvsPath];
 
-    if (poetryConfig['virtualenvs.in-project'] === 'true') {
+    if (poetryConfig['virtualenvs.in-project'] === true) {
       paths.push(path.join(process.cwd(), '.venv'));
     }
 
@@ -57,21 +57,21 @@ class PoetryCache extends CacheDistributor {
 
     const lines = stdout.trim().split(os.EOL);
 
-    const config = {} as {
-      'cache-dir': string;
-      'virtualenvs.in-project': string;
-      'virtualenvs.path': string;
-    };
+    const config: any = {};
 
     for (let line of lines) {
       line = line.replace(/#.*$/, '');
 
       const [key, value] = line.split('=').map(part => part.trim());
 
-      config[key as keyof typeof config] = value;
+      config[key] = JSON.parse(value);
     }
 
-    return config;
+    return config as {
+      'cache-dir': string;
+      'virtualenvs.in-project': boolean;
+      'virtualenvs.path': string;
+    };
   }
 }
 
