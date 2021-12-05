@@ -19,6 +19,8 @@ inputs:
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
+  python-install-dir:
+    description: "The path where python was installed. (PYTHON_INSTALL_DIR)"
 runs:
   using: 'node12'
   main: 'dist/setup/index.js'

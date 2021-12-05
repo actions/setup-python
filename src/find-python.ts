@@ -71,6 +71,7 @@ function usePyPy(
 
   const impl = 'pypy' + majorVersion.toString();
   core.setOutput('python-version', impl);
+  core.setOutput('python-install-dir', installDir);
 
   return {impl: impl, version: versionFromPath(installDir)};
 }
@@ -150,6 +151,7 @@ async function useCpythonVersion(
 
   const installed = versionFromPath(installDir);
   core.setOutput('python-version', installed);
+  core.setOutput('python-install-dir', installDir);
 
   return {impl: 'CPython', version: installed};
 }
