@@ -230,7 +230,6 @@ steps:
     python-version: '3.9'
     cache: 'pip'
 - run: pip install -r requirements.txt
-- run: pip test
 ```
 
 **Caching pipenv dependencies:**
@@ -244,7 +243,6 @@ steps:
     python-version: '3.9'
     cache: 'pipenv'
 - run: pipenv install
-- run: pipenv test
 ```
 
 **Using wildcard patterns to cache dependencies**
@@ -257,7 +255,6 @@ steps:
     cache: 'pip'
     cache-dependency-path: '**/requirements-dev.txt'
 - run: pip install -r subdirectory/requirements-dev.txt
-- run: pip test
 ```
 
 **Using a list of file paths to cache dependencies**
@@ -274,7 +271,6 @@ steps:
       server/app/Pipfile.lock
       __test__/app/Pipfile.lock
 - run: pipenv install
-- run: pipenv test
 ```
 
 # Using `setup-python` with a self hosted runner
