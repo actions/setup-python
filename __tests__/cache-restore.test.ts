@@ -92,13 +92,9 @@ describe('restore-cache', () => {
           dependencyFile
         );
         await cacheDistributor.restoreCache();
-        let pythonKey = '';
-        if (packageManager === 'pipenv') {
-          pythonKey = `python-${pythonVersion}-`;
-        }
 
         expect(infoSpy).toHaveBeenCalledWith(
-          `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${pythonKey}${packageManager}-${fileHash}`
+          `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
         );
       }
     );

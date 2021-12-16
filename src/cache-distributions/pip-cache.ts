@@ -8,7 +8,10 @@ import os from 'os';
 import CacheDistributor from './cache-distributor';
 
 class PipCache extends CacheDistributor {
-  constructor(cacheDependencyPath: string = '**/requirements.txt') {
+  constructor(
+    private pythonVersion: string,
+    cacheDependencyPath: string = '**/requirements.txt'
+  ) {
     super('pip', cacheDependencyPath);
   }
 
@@ -36,8 +39,8 @@ class PipCache extends CacheDistributor {
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.cacheDependencyPath);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}-${hash}`;
-    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
 
     return {
       primaryKey,
