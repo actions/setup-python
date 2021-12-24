@@ -34467,8 +34467,9 @@ const path = __importStar(__webpack_require__(622));
 const os_1 = __importDefault(__webpack_require__(87));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
 class PipCache extends cache_distributor_1.default {
-    constructor(cacheDependencyPath = '**/requirements.txt') {
+    constructor(pythonVersion, cacheDependencyPath = '**/requirements.txt') {
         super('pip', cacheDependencyPath);
+        this.pythonVersion = pythonVersion;
     }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -34487,8 +34488,8 @@ class PipCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}-${hash}`;
-            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${this.packageManager}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
             return {
                 primaryKey,
                 restoreKey: [restoreKey]
@@ -43888,7 +43889,7 @@ var PackageManagers;
 function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath) {
     switch (packageManager) {
         case PackageManagers.Pip:
-            return new pip_cache_1.default(cacheDependencyPath);
+            return new pip_cache_1.default(pythonVersion, cacheDependencyPath);
         case PackageManagers.Pipenv:
             return new pipenv_cache_1.default(pythonVersion, cacheDependencyPath);
         default:
