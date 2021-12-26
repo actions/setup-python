@@ -3,14 +3,14 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
+import {IS_WINDOWS, IS_LINUX, isGhes} from './utils';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
-export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/master/versions-manifest.json`;
-
-const IS_WINDOWS = process.platform === 'win32';
+const MANIFEST_REPO_BRANCH = 'main';
+export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -19,11 +19,12 @@ export async function findReleaseFromManifest(
   const manifest: tc.IToolRelease[] = await tc.getManifestFromRepo(
     MANIFEST_REPO_OWNER,
     MANIFEST_REPO_NAME,
-    AUTH
+    AUTH,
+    MANIFEST_REPO_BRANCH
   );
   return await tc.findFromManifest(
     semanticVersionSpec,
-    true,
+    false,
     manifest,
     architecture
   );
@@ -32,10 +33,17 @@ export async function findReleaseFromManifest(
 async function installPython(workingDirectory: string) {
   const options: ExecOptions = {
     cwd: workingDirectory,
+    env: {
+      ...process.env,
+      ...(IS_LINUX && {LD_LIBRARY_PATH: path.join(workingDirectory, 'lib')})
+    },
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {
-        core.debug(data.toString().trim());
+        core.info(data.toString().trim());
+      },
+      stderr: (data: Buffer) => {
+        core.error(data.toString().trim());
       }
     }
   };
@@ -52,22 +60,14 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
 
   core.info(`Download from "${downloadUrl}"`);
   const pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
-  const fileName = path.basename(pythonPath, '.zip');
   core.info('Extract downloaded archive');
   let pythonExtractedFolder;
   if (IS_WINDOWS) {
-    pythonExtractedFolder = await tc.extractZip(pythonPath, `./${fileName}`);
+    pythonExtractedFolder = await tc.extractZip(pythonPath);
   } else {
-    pythonExtractedFolder = await tc.extractTar(pythonPath, `./${fileName}`);
+    pythonExtractedFolder = await tc.extractTar(pythonPath);
   }
 
   core.info('Execute installation script');
   await installPython(pythonExtractedFolder);
-}
-
-function isGhes(): boolean {
-  const ghUrl = new URL(
-    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
-  );
-  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
 }

@@ -1,5 +1,6 @@
 import * as os from 'os';
 import * as path from 'path';
+import {IS_WINDOWS, IS_LINUX} from './utils';
 
 import * as semver from 'semver';
 
@@ -7,8 +8,6 @@ import * as installer from './install-python';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
-
-const IS_WINDOWS = process.platform === 'win32';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
@@ -36,8 +35,11 @@ function binDir(installDir: string): string {
 // A particular version of PyPy may contain one or more versions of the Python interpreter.
 // For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
 // We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
-  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion.toString());
+function usePyPy(
+  majorVersion: '2' | '3.6',
+  architecture: string
+): InstalledVersion {
+  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion);
   let installDir: string | null = findPyPy(architecture);
 
   if (!installDir && IS_WINDOWS) {
@@ -62,6 +64,10 @@ function usePyPy(majorVersion: 2 | 3, architecture: string): InstalledVersion {
 
   core.addPath(installDir);
   core.addPath(_binDir);
+  // Starting from PyPy 7.3.1, the folder that is used for pip and anything that pip installs should be "Scripts" on Windows.
+  if (IS_WINDOWS) {
+    core.addPath(path.join(installDir, 'Scripts'));
+  }
 
   const impl = 'pypy' + majorVersion.toString();
   core.setOutput('python-version', impl);
@@ -109,6 +115,18 @@ async function useCpythonVersion(
   }
 
   core.exportVariable('pythonLocation', installDir);
+
+  if (IS_LINUX) {
+    const libPath = process.env.LD_LIBRARY_PATH
+      ? `:${process.env.LD_LIBRARY_PATH}`
+      : '';
+    const pyLibPath = path.join(installDir, 'lib');
+
+    if (!libPath.split(':').includes(pyLibPath)) {
+      core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
+    }
+  }
+
   core.addPath(installDir);
   core.addPath(binDir(installDir));
 
@@ -175,9 +193,10 @@ export async function findPythonVersion(
 ): Promise<InstalledVersion> {
   switch (version.toUpperCase()) {
     case 'PYPY2':
-      return usePyPy(2, architecture);
+      return usePyPy('2', architecture);
     case 'PYPY3':
-      return usePyPy(3, architecture);
+      // keep pypy3 pointing to 3.6 for backward compatibility
+      return usePyPy('3.6', architecture);
     default:
       return await useCpythonVersion(version, architecture);
   }

@@ -1,0 +1,12 @@
+certifi==2020.6.20
+chardet==3.0.4
+docutils==0.16
+idna==2.10
+Kivy==2.0.0rc3
+Kivy-Garden==0.1.4
+packaging==20.7
+pdf2image==1.12.1
+Pygments==2.6.1
+requests==2.24.0
+urllib3==1.25.10
+xlrd==1.2.0
