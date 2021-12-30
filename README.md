@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.6', 'pypy-3.7' ]
+        python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.7', 'pypy-3.8' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v2
@@ -63,7 +63,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['2.7', '3.6', '3.7', '3.8', 'pypy-2.7', 'pypy-3.6']
+        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10', 'pypy-2.7', 'pypy-3.8']
         exclude:
           - os: macos-latest
             python-version: '3.8'
@@ -76,7 +76,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+        run: python --version
 ```
 
 Download and set up a version of Python that does not come preinstalled on an image:
@@ -87,7 +87,7 @@ jobs:
     strategy:
       matrix:
         # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
-        python-version: ['3.5', '3.6', '3.7.4', '3.8']
+        python-version: ['3.7.4', '3.8', '3.9', '3.10']
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -102,7 +102,7 @@ steps:
 - uses: actions/checkout@v2
 - uses: actions/setup-python@v2
   with:
-    python-version: '3.9.0-beta.4'
+    python-version: '3.11.0-alpha.1'
 - run: python my_script.py
 ```
 
@@ -112,7 +112,7 @@ steps:
 - uses: actions/checkout@v2
 - uses: actions/setup-python@v2
   with:
-    python-version: '3.9.0-alpha - 3.9.0' # SemVer's version range syntax
+    python-version: '3.11.0-alpha - 3.11.0' # SemVer's version range syntax
 - run: python my_script.py
 ```
 
@@ -125,9 +125,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - 'pypy-3.6' # the latest available version of PyPy that supports Python 3.6
         - 'pypy-3.7' # the latest available version of PyPy that supports Python 3.7
         - 'pypy-3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
+        - 'pypy-3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -161,7 +161,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 - Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
-  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy-3.6`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy-3.6-v7.3.3`.
+  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy-3.7`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy-3.7-v7.3.3`.
 
 - Downloadable PyPy versions from the [official PyPy site](https://downloads.python.org/pypy/).
   - All available versions that we can download are listed in [versions.json](https://downloads.python.org/pypy/versions.json) file.
@@ -198,8 +198,8 @@ The version of PyPy should be specified in the format `pypy-<python_version>[-v<
 The `<pypy_version>` parameter is optional and can be skipped. The latest version will be used in this case.
 
 ```
-pypy-3.6 # the latest available version of PyPy that supports Python 3.6
 pypy-3.7 # the latest available version of PyPy that supports Python 3.7
+pypy-3.8 # the latest available version of PyPy that supports Python 3.8
 pypy-2.7 # the latest available version of PyPy that supports Python 2.7
 pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
 pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
