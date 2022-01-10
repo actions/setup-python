@@ -16,6 +16,9 @@ inputs:
     default: ${{ github.token }}
   cache-dependency-path:
     description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
+  ghes_token:
+    description: Used to pull python distributions from actions/python-versions when using Github Enterprise. This should be a github.com read only access token
+    default: ""
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."

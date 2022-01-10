@@ -52264,7 +52264,12 @@ const tc = __importStar(__webpack_require__(533));
 const exec = __importStar(__webpack_require__(986));
 const utils_1 = __webpack_require__(163);
 const TOKEN = core.getInput('token');
-const AUTH = !TOKEN || utils_1.isGhes() ? undefined : `token ${TOKEN}`;
+const GHES_TOKEN = core.getInput('ghes_token');
+const AUTH = utils_1.isGhes()
+    ? `token ${GHES_TOKEN}`
+    : TOKEN
+        ? `token ${TOKEN}`
+        : undefined;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';

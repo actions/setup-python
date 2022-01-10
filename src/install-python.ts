@@ -6,7 +6,12 @@ import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, isGhes} from './utils';
 
 const TOKEN = core.getInput('token');
-const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
+const GHES_TOKEN = core.getInput('ghes_token');
+const AUTH = isGhes()
+  ? `token ${GHES_TOKEN}`
+  : TOKEN
+  ? `token ${TOKEN}`
+  : undefined;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
