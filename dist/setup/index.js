@@ -52266,7 +52266,9 @@ const utils_1 = __webpack_require__(163);
 const TOKEN = core.getInput('token');
 const GHES_TOKEN = core.getInput('ghes_token');
 const AUTH = utils_1.isGhes()
-    ? `token ${GHES_TOKEN}`
+    ? GHES_TOKEN
+        ? `token ${GHES_TOKEN}`
+        : undefined
     : TOKEN
         ? `token ${TOKEN}`
         : undefined;

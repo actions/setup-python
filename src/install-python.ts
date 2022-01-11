@@ -8,7 +8,9 @@ import {IS_WINDOWS, IS_LINUX, isGhes} from './utils';
 const TOKEN = core.getInput('token');
 const GHES_TOKEN = core.getInput('ghes_token');
 const AUTH = isGhes()
-  ? `token ${GHES_TOKEN}`
+  ? GHES_TOKEN
+    ? `token ${GHES_TOKEN}`
+    : undefined
   : TOKEN
   ? `token ${TOKEN}`
   : undefined;
