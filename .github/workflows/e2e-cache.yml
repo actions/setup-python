@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -47,14 +47,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
-      - run: pip install --user pipenv
+      - name: Install pipenv
+        run: pipx install pipenv
       - name: Install dependencies
-        shell: pwsh
-        run: |
-          if ($IsMacOS) {
-            $env:PATH += ":/Users/runner/.local/bin"
-          }
-          pipenv install flake8
+        run: pipenv install numpy
+
   python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -81,7 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9', 'pypy-3.7-v7.3.5', 'pypy-3.7-v7.x']
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -90,11 +87,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
           cache-dependency-path: '**/requirements-linux.txt'
-      - run: pip install --user pipenv
+      - name: Install pipenv
+        run: pipx install pipenv
       - name: Install dependencies
-        shell: pwsh
-        run: |
-          if ($IsMacOS) {
-            $env:PATH += ":/Users/runner/.local/bin"
-          }
-          pipenv install flake8
+        run: pipenv install numpy
