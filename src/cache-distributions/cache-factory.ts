@@ -13,7 +13,7 @@ export function getCacheDistributor(
 ) {
   switch (packageManager) {
     case PackageManagers.Pip:
-      return new PipCache(cacheDependencyPath);
+      return new PipCache(pythonVersion, cacheDependencyPath);
     case PackageManagers.Pipenv:
       return new PipenvCache(pythonVersion, cacheDependencyPath);
     default:
