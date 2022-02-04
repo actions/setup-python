@@ -34486,7 +34486,11 @@ class PipCache extends cache_distributor_1.default {
                 ({ stdout: stdout, stderr: stderr } = yield execPromisify('pip cache dir'));
             }
             else {
-                ({ stdout: stdout, stderr: stderr, exitCode: exitCode } = yield exec.getExecOutput('pip cache dir'));
+                ({
+                    stdout: stdout,
+                    stderr: stderr,
+                    exitCode: exitCode
+                } = yield exec.getExecOutput('pip cache dir'));
             }
             if (exitCode && stderr) {
                 throw new Error(`Could not get cache folder path for pip package manager`);
