@@ -34463,9 +34463,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const glob = __importStar(__webpack_require__(281));
 const core = __importStar(__webpack_require__(470));
 const exec = __importStar(__webpack_require__(986));
+const child_process = __importStar(__webpack_require__(129));
+const util_1 = __importDefault(__webpack_require__(669));
 const path = __importStar(__webpack_require__(622));
 const os_1 = __importDefault(__webpack_require__(87));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
+const utils_1 = __webpack_require__(163);
 class PipCache extends cache_distributor_1.default {
     constructor(pythonVersion, cacheDependencyPath = '**/requirements.txt') {
         super('pip', cacheDependencyPath);
@@ -34473,7 +34476,18 @@ class PipCache extends cache_distributor_1.default {
     }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr, exitCode } = yield exec.getExecOutput('pip cache dir');
+            let exitCode = 1;
+            let stdout = '';
+            let stderr = '';
+            // Add temporary fix for Windows
+            // Related issue: https://github.com/actions/setup-python/issues/328
+            if (utils_1.IS_WINDOWS) {
+                const execPromisify = util_1.default.promisify(child_process.exec);
+                ({ stdout: stdout, stderr: stderr } = yield execPromisify('pip cache dir'));
+            }
+            else {
+                ({ stdout: stdout, stderr: stderr, exitCode: exitCode } = yield exec.getExecOutput('pip cache dir'));
+            }
             if (exitCode && stderr) {
                 throw new Error(`Could not get cache folder path for pip package manager`);
             }
