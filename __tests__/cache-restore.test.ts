@@ -96,7 +96,8 @@ describe('restore-cache', () => {
         expect(infoSpy).toHaveBeenCalledWith(
           `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
         );
-      }
+      },
+      30000
     );
 
     it.each([
