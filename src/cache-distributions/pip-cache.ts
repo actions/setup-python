@@ -23,6 +23,9 @@ class PipCache extends CacheDistributor {
     let stderr = '';
 
     // Add temporary fix for Windows
+    // On windows it is necessary to execute through an exec
+    // because the getExecOutput gives a non zero code or writes to stderr for pip 22.0.2,
+    // or spawn must be started with the shell option enabled for getExecOutput
     // Related issue: https://github.com/actions/setup-python/issues/328
     if (IS_WINDOWS) {
       const execPromisify = utils.promisify(child_process.exec);
