@@ -10,6 +10,7 @@ on:
       - '**.md'
   schedule:
     - cron: 30 3 * * *
+  workflow_dispatch:
 
 jobs:
   default-version:
@@ -48,6 +49,39 @@ jobs:
       uses: ./
       with:
         python-version: ${{ matrix.python }}
+
+    - name: Validate version
+      run: |
+        $pythonVersion = (python --version)
+        if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
+          Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          exit 1
+        }
+        $pythonVersion
+      shell: pwsh
+
+    - name: Run simple code
+      run: python -c 'import math; print(math.factorial(5))'
+
+  setup-versions-from-file:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} version file
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
+        python: [3.5.4, 3.6.7, 3.7.5, 3.8.1]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: build-version-file ${{ matrix.python }}
+      run: echo ${{ matrix.python }} > .python-version
+
+    - name: setup-python ${{ matrix.python }}
+      uses: ./
+      with:
+        python-version-file: '.python-version'
 
     - name: Validate version
       run: |

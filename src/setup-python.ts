@@ -3,6 +3,7 @@ import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
+import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {isGhes} from './utils';
 
@@ -24,9 +25,30 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
   await cacheDistributor.restoreCache();
 }
 
+function resolveVersionInput(): string {
+  let version = core.getInput('python-version');
+  const versionFileInput = core.getInput('python-version-file');
+
+  if (versionFileInput) {
+    const versionFilePath = path.join(
+      process.env.GITHUB_WORKSPACE!,
+      versionFileInput
+    );
+    if (!fs.existsSync(versionFilePath)) {
+      throw new Error(
+        `The specified node version file at: ${versionFilePath} does not exist`
+      );
+    }
+    version = fs.readFileSync(versionFilePath, 'utf8');
+    core.info(`Resolved ${versionFileInput} as ${version}`);
+  }
+
+  return version;
+}
+
 async function run() {
   try {
-    const version = core.getInput('python-version');
+    const version = resolveVersionInput();
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
