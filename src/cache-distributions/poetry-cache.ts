@@ -48,10 +48,8 @@ class PoetryCache extends CacheDistributor {
     ]);
 
     if (exitCode && stderr) {
-      console.log(stdout, stderr, exitCode);
-
       throw new Error(
-        `Could not get cache folder path for poetry package manager`
+        'Could not get cache folder path for poetry package manager'
       );
     }
 
