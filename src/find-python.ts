@@ -191,13 +191,5 @@ export async function findPythonVersion(
   version: string,
   architecture: string
 ): Promise<InstalledVersion> {
-  switch (version.toUpperCase()) {
-    case 'PYPY2':
-      return usePyPy('2', architecture);
-    case 'PYPY3':
-      // keep pypy3 pointing to 3.6 for backward compatibility
-      return usePyPy('3.6', architecture);
-    default:
-      return await useCpythonVersion(version, architecture);
-  }
+  return await useCpythonVersion(version, architecture);
 }

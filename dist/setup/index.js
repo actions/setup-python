@@ -57135,15 +57135,7 @@ function pythonVersionToSemantic(versionSpec) {
 exports.pythonVersionToSemantic = pythonVersionToSemantic;
 function findPythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
-        switch (version.toUpperCase()) {
-            case 'PYPY2':
-                return usePyPy('2', architecture);
-            case 'PYPY3':
-                // keep pypy3 pointing to 3.6 for backward compatibility
-                return usePyPy('3.6', architecture);
-            default:
-                return yield useCpythonVersion(version, architecture);
-        }
+        return yield useCpythonVersion(version, architecture);
     });
 }
 exports.findPythonVersion = findPythonVersion;

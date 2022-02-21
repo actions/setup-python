@@ -87,12 +87,4 @@ describe('Finder tests', () => {
     }
     expect(thrown).toBeTruthy();
   });
-
-  it('Finds PyPy if it is installed', async () => {
-    const pythonDir: string = path.join(toolDir, 'PyPy', '2.0.0', 'x64');
-    await io.mkdirP(pythonDir);
-    fs.writeFileSync(`${pythonDir}.complete`, 'hello');
-    // This will throw if it doesn't find it in the cache (because no such version exists)
-    await finder.findPythonVersion('pypy2', 'x64');
-  });
 });
