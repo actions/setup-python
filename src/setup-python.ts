@@ -37,7 +37,7 @@ async function run() {
           `Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
         );
       } else {
-        const installed = await finder.findPythonVersion(version, arch);
+        const installed = await finder.useCpythonVersion(version, arch);
         pythonVersion = installed.version;
         core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
       }

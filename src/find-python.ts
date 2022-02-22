@@ -30,52 +30,7 @@ function binDir(installDir: string): string {
   }
 }
 
-// Note on the tool cache layout for PyPy:
-// PyPy has its own versioning scheme that doesn't follow the Python versioning scheme.
-// A particular version of PyPy may contain one or more versions of the Python interpreter.
-// For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
-// We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(
-  majorVersion: '2' | '3.6',
-  architecture: string
-): InstalledVersion {
-  const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion);
-  let installDir: string | null = findPyPy(architecture);
-
-  if (!installDir && IS_WINDOWS) {
-    // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
-    // On our Windows virtual environments, we only install an x86 version.
-    // Fall back to x86.
-    installDir = findPyPy('x86');
-  }
-
-  if (!installDir) {
-    // PyPy not installed in $(Agent.ToolsDirectory)
-    throw new Error(`PyPy ${majorVersion} not found`);
-  }
-
-  // For PyPy, Windows uses 'bin', not 'Scripts'.
-  const _binDir = path.join(installDir, 'bin');
-
-  // On Linux and macOS, the Python interpreter is in 'bin'.
-  // On Windows, it is in the installation root.
-  const pythonLocation = IS_WINDOWS ? installDir : _binDir;
-  core.exportVariable('pythonLocation', pythonLocation);
-
-  core.addPath(installDir);
-  core.addPath(_binDir);
-  // Starting from PyPy 7.3.1, the folder that is used for pip and anything that pip installs should be "Scripts" on Windows.
-  if (IS_WINDOWS) {
-    core.addPath(path.join(installDir, 'Scripts'));
-  }
-
-  const impl = 'pypy' + majorVersion.toString();
-  core.setOutput('python-version', impl);
-
-  return {impl: impl, version: versionFromPath(installDir)};
-}
-
-async function useCpythonVersion(
+export async function useCpythonVersion(
   version: string,
   architecture: string
 ): Promise<InstalledVersion> {
@@ -185,11 +140,4 @@ interface InstalledVersion {
 export function pythonVersionToSemantic(versionSpec: string) {
   const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)/g;
   return versionSpec.replace(prereleaseVersion, '$1-$2');
-}
-
-export async function findPythonVersion(
-  version: string,
-  architecture: string
-): Promise<InstalledVersion> {
-  return await useCpythonVersion(version, architecture);
 }
