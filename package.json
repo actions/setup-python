@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
+    "build-npm": "npm ci && node -e \"try{require('fs').rmdirSync('lib',{recursive:true})}catch(e){}\" && tsc --declaration --declarationMap",
     "format": "prettier --write \"{,!(node_modules)/**/}*.ts\"",
     "format-check": "prettier --check \"{,!(node_modules)/**/}*.ts\"",
     "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
