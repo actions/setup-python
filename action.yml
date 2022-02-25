@@ -20,7 +20,7 @@ outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/setup/index.js'
   post: 'dist/cache-save/index.js'
   post-if: success()
