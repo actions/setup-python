@@ -14,15 +14,15 @@ jobs:
     name: Check licenses
     steps:
       - uses: actions/checkout@v2
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 12.x
+          node-version: 16.x
       - run: npm ci
       - name: Install licensed
         run: |
           cd $RUNNER_TEMP
-          curl -Lfs -o licensed.tar.gz https://github.com/github/licensed/releases/download/3.3.1/licensed-3.3.1-linux-x64.tar.gz
+          curl -Lfs -o licensed.tar.gz https://github.com/github/licensed/releases/download/3.4.4/licensed-3.4.4-linux-x64.tar.gz
           sudo tar -xzf licensed.tar.gz
           sudo mv licensed /usr/local/bin/licensed
       - run: licensed status
