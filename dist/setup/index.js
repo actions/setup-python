@@ -6694,7 +6694,7 @@ function run() {
                     core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
-                    const installed = yield finder.findPythonVersion(version, arch);
+                    const installed = yield finder.useCpythonVersion(version, arch);
                     pythonVersion = installed.version;
                     core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
                 }
@@ -57111,7 +57111,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findPythonVersion = exports.pythonVersionToSemantic = void 0;
+exports.pythonVersionToSemantic = exports.useCpythonVersion = void 0;
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const utils_1 = __webpack_require__(163);
@@ -57138,40 +57138,6 @@ function binDir(installDir) {
     else {
         return path.join(installDir, 'bin');
     }
-}
-// Note on the tool cache layout for PyPy:
-// PyPy has its own versioning scheme that doesn't follow the Python versioning scheme.
-// A particular version of PyPy may contain one or more versions of the Python interpreter.
-// For example, PyPy 7.0 contains Python 2.7, 3.5, and 3.6-alpha.
-// We only care about the Python version, so we don't use the PyPy version for the tool cache.
-function usePyPy(majorVersion, architecture) {
-    const findPyPy = tc.find.bind(undefined, 'PyPy', majorVersion);
-    let installDir = findPyPy(architecture);
-    if (!installDir && utils_1.IS_WINDOWS) {
-        // PyPy only precompiles binaries for x86, but the architecture parameter defaults to x64.
-        // On our Windows virtual environments, we only install an x86 version.
-        // Fall back to x86.
-        installDir = findPyPy('x86');
-    }
-    if (!installDir) {
-        // PyPy not installed in $(Agent.ToolsDirectory)
-        throw new Error(`PyPy ${majorVersion} not found`);
-    }
-    // For PyPy, Windows uses 'bin', not 'Scripts'.
-    const _binDir = path.join(installDir, 'bin');
-    // On Linux and macOS, the Python interpreter is in 'bin'.
-    // On Windows, it is in the installation root.
-    const pythonLocation = utils_1.IS_WINDOWS ? installDir : _binDir;
-    core.exportVariable('pythonLocation', pythonLocation);
-    core.addPath(installDir);
-    core.addPath(_binDir);
-    // Starting from PyPy 7.3.1, the folder that is used for pip and anything that pip installs should be "Scripts" on Windows.
-    if (utils_1.IS_WINDOWS) {
-        core.addPath(path.join(installDir, 'Scripts'));
-    }
-    const impl = 'pypy' + majorVersion.toString();
-    core.setOutput('python-version', impl);
-    return { impl: impl, version: versionFromPath(installDir) };
 }
 function useCpythonVersion(version, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -57222,6 +57188,7 @@ function useCpythonVersion(version, architecture) {
         return { impl: 'CPython', version: installed };
     });
 }
+exports.useCpythonVersion = useCpythonVersion;
 /** Convert versions like `3.8-dev` to a version like `>= 3.8.0-a0`. */
 function desugarDevVersion(versionSpec) {
     if (versionSpec.endsWith('-dev')) {
@@ -57248,20 +57215,6 @@ function pythonVersionToSemantic(versionSpec) {
     return versionSpec.replace(prereleaseVersion, '$1-$2');
 }
 exports.pythonVersionToSemantic = pythonVersionToSemantic;
-function findPythonVersion(version, architecture) {
-    return __awaiter(this, void 0, void 0, function* () {
-        switch (version.toUpperCase()) {
-            case 'PYPY2':
-                return usePyPy('2', architecture);
-            case 'PYPY3':
-                // keep pypy3 pointing to 3.6 for backward compatibility
-                return usePyPy('3.6', architecture);
-            default:
-                return yield useCpythonVersion(version, architecture);
-        }
-    });
-}
-exports.findPythonVersion = findPythonVersion;
 
 
 /***/ }),
