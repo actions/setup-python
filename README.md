@@ -207,7 +207,7 @@ pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
 pypy-3.7-nightly # Python 3.7 and nightly PyPy
 ```
 
-Note: `pypy2` and `pypy3` are deprecated and are not available in newer images. Use the format above.
+Note: `pypy2` and `pypy3` have been removed in v3. Use the format above instead.
 
 # Caching packages dependencies
 
