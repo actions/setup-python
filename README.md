@@ -1,4 +1,4 @@
-# setup-python V2
+# setup-python V3
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
@@ -29,7 +29,7 @@ Basic:
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
     architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -90,7 +90,7 @@ jobs:
         python-version: ['3.7.4', '3.8', '3.9', '3.10']
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -100,7 +100,7 @@ Download and set up an accurate pre-release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.11.0-alpha.1'
 - run: python my_script.py
@@ -110,7 +110,7 @@ Download and set up the latest available version of Python (includes both pre-re
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.11.0-alpha - 3.11.0' # SemVer's version range syntax
 - run: python my_script.py
@@ -130,7 +130,7 @@ jobs:
         - 'pypy-3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -225,7 +225,7 @@ The requirements file format allows to specify dependency versions using logical
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -238,7 +238,7 @@ steps:
 - uses: actions/checkout@v2
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -249,7 +249,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -263,7 +263,7 @@ steps:
 - uses: actions/checkout@v2
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pipenv'
