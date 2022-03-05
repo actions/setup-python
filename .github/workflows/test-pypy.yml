@@ -22,6 +22,7 @@ jobs:
         pypy:
         - 'pypy-2.7'
         - 'pypy-3.7'
+        - 'pypy3.9'
         - 'pypy-2.7-v7.3.4'
         - 'pypy-3.7-v7.3.5'
         - 'pypy-3.7-v7.3.4'
@@ -29,6 +30,7 @@ jobs:
         - 'pypy-3.7-v7.x'
         - 'pypy-2.7-v7.3.4rc1'
         - 'pypy-3.7-nightly'
+        - 'pypy3.8-v7.3.7'
 
     steps:
       - name: Checkout

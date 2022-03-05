@@ -118,18 +118,27 @@ export function findPyPyToolCache(
 }
 
 export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
-  const versions = versionSpec.split('-').filter(item => !!item);
+  let versionsString: string;
+  if (versionSpec.length > 4 && versionSpec[4] == '-') {
+    versionsString = versionSpec.slice(5);
+  } else if (versionSpec.length > 3) {
+    versionsString = versionSpec.slice(4);
+  } else {
+    versionsString = '';
+  }
 
-  if (versions.length < 2 || versions[0] != 'pypy') {
+  const versions = versionsString.split('-').filter(item => !!item);
+
+  if (!versionSpec.startsWith('pypy') || versions.length == 0) {
     throw new Error(
       "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
     );
   }
 
-  const pythonVersion = versions[1];
+  const pythonVersion = versions[0];
   let pypyVersion: string;
-  if (versions.length > 2) {
-    pypyVersion = pypyInstall.pypyVersionToSemantic(versions[2]);
+  if (versions.length > 1) {
+    pypyVersion = pypyInstall.pypyVersionToSemantic(versions[1]);
   } else {
     pypyVersion = 'x';
   }
