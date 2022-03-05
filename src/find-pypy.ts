@@ -6,7 +6,8 @@ import {
   validateVersion,
   getPyPyVersionFromPath,
   readExactPyPyVersionFile,
-  validatePythonVersionFormatForPyPy
+  validatePythonVersionFormatForPyPy,
+  createSymlinkInFolder
 } from './utils';
 
 import * as semver from 'semver';
@@ -16,6 +17,27 @@ import * as tc from '@actions/tool-cache';
 interface IPyPyVersionSpec {
   pypyVersion: string;
   pythonVersion: string;
+}
+
+// TODO remove the following function once v7.3.9 is in tool cache
+async function createPyPySymlink(
+  pypyBinaryPath: string,
+  pythonVersion: string
+) {
+  const version = semver.coerce(pythonVersion)!;
+  const pythonBinaryPostfix = semver.major(version);
+  const pythonMinor = semver.minor(version);
+  const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+  const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+  let binaryExtension = IS_WINDOWS ? '.exe' : '';
+
+  core.info('Creating symlinks...');
+  createSymlinkInFolder(
+    pypyBinaryPath,
+    `pypy${pypyBinaryPostfix}${binaryExtension}`,
+    `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`,
+    true
+  );
 }
 
 export async function findPyPyVersion(
@@ -49,6 +71,8 @@ export async function findPyPyVersion(
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';
   const _binDir = path.join(installDir, pipDir);
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
+  // TODO remove the following line once v7.3.9 is in tool cache
+  await createPyPySymlink(pythonLocation, resolvedPythonVersion);
   core.exportVariable('pythonLocation', pythonLocation);
   core.addPath(pythonLocation);
   core.addPath(_binDir);

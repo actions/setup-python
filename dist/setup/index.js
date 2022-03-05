@@ -2064,6 +2064,19 @@ const utils_1 = __webpack_require__(163);
 const semver = __importStar(__webpack_require__(876));
 const core = __importStar(__webpack_require__(470));
 const tc = __importStar(__webpack_require__(533));
+// TODO remove the following function once v7.3.9 is in tool cache
+function createPyPySymlink(pypyBinaryPath, pythonVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const version = semver.coerce(pythonVersion);
+        const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
+        const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+        let binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        core.info('Creating symlinks...');
+        utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
+    });
+}
 function findPyPyVersion(versionSpec, architecture) {
     return __awaiter(this, void 0, void 0, function* () {
         let resolvedPyPyVersion = '';
@@ -2081,6 +2094,8 @@ function findPyPyVersion(versionSpec, architecture) {
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
+        // TODO remove the following line once v7.3.9 is in tool cache
+        yield createPyPySymlink(pythonLocation, resolvedPythonVersion);
         core.exportVariable('pythonLocation', pythonLocation);
         core.addPath(pythonLocation);
         core.addPath(_binDir);
@@ -10605,11 +10620,14 @@ function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
         const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
         const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
         let binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         core.info('Creating symlinks...');
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
     });
 }
 function installPip(pythonLocation) {
