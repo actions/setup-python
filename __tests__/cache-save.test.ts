@@ -11,7 +11,8 @@ describe('run', () => {
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
-  const poetryLockHash = '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
+  const poetryLockHash =
+    '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
 
   // core spy
   let infoSpy: jest.SpyInstance;
