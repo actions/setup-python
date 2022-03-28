@@ -69,6 +69,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
+      - name: Init pyproject.toml
+        run: poetry init -n
       - name: Install dependencies
         run: poetry add flake8
 
