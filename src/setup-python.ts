@@ -1,3 +1,4 @@
+import * as actionsCache from '@actions/cache';
 import * as core from '@actions/core';
 import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
@@ -11,8 +12,12 @@ function isPyPyVersion(versionSpec: string) {
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
-  if (isGhes()) {
-    throw new Error('Caching is not supported on GHES');
+  if (!actionsCache.isFeatureAvailable()) {
+    if (isGhes()) {
+      throw new Error('Caching is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check with GHES admin if Actions cache service is enabled or not.');
+    } else {
+      throw new Error('An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.');
+    }
   }
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
