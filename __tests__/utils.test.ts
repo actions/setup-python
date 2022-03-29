@@ -46,7 +46,7 @@ describe('isCacheFeatureAvailable', () => {
     } catch (error) {
       expect(error).toHaveProperty(
         'message',
-        'Caching is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check with GHES admin if Actions cache service is enabled or not.'
+        'Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.'
       );
     } finally {
       delete process.env['GITHUB_SERVER_URL'];
