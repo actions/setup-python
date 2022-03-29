@@ -5597,7 +5597,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+const cache = __importStar(__webpack_require__(692));
 const fs_1 = __importDefault(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(876));
@@ -5671,6 +5672,18 @@ function isGhes() {
     return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
 }
 exports.isGhes = isGhes;
+function isCacheFeatureAvailable() {
+    if (!cache.isFeatureAvailable()) {
+        if (isGhes()) {
+            throw new Error('Caching is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check with GHES admin if Actions cache service is enabled or not.');
+        }
+        else {
+            throw new Error('An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.');
+        }
+    }
+    return true;
+}
+exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 
 
 /***/ }),
@@ -6045,7 +6058,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const actionsCache = __importStar(__webpack_require__(692));
 const core = __importStar(__webpack_require__(470));
 const finder = __importStar(__webpack_require__(927));
 const finderPyPy = __importStar(__webpack_require__(847));
@@ -6058,14 +6070,6 @@ function isPyPyVersion(versionSpec) {
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!actionsCache.isFeatureAvailable()) {
-            if (utils_1.isGhes()) {
-                throw new Error('Caching is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check with GHES admin if Actions cache service is enabled or not.');
-            }
-            else {
-                throw new Error('An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.');
-            }
-        }
         const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
         const cacheDistributor = cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
         yield cacheDistributor.restoreCache();
@@ -6089,7 +6093,7 @@ function run() {
                     core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
                 }
                 const cache = core.getInput('cache');
-                if (cache) {
+                if (cache && utils_1.isCacheFeatureAvailable()) {
                     yield cacheDependencies(cache, pythonVersion);
                 }
             }

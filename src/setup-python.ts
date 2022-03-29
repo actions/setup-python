@@ -1,28 +1,16 @@
-import * as actionsCache from '@actions/cache';
 import * as core from '@actions/core';
 import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isGhes} from './utils';
+import {isCacheFeatureAvailable} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy-');
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
-  if (!actionsCache.isFeatureAvailable()) {
-    if (isGhes()) {
-      throw new Error(
-        'Caching is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check with GHES admin if Actions cache service is enabled or not.'
-      );
-    } else {
-      throw new Error(
-        'An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.'
-      );
-    }
-  }
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
   const cacheDistributor = getCacheDistributor(
@@ -52,7 +40,7 @@ async function run() {
       }
 
       const cache = core.getInput('cache');
-      if (cache) {
+      if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
     }
