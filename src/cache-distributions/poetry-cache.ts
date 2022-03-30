@@ -53,7 +53,7 @@ class PoetryCache extends CacheDistributor {
       );
     }
 
-    const lines = stdout.trim().split(os.EOL);
+    const lines = stdout.trim().split('\n');
 
     const config: any = {};
 
