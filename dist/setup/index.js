@@ -5679,7 +5679,7 @@ function isCacheFeatureAvailable() {
             throw new Error('Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.');
         }
         else {
-            core.warning('An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.');
+            core.warning('The runner was not able to contact the cache service. Caching will be skipped');
         }
         return false;
     }
