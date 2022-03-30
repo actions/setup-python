@@ -38794,7 +38794,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const glob = __importStar(__webpack_require__(281));
-const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const exec = __importStar(__webpack_require__(986));
 const cache_distributor_1 = __importDefault(__webpack_require__(435));
@@ -38836,7 +38835,7 @@ class PoetryCache extends cache_distributor_1.default {
             if (exitCode && stderr) {
                 throw new Error('Could not get cache folder path for poetry package manager');
             }
-            const lines = stdout.trim().split(os.EOL);
+            const lines = stdout.trim().split('\n');
             const config = {};
             for (let line of lines) {
                 line = line.replace(/#.*$/, '');
