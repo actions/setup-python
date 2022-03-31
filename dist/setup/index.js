@@ -2105,7 +2105,7 @@ function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
     if (!installDir) {
         core.info(`PyPy version ${pythonVersion} (${pypyVersion}) was not found in the local cache`);
     }
-    core.setOutput('python-version', 'pypy' + resolvedPyPyVersion);
+    core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
     return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
 }
 exports.findPyPyToolCache = findPyPyToolCache;
