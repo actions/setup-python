@@ -90,6 +90,7 @@ export function findPyPyToolCache(
     );
   }
 
+  core.setOutput('python-version', 'pypy' + resolvedPyPyVersion);
   return {installDir, resolvedPythonVersion, resolvedPyPyVersion};
 }
 
