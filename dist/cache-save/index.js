@@ -3728,10 +3728,7 @@ const options_1 = __webpack_require__(538);
 const requestUtils_1 = __webpack_require__(899);
 const versionSalt = '1.0';
 function getCacheApiUrl(resource) {
-    // Ideally we just use ACTIONS_CACHE_URL
-    const baseUrl = (process.env['ACTIONS_CACHE_URL'] ||
-        process.env['ACTIONS_RUNTIME_URL'] ||
-        '').replace('pipelines', 'artifactcache');
+    const baseUrl = process.env['ACTIONS_CACHE_URL'] || '';
     if (!baseUrl) {
         throw new Error('Cache Service Url not found, unable to restore cache.');
     }
@@ -5920,7 +5917,8 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
             //
             // If the file exceeds the buffer maximum length (~1 GB on 32-bit systems and ~2 GB
             // on 64-bit systems), split the download into multiple segments
-            const maxSegmentSize = buffer.constants.MAX_LENGTH;
+            // ~2 GB = 2147483647, beyond this, we start getting out of range error. So, capping it accordingly.
+            const maxSegmentSize = Math.min(2147483647, buffer.constants.MAX_LENGTH);
             const downloadProgress = new DownloadProgress(contentLength);
             const fd = fs.openSync(archivePath, 'w');
             try {
@@ -41451,6 +41449,15 @@ function checkKey(key) {
         throw new ValidationError(`Key Validation Error: ${key} cannot contain commas.`);
     }
 }
+/**
+ * isFeatureAvailable to check the presence of Actions cache service
+ *
+ * @returns boolean return true if Actions cache service feature is available, otherwise false
+ */
+function isFeatureAvailable() {
+    return !!process.env['ACTIONS_CACHE_URL'];
+}
+exports.isFeatureAvailable = isFeatureAvailable;
 /**
  * Restores cache from keys
  *
