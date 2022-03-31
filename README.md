@@ -9,7 +9,7 @@ This action sets up a Python environment for use in actions by:
 - optionally installing and adding to PATH a version of Python that is already installed in the tools cache.
 - downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache.
 - failing if a specific version of Python is not preinstalled or available for download.
-- optionally caching dependencies for pip and pipenv.
+- optionally caching dependencies for pip, pipenv and poetry.
 - registering problem matchers for error output.
 
 # What's new
@@ -19,7 +19,7 @@ This action sets up a Python environment for use in actions by:
 - Automatic setup and download of Python packages if using a self-hosted runner.
 - Support for pre-release versions of Python.
 - Support for installing any version of PyPy on-flight
-- Support for built-in caching of pip and pipenv dependencies
+- Support for built-in caching of pip, pipenv and poetry dependencies
 
 # Usage
 
@@ -209,18 +209,19 @@ pypy-3.7-nightly # Python 3.7 and nightly PyPy
 
 # Caching packages dependencies
 
-The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip` and `pipenv`. The `cache` input is optional, and caching is turned off by default.
+The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
 
-The action defaults to searching for a dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
+The action defaults to searching for a dependency file (`requirements.txt` for pip, `Pipfile.lock` for pipenv or `poetry.lock` for poetry) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
 
  - For pip, the action will cache global cache directory
  - For pipenv, the action will cache virtualenv directory
+ - For poetry, the action will cache virtualenv directory
 
 **Please Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available that can lead to an increase in total build time.
 
 The requirements file format allows to specify dependency versions using logical operators (for example chardet>=3.0.4) or specify dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
 
-**Caching pip dependencies:**  
+**Caching pip dependencies:**
 
 ```yaml
 steps:
@@ -243,6 +244,20 @@ steps:
     python-version: '3.9'
     cache: 'pipenv'
 - run: pipenv install
+```
+
+**Caching poetry dependencies:**
+```yaml
+steps:
+- uses: actions/checkout@v2
+- name: Install poetry
+  run: pipx install poetry
+- uses: actions/setup-python@v2
+  with:
+    python-version: '3.9'
+    cache: 'poetry'
+- run: poetry install
+- run: poetry run pytest
 ```
 
 **Using wildcard patterns to cache dependencies**

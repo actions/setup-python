@@ -1,9 +1,11 @@
 import PipCache from './pip-cache';
 import PipenvCache from './pipenv-cache';
+import PoetryCache from './poetry-cache';
 
 export enum PackageManagers {
   Pip = 'pip',
-  Pipenv = 'pipenv'
+  Pipenv = 'pipenv',
+  Poetry = 'poetry'
 }
 
 export function getCacheDistributor(
@@ -16,6 +18,8 @@ export function getCacheDistributor(
       return new PipCache(pythonVersion, cacheDependencyPath);
     case PackageManagers.Pipenv:
       return new PipenvCache(pythonVersion, cacheDependencyPath);
+    case PackageManagers.Poetry:
+      return new PoetryCache(pythonVersion, cacheDependencyPath);
     default:
       throw new Error(`Caching for '${packageManager}' is not supported`);
   }
