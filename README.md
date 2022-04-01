@@ -252,7 +252,7 @@ steps:
 - uses: actions/checkout@v2
 - name: Install poetry
   run: pipx install poetry
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'poetry'
