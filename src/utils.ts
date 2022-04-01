@@ -25,7 +25,7 @@ export interface IPyPyManifestRelease {
   files: IPyPyManifestAsset[];
 }
 
-/** create Symlinks for downloaded PyPy
+/** create Symlinks for downflfoaded PyPy
  *  It should be executed only for downloaded versions in runtime, because
  *  toolcache versions have this setup.
  */
