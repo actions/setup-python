@@ -249,7 +249,7 @@ steps:
 **Caching poetry dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
 - name: Install poetry
   run: pipx install poetry
 - uses: actions/setup-python@v3
