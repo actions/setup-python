@@ -27,6 +27,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let debugSpy: jest.SpyInstance;
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
+  let setOutputSpy: jest.SpyInstance;
 
   // cache spy
   let restoreCacheSpy: jest.SpyInstance;
@@ -64,6 +65,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       return {stdout: '', stderr: 'Error occured', exitCode: 2};
     });
 
+    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy.mockImplementation(input => undefined);
+
     restoreCacheSpy = jest.spyOn(cache, 'restoreCache');
     restoreCacheSpy.mockImplementation(
       (cachePaths: string[], primaryKey: string, restoreKey?: string) => {
@@ -100,7 +104,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
@@ -126,7 +130,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         dependencyFile,
         cacheDependencyPath
       ) => {
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
@@ -162,7 +166,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
             return primaryKey !== fileHash && restoreKey ? pipFileLockHash : '';
           }
         );
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
