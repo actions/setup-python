@@ -191,6 +191,37 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     );
   });
 
+  describe('Check if handleMatchResult', () => {
+    it.each([
+      ['pip', '3.8.12', 'requirements.txt', 'someKey', true],
+      ['pipenv', '3.9.1', 'requirements.txt', 'someKey', true],
+      ['poetry', '3.8.12', 'requirements.txt', 'someKey', true],
+      ['pip', '3.9.2', 'requirements.txt', undefined, false],
+      ['pipenv', '3.8.12', 'requirements.txt', undefined, false],
+      ['poetry', '3.9.12', 'requirements.txt', undefined, false]
+    ])(
+      'sets correct outputs',
+      async (
+        packageManager,
+        pythonVersion,
+        dependencyFile,
+        matchedKey,
+        expectedOutputValue
+      ) => {
+        const cacheDistributor = getCacheDistributor(
+          packageManager,
+          pythonVersion,
+          dependencyFile
+        );
+        cacheDistributor.handleMatchResult(matchedKey);
+        expect(setOutputSpy).toHaveBeenCalledWith(
+          'cache-hit',
+          expectedOutputValue
+        );
+      }
+    );
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();

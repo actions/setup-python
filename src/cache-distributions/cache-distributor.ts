@@ -1,5 +1,6 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import {PromiseReturnType} from '../utils';
 
 export enum State {
   STATE_CACHE_PRIMARY_KEY = 'cache-primary-key',
@@ -41,12 +42,19 @@ abstract class CacheDistributor {
       restoreKey
     );
 
+    this.handleMatchResult(matchedKey);
+  }
+
+  public handleMatchResult(
+    matchedKey: PromiseReturnType<typeof cache.restoreCache>
+  ) {
     if (matchedKey) {
       core.saveState(State.CACHE_MATCHED_KEY, matchedKey);
       core.info(`Cache restored from key: ${matchedKey}`);
     } else {
       core.info(`${this.packageManager} cache is not found`);
     }
+    core.setOutput('cache-hit', Boolean(matchedKey));
   }
 }
 
