@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd __tests__/data
-          pipenv install requests
+          pipenv install
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -116,4 +116,4 @@ jobs:
       - name: Install dependencies
         run: |
           cd __tests__/data
-          pipenv install requests
+          pipenv install
