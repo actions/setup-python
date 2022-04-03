@@ -37234,18 +37234,17 @@ class CacheDistributor {
             core.saveState(State.CACHE_PATHS, cachePath);
             core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
-            this.handleMatchResult(matchedKey);
+            this.handleMatchResult(matchedKey, primaryKey);
         });
     }
-    handleMatchResult(matchedKey) {
-        if (matchedKey) {
+    handleMatchResult(matchedKey, primaryKey) {
+        if (matchedKey == primaryKey) {
             core.saveState(State.CACHE_MATCHED_KEY, matchedKey);
             core.info(`Cache restored from key: ${matchedKey}`);
         }
         else {
             core.info(`${this.packageManager} cache is not found`);
         }
-        core.info('cache was hit');
         core.setOutput('cache-hit', Boolean(matchedKey));
     }
 }

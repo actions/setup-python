@@ -119,12 +119,3 @@ export function isCacheFeatureAvailable(): boolean {
 
   return true;
 }
-
-// Awaited (typescript 4.5+) polyfill. Not ideal, so use with care
-export type AwaitedPolyfill<T> = T extends PromiseLike<infer U>
-  ? AwaitedPolyfill<U>
-  : T;
-// Extract return type from promise
-export type PromiseReturnType<
-  T extends (...args: any) => any
-> = AwaitedPolyfill<ReturnType<T>>;
