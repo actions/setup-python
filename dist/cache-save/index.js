@@ -37238,14 +37238,14 @@ class CacheDistributor {
         });
     }
     handleMatchResult(matchedKey, primaryKey) {
-        if (matchedKey == primaryKey) {
+        if (matchedKey) {
             core.saveState(State.CACHE_MATCHED_KEY, matchedKey);
             core.info(`Cache restored from key: ${matchedKey}`);
         }
         else {
             core.info(`${this.packageManager} cache is not found`);
         }
-        core.setOutput('cache-hit', Boolean(matchedKey));
+        core.setOutput('cache-hit', matchedKey === primaryKey);
     }
 }
 exports.default = CacheDistributor;

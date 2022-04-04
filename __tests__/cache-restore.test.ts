@@ -193,12 +193,12 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   describe('Check if handleMatchResult', () => {
     it.each([
-      ['pip', '3.8.12', 'requirements.txt', 'someKey', true],
-      ['pipenv', '3.9.1', 'requirements.txt', 'someKey', true],
-      ['poetry', '3.8.12', 'requirements.txt', 'someKey', true],
-      ['pip', '3.9.2', 'requirements.txt', undefined, false],
-      ['pipenv', '3.8.12', 'requirements.txt', undefined, false],
-      ['poetry', '3.9.12', 'requirements.txt', undefined, false]
+      ['pip', '3.8.12', 'requirements.txt', 'someKey', 'someKey', true],
+      ['pipenv', '3.9.1', 'requirements.txt', 'someKey', 'someKey', true],
+      ['poetry', '3.8.12', 'requirements.txt', 'someKey', 'someKey', true],
+      ['pip', '3.9.2', 'requirements.txt', undefined, 'someKey', false],
+      ['pipenv', '3.8.12', 'requirements.txt', undefined, 'someKey', false],
+      ['poetry', '3.9.12', 'requirements.txt', undefined, 'someKey', false]
     ])(
       'sets correct outputs',
       async (
@@ -206,6 +206,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         pythonVersion,
         dependencyFile,
         matchedKey,
+        restoredKey,
         expectedOutputValue
       ) => {
         const cacheDistributor = getCacheDistributor(
@@ -213,7 +214,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           pythonVersion,
           dependencyFile
         );
-        cacheDistributor.handleMatchResult(matchedKey);
+        cacheDistributor.handleMatchResult(matchedKey, restoredKey);
         expect(setOutputSpy).toHaveBeenCalledWith(
           'cache-hit',
           expectedOutputValue
