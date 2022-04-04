@@ -52,6 +52,7 @@ export async function findPyPyVersion(
   core.exportVariable('pythonLocation', pythonLocation);
   core.addPath(pythonLocation);
   core.addPath(_binDir);
+  core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
 
   return {resolvedPyPyVersion, resolvedPythonVersion};
 }
