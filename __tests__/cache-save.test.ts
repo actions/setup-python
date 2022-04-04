@@ -6,7 +6,7 @@ import {State} from '../src/cache-distributions/cache-distributor';
 
 describe('run', () => {
   const pipFileLockHash =
-    '67d817abcde9c72da0ed5b8f235647cb14638b9ff9d742b42e4406d2eb16fe3c';
+    'd1dd6218299d8a6db5fc2001d988b34a8b31f1e9d0bb4534d377dde7c19f64b3';
   const requirementsHash =
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =

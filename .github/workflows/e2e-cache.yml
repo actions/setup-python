@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
         uses: ./
         with:
@@ -41,7 +41,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
         uses: ./
         with:
@@ -50,7 +50,9 @@ jobs:
       - name: Install pipenv
         run: pipx install pipenv
       - name: Install dependencies
-        run: pipenv install numpy
+        run: |
+          cd __tests__/data
+          pipenv install --verbose
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -61,7 +63,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install poetry
         run: pipx install poetry
       - name: Setup Python
@@ -83,7 +85,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
         uses: ./
         with:
@@ -102,14 +104,16 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
-          cache-dependency-path: '**/requirements-linux.txt'
+          cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
         run: pipx install pipenv
       - name: Install dependencies
-        run: pipenv install numpy
+        run: |
+          cd __tests__/data
+          pipenv install --verbose
