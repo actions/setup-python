@@ -46,13 +46,13 @@ jobs:
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
-          # cache: 'pipenv'
+          cache: 'pipenv'
       - name: Install pipenv
         run: pipx install pipenv
       - name: Install dependencies
         run: |
           cd __tests__/data
-          pipenv install
+          pipenv install --verbose
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -109,11 +109,11 @@ jobs:
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
-          # cache: 'pipenv'
+          cache: 'pipenv'
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
         run: pipx install pipenv
       - name: Install dependencies
         run: |
           cd __tests__/data
-          pipenv install
+          pipenv install --verbose
