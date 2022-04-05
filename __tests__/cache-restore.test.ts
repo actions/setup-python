@@ -27,6 +27,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let debugSpy: jest.SpyInstance;
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
+  let setOutputSpy: jest.SpyInstance;
 
   // cache spy
   let restoreCacheSpy: jest.SpyInstance;
@@ -64,6 +65,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       return {stdout: '', stderr: 'Error occured', exitCode: 2};
     });
 
+    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy.mockImplementation(input => undefined);
+
     restoreCacheSpy = jest.spyOn(cache, 'restoreCache');
     restoreCacheSpy.mockImplementation(
       (cachePaths: string[], primaryKey: string, restoreKey?: string) => {
@@ -100,7 +104,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
@@ -126,7 +130,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         dependencyFile,
         cacheDependencyPath
       ) => {
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
@@ -162,7 +166,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
             return primaryKey !== fileHash && restoreKey ? pipFileLockHash : '';
           }
         );
-        const cacheDistributor = await getCacheDistributor(
+        const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
@@ -183,6 +187,38 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         }
 
         expect(infoSpy).toHaveBeenCalledWith(result);
+      }
+    );
+  });
+
+  describe('Check if handleMatchResult', () => {
+    it.each([
+      ['pip', '3.8.12', 'requirements.txt', 'someKey', 'someKey', true],
+      ['pipenv', '3.9.1', 'requirements.txt', 'someKey', 'someKey', true],
+      ['poetry', '3.8.12', 'requirements.txt', 'someKey', 'someKey', true],
+      ['pip', '3.9.2', 'requirements.txt', undefined, 'someKey', false],
+      ['pipenv', '3.8.12', 'requirements.txt', undefined, 'someKey', false],
+      ['poetry', '3.9.12', 'requirements.txt', undefined, 'someKey', false]
+    ])(
+      'sets correct outputs',
+      async (
+        packageManager,
+        pythonVersion,
+        dependencyFile,
+        matchedKey,
+        restoredKey,
+        expectedOutputValue
+      ) => {
+        const cacheDistributor = getCacheDistributor(
+          packageManager,
+          pythonVersion,
+          dependencyFile
+        );
+        cacheDistributor.handleMatchResult(matchedKey, restoredKey);
+        expect(setOutputSpy).toHaveBeenCalledWith(
+          'cache-hit',
+          expectedOutputValue
+        );
       }
     );
   });

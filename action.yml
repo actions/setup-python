@@ -19,6 +19,8 @@ inputs:
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
+  cache-hit:
+    description: 'A boolean value to indicate a cache entry was found'
 runs:
   using: 'node16'
   main: 'dist/setup/index.js'
