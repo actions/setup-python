@@ -1,3 +1,5 @@
+import * as cache from '@actions/cache';
+import * as core from '@actions/core';
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -98,4 +100,22 @@ export function isGhes(): boolean {
     process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   );
   return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+}
+
+export function isCacheFeatureAvailable(): boolean {
+  if (!cache.isFeatureAvailable()) {
+    if (isGhes()) {
+      throw new Error(
+        'Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.'
+      );
+    } else {
+      core.warning(
+        'The runner was not able to contact the cache service. Caching will be skipped'
+      );
+    }
+
+    return false;
+  }
+
+  return true;
 }

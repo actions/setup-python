@@ -4,16 +4,13 @@ import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isGhes} from './utils';
+import {isCacheFeatureAvailable} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy-');
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
-  if (isGhes()) {
-    throw new Error('Caching is not supported on GHES');
-  }
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
   const cacheDistributor = getCacheDistributor(
@@ -47,13 +44,13 @@ async function run() {
           `Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
         );
       } else {
-        const installed = await finder.findPythonVersion(version, arch);
+        const installed = await finder.useCpythonVersion(version, arch);
         pythonVersion = installed.version;
         core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
       }
 
       const cache = core.getInput('cache');
-      if (cache) {
+      if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
     }

@@ -91,23 +91,3 @@ jobs:
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
 
-  setup-pypy-legacy:
-    name: Setup PyPy ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-10.15, windows-2019, ubuntu-18.04, ubuntu-20.04]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: setup-python pypy3
-      uses: ./
-      with:
-        python-version: 'pypy3'
-
-    - name: setup-python pypy2
-      uses: ./
-      with:
-        python-version: 'pypy2'
