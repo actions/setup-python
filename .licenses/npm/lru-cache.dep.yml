@@ -1,16 +1,16 @@
 ---
-name: minimatch
-version: 3.1.2
+name: lru-cache
+version: 7.8.1
 type: npm
-summary: a glob matcher in javascript
-homepage: https://github.com/isaacs/minimatch#readme
+summary: A cache object that deletes the least-recently-used items.
+homepage: https://github.com/isaacs/node-lru-cache#readme
 license: isc
 licenses:
 - sources: LICENSE
   text: |
     The ISC License
 
-    Copyright (c) Isaac Z. Schlueter and Contributors
+    Copyright (c) 2010-2022 Isaac Z. Schlueter and Contributors
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose with or without fee is hereby granted, provided that the above
