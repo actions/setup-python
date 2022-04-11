@@ -54415,11 +54415,8 @@ function findPyPyVersion(versionSpec, architecture) {
         const pypyVersionSpec = parsePyPyVersion(versionSpec);
         ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
         if (!installDir) {
-            ({
-                installDir,
-                resolvedPythonVersion,
-                resolvedPyPyVersion
-            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture));
+            ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } =
+                yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture));
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
