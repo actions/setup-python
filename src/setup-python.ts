@@ -22,6 +22,16 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 }
 
 async function run() {
+  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+    core.debug(
+      `Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`
+    );
+    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+  } else {
+    core.debug(
+      `Python is expected to be installed into RUNNER_TOOL_CACHE==${process.env['RUNNER_TOOL_CACHE']}`
+    );
+  }
   try {
     const version = core.getInput('python-version');
     if (version) {
