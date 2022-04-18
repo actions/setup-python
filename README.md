@@ -154,6 +154,8 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
 
+**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For macOS and Ubuntu images python versions are built from the source code. For Windows the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
+
  # Available versions of PyPy
 
  `setup-python` is able to configure PyPy from two sources:
