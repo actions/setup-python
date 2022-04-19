@@ -1,4 +1,4 @@
-# setup-python V2
+# setup-python V3
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
@@ -9,7 +9,7 @@ This action sets up a Python environment for use in actions by:
 - optionally installing and adding to PATH a version of Python that is already installed in the tools cache.
 - downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the tools cache.
 - failing if a specific version of Python is not preinstalled or available for download.
-- optionally caching dependencies for pip and pipenv.
+- optionally caching dependencies for pip, pipenv and poetry.
 - registering problem matchers for error output.
 
 # What's new
@@ -19,7 +19,7 @@ This action sets up a Python environment for use in actions by:
 - Automatic setup and download of Python packages if using a self-hosted runner.
 - Support for pre-release versions of Python.
 - Support for installing any version of PyPy on-flight
-- Support for built-in caching of pip and pipenv dependencies
+- Support for built-in caching of pip, pipenv and poetry dependencies
 - Support for `.python-version` file
 
 # Usage
@@ -29,8 +29,8 @@ See [action.yml](action.yml)
 Basic:
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v3
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
     architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
@@ -58,9 +58,9 @@ jobs:
         python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.7', 'pypy-3.8' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -82,9 +82,9 @@ jobs:
           - os: windows-latest
             python-version: '3.6'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -101,8 +101,8 @@ jobs:
         # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
         python-version: ['3.7.4', '3.8', '3.9', '3.10']
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -111,8 +111,8 @@ jobs:
 Download and set up an accurate pre-release version of Python:
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v3
   with:
     python-version: '3.11.0-alpha.1'
 - run: python my_script.py
@@ -121,8 +121,8 @@ steps:
 Download and set up the latest available version of Python (includes both pre-release and stable versions):
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v3
   with:
     python-version: '3.11.0-alpha - 3.11.0' # SemVer's version range syntax
 - run: python my_script.py
@@ -141,8 +141,8 @@ jobs:
         - 'pypy-3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
         - 'pypy-3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -191,8 +191,8 @@ GitHub hosted runners have a tools cache that comes with a few versions of Pytho
 |**PyPy Tool Cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
 GitHub virtual environments are setup in [actions/virtual-environments](https://github.com/actions/virtual-environments). During the setup, the available versions of Python and PyPy are automatically downloaded, setup and documented.
-- [Tools cache setup for Ubuntu](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/hosted-tool-cache.sh)
-- [Tools cache setup for Windows](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Download-ToolCache.ps1)
+- Tools cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
+- Tools cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
 
 # Specifying a Python version
 
@@ -221,23 +221,24 @@ pypy-3.7-nightly # Python 3.7 and nightly PyPy
 
 # Caching packages dependencies
 
-The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip` and `pipenv`. The `cache` input is optional, and caching is turned off by default.
+The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
 
-The action defaults to searching for a dependency file (`requirements.txt` for pip or `Pipfile.lock` for pipenv) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
+The action defaults to searching for a dependency file (`requirements.txt` for pip, `Pipfile.lock` for pipenv or `poetry.lock` for poetry) in the repository, and uses its hash as a part of the cache key. Use `cache-dependency-path` for cases where multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
 
  - For pip, the action will cache global cache directory
  - For pipenv, the action will cache virtualenv directory
+ - For poetry, the action will cache virtualenv directory
 
 **Please Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available that can lead to an increase in total build time.
 
 The requirements file format allows to specify dependency versions using logical operators (for example chardet>=3.0.4) or specify dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
 
-**Caching pip dependencies:**  
+**Caching pip dependencies:**
 
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -247,21 +248,35 @@ steps:
 **Caching pipenv dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pipenv'
 - run: pipenv install
 ```
 
+**Caching poetry dependencies:**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- name: Install poetry
+  run: pipx install poetry
+- uses: actions/setup-python@v3
+  with:
+    python-version: '3.9'
+    cache: 'poetry'
+- run: poetry install
+- run: poetry run pytest
+```
+
 **Using wildcard patterns to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -272,10 +287,10 @@ steps:
 **Using a list of file paths to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v2
+- uses: actions/setup-python@v3
   with:
     python-version: '3.9'
     cache: 'pipenv'
