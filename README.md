@@ -179,8 +179,8 @@ GitHub hosted runners have a tools cache that comes with a few versions of Pytho
 |**PyPy Tool Cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
 GitHub virtual environments are setup in [actions/virtual-environments](https://github.com/actions/virtual-environments). During the setup, the available versions of Python and PyPy are automatically downloaded, setup and documented.
-- [Tools cache setup for Ubuntu](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/hosted-tool-cache.sh)
-- [Tools cache setup for Windows](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Download-ToolCache.ps1)
+- Tools cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
+- Tools cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
 
 # Specifying a Python version
 
