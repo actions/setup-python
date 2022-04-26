@@ -6113,7 +6113,7 @@ function run() {
                 }
             }
             else {
-                throw new Error('there\'s empty python-version input');
+                throw new Error("there's empty python-version input");
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
