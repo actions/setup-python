@@ -5225,10 +5225,137 @@ class ToolRunner extends events.EventEmitter {
         return (this._endsWith(upperToolPath, '.CMD') ||
             this._endsWith(upperToolPath, '.BAT'));
     }
+<<<<<<< HEAD
     _windowsQuoteCmdArg(arg) {
         // for .exe, apply the normal quoting rules that libuv applies
         if (!this._isCmdFile()) {
             return this._uvQuoteCmdArg(arg);
+=======
+
+    const sameDirectionIncreasing =
+      (this.operator === '>=' || this.operator === '>') &&
+      (comp.operator === '>=' || comp.operator === '>')
+    const sameDirectionDecreasing =
+      (this.operator === '<=' || this.operator === '<') &&
+      (comp.operator === '<=' || comp.operator === '<')
+    const sameSemVer = this.semver.version === comp.semver.version
+    const differentDirectionsInclusive =
+      (this.operator === '>=' || this.operator === '<=') &&
+      (comp.operator === '>=' || comp.operator === '<=')
+    const oppositeDirectionsLessThan =
+      cmp(this.semver, '<', comp.semver, options) &&
+      (this.operator === '>=' || this.operator === '>') &&
+        (comp.operator === '<=' || comp.operator === '<')
+    const oppositeDirectionsGreaterThan =
+      cmp(this.semver, '>', comp.semver, options) &&
+      (this.operator === '<=' || this.operator === '<') &&
+        (comp.operator === '>=' || comp.operator === '>')
+
+    return (
+      sameDirectionIncreasing ||
+      sameDirectionDecreasing ||
+      (sameSemVer && differentDirectionsInclusive) ||
+      oppositeDirectionsLessThan ||
+      oppositeDirectionsGreaterThan
+    )
+  }
+}
+
+module.exports = Comparator
+
+const {re, t} = __webpack_require__(328)
+const cmp = __webpack_require__(752)
+const debug = __webpack_require__(548)
+const SemVer = __webpack_require__(206)
+const Range = __webpack_require__(124)
+
+
+/***/ }),
+/* 175 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
+const finder = __importStar(__webpack_require__(927));
+const finderPyPy = __importStar(__webpack_require__(847));
+const path = __importStar(__webpack_require__(622));
+const os = __importStar(__webpack_require__(87));
+const cache_factory_1 = __webpack_require__(633);
+const utils_1 = __webpack_require__(163);
+function isPyPyVersion(versionSpec) {
+    return versionSpec.startsWith('pypy-');
+}
+function cacheDependencies(cache, pythonVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
+        const cacheDistributor = cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
+        yield cacheDistributor.restoreCache();
+    });
+}
+function run() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim())) {
+            process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
+        }
+        core.debug(`Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`);
+        process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+        try {
+            const version = core.getInput('python-version');
+            if (version) {
+                let pythonVersion;
+                const arch = core.getInput('architecture') || os.arch();
+                if (isPyPyVersion(version)) {
+                    const installed = yield finderPyPy.findPyPyVersion(version, arch);
+                    pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+                    core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                }
+                else {
+                    const installed = yield finder.useCpythonVersion(version, arch);
+                    pythonVersion = installed.version;
+                    core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
+                }
+                const cache = core.getInput('cache');
+                if (cache && utils_1.isCacheFeatureAvailable()) {
+                    yield cacheDependencies(cache, pythonVersion);
+                }
+            }
+            else {
+                throw new Error("there's empty python-version input");
+            }
+            const matchersPath = path.join(__dirname, '../..', '.github');
+            core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
+>>>>>>> 99015f8 (Use /opt/hostedtoolcache as default value AGENT_TOOLSDIRECTORY)
         }
         // otherwise apply quoting rules specific to the cmd.exe command line parser.
         // the libuv rules are generic and are not designed specifically for cmd.exe
