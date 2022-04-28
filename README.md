@@ -337,7 +337,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 ### Linux
 
 - The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
-- Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
+- By default runner downloads and install the tools to `/opt/hostedtoolcache`. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location.
   - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`.
   - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
 - Create a directory called `hostedtoolcache` inside `/opt`.
