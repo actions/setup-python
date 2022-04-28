@@ -10283,11 +10283,14 @@ function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
         const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
         const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
         let binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         core.info('Creating symlinks...');
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
     });
 }
 function installPip(pythonLocation) {

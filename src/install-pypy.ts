@@ -98,7 +98,9 @@ async function createPyPySymlink(
 ) {
   const version = semver.coerce(pythonVersion)!;
   const pythonBinaryPostfix = semver.major(version);
+  const pythonMinor = semver.minor(version);
   const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+  const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
   let binaryExtension = IS_WINDOWS ? '.exe' : '';
 
   core.info('Creating symlinks...');
@@ -113,6 +115,13 @@ async function createPyPySymlink(
     pypyBinaryPath,
     `pypy${pypyBinaryPostfix}${binaryExtension}`,
     `python${binaryExtension}`,
+    true
+  );
+
+  createSymlinkInFolder(
+    pypyBinaryPath,
+    `pypy${pypyBinaryPostfix}${binaryExtension}`,
+    `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`,
     true
   );
 }
