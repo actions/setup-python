@@ -53,6 +53,10 @@ async function run() {
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
+    } else {
+      core.warning(
+        'python-version is empty, the OS native python will be used'
+      );
     }
     const matchersPath = path.join(__dirname, '../..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
