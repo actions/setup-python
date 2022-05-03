@@ -6100,12 +6100,12 @@ function run() {
                 if (isPyPyVersion(version)) {
                     const installed = yield finderPyPy.findPyPyVersion(version, arch);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-                    core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                    core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
                     const installed = yield finder.useCpythonVersion(version, arch);
                     pythonVersion = installed.version;
-                    core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
+                    core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {
