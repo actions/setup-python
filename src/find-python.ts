@@ -70,6 +70,7 @@ export async function useCpythonVersion(
   }
 
   core.exportVariable('pythonLocation', installDir);
+  core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
 
   if (IS_LINUX) {
     const libPath = process.env.LD_LIBRARY_PATH

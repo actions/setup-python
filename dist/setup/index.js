@@ -52374,6 +52374,7 @@ function findPyPyVersion(versionSpec, architecture) {
         const _binDir = path.join(installDir, pipDir);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
         core.exportVariable('pythonLocation', pythonLocation);
+        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
         core.addPath(pythonLocation);
         core.addPath(_binDir);
         core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
@@ -57009,6 +57010,7 @@ function useCpythonVersion(version, architecture) {
             ].join(os.EOL));
         }
         core.exportVariable('pythonLocation', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
         if (utils_1.IS_LINUX) {
             const libPath = process.env.LD_LIBRARY_PATH
                 ? `:${process.env.LD_LIBRARY_PATH}`
