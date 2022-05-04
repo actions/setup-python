@@ -1,7 +1,8 @@
 import * as glob from '@actions/glob';
-import * as os from 'os';
+import * as io from '@actions/io';
 import * as path from 'path';
 import * as exec from '@actions/exec';
+import * as core from '@actions/core';
 
 import CacheDistributor from './cache-distributor';
 
@@ -26,6 +27,21 @@ class PoetryCache extends CacheDistributor {
 
     if (poetryConfig['virtualenvs.in-project'] === true) {
       paths.push(path.join(process.cwd(), '.venv'));
+    }
+
+    const pythonLocation = await io.which('python');
+
+    if (pythonLocation) {
+      core.debug(`pythonLocation is ${pythonLocation}`);
+      const {exitCode, stderr} = await exec.getExecOutput(
+        `poetry env use ${pythonLocation}`
+      );
+
+      if (exitCode) {
+        throw new Error(stderr);
+      }
+    } else {
+      core.warning('python binaries were not found in PATH.');
     }
 
     return paths;

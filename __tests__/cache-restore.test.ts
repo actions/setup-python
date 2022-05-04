@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
 
 describe('restore-cache', () => {
@@ -34,6 +35,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   // exec spy
   let getExecOutputSpy: jest.SpyInstance;
+
+  // io spy
+  let whichSpy: jest.SpyInstance;
 
   beforeEach(() => {
     process.env['RUNNER_OS'] = process.env['RUNNER_OS'] ?? 'linux';
@@ -74,6 +78,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         return primaryKey;
       }
     );
+
+    whichSpy = jest.spyOn(io, 'which');
+    whichSpy.mockImplementation(() => '/path/to/python');
   });
 
   describe('Validate provided package manager', () => {
