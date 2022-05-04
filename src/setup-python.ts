@@ -55,7 +55,7 @@ async function run() {
       }
     } else {
       core.warning(
-        "The `python-version` input is not set.  The version of Python currently in `PATH` will be used."
+        'The `python-version` input is not set.  The version of Python currently in `PATH` will be used.'
       );
     }
     const matchersPath = path.join(__dirname, '../..', '.github');

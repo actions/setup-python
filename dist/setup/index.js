@@ -6113,7 +6113,7 @@ function run() {
                 }
             }
             else {
-                core.warning("Step input 'python-version' is not set, the OS native python version will be used");
+                core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
