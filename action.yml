@@ -11,6 +11,9 @@ inputs:
     required: false
   architecture:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
+  check-latest:
+    description: 'Set this option if you want the action to check for the latest available version that satisfies the version spec.'
+    default: false
   token:
     description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
     default: ${{ github.token }}

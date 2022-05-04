@@ -34,9 +34,24 @@ export async function useCpythonVersion(
   version: string,
   architecture: string
 ): Promise<InstalledVersion> {
+  let manifest: tc.IToolRelease[] | null = null;
   const desugaredVersionSpec = desugarDevVersion(version);
-  const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
+  let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+
+  const checkLatest = core.getBooleanInput('check-latest');
+
+  if (checkLatest) {
+    manifest = await installer.getManifest();
+    const resolvedVersion = (await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))?.version;
+
+    if(resolvedVersion) {
+      semanticVersionSpec = resolvedVersion;
+      core.info(`Resolved as '${semanticVersionSpec}'`);
+    } else {
+      core.info(`Failed to resolve version ${semanticVersionSpec} from manifest`);
+    }
+  }
 
   let installDir: string | null = tc.find(
     'Python',
@@ -49,7 +64,8 @@ export async function useCpythonVersion(
     );
     const foundRelease = await installer.findReleaseFromManifest(
       semanticVersionSpec,
-      architecture
+      architecture,
+      manifest
     );
 
     if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
