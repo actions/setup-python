@@ -5350,9 +5350,6 @@ function run() {
                     yield cacheDependencies(cache, pythonVersion);
                 }
             }
-            else {
-                throw new Error("there's empty python-version input");
-            }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
 >>>>>>> 99015f8 (Use /opt/hostedtoolcache as default value AGENT_TOOLSDIRECTORY)
