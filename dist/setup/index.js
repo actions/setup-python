@@ -5325,8 +5325,11 @@ function cacheDependencies(cache, pythonVersion) {
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        if (!((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim())) {
-            process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
+        if (!utils_1.IS_WINDOWS && !((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim())) {
+            if (utils_1.IS_LINUX)
+                process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
+            else
+                process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
         }
         core.debug(`Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`);
         process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
