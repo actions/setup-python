@@ -49,14 +49,16 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
+  // According to the README windows binaries do not require to be installed
+  // in the specific location, but Mac and Linux do
   if (!IS_WINDOWS && !process.env.AGENT_TOOLSDIRECTORY?.trim()) {
     if (IS_LINUX) process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
     else process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
   }
   core.debug(
-    `Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`
+    `Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`
   );
-  process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
   try {
     const version = resolveVersionInput();
     if (version) {
