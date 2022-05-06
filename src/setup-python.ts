@@ -34,17 +34,18 @@ async function run() {
   }
   try {
     const version = core.getInput('python-version');
+    const checkLatest = core.getBooleanInput('check-latest');
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
       if (isPyPyVersion(version)) {
-        const installed = await finderPyPy.findPyPyVersion(version, arch);
+        const installed = await finderPyPy.findPyPyVersion(version, arch, checkLatest);
         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
         core.info(
           `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
         );
       } else {
-        const installed = await finder.useCpythonVersion(version, arch);
+        const installed = await finder.useCpythonVersion(version, arch, checkLatest);
         pythonVersion = installed.version;
         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
       }

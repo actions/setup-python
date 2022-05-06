@@ -40,7 +40,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64');
+    await finder.useCpythonVersion('3.x', 'x64', false);
   });
 
   it('Finds stable Python version if it is not installed, but exists in the manifest', async () => {
@@ -60,7 +60,7 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3', 'x64');
+    await finder.useCpythonVersion('1.2.3', 'x64', false);
   });
 
   it('Finds pre-release Python version in the manifest', async () => {
@@ -85,7 +85,7 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3-beta.2', 'x64');
+    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false);
   });
 
   it('Check-latest true, finds the latest version in the manifest', async () => {
@@ -128,7 +128,7 @@ describe('Finder tests', () => {
     
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2', 'x64');
+    await finder.useCpythonVersion('1.2', 'x64', true);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
     expect(infoSpy).toHaveBeenCalledWith('Version 1.2.3 was not found in the local cache');
@@ -139,7 +139,7 @@ describe('Finder tests', () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.useCpythonVersion('3.300000', 'x64');
+      await finder.useCpythonVersion('3.300000', 'x64', false);
     } catch {
       thrown = true;
     }
