@@ -5612,16 +5612,17 @@ function run() {
         }
         try {
             const version = core.getInput('python-version');
+            const checkLatest = core.getBooleanInput('check-latest');
             if (version) {
                 let pythonVersion;
                 const arch = core.getInput('architecture') || os.arch();
                 if (isPyPyVersion(version)) {
-                    const installed = yield finderPyPy.findPyPyVersion(version, arch);
+                    const installed = yield finderPyPy.findPyPyVersion(version, arch, checkLatest);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
                     core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
-                    const installed = yield finder.useCpythonVersion(version, arch);
+                    const installed = yield finder.useCpythonVersion(version, arch, checkLatest);
                     pythonVersion = installed.version;
                     core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
@@ -9742,7 +9743,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.installPyPy = void 0;
+exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
 const path = __importStar(__webpack_require__(622));
 const core = __importStar(__webpack_require__(470));
 const tc = __importStar(__webpack_require__(533));
@@ -9751,10 +9752,10 @@ const httpm = __importStar(__webpack_require__(539));
 const exec = __importStar(__webpack_require__(986));
 const fs_1 = __importDefault(__webpack_require__(747));
 const utils_1 = __webpack_require__(163);
-function installPyPy(pypyVersion, pythonVersion, architecture) {
+function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
-        const releases = yield getAvailablePyPyVersions();
+        releases !== null && releases !== void 0 ? releases : (releases = yield getAvailablePyPyVersions());
         if (!releases || releases.length === 0) {
             throw new Error('No release was found in PyPy version.json');
         }
@@ -9800,6 +9801,7 @@ function getAvailablePyPyVersions() {
         return response.result;
     });
 }
+exports.getAvailablePyPyVersions = getAvailablePyPyVersions;
 function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
@@ -52251,19 +52253,34 @@ const utils_1 = __webpack_require__(163);
 const semver = __importStar(__webpack_require__(876));
 const core = __importStar(__webpack_require__(470));
 const tc = __importStar(__webpack_require__(533));
-function findPyPyVersion(versionSpec, architecture) {
+function findPyPyVersion(versionSpec, architecture, checkLatest) {
     return __awaiter(this, void 0, void 0, function* () {
         let resolvedPyPyVersion = '';
         let resolvedPythonVersion = '';
         let installDir;
+        let releases;
         const pypyVersionSpec = parsePyPyVersion(versionSpec);
+        if (checkLatest) {
+            releases = yield pypyInstall.getAvailablePyPyVersions();
+            if (releases && releases.length > 0) {
+                const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture);
+                if (releaseData) {
+                    core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
+                    pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
+                    pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
+                }
+                else {
+                    core.info(`Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`);
+                }
+            }
+        }
         ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
         if (!installDir) {
             ({
                 installDir,
                 resolvedPythonVersion,
                 resolvedPyPyVersion
-            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture));
+            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, releases));
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
@@ -56883,14 +56900,13 @@ function binDir(installDir) {
         return path.join(installDir, 'bin');
     }
 }
-function useCpythonVersion(version, architecture) {
+function useCpythonVersion(version, architecture, checkLatest) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let manifest = null;
         const desugaredVersionSpec = desugarDevVersion(version);
         let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
-        const checkLatest = core.getBooleanInput('check-latest');
         if (checkLatest) {
             manifest = yield installer.getManifest();
             const resolvedVersion = (_a = (yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;

@@ -32,14 +32,13 @@ function binDir(installDir: string): string {
 
 export async function useCpythonVersion(
   version: string,
-  architecture: string
+  architecture: string,
+  checkLatest: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
   const desugaredVersionSpec = desugarDevVersion(version);
   let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
-
-  const checkLatest = core.getBooleanInput('check-latest');
 
   if (checkLatest) {
     manifest = await installer.getManifest();

@@ -19,11 +19,12 @@ import {
 export async function installPyPy(
   pypyVersion: string,
   pythonVersion: string,
-  architecture: string
+  architecture: string,
+  releases: IPyPyManifestRelease[] | undefined
 ) {
   let downloadDir;
 
-  const releases = await getAvailablePyPyVersions();
+  releases ??= await getAvailablePyPyVersions();
   if (!releases || releases.length === 0) {
     throw new Error('No release was found in PyPy version.json');
   }
@@ -78,7 +79,7 @@ export async function installPyPy(
   return {installDir, resolvedPythonVersion, resolvedPyPyVersion};
 }
 
-async function getAvailablePyPyVersions() {
+export async function getAvailablePyPyVersions() {
   const url = 'https://downloads.python.org/pypy/versions.json';
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
 
