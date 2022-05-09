@@ -37,6 +37,7 @@ describe('Finder tests', () => {
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('Finds Python if it is installed', async () => {
@@ -127,7 +128,7 @@ describe('Finder tests', () => {
     });
 
     await io.mkdirP(pythonDir);
-    await io.rmRF(expPath);
+    await io.rmRF(path.join(toolDir, 'Python', '1.2.3'));
 
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
@@ -137,6 +138,10 @@ describe('Finder tests', () => {
     expect(infoSpy).toHaveBeenCalledWith(
       'Version 1.2.3 was not found in the local cache'
     );
+    expect(infoSpy).toBeCalledWith(
+      'Version 1.2.3 is available for downloading'
+    );
+    expect(installSpy).toHaveBeenCalled();
     expect(cnSpy).toHaveBeenCalledWith(`::add-path::${expPath}${os.EOL}`);
   });
 
