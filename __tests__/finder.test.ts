@@ -1,7 +1,7 @@
 import * as io from '@actions/io';
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 
 const toolDir = path.join(
   __dirname,
