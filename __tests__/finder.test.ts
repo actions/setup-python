@@ -27,6 +27,13 @@ import * as installer from '../src/install-python';
 const manifestData = require('./data/versions-manifest.json');
 
 describe('Finder tests', () => {
+  let writeSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    writeSpy = jest.spyOn(process.stdout, 'write');
+    writeSpy.mockImplementation(() => {});
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
