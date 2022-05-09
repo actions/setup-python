@@ -42,13 +42,21 @@ export async function useCpythonVersion(
 
   if (checkLatest) {
     manifest = await installer.getManifest();
-    const resolvedVersion = (await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))?.version;
+    const resolvedVersion = (
+      await installer.findReleaseFromManifest(
+        semanticVersionSpec,
+        architecture,
+        manifest
+      )
+    )?.version;
 
-    if(resolvedVersion) {
+    if (resolvedVersion) {
       semanticVersionSpec = resolvedVersion;
       core.info(`Resolved as '${semanticVersionSpec}'`);
     } else {
-      core.info(`Failed to resolve version ${semanticVersionSpec} from manifest`);
+      core.info(
+        `Failed to resolve version ${semanticVersionSpec} from manifest`
+      );
     }
   }
 

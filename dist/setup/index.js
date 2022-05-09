@@ -9752,7 +9752,7 @@ const utils_1 = __webpack_require__(163);
 function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
-        releases !== null && releases !== void 0 ? releases : (releases = yield getAvailablePyPyVersions());
+        releases = releases !== null && releases !== void 0 ? releases : (yield getAvailablePyPyVersions());
         if (!releases || releases.length === 0) {
             throw new Error('No release was found in PyPy version.json');
         }

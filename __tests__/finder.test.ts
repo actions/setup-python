@@ -34,7 +34,7 @@ describe('Finder tests', () => {
 
   it('Finds Python if it is installed', async () => {
     const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation((input) => false);
+    getBooleanInputSpy.mockImplementation(input => false);
 
     const pythonDir: string = path.join(toolDir, 'Python', '3.0.0', 'x64');
     await io.mkdirP(pythonDir);
@@ -48,7 +48,7 @@ describe('Finder tests', () => {
     findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
 
     const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation((input) => false);
+    getBooleanInputSpy.mockImplementation(input => false);
 
     const installSpy: jest.SpyInstance = jest.spyOn(
       installer,
@@ -68,7 +68,7 @@ describe('Finder tests', () => {
     findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
 
     const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation((input) => false);
+    getBooleanInputSpy.mockImplementation(input => false);
 
     const installSpy: jest.SpyInstance = jest.spyOn(
       installer,
@@ -93,7 +93,7 @@ describe('Finder tests', () => {
     findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
 
     const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation((input) => true);
+    getBooleanInputSpy.mockImplementation(input => true);
 
     const cnSpy: jest.SpyInstance = jest.spyOn(process.stdout, 'write');
     cnSpy.mockImplementation(line => {
@@ -102,14 +102,10 @@ describe('Finder tests', () => {
     });
 
     const infoSpy: jest.SpyInstance = jest.spyOn(core, 'info');
-    infoSpy.mockImplementation(() => {
-
-    });
+    infoSpy.mockImplementation(() => {});
 
     const debugSpy: jest.SpyInstance = jest.spyOn(core, 'debug');
-    debugSpy.mockImplementation(() => {
-
-    });
+    debugSpy.mockImplementation(() => {});
 
     const pythonDir: string = path.join(toolDir, 'Python', '1.2.2', 'x64');
     const expPath: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
@@ -125,13 +121,15 @@ describe('Finder tests', () => {
 
     await io.mkdirP(pythonDir);
     await io.rmRF(expPath);
-    
+
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await finder.useCpythonVersion('1.2', 'x64', true);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
-    expect(infoSpy).toHaveBeenCalledWith('Version 1.2.3 was not found in the local cache');
+    expect(infoSpy).toHaveBeenCalledWith(
+      'Version 1.2.3 was not found in the local cache'
+    );
     expect(cnSpy).toHaveBeenCalledWith(`::add-path::${expPath}${os.EOL}`);
   });
 
