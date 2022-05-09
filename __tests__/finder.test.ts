@@ -127,6 +127,9 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${expPath}.complete`, 'hello');
     });
 
+    const tcFindSpy: jest.SpyInstance = jest.spyOn(tc, 'find');
+    tcFindSpy.mockImplementationOnce(() => "").mockImplementationOnce(() => expPath);
+
     await io.mkdirP(pythonDir);
     await io.rmRF(path.join(toolDir, 'Python', '1.2.3'));
 
