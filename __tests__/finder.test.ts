@@ -109,6 +109,9 @@ describe('Finder tests', () => {
       // process.stderr.write('write:' + line + '\n');
     });
 
+    const addPathSpy: jest.SpyInstance = jest.spyOn(core, 'addPath');
+    addPathSpy.mockImplementation(() => null);
+
     const infoSpy: jest.SpyInstance = jest.spyOn(core, 'info');
     infoSpy.mockImplementation(() => {});
 
@@ -147,7 +150,7 @@ describe('Finder tests', () => {
       'Version 1.2.3 is available for downloading'
     );
     expect(installSpy).toHaveBeenCalled();
-    expect(cnSpy).toHaveBeenCalledWith(`::add-path::${expPath}${os.EOL}`);
+    expect(addPathSpy).toHaveBeenCalledWith(expPath);
   });
 
   it('Errors if Python is not installed', async () => {
