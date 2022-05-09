@@ -41,12 +41,16 @@ export async function findPyPyVersion(
         architecture
       );
 
-      if(releaseData) {
-        core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
+      if (releaseData) {
+        core.info(
+          `Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`
+        );
         pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
         pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
       } else {
-        core.info(`Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`);
+        core.info(
+          `Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`
+        );
       }
     }
   }

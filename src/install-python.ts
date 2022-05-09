@@ -17,7 +17,7 @@ export async function findReleaseFromManifest(
   architecture: string,
   manifest: tc.IToolRelease[] | null
 ): Promise<tc.IToolRelease | undefined> {
-  if(!manifest) {
+  if (!manifest) {
     manifest = await getManifest();
   }
 
@@ -32,8 +32,15 @@ export async function findReleaseFromManifest(
 }
 
 export function getManifest(): Promise<tc.IToolRelease[]> {
-  core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
-  return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
+  core.debug(
+    `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
+  );
+  return tc.getManifestFromRepo(
+    MANIFEST_REPO_OWNER,
+    MANIFEST_REPO_NAME,
+    AUTH,
+    MANIFEST_REPO_BRANCH
+  );
 }
 
 async function installPython(workingDirectory: string) {

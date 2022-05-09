@@ -24,7 +24,8 @@ export async function installPyPy(
 ) {
   let downloadDir;
 
-  releases ??= await getAvailablePyPyVersions();
+  releases = releases ?? (await getAvailablePyPyVersions());
+
   if (!releases || releases.length === 0) {
     throw new Error('No release was found in PyPy version.json');
   }
