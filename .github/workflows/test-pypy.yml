@@ -86,7 +86,7 @@ jobs:
 
       - name: Assert expected binaries (or symlinks) are present
         run: |
-          EXECUTABLE=${{ matrix.pypy }}
+          EXECUTABLE="pypy-3.7-v7.3.x"
           EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
           EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
           ${EXECUTABLE} --version
