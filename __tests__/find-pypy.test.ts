@@ -63,6 +63,12 @@ describe('findPyPyToolCache', () => {
   const pypyPath = path.join('PyPy', actualPythonVersion, architecture);
   let tcFind: jest.SpyInstance;
   let spyReadExactPyPyVersion: jest.SpyInstance;
+  let infoSpy: jest.SpyInstance;
+  let warningSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
+  let addPathSpy: jest.SpyInstance;
+  let exportVariableSpy: jest.SpyInstance;
+  let setOutputSpy: jest.SpyInstance;
 
   beforeEach(() => {
     tcFind = jest.spyOn(tc, 'find');
@@ -75,6 +81,24 @@ describe('findPyPyToolCache', () => {
 
     spyReadExactPyPyVersion = jest.spyOn(utils, 'readExactPyPyVersionFile');
     spyReadExactPyPyVersion.mockImplementation(() => actualPyPyVersion);
+
+    infoSpy = jest.spyOn(core, 'info');
+    infoSpy.mockImplementation(() => null);
+
+    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy.mockImplementation(() => null);
+
+    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy.mockImplementation(() => null);
+
+    addPathSpy = jest.spyOn(core, 'addPath');
+    addPathSpy.mockImplementation(() => null);
+
+    exportVariableSpy = jest.spyOn(core, 'exportVariable');
+    exportVariableSpy.mockImplementation(() => null);
+
+    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy.mockImplementation(() => null);
   });
 
   afterEach(() => {
@@ -118,7 +142,12 @@ describe('findPyPyToolCache', () => {
 
 describe('findPyPyVersion', () => {
   let getBooleanInputSpy: jest.SpyInstance;
+  let warningSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
   let infoSpy: jest.SpyInstance;
+  let addPathSpy: jest.SpyInstance;
+  let exportVariableSpy: jest.SpyInstance;
+  let setOutputSpy: jest.SpyInstance;
   let tcFind: jest.SpyInstance;
   let spyExtractZip: jest.SpyInstance;
   let spyExtractTar: jest.SpyInstance;
@@ -139,6 +168,21 @@ describe('findPyPyVersion', () => {
 
     infoSpy = jest.spyOn(core, 'info');
     infoSpy.mockImplementation(() => {});
+
+    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy.mockImplementation(() => null);
+
+    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy.mockImplementation(() => null);
+
+    addPathSpy = jest.spyOn(core, 'addPath');
+    addPathSpy.mockImplementation(() => null);
+
+    exportVariableSpy = jest.spyOn(core, 'exportVariable');
+    exportVariableSpy.mockImplementation(() => null);
+
+    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy.mockImplementation(() => null);
 
     tcFind = jest.spyOn(tc, 'find');
     tcFind.mockImplementation((tool: string, version: string) => {
