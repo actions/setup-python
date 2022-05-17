@@ -30,7 +30,7 @@ function resolveVersionInput(): string {
     core.warning(
       'Both python-version and python-version-file inputs are specified, only python-version will be used'
     );
-  } 
+  }
 
   if (version) {
     return version;
@@ -38,7 +38,7 @@ function resolveVersionInput(): string {
 
   const versionFilePath = path.join(
     process.env.GITHUB_WORKSPACE!,
-    versionFile || ".python-version"
+    versionFile || '.python-version'
   );
   if (!fs.existsSync(versionFilePath)) {
     throw new Error(

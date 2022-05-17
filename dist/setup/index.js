@@ -6095,7 +6095,7 @@ function resolveVersionInput() {
     if (version) {
         return version;
     }
-    const versionFilePath = path.join(process.env.GITHUB_WORKSPACE, versionFile || ".python-version");
+    const versionFilePath = path.join(process.env.GITHUB_WORKSPACE, versionFile || '.python-version');
     if (!fs_1.default.existsSync(versionFilePath)) {
         throw new Error(`The specified python version file at: ${versionFilePath} does not exist`);
     }
