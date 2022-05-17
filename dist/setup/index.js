@@ -6117,17 +6117,20 @@ function run() {
                 if (isPyPyVersion(version)) {
                     const installed = yield finderPyPy.findPyPyVersion(version, arch);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-                    core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                    core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
                     const installed = yield finder.useCpythonVersion(version, arch);
                     pythonVersion = installed.version;
-                    core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
+                    core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {
                     yield cacheDependencies(cache, pythonVersion);
                 }
+            }
+            else {
+                core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
@@ -10300,11 +10303,14 @@ function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
         const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
         const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
         let binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         core.info('Creating symlinks...');
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
     });
 }
 function installPip(pythonLocation) {
@@ -52388,6 +52394,7 @@ function findPyPyVersion(versionSpec, architecture) {
         const _binDir = path.join(installDir, pipDir);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
         core.exportVariable('pythonLocation', pythonLocation);
+        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
         core.addPath(pythonLocation);
         core.addPath(_binDir);
         core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
@@ -57023,6 +57030,7 @@ function useCpythonVersion(version, architecture) {
             ].join(os.EOL));
         }
         core.exportVariable('pythonLocation', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
         if (utils_1.IS_LINUX) {
             const libPath = process.env.LD_LIBRARY_PATH
                 ? `:${process.env.LD_LIBRARY_PATH}`

@@ -162,9 +162,12 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - For every minor version of Python, expect only the latest patch to be preinstalled.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
+    - Use `-dev` instead of a patch number (e.g., `3.11-dev`) to install the latest release of a minor version, *alpha and beta releases included*.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
+
+**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For macOS and Ubuntu images python versions are built from the source code. For Windows the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
 
  # Available versions of PyPy
 
