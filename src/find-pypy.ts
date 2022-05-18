@@ -98,9 +98,14 @@ export function findPyPyToolCache(
 export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
   const versions = versionSpec.split('-').filter(item => !!item);
 
+  if (/^(pypy)(.+)/.test(versions[0])) {
+    let pythonVersion = versions[0].replace('pypy', '');
+    versions.splice(0, 1, 'pypy', pythonVersion);
+  }
+
   if (versions.length < 2 || versions[0] != 'pypy') {
     throw new Error(
-      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
+      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation."
     );
   }
 
