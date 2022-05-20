@@ -6077,7 +6077,7 @@ const fs_1 = __importDefault(__webpack_require__(747));
 const cache_factory_1 = __webpack_require__(633);
 const utils_1 = __webpack_require__(163);
 function isPyPyVersion(versionSpec) {
-    return versionSpec.startsWith('pypy-');
+    return versionSpec.startsWith('pypy');
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -52432,8 +52432,12 @@ function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
 exports.findPyPyToolCache = findPyPyToolCache;
 function parsePyPyVersion(versionSpec) {
     const versions = versionSpec.split('-').filter(item => !!item);
+    if (/^(pypy)(.+)/.test(versions[0])) {
+        let pythonVersion = versions[0].replace('pypy', '');
+        versions.splice(0, 1, 'pypy', pythonVersion);
+    }
     if (versions.length < 2 || versions[0] != 'pypy') {
-        throw new Error("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation.");
+        throw new Error("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation.");
     }
     const pythonVersion = versions[1];
     let pypyVersion;

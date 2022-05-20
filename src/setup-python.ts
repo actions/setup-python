@@ -8,7 +8,7 @@ import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {isCacheFeatureAvailable} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
-  return versionSpec.startsWith('pypy-');
+  return versionSpec.startsWith('pypy');
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
