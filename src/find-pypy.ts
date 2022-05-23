@@ -48,12 +48,18 @@ export async function findPyPyVersion(
 
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';
   const _binDir = path.join(installDir, pipDir);
+  const binaryExtension = IS_WINDOWS ? '.exe' : '';
+  const pythonPath = path.join(
+    IS_WINDOWS ? installDir : _binDir,
+    `python${binaryExtension}`
+  );
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
   core.exportVariable('pythonLocation', pythonLocation);
   core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
   core.addPath(pythonLocation);
   core.addPath(_binDir);
   core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
+  core.setOutput('python-path', pythonPath);
 
   return {resolvedPyPyVersion, resolvedPythonVersion};
 }
