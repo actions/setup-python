@@ -21,6 +21,8 @@ outputs:
     description: "The installed python version. Useful when given a version range as input."
   cache-hit:
     description: 'A boolean value to indicate a cache entry was found'
+  python-path:
+    description: "The absolute path to the Python executable."
 runs:
   using: 'node16'
   main: 'dist/setup/index.js'

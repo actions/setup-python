@@ -83,8 +83,14 @@ export async function useCpythonVersion(
     }
   }
 
+  const _binDir = binDir(installDir);
+  const binaryExtension = IS_WINDOWS ? '.exe' : '';
+  const pythonPath = path.join(
+    IS_WINDOWS ? installDir : _binDir,
+    `python${binaryExtension}`
+  );
   core.addPath(installDir);
-  core.addPath(binDir(installDir));
+  core.addPath(_binDir);
 
   if (IS_WINDOWS) {
     // Add --user directory
@@ -106,6 +112,7 @@ export async function useCpythonVersion(
 
   const installed = versionFromPath(installDir);
   core.setOutput('python-version', installed);
+  core.setOutput('python-path', pythonPath);
 
   return {impl: 'CPython', version: installed};
 }
