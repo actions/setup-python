@@ -320,6 +320,26 @@ steps:
 - run: pipenv install
 ```
 
+# Environment variables
+
+ The `update-environment` flag defaults to `true`.
+ With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for `python` to just work out of the box.
+
+ If `update-environment` is set to `false`, the action will not add/update environment variables.
+ This can prove useful if you want the only side-effect to be to ensure python is installed and rely on the `python-path` output to run python.
+ Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
+
+ ```yaml
+ steps:
+   - uses: actions/checkout@v3
+   - uses: actions/setup-python@v4
+     id: cp310
+     with:
+       python-version: '3.10'
+       update-environment: false
+   - run: ${{ steps.cp310.outputs.python-path }} my_script.py
+ ```
+
 # Using `setup-python` with a self hosted runner
 
 Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.

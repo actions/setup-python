@@ -17,6 +17,9 @@ inputs:
     default: ${{ github.token }}
   cache-dependency-path:
     description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
+  update-environment:
+    description: 'Set this option if you want the action to update environment variables.'
+    default: true
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."

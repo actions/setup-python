@@ -20,7 +20,8 @@ interface IPyPyVersionSpec {
 
 export async function findPyPyVersion(
   versionSpec: string,
-  architecture: string
+  architecture: string,
+  updateEnvironment: boolean
 ): Promise<{resolvedPyPyVersion: string; resolvedPythonVersion: string}> {
   let resolvedPyPyVersion = '';
   let resolvedPythonVersion = '';
@@ -54,10 +55,12 @@ export async function findPyPyVersion(
     `python${binaryExtension}`
   );
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
-  core.exportVariable('pythonLocation', installDir);
-  core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
-  core.addPath(pythonLocation);
-  core.addPath(_binDir);
+  if (updateEnvironment) {
+    core.exportVariable('pythonLocation', installDir);
+    core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+    core.addPath(pythonLocation);
+    core.addPath(_binDir);
+  }
   core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
   core.setOutput('python-path', pythonPath);
 
