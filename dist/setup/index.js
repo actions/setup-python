@@ -52396,12 +52396,15 @@ function findPyPyVersion(versionSpec, architecture) {
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
         core.exportVariable('pythonLocation', pythonLocation);
         core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
         core.addPath(pythonLocation);
         core.addPath(_binDir);
         core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
+        core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
     });
 }
@@ -57048,8 +57051,11 @@ function useCpythonVersion(version, architecture) {
                 core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
             }
         }
+        const _binDir = binDir(installDir);
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         core.addPath(installDir);
-        core.addPath(binDir(installDir));
+        core.addPath(_binDir);
         if (utils_1.IS_WINDOWS) {
             // Add --user directory
             // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
@@ -57063,6 +57069,7 @@ function useCpythonVersion(version, architecture) {
         // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         const installed = versionFromPath(installDir);
         core.setOutput('python-version', installed);
+        core.setOutput('python-path', pythonPath);
         return { impl: 'CPython', version: installed };
     });
 }

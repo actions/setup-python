@@ -26,9 +26,14 @@ jobs:
       uses: actions/checkout@v3
 
     - name: setup-python ${{ matrix.python }}
+      id: setup-python
       uses: ./
       with:
         python-version: ${{ matrix.python }}
+
+    - name: Check python-path
+      run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+      shell: bash
 
     - name: Validate version
       run: |
@@ -59,9 +64,14 @@ jobs:
       run: echo ${{ matrix.python }} > .python-version
 
     - name: setup-python ${{ matrix.python }}
+      id: setup-python
       uses: ./
       with:
         python-version-file: '.python-version'
+
+    - name: Check python-path
+      run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+      shell: bash
 
     - name: Validate version
       run: |
@@ -88,9 +98,14 @@ jobs:
       uses: actions/checkout@v3
 
     - name: setup-python 3.9.0-beta.4
+      id: setup-python
       uses: ./
       with:
         python-version: '3.9.0-beta.4'
+
+    - name: Check python-path
+      run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+      shell: bash
 
     - name: Validate version
       run: |
