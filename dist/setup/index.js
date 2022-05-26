@@ -63990,11 +63990,15 @@ function findPyPyVersion(versionSpec, architecture) {
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
         core.exportVariable('pythonLocation', pythonLocation);
+        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
         core.addPath(pythonLocation);
         core.addPath(_binDir);
         core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
+        core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
     });
 }
@@ -64025,8 +64029,12 @@ function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
 exports.findPyPyToolCache = findPyPyToolCache;
 function parsePyPyVersion(versionSpec) {
     const versions = versionSpec.split('-').filter(item => !!item);
+    if (/^(pypy)(.+)/.test(versions[0])) {
+        let pythonVersion = versions[0].replace('pypy', '');
+        versions.splice(0, 1, 'pypy', pythonVersion);
+    }
     if (versions.length < 2 || versions[0] != 'pypy') {
-        throw new Error("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation.");
+        throw new Error("Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation.");
     }
     const pythonVersion = versions[1];
     let pypyVersion;
@@ -64142,6 +64150,7 @@ function useCpythonVersion(version, architecture) {
             ].join(os.EOL));
         }
         core.exportVariable('pythonLocation', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
         if (utils_1.IS_LINUX) {
             const libPath = process.env.LD_LIBRARY_PATH
                 ? `:${process.env.LD_LIBRARY_PATH}`
@@ -64151,8 +64160,11 @@ function useCpythonVersion(version, architecture) {
                 core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
             }
         }
+        const _binDir = binDir(installDir);
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         core.addPath(installDir);
-        core.addPath(binDir(installDir));
+        core.addPath(_binDir);
         if (utils_1.IS_WINDOWS) {
             // Add --user directory
             // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
@@ -64166,6 +64178,7 @@ function useCpythonVersion(version, architecture) {
         // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         const installed = versionFromPath(installDir);
         core.setOutput('python-version', installed);
+        core.setOutput('python-path', pythonPath);
         return { impl: 'CPython', version: installed };
     });
 }
@@ -64299,11 +64312,14 @@ function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
         const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
         const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
         let binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         core.info('Creating symlinks...');
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
         utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
     });
 }
 function installPip(pythonLocation) {
@@ -64520,7 +64536,7 @@ const os = __importStar(__nccwpck_require__(2037));
 const cache_factory_1 = __nccwpck_require__(7549);
 const utils_1 = __nccwpck_require__(1314);
 function isPyPyVersion(versionSpec) {
-    return versionSpec.startsWith('pypy-');
+    return versionSpec.startsWith('pypy');
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -64547,17 +64563,20 @@ function run() {
                 if (isPyPyVersion(version)) {
                     const installed = yield finderPyPy.findPyPyVersion(version, arch);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-                    core.info(`Successfully setup PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                    core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
                     const installed = yield finder.useCpythonVersion(version, arch);
                     pythonVersion = installed.version;
-                    core.info(`Successfully setup ${installed.impl} (${pythonVersion})`);
+                    core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {
                     yield cacheDependencies(cache, pythonVersion);
                 }
+            }
+            else {
+                core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
