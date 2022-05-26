@@ -22,6 +22,7 @@ jobs:
         pypy:
         - 'pypy-2.7'
         - 'pypy-3.7'
+        - 'pypy3.9'
         - 'pypy-2.7-v7.3.4'
         - 'pypy-3.7-v7.3.5'
         - 'pypy-3.7-v7.3.4'
@@ -29,18 +30,38 @@ jobs:
         - 'pypy-3.7-v7.x'
         - 'pypy-2.7-v7.3.4rc1'
         - 'pypy-3.7-nightly'
+        - 'pypy3.8-v7.3.7'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
   
       - name: setup-python ${{ matrix.pypy }}
+        id: setup-python
         uses: ./
         with:
           python-version: ${{ matrix.pypy }}
-  
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
       - name: PyPy and Python version
         run: python --version
   
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
+
+      - name: Assert PyPy is running
+        run: |
+          import platform
+          assert platform.python_implementation().lower() == "pypy"
+        shell: python
+
+      - name: Assert expected binaries (or symlinks) are present
+        run: |
+          EXECUTABLE=${{ matrix.pypy }}
+          EXECUTABLE=${EXECUTABLE/pypy-/pypy}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          ${EXECUTABLE} --version
+        shell: bash

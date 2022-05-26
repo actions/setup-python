@@ -48,11 +48,18 @@ export async function findPyPyVersion(
 
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';
   const _binDir = path.join(installDir, pipDir);
+  const binaryExtension = IS_WINDOWS ? '.exe' : '';
+  const pythonPath = path.join(
+    IS_WINDOWS ? installDir : _binDir,
+    `python${binaryExtension}`
+  );
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
   core.exportVariable('pythonLocation', pythonLocation);
+  core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
   core.addPath(pythonLocation);
   core.addPath(_binDir);
   core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
+  core.setOutput('python-path', pythonPath);
 
   return {resolvedPyPyVersion, resolvedPythonVersion};
 }
@@ -97,9 +104,14 @@ export function findPyPyToolCache(
 export function parsePyPyVersion(versionSpec: string): IPyPyVersionSpec {
   const versions = versionSpec.split('-').filter(item => !!item);
 
+  if (/^(pypy)(.+)/.test(versions[0])) {
+    let pythonVersion = versions[0].replace('pypy', '');
+    versions.splice(0, 1, 'pypy', pythonVersion);
+  }
+
   if (versions.length < 2 || versions[0] != 'pypy') {
     throw new Error(
-      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
+      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation."
     );
   }
 

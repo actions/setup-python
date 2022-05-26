@@ -89,3 +89,13 @@ jobs:
         python-version: 3.8.1
     - name: Verify 3.8.1
       run: python __tests__/verify-python.py 3.8.1
+
+    - name: Run with setup-python 3.10
+      id: cp310
+      uses: ./
+      with:
+        python-version: "3.10"
+    - name: Verify 3.10
+      run: python __tests__/verify-python.py 3.10
+    - name: Run python-path sample 3.10
+      run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
