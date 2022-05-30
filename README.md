@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy-2.7', 'pypy-3.7', 'pypy-3.8' ]
+        python-version: [ '2.x', '3.x', 'pypy2.7', 'pypy3.7', 'pypy3.8' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10', 'pypy-2.7', 'pypy-3.8']
+        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10', 'pypy2.7', 'pypy3.8']
         exclude:
           - os: macos-latest
             python-version: '3.8'
@@ -125,9 +125,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - 'pypy-3.7' # the latest available version of PyPy that supports Python 3.7
-        - 'pypy-3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
-        - 'pypy-3.8' # the latest available version of PyPy that supports Python 3.8
+        - 'pypy3.7' # the latest available version of PyPy that supports Python 3.7
+        - 'pypy3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
+        - 'pypy3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
@@ -136,6 +136,20 @@ jobs:
     - run: python my_script.py
 ```
 More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in the [Available versions of PyPy](#available-versions-of-pypy) section.
+
+An output is available with the absolute path of the python interpreter executable if you need it:
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      id: cp310
+      with:
+        python-version: "3.10"
+    - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
+```
 
 # Getting started with Python + Actions
 
@@ -150,6 +164,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - For every minor version of Python, expect only the latest patch to be preinstalled.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
+    - Use `-dev` instead of a patch number (e.g., `3.11-dev`) to install the latest release of a minor version, *alpha and beta releases included*.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
@@ -163,7 +178,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
 - Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
-  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy-3.7`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy-3.7-v7.3.3`.
+  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy3.7` or `pypy-3.7`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy3.7-v7.3.3` or `pypy-3.7-v7.3.3`.
 
 - Downloadable PyPy versions from the [official PyPy site](https://downloads.python.org/pypy/).
   - All available versions that we can download are listed in [versions.json](https://downloads.python.org/pypy/versions.json) file.
@@ -196,17 +211,17 @@ You should specify only a major and minor version if you are okay with the most 
   - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version Python on the runner will be used.
 
 # Specifying a PyPy version
-The version of PyPy should be specified in the format `pypy-<python_version>[-v<pypy_version>]`.
+The version of PyPy should be specified in the format `pypy<python_version>[-v<pypy_version>]` or `pypy-<python_version>[-v<pypy_version>]`.
 The `<pypy_version>` parameter is optional and can be skipped. The latest version will be used in this case.
 
 ```
-pypy-3.7 # the latest available version of PyPy that supports Python 3.7
-pypy-3.8 # the latest available version of PyPy that supports Python 3.8
-pypy-2.7 # the latest available version of PyPy that supports Python 2.7
-pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
-pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
-pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
-pypy-3.7-nightly # Python 3.7 and nightly PyPy
+pypy3.7 or pypy-3.7 # the latest available version of PyPy that supports Python 3.7
+pypy3.8 or pypy-3.8 # the latest available version of PyPy that supports Python 3.8
+pypy2.7 or pypy-2.7 # the latest available version of PyPy that supports Python 2.7
+pypy3.7-v7.3.3 or pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
+pypy3.7-v7.x or pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
+pypy3.7-v7.3.3rc1 or pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
+pypy3.7-nightly or pypy-3.7-nightly # Python 3.7 and nightly PyPy
 ```
 
 # Caching packages dependencies

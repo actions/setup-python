@@ -37,16 +37,34 @@ describe('parsePyPyVersion', () => {
     ['pypy-3.6-v7.x', {pythonVersion: '3.6', pypyVersion: 'v7.x'}],
     ['pypy-3.6', {pythonVersion: '3.6', pypyVersion: 'x'}],
     ['pypy-3.6-nightly', {pythonVersion: '3.6', pypyVersion: 'nightly'}],
-    ['pypy-3.6-v7.3.3rc1', {pythonVersion: '3.6', pypyVersion: 'v7.3.3-rc.1'}]
+    ['pypy-3.6-v7.3.3rc1', {pythonVersion: '3.6', pypyVersion: 'v7.3.3-rc.1'}],
+    ['pypy3.8-v7.3.7', {pythonVersion: '3.8', pypyVersion: 'v7.3.7'}],
+    ['pypy3.8-v7.3.x', {pythonVersion: '3.8', pypyVersion: 'v7.3.x'}],
+    ['pypy3.8-v7.x', {pythonVersion: '3.8', pypyVersion: 'v7.x'}],
+    ['pypy3.8', {pythonVersion: '3.8', pypyVersion: 'x'}],
+    ['pypy3.9-nightly', {pythonVersion: '3.9', pypyVersion: 'nightly'}],
+    ['pypy3.9-v7.3.8rc1', {pythonVersion: '3.9', pypyVersion: 'v7.3.8-rc.1'}]
   ])('%s -> %s', (input, expected) => {
     expect(finder.parsePyPyVersion(input)).toEqual(expected);
   });
 
-  it('throw on invalid input', () => {
-    expect(() => finder.parsePyPyVersion('pypy-')).toThrowError(
-      "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy-<python-version>'. See README for examples and documentation."
-    );
-  });
+  it.each(['', 'pypy-', 'pypy', 'p', 'notpypy-'])(
+    'throw on invalid input "%s"',
+    input => {
+      expect(() => finder.parsePyPyVersion(input)).toThrowError(
+        "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation."
+      );
+    }
+  );
+
+  it.each(['pypy-2', 'pypy-3', 'pypy2', 'pypy3', 'pypy3.x', 'pypy3.8.10'])(
+    'throw on invalid input "%s"',
+    input => {
+      expect(() => finder.parsePyPyVersion(input)).toThrowError(
+        "Invalid format of Python version for PyPy. Python version should be specified in format 'x.y'. See README for examples and documentation."
+      );
+    }
+  );
 });
 
 describe('getPyPyVersionFromPath', () => {
