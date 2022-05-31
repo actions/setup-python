@@ -137,6 +137,20 @@ jobs:
 ```
 More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in the [Available versions of PyPy](#available-versions-of-pypy) section.
 
+An output is available with the absolute path of the python interpreter executable if you need it:
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      id: cp310
+      with:
+        python-version: "3.10"
+    - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
+```
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).

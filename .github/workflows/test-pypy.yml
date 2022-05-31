@@ -37,10 +37,15 @@ jobs:
         uses: actions/checkout@v2
   
       - name: setup-python ${{ matrix.pypy }}
+        id: setup-python
         uses: ./
         with:
           python-version: ${{ matrix.pypy }}
-  
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
       - name: PyPy and Python version
         run: python --version
   
