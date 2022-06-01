@@ -151,7 +151,7 @@ jobs:
     - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
 ```
 
->After finishing the action environment variable `pythonLocation` also becomes available. It contains the absolute path to the folder where the desired version of Python or PyPy is installed.
+>The environment variable `pythonLocation` also becomes available after Python or PyPy installation. It contains the absolute path to the folder where the desired version of Python or PyPy is installed.
 
 # Getting started with Python + Actions
 
