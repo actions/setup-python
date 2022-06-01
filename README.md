@@ -151,6 +151,8 @@ jobs:
     - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
 ```
 
+>After finishing the action environment variable `pythonLocation` becomes available. It contains the path to the folder where the desired version of Python or PyPy is installed.
+
 # Getting started with Python + Actions
 
 Check out our detailed guide on using [Python with GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-python-with-github-actions).
