@@ -38423,7 +38423,7 @@ class PoetryCache extends cache_distributor_1.default {
             const lines = stdout.trim().split('\n');
             const config = {};
             for (let line of lines) {
-                line = line.replace(/#.*$/, '');
+                line = line.replace(/#.*$/gm, '');
                 const [key, value] = line.split('=').map(part => part.trim());
                 config[key] = JSON.parse(value);
             }
