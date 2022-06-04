@@ -85,6 +85,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
+- [Allow pre-releases](docs/advanced-usage.md#allow-pre-releases)
 
 ## License
 

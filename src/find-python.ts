@@ -34,11 +34,15 @@ export async function useCpythonVersion(
   version: string,
   architecture: string,
   updateEnvironment: boolean,
-  checkLatest: boolean
+  checkLatest: boolean,
+  allowPreReleases: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
   const desugaredVersionSpec = desugarDevVersion(version);
-  let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
+  let semanticVersionSpec = pythonVersionToSemantic(
+    desugaredVersionSpec,
+    allowPreReleases
+  );
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
 
   if (checkLatest) {
@@ -178,8 +182,18 @@ interface InstalledVersion {
  * Python's prelease versions look like `3.7.0b2`.
  * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-b2`.
  * If the version spec contains prerelease versions, we need to convert them to the semantic version equivalent.
+ *
+ * For easier use of the action, we also map 'x.y' to allow pre-release before 'x.y.0' release if allowPreReleases is true
  */
-export function pythonVersionToSemantic(versionSpec: string) {
+export function pythonVersionToSemantic(
+  versionSpec: string,
+  allowPreReleases: boolean
+) {
   const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)/g;
-  return versionSpec.replace(prereleaseVersion, '$1-$2');
+  const majorMinor = /^(\d+)\.(\d+)$/;
+  let result = versionSpec.replace(prereleaseVersion, '$1-$2');
+  if (allowPreReleases) {
+    result = result.replace(majorMinor, '~$1.$2.0-0');
+  }
+  return result;
 }

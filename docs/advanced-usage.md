@@ -20,6 +20,7 @@
     - [Linux](advanced-usage.md#linux)
     - [macOS](advanced-usage.md#macos)
 - [Using `setup-python` on GHES](advanced-usage.md#using-setup-python-on-ghes)
+- [Allow pre-releases](advanced-usage.md#allow-pre-releases)
 
 ## Using the `python-version` input
 
@@ -568,3 +569,31 @@ Requests should now be authenticated. To verify that you are getting the higher 
 
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server@3.2/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
+
+
+## Allow pre-releases
+
+The `allow-prereleases` flag defaults to `false`.
+If `allow-prereleases` is set to `true`, the action will allow falling back to pre-release versions of Python when a matching GA version of Python is not available.
+This allows for example to simplify reuse of `python-version` as an input of nox for pre-releases of Python by not requiring manipulation of the `3.y-dev` specifier.
+For CPython, `allow-prereleases` will only have effect for `x.y` version range (e.g. `3.12`).
+Let's say that python 3.12 is not generally available, the following workflow will fallback to the most recent pre-release of python 3.12:
+```yaml
+jobs:
+  test:
+    name: ${{ matrix.os }} / ${{ matrix.python_version }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Ubuntu, Windows, macOS]
+        python_version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python_version }}"
+      - run: pipx run nox --error-on-missing-interpreters -s tests-${{ matrix.python_version }}
+```
+

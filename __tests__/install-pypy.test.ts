@@ -51,6 +51,12 @@ describe('findRelease', () => {
     platform: process.platform,
     download_url: `https://test.download.python.org/pypy/pypy3.6-v7.3.3-${extensionName}`
   };
+  const filesRC1: IPyPyManifestAsset = {
+    filename: `pypy3.6-v7.4.0rc1-${extensionName}`,
+    arch: architecture,
+    platform: process.platform,
+    download_url: `https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-${extensionName}`
+  };
 
   let getBooleanInputSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
@@ -72,7 +78,13 @@ describe('findRelease', () => {
     const pythonVersion = '3.6';
     const pypyVersion = '7.3.7';
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual(null);
   });
 
@@ -80,7 +92,13 @@ describe('findRelease', () => {
     const pythonVersion = '3.6';
     const pypyVersion = '7.3.3';
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual({
       foundAsset: files,
       resolvedPythonVersion: '3.6.12',
@@ -92,7 +110,13 @@ describe('findRelease', () => {
     const pythonVersion = '3.6';
     const pypyVersion = '7.x';
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual({
       foundAsset: files,
       resolvedPythonVersion: '3.6.12',
@@ -104,7 +128,13 @@ describe('findRelease', () => {
     const pythonVersion = '3.7';
     const pypyVersion = installer.pypyVersionToSemantic('7.3.3rc2');
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual({
       foundAsset: {
         filename: `test${extension}`,
@@ -121,11 +151,44 @@ describe('findRelease', () => {
     const pythonVersion = '3.6';
     const pypyVersion = 'x';
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual({
       foundAsset: files,
       resolvedPythonVersion: '3.6.12',
       resolvedPyPyVersion: '7.3.3'
+    });
+  });
+
+  it('Python version and PyPy version matches semver (pre-release)', () => {
+    const pythonVersion = '3.6';
+    const pypyVersion = '7.4.x';
+    expect(
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
+    ).toBeNull();
+    expect(
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        true
+      )
+    ).toEqual({
+      foundAsset: filesRC1,
+      resolvedPythonVersion: '3.6.12',
+      resolvedPyPyVersion: '7.4.0rc1'
     });
   });
 
@@ -134,7 +197,13 @@ describe('findRelease', () => {
     const pypyVersion = 'nightly';
     const filename = IS_WINDOWS ? 'filename.zip' : 'filename.tar.bz2';
     expect(
-      installer.findRelease(releases, pythonVersion, pypyVersion, architecture)
+      installer.findRelease(
+        releases,
+        pythonVersion,
+        pypyVersion,
+        architecture,
+        false
+      )
     ).toEqual({
       foundAsset: {
         filename: filename,
@@ -224,7 +293,7 @@ describe('installPyPy', () => {
 
   it('throw if release is not found', async () => {
     await expect(
-      installer.installPyPy('7.3.3', '3.6.17', architecture, undefined)
+      installer.installPyPy('7.3.3', '3.6.17', architecture, false, undefined)
     ).rejects.toThrowError(
       `PyPy version 3.6.17 (7.3.3) with arch ${architecture} not found`
     );
@@ -244,11 +313,38 @@ describe('installPyPy', () => {
     spyChmodSync.mockImplementation(() => undefined);
 
     await expect(
-      installer.installPyPy('7.3.x', '3.6.12', architecture, undefined)
+      installer.installPyPy('7.x', '3.6.12', architecture, false, undefined)
     ).resolves.toEqual({
       installDir: path.join(toolDir, 'PyPy', '3.6.12', architecture),
       resolvedPythonVersion: '3.6.12',
       resolvedPyPyVersion: '7.3.3'
+    });
+
+    expect(spyHttpClient).toHaveBeenCalled();
+    expect(spyDownloadTool).toHaveBeenCalled();
+    expect(spyExistsSync).toHaveBeenCalled();
+    expect(spyCacheDir).toHaveBeenCalled();
+    expect(spyExec).toHaveBeenCalled();
+  });
+
+  it('found and install PyPy, pre-release fallback', async () => {
+    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir.mockImplementation(() =>
+      path.join(toolDir, 'PyPy', '3.6.12', architecture)
+    );
+
+    spyChmodSync = jest.spyOn(fs, 'chmodSync');
+    spyChmodSync.mockImplementation(() => undefined);
+
+    await expect(
+      installer.installPyPy('7.4.x', '3.6.12', architecture, false, undefined)
+    ).rejects.toThrowError();
+    await expect(
+      installer.installPyPy('7.4.x', '3.6.12', architecture, true, undefined)
+    ).resolves.toEqual({
+      installDir: path.join(toolDir, 'PyPy', '3.6.12', architecture),
+      resolvedPythonVersion: '3.6.12',
+      resolvedPyPyVersion: '7.4.0rc1'
     });
 
     expect(spyHttpClient).toHaveBeenCalled();

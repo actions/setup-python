@@ -66237,7 +66237,7 @@ const utils_1 = __nccwpck_require__(1314);
 const semver = __importStar(__nccwpck_require__(1383));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
-function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLatest) {
+function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
     return __awaiter(this, void 0, void 0, function* () {
         let resolvedPyPyVersion = '';
         let resolvedPythonVersion = '';
@@ -66247,7 +66247,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
         if (checkLatest) {
             releases = yield pypyInstall.getAvailablePyPyVersions();
             if (releases && releases.length > 0) {
-                const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture);
+                const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture, false);
                 if (releaseData) {
                     core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
                     pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
@@ -66264,7 +66264,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
                 installDir,
                 resolvedPythonVersion,
                 resolvedPyPyVersion
-            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, releases));
+            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, allowPreReleases, releases));
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
@@ -66414,12 +66414,12 @@ function binDir(installDir) {
         return path.join(installDir, 'bin');
     }
 }
-function useCpythonVersion(version, architecture, updateEnvironment, checkLatest) {
+function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let manifest = null;
         const desugaredVersionSpec = desugarDevVersion(version);
-        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
+        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
         if (checkLatest) {
             manifest = yield installer.getManifest();
@@ -66510,10 +66510,17 @@ function versionFromPath(installDir) {
  * Python's prelease versions look like `3.7.0b2`.
  * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-b2`.
  * If the version spec contains prerelease versions, we need to convert them to the semantic version equivalent.
+ *
+ * For easier use of the action, we also map 'x.y' to allow pre-release before 'x.y.0' release if allowPreReleases is true
  */
-function pythonVersionToSemantic(versionSpec) {
+function pythonVersionToSemantic(versionSpec, allowPreReleases) {
     const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)/g;
-    return versionSpec.replace(prereleaseVersion, '$1-$2');
+    const majorMinor = /^(\d+)\.(\d+)$/;
+    let result = versionSpec.replace(prereleaseVersion, '$1-$2');
+    if (allowPreReleases) {
+        result = result.replace(majorMinor, '~$1.$2.0-0');
+    }
+    return result;
 }
 exports.pythonVersionToSemantic = pythonVersionToSemantic;
 
@@ -66558,6 +66565,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
+const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
@@ -66566,14 +66574,22 @@ const httpm = __importStar(__nccwpck_require__(9925));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const utils_1 = __nccwpck_require__(1314);
-function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
+function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
         releases = releases !== null && releases !== void 0 ? releases : (yield getAvailablePyPyVersions());
         if (!releases || releases.length === 0) {
             throw new Error('No release was found in PyPy version.json');
         }
-        const releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture);
+        let releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, false);
+        if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
+            // check for pre-release
+            core.info([
+                `Stable PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`,
+                `Trying pre-release versions`
+            ].join(os.EOL));
+            releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, true);
+        }
         if (!releaseData || !releaseData.foundAsset) {
             throw new Error(`PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`);
         }
@@ -66656,12 +66672,13 @@ function installPip(pythonLocation) {
         yield exec.exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
     });
 }
-function findRelease(releases, pythonVersion, pypyVersion, architecture) {
+function findRelease(releases, pythonVersion, pypyVersion, architecture, includePrerelease) {
+    const options = { includePrerelease: includePrerelease };
     const filterReleases = releases.filter(item => {
         const isPythonVersionSatisfied = semver.satisfies(semver.coerce(item.python_version), pythonVersion);
         const isPyPyNightly = utils_1.isNightlyKeyword(pypyVersion) && utils_1.isNightlyKeyword(item.pypy_version);
         const isPyPyVersionSatisfied = isPyPyNightly ||
-            semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
+            semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion, options);
         const isArchPresent = item.files &&
             (utils_1.IS_WINDOWS
                 ? isArchPresentForWindows(item, architecture)
@@ -66948,6 +66965,7 @@ function run() {
         try {
             const versions = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
+            const allowPreReleases = core.getBooleanInput('allow-prereleases');
             if (versions.length) {
                 let pythonVersion = '';
                 const arch = core.getInput('architecture') || os.arch();
@@ -66955,12 +66973,12 @@ function run() {
                 core.startGroup('Installed versions');
                 for (const version of versions) {
                     if (isPyPyVersion(version)) {
-                        const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
+                        const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
                         core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                     }
                     else {
-                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest);
+                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = installed.version;
                         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                     }

@@ -1,5 +1,95 @@
 [
   {
+    "pypy_version": "7.3.8rc2",
+    "python_version": "3.8.12",
+    "stable": false,
+    "latest_pypy": false,
+    "date": "2022-02-11",
+    "files": [
+      {
+        "filename": "pypy3.8-v7.3.8rc2-linux32.tar.bz2",
+        "arch": "i686",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-linux32.tar.bz2"
+      },
+      {
+        "filename": "pypy3.8-v7.3.8rc2-linux64.tar.bz2",
+        "arch": "x64",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-linux64.tar.bz2"
+      },
+      {
+        "filename": "pypy3.8-v7.3.8rc2-darwin64.tar.bz2",
+        "arch": "x64",
+        "platform": "darwin",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-darwin64.tar.bz2"
+      },
+      {
+        "filename": "pypy3.8-v7.3.8rc2-s390x.tar.bz2",
+        "arch": "s390x",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-s390x.tar.bz2"
+      },
+      {
+        "filename": "pypy3.8-v7.3.8rc2-win64.zip",
+        "arch": "x64",
+        "platform": "win64",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-win64.zip"
+      },
+      {
+        "filename": "pypy3.8-v7.3.8rc2-win32.zip",
+        "arch": "x86",
+        "platform": "win32",
+        "download_url": "https://test.download.python.org/pypy/pypy3.8-v7.3.8rc2-win32.zip"
+      }
+    ]
+  },
+  {
+    "pypy_version": "7.4.0rc1",
+    "python_version": "3.6.12",
+    "stable": false,
+    "latest_pypy": false,
+    "date": "2021-11-11",
+    "files": [
+      {
+        "filename": "pypy3.6-v7.4.0rc1-aarch64.tar.bz2",
+        "arch": "aarch64",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-aarch64.tar.bz2"
+      },
+      {
+        "filename": "pypy3.6-v7.4.0rc1-linux32.tar.bz2",
+        "arch": "i686",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-linux32.tar.bz2"
+      },
+      {
+        "filename": "pypy3.6-v7.4.0rc1-linux64.tar.bz2",
+        "arch": "x64",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-linux64.tar.bz2"
+      },
+      {
+        "filename": "pypy3.6-v7.4.0rc1-darwin64.tar.bz2",
+        "arch": "x64",
+        "platform": "darwin",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-darwin64.tar.bz2"
+      },
+      {
+        "filename": "pypy3.6-v7.4.0rc1-win32.zip",
+        "arch": "x86",
+        "platform": "win32",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-win32.zip"
+      },
+      {
+        "filename": "pypy3.6-v7.4.0rc1-s390x.tar.bz2",
+        "arch": "s390x",
+        "platform": "linux",
+        "download_url": "https://test.download.python.org/pypy/pypy3.6-v7.4.0rc1-s390x.tar.bz2"
+      }
+    ]
+  },
+  {
     "pypy_version": "7.3.3",
     "python_version": "3.6.12",
     "stable": true,

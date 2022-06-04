@@ -23,7 +23,8 @@ export async function findPyPyVersion(
   versionSpec: string,
   architecture: string,
   updateEnvironment: boolean,
-  checkLatest: boolean
+  checkLatest: boolean,
+  allowPreReleases: boolean
 ): Promise<{resolvedPyPyVersion: string; resolvedPythonVersion: string}> {
   let resolvedPyPyVersion = '';
   let resolvedPythonVersion = '';
@@ -39,7 +40,8 @@ export async function findPyPyVersion(
         releases,
         pypyVersionSpec.pythonVersion,
         pypyVersionSpec.pypyVersion,
-        architecture
+        architecture,
+        false
       );
 
       if (releaseData) {
@@ -71,6 +73,7 @@ export async function findPyPyVersion(
       pypyVersionSpec.pypyVersion,
       pypyVersionSpec.pythonVersion,
       architecture,
+      allowPreReleases,
       releases
     ));
   }

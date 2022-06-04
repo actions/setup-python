@@ -56,7 +56,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64', true, false);
+    await finder.useCpythonVersion('3.x', 'x64', true, false, false);
     expect(spyCoreAddPath).toHaveBeenCalled();
     expect(spyCoreExportVariable).toHaveBeenCalledWith(
       'pythonLocation',
@@ -73,7 +73,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64', false, false);
+    await finder.useCpythonVersion('3.x', 'x64', false, false, false);
     expect(spyCoreAddPath).not.toHaveBeenCalled();
     expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
@@ -95,7 +95,12 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3', 'x64', true, false);
+    await expect(
+      finder.useCpythonVersion('1.2.3', 'x64', true, false, false)
+    ).resolves.toEqual({
+      impl: 'CPython',
+      version: '1.2.3'
+    });
     expect(spyCoreAddPath).toHaveBeenCalled();
     expect(spyCoreExportVariable).toHaveBeenCalledWith(
       'pythonLocation',
@@ -122,14 +127,19 @@ describe('Finder tests', () => {
       const pythonDir: string = path.join(
         toolDir,
         'Python',
-        '1.2.3-beta.2',
+        '1.2.4-beta.2',
         'x64'
       );
       await io.mkdirP(pythonDir);
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false, false);
+    await expect(
+      finder.useCpythonVersion('1.2.4-beta.2', 'x64', false, false, false)
+    ).resolves.toEqual({
+      impl: 'CPython',
+      version: '1.2.4-beta.2'
+    });
   });
 
   it('Check-latest true, finds the latest version in the manifest', async () => {
@@ -176,7 +186,7 @@ describe('Finder tests', () => {
 
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2', 'x64', true, true);
+    await finder.useCpythonVersion('1.2', 'x64', true, true, false);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
     expect(infoSpy).toHaveBeenCalledWith(
@@ -187,7 +197,7 @@ describe('Finder tests', () => {
     );
     expect(installSpy).toHaveBeenCalled();
     expect(addPathSpy).toHaveBeenCalledWith(expPath);
-    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false, true);
+    await finder.useCpythonVersion('1.2.4-beta.2', 'x64', false, true, false);
     expect(spyCoreAddPath).toHaveBeenCalled();
     expect(spyCoreExportVariable).toHaveBeenCalledWith(
       'pythonLocation',
@@ -199,11 +209,67 @@ describe('Finder tests', () => {
     );
   });
 
+  it('Finds stable Python version if it is not installed, but exists in the manifest, skipping newer pre-release', async () => {
+    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
+    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+
+    const installSpy: jest.SpyInstance = jest.spyOn(
+      installer,
+      'installCpythonFromRelease'
+    );
+    installSpy.mockImplementation(async () => {
+      const pythonDir: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
+      await io.mkdirP(pythonDir);
+      fs.writeFileSync(`${pythonDir}.complete`, 'hello');
+    });
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
+    await expect(
+      finder.useCpythonVersion('1.2', 'x64', false, false, false)
+    ).resolves.toEqual({
+      impl: 'CPython',
+      version: '1.2.3'
+    });
+  });
+
+  it('Finds Python version if it is not installed, but exists in the manifest, pre-release fallback', async () => {
+    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
+    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+
+    const installSpy: jest.SpyInstance = jest.spyOn(
+      installer,
+      'installCpythonFromRelease'
+    );
+    installSpy.mockImplementation(async () => {
+      const pythonDir: string = path.join(
+        toolDir,
+        'Python',
+        '1.1.0-beta.2',
+        'x64'
+      );
+      await io.mkdirP(pythonDir);
+      fs.writeFileSync(`${pythonDir}.complete`, 'hello');
+    });
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
+    await expect(
+      finder.useCpythonVersion('1.1', 'x64', false, false, false)
+    ).rejects.toThrowError();
+    await expect(
+      finder.useCpythonVersion('1.1', 'x64', false, false, true)
+    ).resolves.toEqual({
+      impl: 'CPython',
+      version: '1.1.0-beta.2'
+    });
+    // Check 1.1.0 version specifier does not fallback to '1.1.0-beta.2'
+    await expect(
+      finder.useCpythonVersion('1.1.0', 'x64', false, false, true)
+    ).rejects.toThrowError();
+  });
+
   it('Errors if Python is not installed', async () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.useCpythonVersion('3.300000', 'x64', true, false);
+      await finder.useCpythonVersion('3.300000', 'x64', true, false, false);
     } catch {
       thrown = true;
     }
