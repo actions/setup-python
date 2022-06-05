@@ -20,10 +20,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        python-version: ['3.11', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       - name: Setup Python
         uses: ./
         with:
@@ -38,10 +38,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        python-version: ['3.11', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       - name: Setup Python
         uses: ./
         with:
@@ -60,10 +60,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.8']
+        os: [ubuntu-main, windows-latest, macos-latest]
+        python-version: ['3.11', 'pypy-3.8']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       - name: Install poetry
         run: pipx install poetry
       - name: Setup Python
@@ -82,10 +82,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        os: [ubuntu-22604, windows-latest, macos-latest]
+        python-version: ['3.11', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       - name: Setup Python
         uses: ./
         with:
@@ -101,10 +101,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        python-version: ['3.11', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       - name: Setup Python
         uses: ./
         with:
