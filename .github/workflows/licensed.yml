@@ -10,14 +10,14 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Check licenses
     steps:
-      - uses: actions/checkout@v2
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@main
+      - name: Set Node.js 18.x
+        uses: actions/setup-node@main
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: npm
       - run: npm ci
       - name: Install licensed
