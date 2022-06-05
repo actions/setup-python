@@ -14,15 +14,15 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, windows-latest]
+        operating-system: [ubuntu-22.04, windows-latest]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@main
 
-    - name: Set Node.js 16.x
-      uses: actions/setup-node@v3
+    - name: Set Node.js 18.x
+      uses: actions/setup-node@main
       with:
-        node-version: 16.x
+        node-version: 18.x
         cache: npm
 
     - name: npm ci
@@ -33,62 +33,6 @@ jobs:
 
     - name: npm test
       run: npm test
-
-    - name: Run with setup-python 2.7
-      uses: ./
-      with:
-        python-version: 2.7
-    - name: Verify 2.7
-      run: python __tests__/verify-python.py 2.7
-
-    - name: Run with setup-python 3.5
-      uses: ./
-      with:
-        python-version: 3.5
-    - name: Verify 3.5
-      run: python __tests__/verify-python.py 3.5
-
-    - name: Run with setup-python 3.6
-      uses: ./
-      with:
-        python-version: 3.6
-    - name: Verify 3.6
-      run: python __tests__/verify-python.py 3.6
-
-    - name: Run with setup-python 3.7
-      uses: ./
-      with:
-        python-version: 3.7
-    - name: Verify 3.7
-      run: python __tests__/verify-python.py 3.7
-
-    - name: Run with setup-python 3.8
-      uses: ./
-      with:
-        python-version: 3.8
-    - name: Verify 3.8
-      run: python __tests__/verify-python.py 3.8
-    
-    - name: Run with setup-python 3.7.5
-      uses: ./
-      with:
-        python-version: 3.7.5
-    - name: Verify 3.7.5
-      run: python __tests__/verify-python.py 3.7.5
-
-    - name: Run with setup-python 3.6.7
-      uses: ./
-      with:
-        python-version: 3.6.7
-    - name: Verify 3.6.7
-      run: python __tests__/verify-python.py 3.6.7
-
-    - name: Run with setup-python 3.8.1
-      uses: ./
-      with:
-        python-version: 3.8.1
-    - name: Verify 3.8.1
-      run: python __tests__/verify-python.py 3.8.1
 
     - name: Run with setup-python 3.10
       id: cp310
