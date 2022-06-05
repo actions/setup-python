@@ -19,11 +19,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.1]
+        os: [macos-latest, windows-latest, ubuntu-22.04]
+        python: [3.11]
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
 
     - name: setup-python ${{ matrix.python }}
       id: setup-python
@@ -54,11 +54,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.1]
+        os: [macos-latest, windows-latest, ubuntu-22.04]
+        python: [3.11]
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
 
     - name: build-version-file ${{ matrix.python }}
       run: echo ${{ matrix.python }} > .python-version
@@ -87,21 +87,21 @@ jobs:
       run: python -c 'import math; print(math.factorial(5))'
 
   setup-pre-release-version-from-manifest:
-    name: Setup 3.9.0-beta.4 ${{ matrix.os }}
+    name: Setup 3.11.0-beta.3 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
+        os: [macos-latest, windows-latest, ubuntu-22.04]
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
 
-    - name: setup-python 3.9.0-beta.4
+    - name: setup-python 3.11.0-beta.3
       id: setup-python
       uses: ./
       with:
-        python-version: '3.9.0-beta.4'
+        python-version: '3.11.0-beta.3'
 
     - name: Check python-path
       run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -110,8 +110,8 @@ jobs:
     - name: Validate version
       run: |
         $pythonVersion = (python --version)
-        if ("Python 3.9.0b4" -ne "$pythonVersion"){
-          Write-Host "The current version is $pythonVersion; expected version is 3.9.0b4"
+        if ("Python 3.11.0b3" -ne "$pythonVersion"){
+          Write-Host "The current version is $pythonVersion; expected version is 3.11.0b3"
           exit 1
         }
         $pythonVersion
