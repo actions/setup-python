@@ -18,12 +18,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-22.04]
         pypy:
-        - 'pypy-2.7'
         - 'pypy-3.7'
         - 'pypy3.9'
-        - 'pypy-2.7-v7.3.4'
         - 'pypy-3.7-v7.3.5'
         - 'pypy-3.7-v7.3.4'
         - 'pypy-3.7-v7.3.x'
@@ -34,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@main
   
       - name: setup-python ${{ matrix.pypy }}
         id: setup-python
