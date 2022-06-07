@@ -64527,12 +64527,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
 const path = __importStar(__nccwpck_require__(1017));
 const os = __importStar(__nccwpck_require__(2037));
+const fs_1 = __importDefault(__nccwpck_require__(7147));
 const cache_factory_1 = __nccwpck_require__(7549);
 const utils_1 = __nccwpck_require__(1314);
 function isPyPyVersion(versionSpec) {
@@ -64545,6 +64549,23 @@ function cacheDependencies(cache, pythonVersion) {
         yield cacheDistributor.restoreCache();
     });
 }
+function resolveVersionInput() {
+    let version = core.getInput('python-version');
+    const versionFile = core.getInput('python-version-file');
+    if (version && versionFile) {
+        core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used');
+    }
+    if (version) {
+        return version;
+    }
+    const versionFilePath = path.join(process.env.GITHUB_WORKSPACE, versionFile || '.python-version');
+    if (!fs_1.default.existsSync(versionFilePath)) {
+        throw new Error(`The specified python version file at: ${versionFilePath} does not exist`);
+    }
+    version = fs_1.default.readFileSync(versionFilePath, 'utf8');
+    core.info(`Resolved ${versionFile} as ${version}`);
+    return version;
+}
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -64556,7 +64577,7 @@ function run() {
             core.debug(`Python is expected to be installed into RUNNER_TOOL_CACHE==${process.env['RUNNER_TOOL_CACHE']}`);
         }
         try {
-            const version = core.getInput('python-version');
+            const version = resolveVersionInput();
             if (version) {
                 let pythonVersion;
                 const arch = core.getInput('architecture') || os.arch();

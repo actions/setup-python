@@ -4,8 +4,9 @@ description: 'Set up a specific version of Python and add the command-line tools
 author: 'GitHub'
 inputs:
   python-version:
-    description: "Version range or exact version of a Python version to use, using SemVer's version range syntax."
-    default: '3.x'
+    description: "Version range or exact version of Python to use, using SemVer's version range syntax. Reads from .python-version if unset."
+  python-version-file:
+    description: "File containing the Python version to use. Example: .python-version"
   cache:
     description: 'Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.'
     required: false
