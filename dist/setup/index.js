@@ -63993,7 +63993,7 @@ function findPyPyVersion(versionSpec, architecture) {
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
-        core.exportVariable('pythonLocation', pythonLocation);
+        core.exportVariable('pythonLocation', installDir);
         core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
         core.addPath(pythonLocation);
         core.addPath(_binDir);
