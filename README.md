@@ -1,4 +1,4 @@
-# setup-python V3
+# setup-python V4
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
@@ -20,6 +20,7 @@ This action sets up a Python environment for use in actions by:
 - Support for pre-release versions of Python.
 - Support for installing any version of PyPy on-flight
 - Support for built-in caching of pip, pipenv and poetry dependencies
+- Support for `.python-version` file
 
 # Usage
 
@@ -29,10 +30,20 @@ Basic:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
     architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+- run: python my_script.py
+```
+
+Read Python version from file:
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version-file: '.python-version' # Read python version from a file
 - run: python my_script.py
 ```
 
@@ -48,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -72,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -90,7 +101,7 @@ jobs:
         python-version: ['3.7.4', '3.8', '3.9', '3.10']
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -100,7 +111,7 @@ Download and set up an accurate pre-release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.11.0-alpha.1'
 - run: python my_script.py
@@ -110,7 +121,7 @@ Download and set up the latest available version of Python (includes both pre-re
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.11.0-alpha - 3.11.0' # SemVer's version range syntax
 - run: python my_script.py
@@ -130,7 +141,7 @@ jobs:
         - 'pypy3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -144,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       id: cp310
       with:
         python-version: "3.10"
@@ -245,7 +256,7 @@ The requirements file format allows to specify dependency versions using logical
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -258,7 +269,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -271,7 +282,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install poetry
   run: pipx install poetry
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'poetry'
@@ -283,7 +294,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -297,7 +308,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
