@@ -369,8 +369,8 @@ To get a higher rate limit, you can [generate a personal access token on github.
 ```yml
 uses: actions/setup-python@v4
 with:
-    token: ${{ secrets.GITHUB_DOTCOM_TOKEN }}
-    python-version: 3.11
+  token: ${{ secrets.GITHUB_DOTCOM_TOKEN }}
+  python-version: 3.11
 ```
 
 # License
