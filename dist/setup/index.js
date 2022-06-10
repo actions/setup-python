@@ -64546,14 +64546,15 @@ function cacheDependencies(cache, pythonVersion) {
 }
 function resolveVersionInput() {
     let version = core.getInput('python-version');
-    const versionFile = core.getInput('python-version-file');
+    let versionFile = core.getInput('python-version-file');
     if (version && versionFile) {
         core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used');
     }
     if (version) {
         return version;
     }
-    const versionFilePath = path.join(process.env.GITHUB_WORKSPACE, versionFile || '.python-version');
+    versionFile = versionFile || '.python-version';
+    const versionFilePath = path.join(process.env.GITHUB_WORKSPACE, versionFile);
     if (!fs_1.default.existsSync(versionFilePath)) {
         throw new Error(`The specified python version file at: ${versionFilePath} does not exist`);
     }

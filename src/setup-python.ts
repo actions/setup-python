@@ -24,7 +24,7 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 
 function resolveVersionInput(): string {
   let version = core.getInput('python-version');
-  const versionFile = core.getInput('python-version-file');
+  let versionFile = core.getInput('python-version-file');
 
   if (version && versionFile) {
     core.warning(
@@ -36,10 +36,8 @@ function resolveVersionInput(): string {
     return version;
   }
 
-  const versionFilePath = path.join(
-    process.env.GITHUB_WORKSPACE!,
-    versionFile || '.python-version'
-  );
+  versionFile = versionFile || '.python-version';
+  const versionFilePath = path.join(process.env.GITHUB_WORKSPACE!, versionFile);
   if (!fs.existsSync(versionFilePath)) {
     throw new Error(
       `The specified python version file at: ${versionFilePath} does not exist`
