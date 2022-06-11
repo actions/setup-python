@@ -1,5 +1,5 @@
 name: Validate Python e2e
-on: 
+on:
   push:
     branches:
       - main
@@ -120,3 +120,30 @@ jobs:
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
 
+  setup-dev-version:
+    name: Setup 3.9-dev ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: setup-python 3.9-dev
+      id: setup-python
+      uses: ./
+      with:
+        python-version: '3.9-dev'
+
+    - name: Check python-path
+      run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+      shell: bash
+
+    - name: Validate version
+      run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.9.') }}
+      shell: bash
+
+    - name: Run simple code
+      run: python -c 'import math; print(math.factorial(5))'

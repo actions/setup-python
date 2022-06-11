@@ -45,8 +45,8 @@ We won't pursue the goal to provide wide customization of caching in the scope o
 
 ```
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
   with:
     python-version: 3.9
     cache: pip
@@ -56,8 +56,8 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
   with:
     python-version: 3.9
     cache: pipenv
@@ -66,8 +66,8 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
   with:
     python-version: 3.9
     cache: pip
@@ -80,8 +80,8 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-python@v2
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
   with:
     python-version: 3.9
     cache: pip

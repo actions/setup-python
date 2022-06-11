@@ -117,14 +117,10 @@ export async function useCpythonVersion(
   return {impl: 'CPython', version: installed};
 }
 
-/** Convert versions like `3.8-dev` to a version like `>= 3.8.0-a0`. */
+/** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
 function desugarDevVersion(versionSpec: string) {
-  if (versionSpec.endsWith('-dev')) {
-    const versionRoot = versionSpec.slice(0, -'-dev'.length);
-    return `>= ${versionRoot}.0-a0`;
-  } else {
-    return versionSpec;
-  }
+  const devVersion = /^(\d+)\.(\d+)-dev$/;
+  return versionSpec.replace(devVersion, '~$1.$2.0-0');
 }
 
 /** Extracts python version from install path from hosted tool cache as described in README.md */

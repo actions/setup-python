@@ -54,7 +54,7 @@ export async function findPyPyVersion(
     `python${binaryExtension}`
   );
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
-  core.exportVariable('pythonLocation', pythonLocation);
+  core.exportVariable('pythonLocation', installDir);
   core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
   core.addPath(pythonLocation);
   core.addPath(_binDir);
