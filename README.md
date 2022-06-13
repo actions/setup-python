@@ -364,7 +364,14 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 `setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during download that read `##[error]API rate limit exceeded for...`.
 
-To avoid hitting rate-limit problems, we recommend [setting up your own runner tool cache](https://docs.github.com/en/enterprise-server@2.22/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access#about-the-included-setup-actions-and-the-runner-tool-cache).
+To get a higher rate limit, you can [generate a personal access token on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action:
+
+```yml
+uses: actions/setup-python@v4
+with:
+  token: ${{ secrets.GH_DOTCOM_TOKEN }}
+  python-version: 3.11
+```
 
 # License
 
