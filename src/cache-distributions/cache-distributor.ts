@@ -35,13 +35,25 @@ abstract class CacheDistributor {
     core.saveState(State.CACHE_PATHS, cachePath);
     core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
 
-    const matchedKey = await cache.restoreCache(
-      cachePath,
-      primaryKey,
-      restoreKey
-    );
+    try {
+      const matchedKey = await cache.restoreCache(
+        cachePath,
+        primaryKey,
+        restoreKey
+      );
 
-    this.handleMatchResult(matchedKey, primaryKey);
+      this.handleMatchResult(matchedKey, primaryKey);
+    } catch(error) {
+      const typedError = error as Error;
+      if (typedError.name === cache.ValidationError.name) {
+        throw error;
+      } else {
+        core.warning(typedError.message);
+        core.setOutput('cache-hit', false);
+      }
+    }
+
+
   }
 
   public handleMatchResult(matchedKey: string | undefined, primaryKey: string) {

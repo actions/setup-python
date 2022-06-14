@@ -57529,8 +57529,20 @@ class CacheDistributor {
             const cachePath = yield this.getCacheGlobalDirectories();
             core.saveState(State.CACHE_PATHS, cachePath);
             core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
-            const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
-            this.handleMatchResult(matchedKey, primaryKey);
+            try {
+                const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
+                this.handleMatchResult(matchedKey, primaryKey);
+            }
+            catch (error) {
+                const typedError = error;
+                if (typedError.name === cache.ValidationError.name) {
+                    throw error;
+                }
+                else {
+                    core.warning(typedError.message);
+                    core.setOutput('cache-hit', false);
+                }
+            }
         });
     }
     handleMatchResult(matchedKey, primaryKey) {
