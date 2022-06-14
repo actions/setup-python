@@ -43,7 +43,7 @@ abstract class CacheDistributor {
       );
 
       this.handleMatchResult(matchedKey, primaryKey);
-    } catch(error) {
+    } catch (error) {
       const typedError = error as Error;
       if (typedError.name === cache.ValidationError.name) {
         throw error;
@@ -52,8 +52,6 @@ abstract class CacheDistributor {
         core.setOutput('cache-hit', false);
       }
     }
-
-
   }
 
   public handleMatchResult(matchedKey: string | undefined, primaryKey: string) {
