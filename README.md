@@ -237,6 +237,8 @@ pypy3.7-v7.3.3rc1 or pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
 pypy3.7-nightly or pypy-3.7-nightly # Python 3.7 and nightly PyPy
 ```
 
+Note: `pypy2` and `pypy3` have been removed in v3. Use the format above instead.
+
 # Caching packages dependencies
 
 The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
