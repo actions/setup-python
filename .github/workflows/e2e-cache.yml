@@ -43,12 +43,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
+        id: setup-python
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install pipenv
-        run: pipx install pipenv
+        run: pipx install pipenv --python ${{ steps.setup-python.outputs.python-path }}
       - name: Install dependencies
         run: |
           cd __tests__/data
