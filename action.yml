@@ -4,8 +4,9 @@ description: 'Set up a specific version of Python and add the command-line tools
 author: 'GitHub'
 inputs:
   python-version:
-    description: "Version range or exact version of a Python version to use, using SemVer's version range syntax."
-    default: '3.x'
+    description: "Version range or exact version of Python to use, using SemVer's version range syntax. Reads from .python-version if unset."
+  python-version-file:
+    description: "File containing the Python version to use. Example: .python-version"
   cache:
     description: 'Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.'
     required: false
@@ -15,7 +16,7 @@ inputs:
     description: 'Set this option if you want the action to check for the latest available version that satisfies the version spec.'
     default: false
   token:
-    description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
+    description: The token used to authenticate when to fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.token }}
   cache-dependency-path:
     description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'

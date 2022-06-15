@@ -1,4 +1,4 @@
-# setup-python V3
+# setup-python V4
 
 <p align="left">
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
@@ -20,6 +20,7 @@ This action sets up a Python environment for use in actions by:
 - Support for pre-release versions of Python.
 - Support for installing any version of PyPy on-flight
 - Support for built-in caching of pip, pipenv and poetry dependencies
+- Support for `.python-version` file
 
 # Usage
 
@@ -29,10 +30,20 @@ Basic:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
     architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+- run: python my_script.py
+```
+
+Read Python version from file:
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version-file: '.python-version' # Read python version from a file
 - run: python my_script.py
 ```
 
@@ -48,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -72,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -90,7 +101,7 @@ jobs:
         python-version: ['3.7.4', '3.8', '3.9', '3.10']
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -100,7 +111,7 @@ Download and set up an accurate pre-release version of Python:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.11.0-alpha.1'
 - run: python my_script.py
@@ -110,7 +121,7 @@ Download and set up the latest available version of Python (includes both pre-re
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.11.0-alpha - 3.11.0' # SemVer's version range syntax
 - run: python my_script.py
@@ -130,7 +141,7 @@ jobs:
         - 'pypy3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -144,12 +155,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       id: cp310
       with:
         python-version: "3.10"
     - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
 ```
+
+>The environment variable `pythonLocation` also becomes available after Python or PyPy installation. It contains the absolute path to the folder where the desired version of Python or PyPy is installed.
 
 # Getting started with Python + Actions
 
@@ -164,7 +177,7 @@ Check out our detailed guide on using [Python with GitHub Actions](https://help.
     - For every minor version of Python, expect only the latest patch to be preinstalled.
     - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
-    - Use `-dev` instead of a patch number (e.g., `3.11-dev`) to install the latest release of a minor version, *alpha and beta releases included*.
+    - Use `-dev` instead of a patch number (e.g., `3.11-dev`) to install the latest patch version release for a given minor version, *alpha and beta releases included*.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
@@ -224,6 +237,8 @@ pypy3.7-v7.3.3rc1 or pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
 pypy3.7-nightly or pypy-3.7-nightly # Python 3.7 and nightly PyPy
 ```
 
+Note: `pypy2` and `pypy3` have been removed in v3. Use the format above instead.
+
 # Check latest version
 
 The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python/PyPy` version is always used.
@@ -261,7 +276,7 @@ The requirements file format allows to specify dependency versions using logical
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -274,7 +289,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -287,7 +302,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install poetry
   run: pipx install poetry
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'poetry'
@@ -299,7 +314,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -313,7 +328,7 @@ steps:
 - uses: actions/checkout@v3
 - name: Install pipenv
   run: pipx install pipenv
-- uses: actions/setup-python@v3
+- uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -369,7 +384,14 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 `setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during download that read `##[error]API rate limit exceeded for...`.
 
-To avoid hitting rate-limit problems, we recommend [setting up your own runner tool cache](https://docs.github.com/en/enterprise-server@2.22/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access#about-the-included-setup-actions-and-the-runner-tool-cache).
+To get a higher rate limit, you can [generate a personal access token on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action:
+
+```yml
+uses: actions/setup-python@v4
+with:
+  token: ${{ secrets.GH_DOTCOM_TOKEN }}
+  python-version: 3.11
+```
 
 # License
 

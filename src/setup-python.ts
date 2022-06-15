@@ -3,6 +3,7 @@ import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
+import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {isCacheFeatureAvailable} from './utils';
 
@@ -21,6 +22,35 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
   await cacheDistributor.restoreCache();
 }
 
+function resolveVersionInput(): string {
+  let version = core.getInput('python-version');
+  const versionFile = core.getInput('python-version-file');
+
+  if (version && versionFile) {
+    core.warning(
+      'Both python-version and python-version-file inputs are specified, only python-version will be used'
+    );
+  }
+
+  if (version) {
+    return version;
+  }
+
+  const versionFilePath = path.join(
+    process.env.GITHUB_WORKSPACE!,
+    versionFile || '.python-version'
+  );
+  if (!fs.existsSync(versionFilePath)) {
+    throw new Error(
+      `The specified python version file at: ${versionFilePath} does not exist`
+    );
+  }
+  version = fs.readFileSync(versionFilePath, 'utf8');
+  core.info(`Resolved ${versionFile} as ${version}`);
+
+  return version;
+}
+
 async function run() {
   if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
     core.debug(
@@ -33,8 +63,9 @@ async function run() {
     );
   }
   try {
-    const version = core.getInput('python-version');
+    const version = resolveVersionInput();
     const checkLatest = core.getBooleanInput('check-latest');
+
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
