@@ -120,36 +120,12 @@ jobs:
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
 
-<<<<<<< HEAD
-  check-latest:
-=======
   setup-dev-version:
     name: Setup 3.9-dev ${{ matrix.os }}
->>>>>>> main
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-<<<<<<< HEAD
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10"]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python and check latest
-        uses: ./
-        with:
-          python-version: ${{ matrix.python-version }}
-          check-latest: true
-      - name: Validate version
-        run: |
-          $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "${{ matrix.python }}"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
-            exit 1
-          }
-          $pythonVersion
-        shell: pwsh
-=======
         os: [macos-latest, windows-latest, ubuntu-latest]
     steps:
     - name: Checkout
@@ -171,4 +147,27 @@ jobs:
 
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
->>>>>>> main
+
+  check-latest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python and check latest
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          check-latest: true
+      - name: Validate version
+        run: |
+          $pythonVersion = (python --version)
+          if ("$pythonVersion" -NotMatch "${{ matrix.python }}"){
+            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+            exit 1
+          }
+          $pythonVersion
+        shell: pwsh
