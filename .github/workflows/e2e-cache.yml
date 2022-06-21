@@ -48,7 +48,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install pipenv
-        run: pipx install pipenv
+        run: pip install --user pipenv
       - name: Install dependencies
         run: |
           cd __tests__/data
@@ -112,7 +112,7 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
-        run: pipx install pipenv
+        run: pip install --user pipenv
       - name: Install dependencies
         run: |
           cd __tests__/data
