@@ -127,6 +127,16 @@ steps:
 - run: python my_script.py
 ```
 
+Download and set up the latest stable version of Python, for specified major version:
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.x'
+- run: python my_script.py
+```
+
 Download and set up PyPy:
 
 ```yaml
