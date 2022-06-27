@@ -16,18 +16,24 @@ class PoetryCache extends CacheDistributor {
   }
 
   protected async getCacheGlobalDirectories() {
-    const poetryConfig = await this.getPoetryConfiguration();
+    const paths = [];
+    const globber = await glob.create(this.patterns);
 
-    const cacheDir = poetryConfig['cache-dir'];
-    const virtualenvsPath = poetryConfig['virtualenvs.path'].replace(
-      '{cache-dir}',
-      cacheDir
-    );
+    for await (const file of globber.globGenerator()) {
+      const basedir = path.dirname(file);
+      const poetryConfig = await this.getPoetryConfiguration(basedir);
 
-    const paths = [virtualenvsPath];
+      const cacheDir = poetryConfig['cache-dir'];
+      const virtualenvsPath = poetryConfig['virtualenvs.path'].replace(
+        '{cache-dir}',
+        cacheDir
+      );
 
-    if (poetryConfig['virtualenvs.in-project'] === true) {
-      paths.push(path.join(process.cwd(), '.venv'));
+      paths.push(virtualenvsPath);
+
+      if (poetryConfig['virtualenvs.in-project'] === true) {
+        paths.push(path.join(basedir, '.venv'));
+      }
     }
 
     const pythonLocation = await io.which('python');
@@ -63,11 +69,12 @@ class PoetryCache extends CacheDistributor {
     };
   }
 
-  private async getPoetryConfiguration() {
-    const {stdout, stderr, exitCode} = await exec.getExecOutput('poetry', [
-      'config',
-      '--list'
-    ]);
+  private async getPoetryConfiguration(basedir: string) {
+    const {stdout, stderr, exitCode} = await exec.getExecOutput(
+      'poetry',
+      ['config', '--list'],
+      {cwd: basedir}
+    );
 
     if (exitCode && stderr) {
       throw new Error(
