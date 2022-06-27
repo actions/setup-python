@@ -74,7 +74,7 @@ class PoetryCache extends CacheDistributor {
     const config: any = {};
 
     for (let line of lines) {
-      line = line.replace(/#.*$/, '');
+      line = line.replace(/#.*$/gm, '');
 
       const [key, value] = line.split('=').map(part => part.trim());
 
