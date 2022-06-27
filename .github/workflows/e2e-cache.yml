@@ -66,15 +66,15 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install poetry
         run: pipx install poetry
+      - name: Init pyproject.toml
+        run: mv ./__tests__/data/pyproject.toml .
       - name: Setup Python
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
-      - name: Init pyproject.toml
-        run: poetry init -n
       - name: Install dependencies
-        run: poetry add flake8
+        run: poetry install
 
   python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})

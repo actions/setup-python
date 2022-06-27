@@ -33,15 +33,20 @@ class PoetryCache extends CacheDistributor {
 
     if (pythonLocation) {
       core.debug(`pythonLocation is ${pythonLocation}`);
-      const {exitCode, stderr} = await exec.getExecOutput(
-        `poetry env use ${pythonLocation}`
+      const {
+        exitCode,
+        stderr
+      } = await exec.getExecOutput(
+        `poetry env use ${pythonLocation}`,
+        undefined,
+        {ignoreReturnCode: true}
       );
 
       if (exitCode) {
-        throw new Error(stderr);
+        core.info(`[warning]${stderr}`);
       }
     } else {
-      core.warning('python binaries were not found in PATH.');
+      core.info('[warning]python binaries were not found in PATH.');
     }
 
     return paths;

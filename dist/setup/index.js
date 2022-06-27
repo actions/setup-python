@@ -63876,8 +63876,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const glob = __importStar(__nccwpck_require__(8090));
+const io = __importStar(__nccwpck_require__(7436));
 const path = __importStar(__nccwpck_require__(1017));
 const exec = __importStar(__nccwpck_require__(1514));
+const core = __importStar(__nccwpck_require__(2186));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
 class PoetryCache extends cache_distributor_1.default {
     constructor(pythonVersion, patterns = '**/poetry.lock') {
@@ -63893,6 +63895,17 @@ class PoetryCache extends cache_distributor_1.default {
             const paths = [virtualenvsPath];
             if (poetryConfig['virtualenvs.in-project'] === true) {
                 paths.push(path.join(process.cwd(), '.venv'));
+            }
+            const pythonLocation = yield io.which('python');
+            if (pythonLocation) {
+                core.debug(`pythonLocation is ${pythonLocation}`);
+                const { exitCode, stderr } = yield exec.getExecOutput(`poetry env use ${pythonLocation}`, undefined, { ignoreReturnCode: true });
+                if (exitCode) {
+                    core.info(`[warning]${stderr}`);
+                }
+            }
+            else {
+                core.info('[warning]python binaries were not found in PATH.');
             }
             return paths;
         });
