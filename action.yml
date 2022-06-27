@@ -14,7 +14,7 @@ inputs:
     description: 'The target architecture (x86, x64) of the Python interpreter.'
   token:
     description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
-    default: ${{ github.server_url == 'https://github.com' && github.token }}
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
   cache-dependency-path:
     description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
 outputs:
