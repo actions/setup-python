@@ -269,12 +269,12 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
 
@@ -308,8 +308,6 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -317,6 +315,8 @@ steps:
     cache-dependency-path: |
       server/app/Pipfile.lock
       __test__/app/Pipfile.lock
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
 
