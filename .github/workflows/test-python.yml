@@ -147,3 +147,28 @@ jobs:
 
     - name: Run simple code
       run: python -c 'import math; print(math.factorial(5))'
+
+  setup-versions-noenv:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} (noenv)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-20.04]
+        python: ["3.7", "3.8", "3.9", "3.10"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: setup-python ${{ matrix.python }}
+      id: setup-python
+      uses: ./
+      with:
+        python-version: ${{ matrix.python }}
+        update-environment: false
+
+    - name: Python version
+      run: ${{ steps.setup-python.outputs.python-path }} --version
+
+    - name: Run simple code
+      run: ${{ steps.setup-python.outputs.python-path }} -c 'import math; print(math.factorial(5))'
