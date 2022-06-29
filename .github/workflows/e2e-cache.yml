@@ -50,10 +50,15 @@ jobs:
       - name: Install pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
       - name: Install dependencies
+        shell: pwsh
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          pipenv install --keep-outdated --python 3
+          if (${{ matrix.python-version }} -Match "pypy") {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+          } else {
+            pipenv install --keep-outdated --python pypy
+          }
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -115,7 +120,12 @@ jobs:
       - name: Install pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
       - name: Install dependencies
+        shell: pwsh
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          pipenv install --keep-outdated --python 3
+          if (${{ matrix.python-version }} -Match "pypy") {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+          } else {
+            pipenv install --keep-outdated --python pypy
+          }
