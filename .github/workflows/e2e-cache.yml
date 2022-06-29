@@ -53,7 +53,7 @@ jobs:
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          pipenv install --keep-outdated
+          pipenv install --keep-outdated --python 3
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -118,4 +118,4 @@ jobs:
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          pipenv install --keep-outdated
+          pipenv install --keep-outdated --python 3
