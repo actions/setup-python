@@ -55,9 +55,9 @@ jobs:
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
           if ("${{ matrix.python-version }}" -Match "pypy") {
-            pipenv install --keep-outdated --python ${{ matrix.python-version }}
-          } else {
             pipenv install --keep-outdated --python pypy
+          } else {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
           }
 
   python-poetry-dependencies-caching:
@@ -125,7 +125,7 @@ jobs:
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
           if ("${{ matrix.python-version }}" -Match "pypy") {
-            pipenv install --keep-outdated --python ${{ matrix.python-version }}
-          } else {
             pipenv install --keep-outdated --python pypy
+          } else {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
           }
