@@ -65263,7 +65263,7 @@ function resolveVersionInput() {
     let version = core.getInput('python-version');
     let versionFile = core.getInput('python-version-file');
     if (version && versionFile) {
-        core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used');
+        core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used.');
     }
     if (version) {
         return version;
@@ -65278,14 +65278,14 @@ function resolveVersionInput() {
                 versionFile = defaultVersionFile;
             }
             else {
-                throw new Error(`The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found`);
+                throw new Error(`The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found.`);
             }
         }
         version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied. ");
+    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
     return version;
 }
 function run() {

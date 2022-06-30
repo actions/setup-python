@@ -28,7 +28,7 @@ function resolveVersionInput(): string {
 
   if (version && versionFile) {
     core.warning(
-      'Both python-version and python-version-file inputs are specified, only python-version will be used'
+      'Both python-version and python-version-file inputs are specified, only python-version will be used.'
     );
   }
 
@@ -50,7 +50,7 @@ function resolveVersionInput(): string {
         versionFile = defaultVersionFile;
       } else {
         throw new Error(
-          `The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found`
+          `The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found.`
         );
       }
     }
@@ -62,7 +62,7 @@ function resolveVersionInput(): string {
   }
 
   core.warning(
-    "Neither 'python-version' nor 'python-version-file' inputs were supplied. "
+    "Neither 'python-version' nor 'python-version-file' inputs were supplied."
   );
 
   return version;
