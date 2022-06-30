@@ -65271,12 +65271,10 @@ function resolveVersionInput() {
     }
     if (versionFile) {
         if (!fs_1.default.existsSync(versionFile)) {
-            logWarning(`The specified python version file at: ${versionFile} does not exist. Attempting to find .python-version file.`);
-            if (!fs_1.default.existsSync('.python-version')) {
-                throw new Error(`The specified python version file at: ${versionFile} does not exist and default .python-version file isn't found.`);
-            }
-            else {
-                versionFile = '.python-version';
+            logWarning(`The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`);
+            versionFile = '.python-version';
+            if (!fs_1.default.existsSync(versionFile)) {
+                throw new Error(`The ${versionFile} doesn't exist.`);
             }
         }
         version = fs_1.default.readFileSync(versionFile, 'utf8');

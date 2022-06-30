@@ -39,14 +39,11 @@ function resolveVersionInput(): string {
   if (versionFile) {
     if (!fs.existsSync(versionFile)) {
       logWarning(
-        `The specified python version file at: ${versionFile} does not exist. Attempting to find .python-version file.`
+        `The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`
       );
-      if (!fs.existsSync('.python-version')) {
-        throw new Error(
-          `The specified python version file at: ${versionFile} does not exist and default .python-version file isn't found.`
-        );
-      } else {
-        versionFile = '.python-version';
+      versionFile = '.python-version';
+      if (!fs.existsSync(versionFile)) {
+        throw new Error(`The ${versionFile} doesn't exist.`);
       }
     }
 
