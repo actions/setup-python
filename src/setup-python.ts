@@ -64,14 +64,23 @@ async function run() {
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
+      const updateEnvironment = core.getBooleanInput('update-environment');
       if (isPyPyVersion(version)) {
-        const installed = await finderPyPy.findPyPyVersion(version, arch);
+        const installed = await finderPyPy.findPyPyVersion(
+          version,
+          arch,
+          updateEnvironment
+        );
         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
         core.info(
           `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
         );
       } else {
-        const installed = await finder.useCpythonVersion(version, arch);
+        const installed = await finder.useCpythonVersion(
+          version,
+          arch,
+          updateEnvironment
+        );
         pythonVersion = installed.version;
         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
       }

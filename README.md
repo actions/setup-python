@@ -269,12 +269,12 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
 
@@ -308,8 +308,6 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -317,8 +315,30 @@ steps:
     cache-dependency-path: |
       server/app/Pipfile.lock
       __test__/app/Pipfile.lock
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
+
+# Environment variables
+
+ The `update-environment` flag defaults to `true`.
+ With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for `python` to just work out of the box.
+
+ If `update-environment` is set to `false`, the action will not add/update environment variables.
+ This can prove useful if you want the only side-effect to be to ensure python is installed and rely on the `python-path` output to run python.
+ Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
+
+ ```yaml
+ steps:
+   - uses: actions/checkout@v3
+   - uses: actions/setup-python@v4
+     id: cp310
+     with:
+       python-version: '3.10'
+       update-environment: false
+   - run: ${{ steps.cp310.outputs.python-path }} my_script.py
+ ```
 
 # Using `setup-python` with a self hosted runner
 

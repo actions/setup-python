@@ -20,7 +20,8 @@ interface IPyPyVersionSpec {
 
 export async function findPyPyVersion(
   versionSpec: string,
-  architecture: string
+  architecture: string,
+  updateEnvironment: boolean
 ): Promise<{resolvedPyPyVersion: string; resolvedPythonVersion: string}> {
   let resolvedPyPyVersion = '';
   let resolvedPythonVersion = '';
@@ -54,10 +55,18 @@ export async function findPyPyVersion(
     `python${binaryExtension}`
   );
   const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
-  core.exportVariable('pythonLocation', installDir);
-  core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
-  core.addPath(pythonLocation);
-  core.addPath(_binDir);
+  if (updateEnvironment) {
+    core.exportVariable('pythonLocation', installDir);
+    // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+    core.exportVariable('Python_ROOT_DIR', installDir);
+    // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+    core.exportVariable('Python2_ROOT_DIR', installDir);
+    // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+    core.exportVariable('Python3_ROOT_DIR', installDir);
+    core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+    core.addPath(pythonLocation);
+    core.addPath(_binDir);
+  }
   core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
   core.setOutput('python-path', pythonPath);
 
