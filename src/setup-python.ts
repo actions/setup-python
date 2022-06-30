@@ -36,15 +36,31 @@ function resolveVersionInput(): string {
     return version;
   }
 
-  versionFile = versionFile || '.python-version';
-  if (!fs.existsSync(versionFile)) {
-    throw new Error(
-      `The specified python version file at: ${versionFile} does not exist`
-    );
-  }
-  version = fs.readFileSync(versionFile, 'utf8');
-  core.info(`Resolved ${versionFile} as ${version}`);
+  if (versionFile) {
+    const defaultVersionFile = '.python-version';
 
+    const VersionFileExists = fs.existsSync(versionFile);
+    const defaultVersionFileExists = fs.existsSync(defaultVersionFile);
+
+    if (!VersionFileExists && !defaultVersionFileExists) {
+      throw new Error(
+        `The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found`
+      );
+    }
+    if (VersionFileExists) {
+      version = fs.readFileSync(versionFile, 'utf8');
+      core.info(`Resolved ${versionFile} as ${version}`);
+    } else {
+      version = fs.readFileSync('.python-version', 'utf8');
+      core.info(`Resolved ${'.python-version'} as ${version}`);
+    }
+
+    return version;
+  }
+
+  core.warning(
+    "Neither 'python-version' nor 'python-version-file' inputs were supplied. "
+  );
   return version;
 }
 
