@@ -65275,6 +65275,7 @@ function resolveVersionInput() {
                 throw new Error(`The specified python version file at: ${versionFile} does not exist.`);
             }
             if (fs_1.default.existsSync(defaultVersionFile)) {
+                core.warning(`The specified python version file at: ${versionFile} does not exist. Attempting to find ${defaultVersionFile} file.`);
                 versionFile = defaultVersionFile;
             }
             else {
