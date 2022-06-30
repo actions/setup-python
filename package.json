@@ -9,7 +9,7 @@
     "format": "prettier --write \"{,!(node_modules)/**/}*.ts\"",
     "format-check": "prettier --check \"{,!(node_modules)/**/}*.ts\"",
     "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^2.0.2",
+    "@actions/cache": "^3.0.0",
     "@actions/core": "^1.7.0",
     "@actions/exec": "^1.1.0",
     "@actions/glob": "^0.2.0",

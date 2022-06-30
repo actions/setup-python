@@ -43,17 +43,11 @@ async function saveCache(packageManager: string) {
     return;
   }
 
-  try {
-    await cache.saveCache(cachePaths, primaryKey);
-    core.info(`Cache saved with the key: ${primaryKey}`);
-  } catch (error) {
-    const err = error as Error;
-    if (err.name === cache.ReserveCacheError.name) {
-      core.info(err.message);
-    } else {
-      throw error;
-    }
+  const cacheId = await cache.saveCache(cachePaths, primaryKey);
+  if (cacheId == -1) {
+    return;
   }
+  core.info(`Cache saved with the key: ${primaryKey}`);
 }
 
 function isCacheDirectoryExists(cacheDirectory: string[]) {
