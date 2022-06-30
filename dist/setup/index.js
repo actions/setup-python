@@ -63884,25 +63884,18 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment) {
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
-<<<<<<< HEAD
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+            core.exportVariable('Python_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+            core.exportVariable('Python2_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+            core.exportVariable('Python3_ROOT_DIR', installDir);
             core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
             core.addPath(pythonLocation);
             core.addPath(_binDir);
         }
-=======
-        core.exportVariable('pythonLocation', installDir);
-        // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
-        core.exportVariable('Python_ROOT_DIR', installDir);
-        // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
-        core.exportVariable('Python2_ROOT_DIR', installDir);
-        // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
-        core.exportVariable('Python3_ROOT_DIR', installDir);
-        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
-        core.addPath(pythonLocation);
-        core.addPath(_binDir);
->>>>>>> 31fd3d4 (Add CMake hints)
         core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
         core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
@@ -64055,8 +64048,6 @@ function useCpythonVersion(version, architecture, updateEnvironment) {
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
-<<<<<<< HEAD
-=======
         core.exportVariable('pythonLocation', installDir);
         // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
         core.exportVariable('Python_ROOT_DIR', installDir);
@@ -64074,7 +64065,6 @@ function useCpythonVersion(version, architecture, updateEnvironment) {
                 core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
             }
         }
->>>>>>> 31fd3d4 (Add CMake hints)
         const _binDir = binDir(installDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
