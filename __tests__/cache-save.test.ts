@@ -212,6 +212,59 @@ describe('run', () => {
       );
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
+
+    it('saves with -1 cacheId , should not fail workflow', async () => {
+      inputs['cache'] = 'poetry';
+      getStateSpy.mockImplementation((name: string) => {
+        if (name === State.STATE_CACHE_PRIMARY_KEY) {
+          return poetryLockHash;
+        } else if (name === State.CACHE_PATHS) {
+          return JSON.stringify([__dirname]);
+        } else {
+          return requirementsHash;
+        }
+      });
+
+      saveCacheSpy.mockImplementation(() => {
+        return -1;
+      });
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(getStateSpy).toHaveBeenCalledTimes(3);
+      expect(infoSpy).not.toHaveBeenCalled();
+      expect(saveCacheSpy).toHaveBeenCalled();
+      expect(infoSpy).not.toHaveBeenLastCalledWith(
+        `Cache saved with the key: ${poetryLockHash}`
+      );
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('saves with error from toolkit, should fail workflow', async () => {
+      inputs['cache'] = 'npm';
+      getStateSpy.mockImplementation((name: string) => {
+        if (name === State.STATE_CACHE_PRIMARY_KEY) {
+          return poetryLockHash;
+        } else if (name === State.CACHE_PATHS) {
+          return JSON.stringify([__dirname]);
+        } else {
+          return requirementsHash;
+        }
+      });
+
+      saveCacheSpy.mockImplementation(() => {
+        throw new cache.ValidationError('Validation failed');
+      });
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(getStateSpy).toHaveBeenCalledTimes(3);
+      expect(infoSpy).not.toHaveBeenCalledWith();
+      expect(saveCacheSpy).toHaveBeenCalled();
+      expect(setFailedSpy).toHaveBeenCalled();
+    });
   });
 
   afterEach(() => {
