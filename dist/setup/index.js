@@ -65283,7 +65283,7 @@ function resolveVersionInput() {
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
+    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
     return version;
 }
 function run() {

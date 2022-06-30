@@ -56,7 +56,7 @@ function resolveVersionInput(): string {
     return version;
   }
 
-  logWarning(
+  core.warning(
     "Neither 'python-version' nor 'python-version-file' inputs were supplied."
   );
 
