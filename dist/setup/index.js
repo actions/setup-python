@@ -65241,6 +65241,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.logWarning = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
@@ -65269,24 +65270,20 @@ function resolveVersionInput() {
         return version;
     }
     if (versionFile) {
-        const defaultVersionFile = '.python-version';
         if (!fs_1.default.existsSync(versionFile)) {
-            if (versionFile === defaultVersionFile) {
-                throw new Error(`The specified python version file at: ${versionFile} does not exist.`);
-            }
-            if (fs_1.default.existsSync(defaultVersionFile)) {
-                core.warning(`The specified python version file at: ${versionFile} does not exist. Attempting to find ${defaultVersionFile} file.`);
-                versionFile = defaultVersionFile;
+            logWarning(`The specified python version file at: ${versionFile} does not exist. Attempting to find .python-version file.`);
+            if (!fs_1.default.existsSync('.python-version')) {
+                throw new Error(`The specified python version file at: ${versionFile} does not exist and default .python-version file isn't found.`);
             }
             else {
-                throw new Error(`The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found.`);
+                versionFile = '.python-version';
             }
         }
         version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
+    logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
     return version;
 }
 function run() {
@@ -65331,6 +65328,11 @@ function run() {
         }
     });
 }
+function logWarning(message) {
+    const warningPrefix = '[warning]';
+    core.info(`${warningPrefix}${message}`);
+}
+exports.logWarning = logWarning;
 run();
 
 
