@@ -63886,6 +63886,12 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment) {
         const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+            core.exportVariable('Python_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+            core.exportVariable('Python2_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+            core.exportVariable('Python3_ROOT_DIR', installDir);
             core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
             core.addPath(pythonLocation);
             core.addPath(_binDir);
@@ -64042,11 +64048,28 @@ function useCpythonVersion(version, architecture, updateEnvironment) {
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
+        if (utils_1.IS_LINUX) {
+            const libPath = process.env.LD_LIBRARY_PATH
+                ? `:${process.env.LD_LIBRARY_PATH}`
+                : '';
+            const pyLibPath = path.join(installDir, 'lib');
+            if (!libPath.split(':').includes(pyLibPath)) {
+                core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
+            }
+        }
         const _binDir = binDir(installDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
+            core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
+            core.exportVariable('pythonLocation', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+            core.exportVariable('Python_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+            core.exportVariable('Python2_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+            core.exportVariable('Python3_ROOT_DIR', installDir);
             core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
             if (utils_1.IS_LINUX) {
                 const libPath = process.env.LD_LIBRARY_PATH
