@@ -64483,8 +64483,8 @@ function resolveVersionInput() {
             core.info(`Resolved ${versionFile} as ${version}`);
         }
         else {
-            version = fs_1.default.readFileSync('.python-version', 'utf8');
-            core.info(`Resolved ${'.python-version'} as ${version}`);
+            version = fs_1.default.readFileSync(defaultVersionFile, 'utf8');
+            core.info(`Resolved ${defaultVersionFile} as ${version}`);
         }
         return version;
     }

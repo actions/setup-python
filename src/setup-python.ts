@@ -51,8 +51,8 @@ function resolveVersionInput(): string {
       version = fs.readFileSync(versionFile, 'utf8');
       core.info(`Resolved ${versionFile} as ${version}`);
     } else {
-      version = fs.readFileSync('.python-version', 'utf8');
-      core.info(`Resolved ${'.python-version'} as ${version}`);
+      version = fs.readFileSync(defaultVersionFile, 'utf8');
+      core.info(`Resolved ${defaultVersionFile} as ${version}`);
     }
 
     return version;
