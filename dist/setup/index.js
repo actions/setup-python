@@ -65270,19 +65270,19 @@ function resolveVersionInput() {
     }
     if (versionFile) {
         const defaultVersionFile = '.python-version';
-        const VersionFileExists = fs_1.default.existsSync(versionFile);
-        const defaultVersionFileExists = fs_1.default.existsSync(defaultVersionFile);
-        if (!VersionFileExists && !defaultVersionFileExists) {
-            throw new Error(`The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found`);
+        if (!fs_1.default.existsSync(versionFile)) {
+            if (versionFile === defaultVersionFile) {
+                throw new Error(`The specified python version file at: ${versionFile} does not exist.`);
+            }
+            if (fs_1.default.existsSync(defaultVersionFile)) {
+                versionFile = defaultVersionFile;
+            }
+            else {
+                throw new Error(`The specified python version file at: ${versionFile} does not exist and default ${defaultVersionFile} file isn't found`);
+            }
         }
-        if (VersionFileExists) {
-            version = fs_1.default.readFileSync(versionFile, 'utf8');
-            core.info(`Resolved ${versionFile} as ${version}`);
-        }
-        else {
-            version = fs_1.default.readFileSync(defaultVersionFile, 'utf8');
-            core.info(`Resolved ${defaultVersionFile} as ${version}`);
-        }
+        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
     core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied. ");
