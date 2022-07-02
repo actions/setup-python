@@ -151,8 +151,11 @@ describe('findPyPyVersion', () => {
   let spyChmodSync: jest.SpyInstance;
   let spyCoreAddPath: jest.SpyInstance;
   let spyCoreExportVariable: jest.SpyInstance;
+  const env = process.env;
 
   beforeEach(() => {
+    jest.resetModules();
+    process.env = {...env};
     tcFind = jest.spyOn(tc, 'find');
     tcFind.mockImplementation((tool: string, version: string) => {
       const semverRange = new semver.Range(version);
@@ -214,6 +217,7 @@ describe('findPyPyVersion', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    process.env = env;
   });
 
   it('found PyPy in toolcache', async () => {
