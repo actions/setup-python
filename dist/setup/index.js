@@ -64845,15 +64845,6 @@ function useCpythonVersion(version, architecture, updateEnvironment) {
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
-        if (utils_1.IS_LINUX) {
-            const libPath = process.env.LD_LIBRARY_PATH
-                ? `:${process.env.LD_LIBRARY_PATH}`
-                : '';
-            const pyLibPath = path.join(installDir, 'lib');
-            if (!libPath.split(':').includes(pyLibPath)) {
-                core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
-            }
-        }
         const _binDir = binDir(installDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
