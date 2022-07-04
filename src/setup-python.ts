@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable} from './utils';
+import {isCacheFeatureAvailable, IS_LINUX, IS_WINDOWS} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -61,16 +61,16 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
-  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
-    core.debug(
-      `Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`
-    );
+  // According to the README windows binaries do not require to be installed
+  // in the specific location, but Mac and Linux do
+  if (!IS_WINDOWS && !process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+    if (IS_LINUX) process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
+    else process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
     process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
-  } else {
-    core.debug(
-      `Python is expected to be installed into RUNNER_TOOL_CACHE==${process.env['RUNNER_TOOL_CACHE']}`
-    );
   }
+  core.debug(
+    `Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`
+  );
   try {
     const version = resolveVersionInput();
     if (version) {
