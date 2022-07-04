@@ -65241,6 +65241,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.logWarning = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
@@ -65263,17 +65264,24 @@ function resolveVersionInput() {
     let version = core.getInput('python-version');
     let versionFile = core.getInput('python-version-file');
     if (version && versionFile) {
-        core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used');
+        core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used.');
     }
     if (version) {
         return version;
     }
-    versionFile = versionFile || '.python-version';
-    if (!fs_1.default.existsSync(versionFile)) {
-        throw new Error(`The specified python version file at: ${versionFile} does not exist`);
+    if (versionFile) {
+        if (!fs_1.default.existsSync(versionFile)) {
+            logWarning(`The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`);
+            versionFile = '.python-version';
+            if (!fs_1.default.existsSync(versionFile)) {
+                throw new Error(`The ${versionFile} doesn't exist.`);
+            }
+        }
+        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        core.info(`Resolved ${versionFile} as ${version}`);
+        return version;
     }
-    version = fs_1.default.readFileSync(versionFile, 'utf8');
-    core.info(`Resolved ${versionFile} as ${version}`);
+    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
     return version;
 }
 function run() {
@@ -65318,6 +65326,11 @@ function run() {
         }
     });
 }
+function logWarning(message) {
+    const warningPrefix = '[warning]';
+    core.info(`${warningPrefix}${message}`);
+}
+exports.logWarning = logWarning;
 run();
 
 

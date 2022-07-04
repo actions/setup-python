@@ -28,7 +28,7 @@ function resolveVersionInput(): string {
 
   if (version && versionFile) {
     core.warning(
-      'Both python-version and python-version-file inputs are specified, only python-version will be used'
+      'Both python-version and python-version-file inputs are specified, only python-version will be used.'
     );
   }
 
@@ -36,14 +36,26 @@ function resolveVersionInput(): string {
     return version;
   }
 
-  versionFile = versionFile || '.python-version';
-  if (!fs.existsSync(versionFile)) {
-    throw new Error(
-      `The specified python version file at: ${versionFile} does not exist`
-    );
+  if (versionFile) {
+    if (!fs.existsSync(versionFile)) {
+      logWarning(
+        `The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`
+      );
+      versionFile = '.python-version';
+      if (!fs.existsSync(versionFile)) {
+        throw new Error(`The ${versionFile} doesn't exist.`);
+      }
+    }
+
+    version = fs.readFileSync(versionFile, 'utf8');
+    core.info(`Resolved ${versionFile} as ${version}`);
+
+    return version;
   }
-  version = fs.readFileSync(versionFile, 'utf8');
-  core.info(`Resolved ${versionFile} as ${version}`);
+
+  core.warning(
+    "Neither 'python-version' nor 'python-version-file' inputs were supplied."
+  );
 
   return version;
 }
@@ -99,6 +111,11 @@ async function run() {
   } catch (err) {
     core.setFailed((err as Error).message);
   }
+}
+
+export function logWarning(message: string): void {
+  const warningPrefix = '[warning]';
+  core.info(`${warningPrefix}${message}`);
 }
 
 run();
