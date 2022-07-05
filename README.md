@@ -320,6 +320,21 @@ steps:
 - run: pipenv install
 ```
 
+**Using a list of wildcard patterns to cache dependencies**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.10'
+    cache: 'pip'
+    cache-dependency-path: |
+      **/setup.cfg
+      **/requirements*.txt
+- run: pip install -e . -r subdirectory/requirements-dev.txt
+```
+
+
 # Environment variables
 
  The `update-environment` flag defaults to `true`.
