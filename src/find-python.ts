@@ -70,17 +70,6 @@ export async function useCpythonVersion(
     );
   }
 
-  if (IS_LINUX) {
-    const libPath = process.env.LD_LIBRARY_PATH
-      ? `:${process.env.LD_LIBRARY_PATH}`
-      : '';
-    const pyLibPath = path.join(installDir, 'lib');
-
-    if (!libPath.split(':').includes(pyLibPath)) {
-      core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
-    }
-  }
-
   const _binDir = binDir(installDir);
   const binaryExtension = IS_WINDOWS ? '.exe' : '';
   const pythonPath = path.join(

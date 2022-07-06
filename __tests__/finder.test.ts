@@ -28,10 +28,12 @@ const manifestData = require('./data/versions-manifest.json');
 describe('Finder tests', () => {
   let spyCoreAddPath: jest.SpyInstance;
   let spyCoreExportVariable: jest.SpyInstance;
+  const env = process.env;
 
   beforeEach(() => {
+    jest.resetModules();
+    process.env = {...env};
     spyCoreAddPath = jest.spyOn(core, 'addPath');
-
     spyCoreExportVariable = jest.spyOn(core, 'exportVariable');
   });
 
@@ -39,6 +41,7 @@ describe('Finder tests', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    process.env = env;
   });
 
   it('Finds Python if it is installed', async () => {
@@ -65,7 +68,6 @@ describe('Finder tests', () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await finder.useCpythonVersion('3.x', 'x64', false);
     expect(spyCoreAddPath).not.toHaveBeenCalled();
-    expect(spyCoreExportVariable).not.toHaveBeenCalled();
     expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
 
