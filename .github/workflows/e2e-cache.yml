@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
@@ -48,11 +48,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install pipenv
-        run: pipx install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
       - name: Install dependencies
+        shell: pwsh
         run: |
-          cd __tests__/data
-          pipenv install --verbose
+          mv ./__tests__/data/Pipfile.lock .
+          mv ./__tests__/data/Pipfile .
+          if ("${{ matrix.python-version }}" -Match "pypy") {
+            pipenv install --keep-outdated --python pypy
+          } else {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+          }
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -102,7 +108,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
@@ -112,8 +118,14 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
-        run: pipx install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
       - name: Install dependencies
+        shell: pwsh
         run: |
-          cd __tests__/data
-          pipenv install --verbose
+          mv ./__tests__/data/Pipfile.lock .
+          mv ./__tests__/data/Pipfile .
+          if ("${{ matrix.python-version }}" -Match "pypy") {
+            pipenv install --keep-outdated --python pypy
+          } else {
+            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+          }

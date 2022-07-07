@@ -6,7 +6,7 @@ import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
-    'd1dd6218299d8a6db5fc2001d988b34a8b31f1e9d0bb4534d377dde7c19f64b3';
+    'a3bdcc71289e4979ca9e051810d81999cc99823109faf6912e17ff14c8e621a6';
   const requirementsHash =
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =

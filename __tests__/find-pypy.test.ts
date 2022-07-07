@@ -5,6 +5,7 @@ import {HttpClient} from '@actions/http-client';
 import * as ifm from '@actions/http-client/interfaces';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
+import * as core from '@actions/core';
 
 import * as path from 'path';
 import * as semver from 'semver';
@@ -148,8 +149,13 @@ describe('findPyPyVersion', () => {
   let spyWriteExactPyPyVersionFile: jest.SpyInstance;
   let spyCacheDir: jest.SpyInstance;
   let spyChmodSync: jest.SpyInstance;
+  let spyCoreAddPath: jest.SpyInstance;
+  let spyCoreExportVariable: jest.SpyInstance;
+  const env = process.env;
 
   beforeEach(() => {
+    jest.resetModules();
+    process.env = {...env};
     tcFind = jest.spyOn(tc, 'find');
     tcFind.mockImplementation((tool: string, version: string) => {
       const semverRange = new semver.Range(version);
@@ -201,32 +207,46 @@ describe('findPyPyVersion', () => {
 
     spyExistsSync = jest.spyOn(fs, 'existsSync');
     spyExistsSync.mockReturnValue(true);
+
+    spyCoreAddPath = jest.spyOn(core, 'addPath');
+
+    spyCoreExportVariable = jest.spyOn(core, 'exportVariable');
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    process.env = env;
   });
 
   it('found PyPy in toolcache', async () => {
     await expect(
-      finder.findPyPyVersion('pypy-3.6-v7.3.x', architecture)
+      finder.findPyPyVersion('pypy-3.6-v7.3.x', architecture, true)
     ).resolves.toEqual({
       resolvedPythonVersion: '3.6.12',
       resolvedPyPyVersion: '7.3.3'
     });
+    expect(spyCoreAddPath).toHaveBeenCalled();
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'pythonLocation',
+      expect.anything()
+    );
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.anything()
+    );
   });
 
   it('throw on invalid input format', async () => {
     await expect(
-      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture)
+      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true)
     ).rejects.toThrow();
   });
 
   it('throw on invalid input format pypy3.7-7.3.x', async () => {
     await expect(
-      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture)
+      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true)
     ).rejects.toThrow();
   });
 
@@ -238,16 +258,42 @@ describe('findPyPyVersion', () => {
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture)
+      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture, true)
     ).resolves.toEqual({
       resolvedPythonVersion: '3.7.9',
       resolvedPyPyVersion: '7.3.3'
     });
+    expect(spyCoreAddPath).toHaveBeenCalled();
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'pythonLocation',
+      expect.anything()
+    );
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.anything()
+    );
+  });
+
+  it('found and install successfully without environment update', async () => {
+    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir.mockImplementation(() =>
+      path.join(toolDir, 'PyPy', '3.7.7', architecture)
+    );
+    spyChmodSync = jest.spyOn(fs, 'chmodSync');
+    spyChmodSync.mockImplementation(() => undefined);
+    await expect(
+      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture, false)
+    ).resolves.toEqual({
+      resolvedPythonVersion: '3.7.9',
+      resolvedPyPyVersion: '7.3.3'
+    });
+    expect(spyCoreAddPath).not.toHaveBeenCalled();
+    expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
 
   it('throw if release is not found', async () => {
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.5.x', architecture)
+      finder.findPyPyVersion('pypy-3.7-v7.5.x', architecture, true)
     ).rejects.toThrowError(
       `PyPy version 3.7 (v7.5.x) with arch ${architecture} not found`
     );
