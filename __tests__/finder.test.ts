@@ -30,7 +30,7 @@ describe('Finder tests', () => {
   let writeSpy: jest.SpyInstance;
   let spyCoreAddPath: jest.SpyInstance;
   let spyCoreExportVariable: jest.SpyInstance;
-  const env = process.env;  
+  const env = process.env;
 
   beforeEach(() => {
     writeSpy = jest.spyOn(process.stdout, 'write');
