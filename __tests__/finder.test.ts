@@ -176,7 +176,7 @@ describe('Finder tests', () => {
 
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2', 'x64', false, true);
+    await finder.useCpythonVersion('1.2', 'x64', true, true);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
     expect(infoSpy).toHaveBeenCalledWith(
