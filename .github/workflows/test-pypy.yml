@@ -66,6 +66,32 @@ jobs:
           ${EXECUTABLE} --version
         shell: bash
 
+  setup-pypy-noenv:
+    name: Setup PyPy ${{ matrix.pypy }} ${{ matrix.os }} (noenv)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
+        pypy: ['pypy2.7', 'pypy3.7', 'pypy3.8', 'pypy3.9-nightly']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: setup-python ${{ matrix.pypy }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version: ${{ matrix.pypy }}
+          update-environment: false
+
+      - name: PyPy and Python version
+        run: ${{ steps.setup-python.outputs.python-path }} --version
+
+      - name: Run simple code
+        run: ${{ steps.setup-python.outputs.python-path }} -c 'import math; print(math.factorial(5))'
+
   check-latest:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -81,7 +107,7 @@ jobs:
           check-latest: true
       - name: PyPy and Python version
         run: python --version
-  
+
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 

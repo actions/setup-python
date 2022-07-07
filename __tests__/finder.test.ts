@@ -28,16 +28,24 @@ const manifestData = require('./data/versions-manifest.json');
 
 describe('Finder tests', () => {
   let writeSpy: jest.SpyInstance;
+  let spyCoreAddPath: jest.SpyInstance;
+  let spyCoreExportVariable: jest.SpyInstance;
+  const env = process.env;  
 
   beforeEach(() => {
     writeSpy = jest.spyOn(process.stdout, 'write');
     writeSpy.mockImplementation(() => {});
+    jest.resetModules();
+    process.env = {...env};
+    spyCoreAddPath = jest.spyOn(core, 'addPath');
+    spyCoreExportVariable = jest.spyOn(core, 'exportVariable');
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    process.env = env;
   });
 
   it('Finds Python if it is installed', async () => {
@@ -48,7 +56,26 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64', false);
+    await finder.useCpythonVersion('3.x', 'x64', true, false);
+    expect(spyCoreAddPath).toHaveBeenCalled();
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'pythonLocation',
+      expect.anything()
+    );
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.anything()
+    );
+  });
+
+  it('Finds Python if it is installed without environment update', async () => {
+    const pythonDir: string = path.join(toolDir, 'Python', '3.0.0', 'x64');
+    await io.mkdirP(pythonDir);
+    fs.writeFileSync(`${pythonDir}.complete`, 'hello');
+    // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
+    await finder.useCpythonVersion('3.x', 'x64', false, false);
+    expect(spyCoreAddPath).not.toHaveBeenCalled();
+    expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
 
   it('Finds stable Python version if it is not installed, but exists in the manifest', async () => {
@@ -68,7 +95,16 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3', 'x64', false);
+    await finder.useCpythonVersion('1.2.3', 'x64', true, false);
+    expect(spyCoreAddPath).toHaveBeenCalled();
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'pythonLocation',
+      expect.anything()
+    );
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.anything()
+    );
   });
 
   it('Finds pre-release Python version in the manifest', async () => {
@@ -93,7 +129,7 @@ describe('Finder tests', () => {
       fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     });
     // This will throw if it doesn't find it in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false);
+    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false, false);
   });
 
   it('Check-latest true, finds the latest version in the manifest', async () => {
@@ -140,7 +176,7 @@ describe('Finder tests', () => {
 
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2', 'x64', true);
+    await finder.useCpythonVersion('1.2', 'x64', false, true);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
     expect(infoSpy).toHaveBeenCalledWith(
@@ -151,16 +187,28 @@ describe('Finder tests', () => {
     );
     expect(installSpy).toHaveBeenCalled();
     expect(addPathSpy).toHaveBeenCalledWith(expPath);
+    await finder.useCpythonVersion('1.2.3-beta.2', 'x64', false, true);
+    expect(spyCoreAddPath).toHaveBeenCalled();
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'pythonLocation',
+      expect.anything()
+    );
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.anything()
+    );
   });
 
   it('Errors if Python is not installed', async () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.useCpythonVersion('3.300000', 'x64', false);
+      await finder.useCpythonVersion('3.300000', 'x64', true, false);
     } catch {
       thrown = true;
     }
     expect(thrown).toBeTruthy();
+    expect(spyCoreAddPath).not.toHaveBeenCalled();
+    expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
 });

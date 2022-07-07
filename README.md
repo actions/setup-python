@@ -127,6 +127,26 @@ steps:
 - run: python my_script.py
 ```
 
+Download and set up the latest patch version of Python (for specified major & minor versions):
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.11-dev'
+- run: python my_script.py
+```
+
+Download and set up the latest stable version of Python (for specified major version):
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.x'
+- run: python my_script.py
+```
+
 Download and set up PyPy:
 
 ```yaml
@@ -287,12 +307,12 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
     cache: 'pipenv'
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
 
@@ -326,8 +346,6 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- name: Install pipenv
-  run: pipx install pipenv
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -335,8 +353,45 @@ steps:
     cache-dependency-path: |
       server/app/Pipfile.lock
       __test__/app/Pipfile.lock
+- name: Install pipenv
+  run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
+
+**Using a list of wildcard patterns to cache dependencies**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.10'
+    cache: 'pip'
+    cache-dependency-path: |
+      **/setup.cfg
+      **/requirements*.txt
+- run: pip install -e . -r subdirectory/requirements-dev.txt
+```
+
+
+# Environment variables
+
+ The `update-environment` flag defaults to `true`.
+ With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for `python` to just work out of the box.
+
+ If `update-environment` is set to `false`, the action will not add/update environment variables.
+ This can prove useful if you want the only side-effect to be to ensure python is installed and rely on the `python-path` output to run python.
+ Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
+
+ ```yaml
+ steps:
+   - uses: actions/checkout@v3
+   - uses: actions/setup-python@v4
+     id: cp310
+     with:
+       python-version: '3.10'
+       update-environment: false
+   - run: ${{ steps.cp310.outputs.python-path }} my_script.py
+ ```
 
 # Using `setup-python` with a self hosted runner
 
@@ -355,7 +410,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 ### Linux
 
 - The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
-- Create an environment variable called `AGENT_TOOLSDIRECTORY` and set it to `/opt/hostedtoolcache`. This controls where the runner downloads and installs tools.
+- By default runner downloads and install the tools to `/opt/hostedtoolcache`. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location.
   - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`.
   - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
 - Create a directory called `hostedtoolcache` inside `/opt`.
@@ -384,14 +439,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 `setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during download that read `##[error]API rate limit exceeded for...`.
 
-To get a higher rate limit, you can [generate a personal access token on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action:
-
-```yml
-uses: actions/setup-python@v4
-with:
-  token: ${{ secrets.GH_DOTCOM_TOKEN }}
-  python-version: 3.11
-```
+To avoid hitting rate-limit problems, we recommend [setting up your own runner tool cache](https://docs.github.com/en/enterprise-server@2.22/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access#about-the-included-setup-actions-and-the-runner-tool-cache).
 
 # License
 
