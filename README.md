@@ -34,7 +34,7 @@ steps:
 ```
 The `python-version` input is optional. If not supplied, the Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH vary between runners and can be changed unexpectedly so we recommend always use `setup-python`.
 
-The action will first check the local [toolcache](docs/advanced-usage.md#hosted-tool-cache) for a [semver](https://github.com/npm/node-semver#versions) match. If unable to find a specific version in the tool cache, the action will attempt to download a version of Python from [GitHub Releases](https://github.com/actions/python-versions/releases) and for PyPy from the official [PyPy's dist](https://downloads.python.org/pypy/).
+The action will first check the local [tool cache](docs/advanced-usage.md#hosted-tool-cache) for a [semver](https://github.com/npm/node-semver#versions) match. If unable to find a specific version in the tool cache, the action will attempt to download a version of Python from [GitHub Releases](https://github.com/actions/python-versions/releases) and for PyPy from the official [PyPy's dist](https://downloads.python.org/pypy/).
 
 For information regarding locally cached versions of Python/PyPy on GitHub hosted runners, check out [GitHub Actions Virtual Environments](https://github.com/actions/virtual-environments).
 
@@ -81,7 +81,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Caching packages data](docs/advanced-usage.md#caching-packages-data)
 - [Environment variables and action's outputs](docs/advanced-usage.md#environment-variables-and-actions-outputs)
 - [Available versions of Python and PyPy](docs/advanced-usage.md#available-versions-of-python-and-pypy)
-- [Hosted Toolcache](docs/advanced-usage.md#hosted-tool-cache) 
+- [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
 

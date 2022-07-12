@@ -10,7 +10,7 @@
 - [Available versions of Python and PyPy](#available-versions-of-python-and-pypy)
     - [Python](#python)
     - [PyPy](#pypy)
-- [Hosted Tool Cache](#hosted-tool-cache) 
+- [Hosted tool cache](#hosted-tool-cache) 
 - [Using `setup-python` with a self hosted runner](#using-setup-python-with-a-self-hosted-runner)
     - [Windows](#windows)
     - [Linux](#linux)
@@ -354,10 +354,10 @@ Such a requirement on side-effect could be because you don't want your composite
 
 `setup-python` is able to configure **Python** from two sources:
 
-- Preinstalled versions of Python in the toolcache on GitHub-hosted runners.
+- Preinstalled versions of Python in the tool cache on GitHub-hosted runners.
     - For detailed information regarding the available versions of Python that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
     - For every minor version of Python, expect only the latest patch to be preinstalled.
-    - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tools cache.
+    - If `3.8.1` is installed for example, and `3.8.2` is released, expect `3.8.1` to be removed and replaced by `3.8.2` in the tool cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor version will get you the latest preinstalled patch version. In the previous example, the version spec `3.8` will use the `3.8.2` Python version found in the cache.
     - Use `-dev` instead of a patch number (e.g., `3.11-dev`) to install the latest patch version release for a given minor version, *alpha and beta releases included*.
 - Downloadable Python versions from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)).
@@ -370,7 +370,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
  `setup-python` is able to configure **PyPy** from two sources:
 
-- Preinstalled versions of PyPy in the tools cache on GitHub-hosted runners
+- Preinstalled versions of PyPy in the tool cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
   - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy3.7` or `pypy-3.7`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy3.7-v7.3.3` or `pypy-3.7-v7.3.3`.
@@ -380,15 +380,15 @@ Such a requirement on side-effect could be because you don't want your composite
   - PyPy < 7.3.3 are not available to install on-flight.
   - If some versions are not available, you can open an issue in https://foss.heptapod.net/pypy/pypy/
 
-# Hosted Tool Cache
+# Hosted tool cache
 
-GitHub hosted runners have a tool cache that comes with a few versions of Python + PyPy already installed. This tool cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of this tools cache and there is where you will find Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy in this tools cache and adding it to PATH.
+GitHub hosted runners have a tool cache that comes with a few versions of Python + PyPy already installed. This tool cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of this tool cache and there is where you will find Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy in this tool cache and adding it to PATH.
 
 || Location |
 |------|-------|
-|**Tool Cache Directory** |`RUNNER_TOOL_CACHE`|
-|**Python Tool Cache**|`RUNNER_TOOL_CACHE/Python/*`|
-|**PyPy Tool Cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
+|**Tool cache Directory** |`RUNNER_TOOL_CACHE`|
+|**Python tool cache**|`RUNNER_TOOL_CACHE/Python/*`|
+|**PyPy tool cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
 GitHub virtual environments are set up in [actions/virtual-environments](https://github.com/actions/virtual-environments). During the setup, the available versions of Python and PyPy are automatically downloaded, set up and documented.
 - Tool cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
