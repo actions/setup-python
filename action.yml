@@ -4,7 +4,7 @@ description: 'Set up a specific version of Python and add the command-line tools
 author: 'GitHub'
 inputs:
   python-version:
-    description: "Version range or exact version of Python to use, using SemVer's version range syntax. Reads from .python-version if unset."
+    description: "Version range or exact version of Python to use, using SemVer's version range syntax."
   python-version-file:
     description: "File containing the Python version to use. Example: .python-version"
   cache:
@@ -22,7 +22,7 @@ inputs:
     default: true
 outputs:
   python-version:
-    description: "The installed python version. Useful when given a version range as input."
+    description: "The installed Python version. Useful when given a version range as input."
   cache-hit:
     description: 'A boolean value to indicate a cache entry was found'
   python-path:
