@@ -24,12 +24,23 @@ This action provides the following functionality for GitHub Actions users:
 
 See [action.yml](action.yml)
 
+**Python**
 ```yaml
 steps:
 - uses: actions/checkout@v3
 - uses: actions/setup-python@v4 # <- v4 is a major release tag of the action: https://github.com/actions/setup-python/tags
   with:
     python-version: '3.10' 
+- run: python my_script.py
+```
+
+**PyPy**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4 
+  with:
+    python-version: 'pypy3.7' 
 - run: python my_script.py
 ```
 The `python-version` input is optional. If not supplied, the Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH vary between runners and can be changed unexpectedly so we recommend always use `setup-python`.
@@ -40,11 +51,11 @@ For information regarding locally cached versions of Python/PyPy on GitHub hoste
 
 ## Supported version syntax
 
-The `python-version` input supports the [Semantic Versioning Specification](https://github.com/npm/node-semver#versions) and some special version notations (e.g. `x.y-dev`), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
+The `python-version` input supports the [Semantic Versioning Specification](https://semver.org/) and some special version notations (e.g. `semver ranges`, `x.y-dev syntax`, etc), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
 
 ## Supported architectures
 
-Using `architecture` input it's possible to specify required python's interpreter architecture: `x86` or `x64`. If input is not specified it defaults to `x64`.
+Using `architecture` input it's possible to specify required python's interpreter architecture: `x86` or `x64`. If input is not specified the architecture defaults to `x64`.
 
 ## Caching packages dependencies
 

@@ -36,7 +36,7 @@ steps:
   - The only downside to this is that set up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions.
   - MSI installers are used on Windows for this, so runs will take a little longer to set up vs MacOS and Linux.
 
-You should specify **only a major and minor version** if you are okay with the most recent patch version being used:
+You can specify **only a major and minor version** if you are okay with the most recent patch version being used:
 
   ```yaml
 steps:
@@ -72,7 +72,7 @@ steps:
 - run: python my_script.py
 ```
 
-You can also use several types of ranges that are specified in [Semantic Versioning Specification](https://github.com/npm/node-semver#ranges), for instance:
+You can also use several types of ranges that are specified in [semver](https://github.com/npm/node-semver#ranges), for instance:
 
 - **[hyphen ranges](https://github.com/npm/node-semver#hyphen-ranges-xyz---abc)** to download and set up the latest available version of Python (includes both pre-release and stable versions):
 
@@ -95,14 +95,13 @@ steps:
     python-version: '3.x'
 - run: python my_script.py
 ```
-Please refer to the [Advanced range syntax section](https://github.com/npm/node-semver#advanced-range-syntax) of the [Semantic Versioning Specification](https://github.com/npm/node-semver) to check other available range syntaxes.
+Please refer to the [Advanced range syntax section](https://github.com/npm/node-semver#advanced-range-syntax) of the [semver](https://github.com/npm/node-semver) to check other available range syntaxes.
 
 ## Specifying a PyPy version
 The version of PyPy should be specified in the format `pypy<python_version>[-v<pypy_version>]` or `pypy-<python_version>[-v<pypy_version>]`.
 The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy version will be used in this case.
 
 ```
-pypy3.7 or pypy-3.7 # the latest available version of PyPy that supports Python 3.7
 pypy3.8 or pypy-3.8 # the latest available version of PyPy that supports Python 3.8
 pypy2.7 or pypy-2.7 # the latest available version of PyPy that supports Python 2.7
 pypy3.7-v7.3.3 or pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
@@ -122,7 +121,6 @@ jobs:
         python-version:
         - 'pypy3.7' # the latest available version of PyPy that supports Python 3.7
         - 'pypy3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
-        - 'pypy3.8' # the latest available version of PyPy that supports Python 3.8
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
@@ -130,7 +128,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
 ```
-More details on PyPy syntax and examples of using preview / nightly versions of PyPy can be found in the [Available versions of PyPy](#pypy) section.
+More details on PyPy syntax can be found in the [Available versions of PyPy](#pypy) section.
 
 ## Matrix Testing
 
@@ -239,17 +237,6 @@ steps:
 - run: poetry install
 - run: poetry run pytest
 ```
-**Using wildcard patterns to cache dependencies**
-```yaml
-steps:
-- uses: actions/checkout@v3
-- uses: actions/setup-python@v4
-  with:
-    python-version: '3.9'
-    cache: 'pip'
-    cache-dependency-path: '**/requirements-dev.txt'
-- run: pip install -r subdirectory/requirements-dev.txt
-```
 
 **Using a list of file paths to cache dependencies**
 ```yaml
@@ -265,6 +252,17 @@ steps:
 - name: Install pipenv
   run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
+```
+**Using wildcard patterns to cache dependencies**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.9'
+    cache: 'pip'
+    cache-dependency-path: '**/requirements-dev.txt'
+- run: pip install -r subdirectory/requirements-dev.txt
 ```
 
 **Using a list of wildcard patterns to cache dependencies**
@@ -287,7 +285,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output it's possible to get the installed by action python's version. This output is useful when the input `python-version` given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with exact installed version (e.g. 3.10.1). 
+Using **python-version** output it's possible to get the installed by action Pytho/PyPy version. This output is useful when the input `python-version` given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
 
 ```yaml
 jobs:
@@ -304,7 +302,7 @@ jobs:
 
 ### `python-path`
 
-**python-path** output is available with the absolute path of the python interpreter executable if you need it:
+**python-path** output is available with the absolute path of the Python/PyPy interpreter executable if you need it:
 
 ```yaml
 jobs:
@@ -318,12 +316,29 @@ jobs:
         python-version: "3.10"
     - run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
 ```
+### `cache-hit`
+
+**cache-hit** output is available with a boolean value that indicates whether a cache hit occured on the primary key:
+
+```
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      id: cp310
+      with:
+        python-version: "3.8.0"
+        cache: "poetry"
+    - run: echo '${{ steps.cp310.outputs.cache-hit }}' # true if cache-hit occured on the primary key
+```
 
 ## Evironment variables
 
 These environment variables become available after setup-python action execution:
 
-| Env.Variable      | Description |
+| **Env.variable**      | **Description** |
 | ----------- | ----------- |
 | pythonLocation      |Contains the absolute path to the folder where the requested version of Python or PyPy is installed|
 | Python_ROOT_DIR   | https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython        |
@@ -333,10 +348,10 @@ These environment variables become available after setup-python action execution
 ## Using `update-environment` flag
 
 The `update-environment` flag defaults to `true`.
-With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for `python` to just work out of the box.
+With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for Python/PyPy to just work out of the box.
 
 If `update-environment` is set to `false`, the action will not add/update environment variables.
-This can prove useful if you want the only side-effect to be to ensure python is installed and rely on the `python-path` output to run python.
+This can prove useful if you want the only side-effect to be to ensure Python/PyPy is installed and rely on the `python-path` output to run executable.
 Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
 
 ```yaml
@@ -382,7 +397,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
 # Hosted tool cache
 
-GitHub hosted runners have a tool cache that comes with a few versions of Python + PyPy already installed. This tool cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of this tool cache and there is where you will find Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy in this tool cache and adding it to PATH.
+GitHub hosted runners have a tool cache that comes with a few versions of Python + PyPy already installed. This tool cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of the tool cache with Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy from this tool cache and adding it to PATH.
 
 || Location |
 |------|-------|
