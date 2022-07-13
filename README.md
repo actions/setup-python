@@ -4,7 +4,7 @@
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
 </p>
 
-This action provides the following functionality for GitHub Actions users:
+This action provides the following functionalities for GitHub Actions users:
 
 - Optionally downloading and installing the requested version of Python/PyPy and adding it to the PATH
 - Optionally caching dependencies for pip, pipenv and poetry
@@ -45,7 +45,7 @@ The `python-version` input supports the [Semantic Versioning Specification](http
 
 ## Supported architectures
 
-Using `architecture` input it's possible to specify required python's interpreter architecture: `x86` or `x64`. If input is not specified the architecture defaults to `x64`.
+Using `architecture` input it is possible to specify required Python/PyPy interpreter architecture: `x86` or `x64`. If input is not specified the architecture defaults to `x64`.
 
 ## Caching packages dependencies
 
