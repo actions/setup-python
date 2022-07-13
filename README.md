@@ -10,16 +10,6 @@ This action provides the following functionality for GitHub Actions users:
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
 
-## Table of contents
-
-- [Basic usage](#basic-usage)
-- [Supported version syntax](#supported-version-syntax)
-- [Supported architectures](#supported-architectures)
-- [Caching packages dependencies](#caching-packages-dependencies)
-- [Advanced usage](#advanced-usage)
-- [License](#license)
-- [Contributions](#contributions)
-
 ## Basic usage
 
 See [action.yml](action.yml)
@@ -40,7 +30,7 @@ steps:
 - uses: actions/checkout@v3
 - uses: actions/setup-python@v4 
   with:
-    python-version: 'pypy3.7' 
+    python-version: 'pypy3.9' 
 - run: python my_script.py
 ```
 The `python-version` input is optional. If not supplied, the Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH vary between runners and can be changed unexpectedly so we recommend always use `setup-python`.
@@ -51,7 +41,7 @@ For information regarding locally cached versions of Python/PyPy on GitHub hoste
 
 ## Supported version syntax
 
-The `python-version` input supports the [Semantic Versioning Specification](https://semver.org/) and some special version notations (e.g. `semver ranges`, `x.y-dev syntax`, etc), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
+The `python-version` input supports the [Semantic Versioning Specification](https://semver.org/) and some special version notations (e.g. `semver ranges`, `x.y-dev syntax`, etc.), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
 
 ## Supported architectures
 

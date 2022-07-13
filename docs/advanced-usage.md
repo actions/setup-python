@@ -285,7 +285,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output it's possible to get the installed by action Pytho/PyPy version. This output is useful when the input `python-version` given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
+Using **python-version** output it's possible to get the installed by action Python/PyPy version. This output is useful when the input `python-version` given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
 
 ```yaml
 jobs:
