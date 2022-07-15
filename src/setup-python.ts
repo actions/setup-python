@@ -7,9 +7,7 @@ import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {
   isCacheFeatureAvailable,
-  logWarning,
-  IS_LINUX,
-  IS_WINDOWS
+  logWarning
 } from './utils';
 
 function isPyPyVersion(versionSpec: string) {
@@ -68,11 +66,9 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
-  // According to the README windows binaries do not require to be installed
-  // in the specific location, but Mac and Linux do
-  if (!IS_WINDOWS && !process.env.AGENT_TOOLSDIRECTORY?.trim()) {
-    if (IS_LINUX) process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
-    else process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+  // When setting AGENT_TOOLSDIRECTORY, the actions/tool-cache function find
+  // is not able to find the files cached by actions/python-version.
+  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
     process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
   }
   core.debug(
