@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable, IS_LINUX, IS_WINDOWS} from './utils';
+import {isCacheFeatureAvailable} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -61,12 +61,11 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
-  // According to the README windows binaries do not require to be installed
-  // in the specific location, but Mac and Linux do
-  if (!IS_WINDOWS && !process.env.AGENT_TOOLSDIRECTORY?.trim()) {
-    if (IS_LINUX) process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
-    else process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
-    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+  // This aligns us with actions/setup-python, which defaults their
+  // internal TOOLCACHE_ROOT to RUNNER_TOOL_CACHE when AGENT_TOOLSDIRECTORY
+  // is not set.
+  if (!process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+    process.env['AGENT_TOOLSDIRECTORY'] = process.env['RUNNER_TOOL_CACHE'];
   }
   core.debug(
     `Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`
