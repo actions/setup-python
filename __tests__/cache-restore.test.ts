@@ -115,8 +115,15 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         );
 
         if (process.env['RUNNER_OS'] === 'linux') {
+          Object.defineProperty(utils, 'IS_LINUX', {
+            value: () => {
+              jest.fn().mockReturnValue(true);
+            }
+          });
+
           computeKeysSpy.mockImplementation(() => 'Ubuntu-20.4');
         }
+
         await cacheDistributor.restoreCache();
 
         if (process.env['RUNNER_OS'] === 'linux') {
