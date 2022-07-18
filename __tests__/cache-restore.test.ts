@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
+import * as utils from './../src/utils';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
@@ -27,6 +28,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let debugSpy: jest.SpyInstance;
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
+  let computeKeysSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
 
   // cache spy
@@ -74,6 +76,8 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         return primaryKey;
       }
     );
+
+    computeKeysSpy = jest.spyOn(utils, 'getLinuxOSReleaseInfo');
   });
 
   describe('Validate provided package manager', () => {
@@ -109,11 +113,21 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           pythonVersion,
           dependencyFile
         );
+
+        if (process.env['RUNNER_OS'] === 'linux') {
+          computeKeysSpy.mockImplementation(() => 'Ubuntu-20.4');
+        }
         await cacheDistributor.restoreCache();
 
-        expect(infoSpy).toHaveBeenCalledWith(
-          `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
-        );
+        if (process.env['RUNNER_OS'] === 'linux') {
+          expect(infoSpy).toHaveBeenCalledWith(
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.4-python-${pythonVersion}-${packageManager}-${fileHash}`
+          );
+        } else {
+          expect(infoSpy).toHaveBeenCalledWith(
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
+          );
+        }
       },
       30000
     );
