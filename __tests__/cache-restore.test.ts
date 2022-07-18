@@ -121,7 +121,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
             }
           });
 
-          computeKeysSpy.mockImplementation(() => 'Ubuntu-20.4');
+          computeKeysSpy.mockResolvedValue('Ubuntu-20.4');
         }
 
         await cacheDistributor.restoreCache();
