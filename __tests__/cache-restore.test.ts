@@ -115,7 +115,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         );
 
         if (process.env['RUNNER_OS']?.toLowerCase() === 'linux') {
-          computeKeysSpy.mockImplementation(() => Promise.resolve('Ubuntu-20.4'));
+          computeKeysSpy.mockImplementation(() =>
+            Promise.resolve('Ubuntu-20.4')
+          );
           Object.defineProperty(utils, 'IS_LINUX', {
             value: () => {
               jest.fn().mockImplementation(() => true);
