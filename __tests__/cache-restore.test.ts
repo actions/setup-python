@@ -114,16 +114,14 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           dependencyFile
         );
 
+        computeKeysSpy.mockImplementation(() => Promise.resolve('Ubuntu-20.4'));
+
         if (process.env['RUNNER_OS'] === 'linux') {
           Object.defineProperty(utils, 'IS_LINUX', {
             value: () => {
               jest.fn().mockReturnValue(true);
             }
           });
-
-          computeKeysSpy.mockImplementation(() =>
-            Promise.resolve('Ubuntu-20.4')
-          );
         }
 
         await cacheDistributor.restoreCache();
