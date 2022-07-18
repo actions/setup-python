@@ -2,6 +2,7 @@ import * as glob from '@actions/glob';
 import * as os from 'os';
 import * as path from 'path';
 import * as core from '@actions/core';
+import {getLinuxOSReleaseInfo, IS_LINUX} from '../utils';
 
 import CacheDistributor from './cache-distributor';
 
@@ -31,9 +32,17 @@ class PipenvCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash = await glob.hashFiles(this.patterns);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    const hash = await glob.hashFiles(this.cacheDependencyPath);
+    let primaryKey = '';
     const restoreKey = undefined;
+
+    if (IS_LINUX) {
+      const osRelease = await getLinuxOSReleaseInfo();
+      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    } else {
+      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    }
+
     return {
       primaryKey,
       restoreKey
