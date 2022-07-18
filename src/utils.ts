@@ -124,19 +124,13 @@ export function isCacheFeatureAvailable(): boolean {
 export async function getLinuxOSReleaseInfo() {
   const {stdout, stderr, exitCode} = await exec.getExecOutput(
     'lsb_release',
-    ['-a'],
+    ['-i -r -s'],
     {
       silent: true
     }
   );
 
-  let osVersion = '';
-  let osRelease = '';
-
-  stdout.split('\n').forEach(elem => {
-    if (elem.includes('Distributor')) osVersion = elem.split(':')[1].trim();
-    if (elem.includes('Release')) osRelease = elem.split(':')[1].trim();
-  });
+  const [osRelease, osVersion] = stdout.trim().split('\n');
 
   core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
 
