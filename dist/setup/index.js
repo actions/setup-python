@@ -64433,13 +64433,11 @@ class PipCache extends cache_distributor_1.default {
             let primaryKey = '';
             let restoreKey = '';
             if (utils_1.IS_LINUX) {
-                console.log('here');
                 const osRelease = yield utils_1.getLinuxOSReleaseInfo();
                 primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
                 restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             else {
-                console.log('here2');
                 primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
                 restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
             }
@@ -65486,19 +65484,18 @@ function isCacheFeatureAvailable() {
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 function getLinuxOSReleaseInfo() {
     return __awaiter(this, void 0, void 0, function* () {
-        const versionId = yield exec.getExecOutput('lsb_release', ['-a'], {
+        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-a'], {
             silent: true
         });
         let osVersion = '';
         let osRelease = '';
-        versionId.stdout.split('\n').forEach(elem => {
+        stdout.split('\n').forEach(elem => {
             if (elem.includes('Distributor'))
                 osVersion = elem.split(':')[1].trim();
             if (elem.includes('Release'))
                 osRelease = elem.split(':')[1].trim();
         });
-        core.info(osRelease);
-        core.info(osVersion);
+        core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
         return `${osVersion}-${osRelease}`;
     });
 }

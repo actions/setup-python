@@ -122,18 +122,23 @@ export function isCacheFeatureAvailable(): boolean {
 }
 
 export async function getLinuxOSReleaseInfo() {
-  const versionId = await exec.getExecOutput('lsb_release', ['-a'], {
-    silent: true
-  });
+  const {stdout, stderr, exitCode} = await exec.getExecOutput(
+    'lsb_release',
+    ['-a'],
+    {
+      silent: true
+    }
+  );
+
   let osVersion = '';
   let osRelease = '';
 
-  versionId.stdout.split('\n').forEach(elem => {
+  stdout.split('\n').forEach(elem => {
     if (elem.includes('Distributor')) osVersion = elem.split(':')[1].trim();
     if (elem.includes('Release')) osRelease = elem.split(':')[1].trim();
   });
 
-  core.info(osRelease);
-  core.info(osVersion);
+  core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
+
   return `${osVersion}-${osRelease}`;
 }
