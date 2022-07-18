@@ -122,7 +122,9 @@ export function isCacheFeatureAvailable(): boolean {
 }
 
 export async function getLinuxOSReleaseInfo() {
-  const versionId = await exec.getExecOutput('lsb_release', ['-a']);
+  const versionId = await exec.getExecOutput('lsb_release', ['-a'], {
+    silent: true
+  });
   let osVersion = '';
   let osRelease = '';
 
