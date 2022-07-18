@@ -124,7 +124,7 @@ export function isCacheFeatureAvailable(): boolean {
 export async function getLinuxOSReleaseInfo() {
   const {stdout, stderr, exitCode} = await exec.getExecOutput(
     'lsb_release',
-    ['-i -r -s'],
+    ['-i', '-r', '-s'],
     {
       silent: true
     }

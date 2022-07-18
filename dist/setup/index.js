@@ -65484,7 +65484,7 @@ function isCacheFeatureAvailable() {
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 function getLinuxOSReleaseInfo() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-i -r -s'], {
+        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
             silent: true
         });
         const [osRelease, osVersion] = stdout.trim().split('\n');
