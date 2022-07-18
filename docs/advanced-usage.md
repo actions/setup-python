@@ -179,7 +179,7 @@ jobs:
 
 # Using python-version-file input
 
-`setup-python` action has ability to read Python/PyPy version from a version file. `python-version-file` input is used for specifying path to the version file. If version file at the specified path doesn't exist action will try to find `.python-version` file implying that it as a default type of version files. If `.python-version` file doesn't exist also, action will fail with error.
+`setup-python` action has ability to read Python/PyPy version from a version file. `python-version-file` input is used for specifying path to the version file. If `.python-version` file doesn't exist, action will fail with error.
 
 >In case both `python-version` and `python-version-file` inputs are supplied, `python-version-file` input will be ignored due to its lower priority.
 
@@ -414,9 +414,7 @@ GitHub virtual environments are set up in [actions/virtual-environments](https:/
 
 Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
 
-If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
-
-### Windows
+## Windows requirements
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
 - If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient.
@@ -424,28 +422,7 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
 
-### Linux
-
-- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
-- By default runner downloads and install the tools to `/opt/hostedtoolcache`. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location.
-  - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`.
-  - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
-- Create a directory called `hostedtoolcache` inside `/opt`.
-- The user starting the runner must have write permission to the `/opt/hostedtoolcache` directory. It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. Check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.
-- The runner can be granted write access to the `/opt/hostedtoolcache` directory using a few techniques:
-  - The user starting the runner is the owner, and the owner has write permission.
-  - The user starting the runner is in the owning group, and the owning group has write permission.
-  - All users have write permission.
-- One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`.
-    - `sudo chown runner-user:runner-group /opt/hostedtoolcache/`.
-- If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://help.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
-
-### MacOS
-
-- The same setup that applies to `Linux` also applies to `MacOS`, just with a different tools cache directory.
-- Create a directory called `/Users/runner/hostedtoolcache`.
-- Set the `AGENT_TOOLSDIRECTORY` environment variable to `/Users/runner/hostedtoolcache`.
-- Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
+>If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
 
 # Using `setup-python` on GHES
 
