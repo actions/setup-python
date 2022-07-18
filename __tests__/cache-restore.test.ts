@@ -114,6 +114,12 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           dependencyFile
         );
 
+        if (process.platform === 'linux') {
+          getLinuxOSReleaseInfoSpy.mockImplementation(() =>
+            Promise.resolve('Ubuntu-20.4')
+          );
+        }
+
         await cacheDistributor.restoreCache();
 
         if (process.platform === 'linux') {
