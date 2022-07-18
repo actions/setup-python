@@ -122,6 +122,12 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
               jest.fn().mockReturnValue(true);
             }
           });
+        } else {
+          Object.defineProperty(utils, 'IS_LINUX', {
+            value: () => {
+              jest.fn().mockReturnValue(false);
+            }
+          });
         }
 
         await cacheDistributor.restoreCache();
