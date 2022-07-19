@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
+import * as utils from './../src/utils';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
@@ -28,6 +29,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
+  let getLinuxOSReleaseInfoSpy: jest.SpyInstance;
 
   // cache spy
   let restoreCacheSpy: jest.SpyInstance;
@@ -74,6 +76,8 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         return primaryKey;
       }
     );
+
+    getLinuxOSReleaseInfoSpy = jest.spyOn(utils, 'getLinuxOSReleaseInfo');
   });
 
   describe('Validate provided package manager', () => {
@@ -109,11 +113,24 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           pythonVersion,
           dependencyFile
         );
+
+        if (process.platform === 'linux') {
+          getLinuxOSReleaseInfoSpy.mockImplementation(() =>
+            Promise.resolve('Ubuntu-20.4')
+          );
+        }
+
         await cacheDistributor.restoreCache();
 
-        expect(infoSpy).toHaveBeenCalledWith(
-          `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
-        );
+        if (process.platform === 'linux' && packageManager === 'pip') {
+          expect(infoSpy).toHaveBeenCalledWith(
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.4-python-${pythonVersion}-${packageManager}-${fileHash}`
+          );
+        } else {
+          expect(infoSpy).toHaveBeenCalledWith(
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
+          );
+        }
       },
       30000
     );
