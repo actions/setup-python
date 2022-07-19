@@ -64494,7 +64494,6 @@ const glob = __importStar(__nccwpck_require__(8090));
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(1314);
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
 class PipenvCache extends cache_distributor_1.default {
     constructor(pythonVersion, patterns = '**/Pipfile.lock') {
@@ -64521,16 +64520,9 @@ class PipenvCache extends cache_distributor_1.default {
     }
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            let primaryKey = '';
+            const hash = yield glob.hashFiles(this.patterns);
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
             const restoreKey = undefined;
-            if (utils_1.IS_LINUX) {
-                const osRelease = yield utils_1.getLinuxOSReleaseInfo();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            }
-            else {
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            }
             return {
                 primaryKey,
                 restoreKey
@@ -64583,7 +64575,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const glob = __importStar(__nccwpck_require__(8090));
 const path = __importStar(__nccwpck_require__(1017));
 const exec = __importStar(__nccwpck_require__(1514));
-const utils_1 = __nccwpck_require__(1314);
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
 class PoetryCache extends cache_distributor_1.default {
     constructor(pythonVersion, patterns = '**/poetry.lock') {
@@ -64605,16 +64596,9 @@ class PoetryCache extends cache_distributor_1.default {
     }
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            let primaryKey = '';
+            const hash = yield glob.hashFiles(this.patterns);
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
             const restoreKey = undefined;
-            if (utils_1.IS_LINUX) {
-                const osRelease = yield utils_1.getLinuxOSReleaseInfo();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            }
-            else {
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            }
             return {
                 primaryKey,
                 restoreKey
