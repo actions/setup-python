@@ -122,7 +122,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
         await cacheDistributor.restoreCache();
 
-        if (process.platform === 'linux') {
+        if (process.platform === 'linux' && packageManager === 'pip') {
           expect(infoSpy).toHaveBeenCalledWith(
             `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.4-python-${pythonVersion}-${packageManager}-${fileHash}`
           );
