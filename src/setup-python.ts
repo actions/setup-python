@@ -5,11 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {
-  isCacheFeatureAvailable,
-  logWarning,
-  IS_MAC
-} from './utils';
+import {isCacheFeatureAvailable, logWarning, IS_MAC} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -67,13 +63,20 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
-  // When setting AGENT_TOOLSDIRECTORY, the actions/tool-cache function find
-  // is not able to find the files cached by actions/python-version.
+  if (IS_MAC) {
+    process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+  }
+
   if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
     process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
   }
+
   core.debug(
-    `Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`
+    `Python is expected to be installed into ${
+      process.env.AGENT_TOOLSDIRECTORY?.trim()
+        ? process.env['AGENT_TOOLSDIRECTORY']
+        : process.env['RUNNER_TOOL_CACHE']
+    }`
   );
   try {
     const version = resolveVersionInput();
