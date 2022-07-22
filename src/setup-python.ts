@@ -7,7 +7,8 @@ import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {
   isCacheFeatureAvailable,
-  logWarning
+  logWarning,
+  IS_MAC
 } from './utils';
 
 function isPyPyVersion(versionSpec: string) {

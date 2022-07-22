@@ -65430,6 +65430,7 @@ const semver = __importStar(__nccwpck_require__(1383));
 const exec = __importStar(__nccwpck_require__(1514));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
+exports.IS_MAC = process.platform === 'darwin';
 exports.WINDOWS_ARCHS = ['x86', 'x64'];
 exports.WINDOWS_PLATFORMS = ['win32', 'win64'];
 const PYPY_VERSION_FILE = 'PYPY_VERSION';
