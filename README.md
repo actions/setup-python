@@ -427,7 +427,8 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 ### Mac
 
-- The same setup that applies to `Linux` also applies to `Mac`
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source with the [--enable-shared](https://github.com/actions/python-versions/blob/main/builders/macos-python-builder.psm1#L44) flag, however lack the relocatable flag.
+- Due to the fixed shared library path, only the hosted tool cache of  `/Users/runner/hostedtoolcache` is supported, and the path must be writeable by the runner user.
 
 # Using Python without `setup-python`
 
