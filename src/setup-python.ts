@@ -5,7 +5,12 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable, IS_LINUX, IS_WINDOWS} from './utils';
+import {
+  isCacheFeatureAvailable,
+  logWarning,
+  IS_LINUX,
+  IS_WINDOWS
+} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -113,11 +118,6 @@ async function run() {
   } catch (err) {
     core.setFailed((err as Error).message);
   }
-}
-
-export function logWarning(message: string): void {
-  const warningPrefix = '[warning]';
-  core.info(`${warningPrefix}${message}`);
 }
 
 run();

@@ -64573,9 +64573,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const glob = __importStar(__nccwpck_require__(8090));
+const io = __importStar(__nccwpck_require__(7436));
 const path = __importStar(__nccwpck_require__(1017));
 const exec = __importStar(__nccwpck_require__(1514));
+const core = __importStar(__nccwpck_require__(2186));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
+const utils_1 = __nccwpck_require__(1314);
 class PoetryCache extends cache_distributor_1.default {
     constructor(pythonVersion, patterns = '**/poetry.lock') {
         super('poetry', patterns);
@@ -64590,6 +64593,17 @@ class PoetryCache extends cache_distributor_1.default {
             const paths = [virtualenvsPath];
             if (poetryConfig['virtualenvs.in-project'] === true) {
                 paths.push(path.join(process.cwd(), '.venv'));
+            }
+            const pythonLocation = yield io.which('python');
+            if (pythonLocation) {
+                core.debug(`pythonLocation is ${pythonLocation}`);
+                const { exitCode, stderr } = yield exec.getExecOutput(`poetry env use ${pythonLocation}`, undefined, { ignoreReturnCode: true });
+                if (exitCode) {
+                    utils_1.logWarning(stderr);
+                }
+            }
+            else {
+                utils_1.logWarning('python binaries were not found in PATH');
             }
             return paths;
         });
@@ -65241,7 +65255,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logWarning = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
@@ -65277,14 +65290,14 @@ function resolveVersionInput() {
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file.");
+    utils_1.logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file.");
     versionFile = '.python-version';
     if (fs_1.default.existsSync(versionFile)) {
         version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    logWarning(`${versionFile} doesn't exist.`);
+    utils_1.logWarning(`${versionFile} doesn't exist.`);
     return version;
 }
 function run() {
@@ -65332,11 +65345,6 @@ function run() {
         }
     });
 }
-function logWarning(message) {
-    const warningPrefix = '[warning]';
-    core.info(`${warningPrefix}${message}`);
-}
-exports.logWarning = logWarning;
 run();
 
 
@@ -65379,7 +65387,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
@@ -65480,6 +65488,11 @@ function getLinuxOSReleaseInfo() {
     });
 }
 exports.getLinuxOSReleaseInfo = getLinuxOSReleaseInfo;
+function logWarning(message) {
+    const warningPrefix = '[warning]';
+    core.info(`${warningPrefix}${message}`);
+}
+exports.logWarning = logWarning;
 
 
 /***/ }),
