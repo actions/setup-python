@@ -5,6 +5,7 @@ import * as exec from '@actions/exec';
 import * as core from '@actions/core';
 
 import CacheDistributor from './cache-distributor';
+import { logWarning } from '../utils';
 
 class PoetryCache extends CacheDistributor {
   constructor(
@@ -43,10 +44,10 @@ class PoetryCache extends CacheDistributor {
       );
 
       if (exitCode) {
-        core.info(`[warning]${stderr}`);
+        logWarning(stderr);
       }
     } else {
-      core.info('[warning]python binaries were not found in PATH.');
+      logWarning('python binaries were not found in PATH');
     }
 
     return paths;

@@ -136,3 +136,8 @@ export async function getLinuxOSReleaseInfo() {
 
   return `${osVersion}-${osRelease}`;
 }
+
+export function logWarning(message: string): void {
+  const warningPrefix = '[warning]';
+  core.info(`${warningPrefix}${message}`);
+}
