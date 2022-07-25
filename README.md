@@ -330,6 +330,19 @@ steps:
 - run: poetry run pytest
 ```
 
+**If you only need poetry install, consider using pip:**
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.9'
+    cache: 'pip'
+    cache-dependency-path: 'poetry.lock'
+- run: pip install .
+- run: pytest
+```
+
 **Using wildcard patterns to cache dependencies**
 ```yaml
 steps:
