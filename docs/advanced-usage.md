@@ -435,7 +435,7 @@ By default runner downloads and installs tools into the folder set up by `RUNNER
 - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/path/to/folder`.
 - More permanent way of setting the environment variable is to create an `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/path/to/folder`. This ensures the variable is always set if your runner is configured as a service.
 
-If you're using non-default tool cache directory be sure that the user starting the runner have write permission to the new tool cache directory folder. To check the current user and group that the runner belongs type `ls -l` inside the runners root directory.
+If you're using non-default tool cache directory be sure that the user starting the runner have write permission to the new tool cache directory. To check the current user and group that the runner belongs type `ls -l` inside the runners root directory.
 
 The runner can be granted write access to any directory using a few techniques:
 - The user starting the runner is the owner, and the owner has write permission.
