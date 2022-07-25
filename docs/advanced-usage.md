@@ -412,9 +412,12 @@ GitHub virtual environments are set up in [actions/virtual-environments](https:/
 
 # Using `setup-python` with a self hosted runner
 
-Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` will not work. If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
+Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` may not work.
 
-## Windows requirements
+If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
+
+
+## Windows
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
 - If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient.
@@ -422,7 +425,47 @@ Python distributions are only available for the same [environments](https://gith
 - MSI installers are used when setting up Python on Windows. A word of caution as MSI installers update registry settings.
 - The 3.8 MSI installer for Windows will not let you install another 3.8 version of Python. If `setup-python` fails for a 3.8 version of Python, make sure any previously installed versions are removed by going to "Apps & Features" in the Settings app.
 
+> By default runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Windows self-hosted runners.
+
 >If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see addition logs.
+
+## Linux
+
+By default runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Linux self-hosted runners:
+- In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/path/to/folder`.
+- More permanent way of setting the environment variable is to create an `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/path/to/folder`. This ensures the variable is always set if your runner is configured as a service.
+
+If you're using non-default tool cache directory be sure that the user starting the runner have write permission to the new tool cache directory folder. To check the current user and group that the runner belongs type `ls -l` inside the runners root directory.
+
+The runner can be granted write access to any directory using a few techniques:
+- The user starting the runner is the owner, and the owner has write permission.
+- The user starting the runner is in the owning group, and the owning group has write permission.
+- All users have write permission.
+One quick way to grant access is to change the user and group of the non-default tool cache folder to be the same as the runners using `chown`:
+`sudo chown runner-user:runner-group /path/to/folder`.
+
+
+> If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
+
+
+## MacOS
+
+ The Python packages for MacOS that are downloaded from `actions/python-versions` are originally compiled from source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before use of `setup-python` on the MacOS self-hosted runner:
+ 
+ - Create a directory called `/Users/runner/hostedtoolcache`
+ - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
+
+You can check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.        
+The runner can be granted write access to the `/Users/runner/hostedtoolcache` directory using a few techniques:
+ - The user starting the runner is the owner, and the owner has write permission.
+ - The user starting the runner is in the owning group, and the owning group has write permission.
+ - All users have write permission.
+One quick way to grant access is to change the user and group of `/Users/runner/hostedtoolcache` to be the same as the runners using `chown`:
+`sudo chown runner-user:runner-group /Users/runner/hostedtoolcache`
+
+> If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
+
+
 
 # Using `setup-python` on GHES
 
