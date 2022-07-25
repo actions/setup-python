@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as exec from '@actions/exec';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
@@ -118,4 +119,20 @@ export function isCacheFeatureAvailable(): boolean {
   }
 
   return true;
+}
+
+export async function getLinuxOSReleaseInfo() {
+  const {stdout, stderr, exitCode} = await exec.getExecOutput(
+    'lsb_release',
+    ['-i', '-r', '-s'],
+    {
+      silent: true
+    }
+  );
+
+  const [osRelease, osVersion] = stdout.trim().split('\n');
+
+  core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
+
+  return `${osVersion}-${osRelease}`;
 }

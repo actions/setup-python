@@ -64430,8 +64430,17 @@ class PipCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+            let primaryKey = '';
+            let restoreKey = '';
+            if (utils_1.IS_LINUX) {
+                const osRelease = yield utils_1.getLinuxOSReleaseInfo();
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}`;
+            }
+            else {
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+            }
             return {
                 primaryKey,
                 restoreKey: [restoreKey]
@@ -65275,17 +65284,20 @@ function resolveVersionInput() {
     }
     if (versionFile) {
         if (!fs_1.default.existsSync(versionFile)) {
-            logWarning(`The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`);
-            versionFile = '.python-version';
-            if (!fs_1.default.existsSync(versionFile)) {
-                throw new Error(`The ${versionFile} doesn't exist.`);
-            }
+            throw new Error(`The specified python version file at: ${versionFile} doesn't exist.`);
         }
         version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
+    logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file.");
+    versionFile = '.python-version';
+    if (fs_1.default.existsSync(versionFile)) {
+        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        core.info(`Resolved ${versionFile} as ${version}`);
+        return version;
+    }
+    logWarning(`${versionFile} doesn't exist.`);
     return version;
 }
 function run() {
@@ -65367,16 +65379,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const semver = __importStar(__nccwpck_require__(1383));
+const exec = __importStar(__nccwpck_require__(1514));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
 exports.WINDOWS_ARCHS = ['x86', 'x64'];
@@ -65460,6 +65482,17 @@ function isCacheFeatureAvailable() {
     return true;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
+function getLinuxOSReleaseInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+            silent: true
+        });
+        const [osRelease, osVersion] = stdout.trim().split('\n');
+        core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
+        return `${osVersion}-${osRelease}`;
+    });
+}
+exports.getLinuxOSReleaseInfo = getLinuxOSReleaseInfo;
 
 
 /***/ }),
