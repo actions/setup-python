@@ -5,7 +5,12 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable, logWarning, IS_LINUX, IS_WINDOWS} from './utils';
+import {
+  isCacheFeatureAvailable,
+  logWarning,
+  IS_LINUX,
+  IS_WINDOWS
+} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');

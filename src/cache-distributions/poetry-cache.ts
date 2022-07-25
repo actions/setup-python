@@ -5,7 +5,7 @@ import * as exec from '@actions/exec';
 import * as core from '@actions/core';
 
 import CacheDistributor from './cache-distributor';
-import { logWarning } from '../utils';
+import {logWarning} from '../utils';
 
 class PoetryCache extends CacheDistributor {
   constructor(
