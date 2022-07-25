@@ -91,3 +91,36 @@ jobs:
 
       - name: Run simple code
         run: ${{ steps.setup-python.outputs.python-path }} -c 'import math; print(math.factorial(5))'
+
+  check-latest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup PyPy and check latest
+        uses: ./
+        with:
+          python-version: 'pypy-3.7-v7.3.x'
+          check-latest: true
+      - name: PyPy and Python version
+        run: python --version
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+      - name: Assert PyPy is running
+        run: |
+          import platform
+          assert platform.python_implementation().lower() == "pypy"
+        shell: python
+
+      - name: Assert expected binaries (or symlinks) are present
+        run: |
+          EXECUTABLE="pypy-3.7-v7.3.x"
+          EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          ${EXECUTABLE} --version
+        shell: bash

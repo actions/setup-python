@@ -259,6 +259,24 @@ pypy3.7-nightly or pypy-3.7-nightly # Python 3.7 and nightly PyPy
 
 Note: `pypy2` and `pypy3` have been removed in v3. Use the format above instead.
 
+# Check latest version
+
+The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python/PyPy` version is always used.
+
+If `check-latest` is set to `true`, the action first checks if the cached version is the latest one. If the locally cached version is not the most up-to-date, a `Python/PyPy` version will then be downloaded. Set `check-latest` to `true` if you want the most up-to-date `Python/PyPy` version to always be used.
+
+> Setting `check-latest` to `true` has performance implications as downloading `Python/PyPy` versions is slower than using cached versions.
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+  - uses: actions/setup-python@v3
+    with:
+      python-version: '3.7'
+      check-latest: true
+  - run: python my_script.py
+```
+
 # Caching packages dependencies
 
 The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.

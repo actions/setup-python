@@ -80,6 +80,8 @@ async function run() {
   );
   try {
     const version = resolveVersionInput();
+    const checkLatest = core.getBooleanInput('check-latest');
+
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
@@ -88,7 +90,8 @@ async function run() {
         const installed = await finderPyPy.findPyPyVersion(
           version,
           arch,
-          updateEnvironment
+          updateEnvironment,
+          checkLatest
         );
         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
         core.info(
@@ -98,7 +101,8 @@ async function run() {
         const installed = await finder.useCpythonVersion(
           version,
           arch,
-          updateEnvironment
+          updateEnvironment,
+          checkLatest
         );
         pythonVersion = installed.version;
         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);

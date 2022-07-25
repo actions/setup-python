@@ -14,19 +14,32 @@ export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_O
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
-  architecture: string
+  architecture: string,
+  manifest: tc.IToolRelease[] | null
 ): Promise<tc.IToolRelease | undefined> {
-  const manifest: tc.IToolRelease[] = await tc.getManifestFromRepo(
-    MANIFEST_REPO_OWNER,
-    MANIFEST_REPO_NAME,
-    AUTH,
-    MANIFEST_REPO_BRANCH
-  );
-  return await tc.findFromManifest(
+  if (!manifest) {
+    manifest = await getManifest();
+  }
+
+  const foundRelease = await tc.findFromManifest(
     semanticVersionSpec,
     false,
     manifest,
     architecture
+  );
+
+  return foundRelease;
+}
+
+export function getManifest(): Promise<tc.IToolRelease[]> {
+  core.debug(
+    `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
+  );
+  return tc.getManifestFromRepo(
+    MANIFEST_REPO_OWNER,
+    MANIFEST_REPO_NAME,
+    AUTH,
+    MANIFEST_REPO_BRANCH
   );
 }
 
