@@ -23,7 +23,7 @@
 
 - If there is a specific version of Python that you need and you don't want to worry about any potential breaking changes due to patch updates (going from `3.7.5` to `3.7.6` for example), you should specify the **exact major, minor, and patch version** (such as `3.7.5`):
 
-  ```yaml
+```yaml
 steps:
 - uses: actions/checkout@v3
 - uses: actions/setup-python@v4
@@ -31,12 +31,12 @@ steps:
     python-version: '3.7.5' 
 - run: python my_script.py
 ```
-  - The only downside to this is that set-up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions.
-  - MSI installers are used on Windows for this, so runs will take a little longer to set up vs MacOS and Linux.
+    - The only downside to this is that set-up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions.
+    - MSI installers are used on Windows for this, so runs will take a little longer to set up vs MacOS and Linux.
 
 - You can specify **only a major and minor version** if you are okay with the most recent patch version being used:
 
-  ```yaml
+```yaml
 steps:
 - uses: actions/checkout@v3
 - uses: actions/setup-python@v4
@@ -44,9 +44,9 @@ steps:
     python-version: '3.7' 
 - run: python my_script.py
 ```
-  - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
-  - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
-  - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version of Python on the runner will be used.
+    - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
+    - The patch version that will be preinstalled, will generally be the latest and every time there is a new patch released, the older version that is preinstalled will be replaced.
+    - Using the most recent patch version will result in a very quick setup since no downloads will be required since a locally installed version of Python on the runner will be used.
 
 - You can specify the version with **prerelease tag** to download and set up an accurate pre-release version of Python:
 
