@@ -33,7 +33,7 @@ steps:
     python-version: 'pypy3.9' 
 - run: python my_script.py
 ```
-The `python-version` input is optional. If not supplied, the action will try to resolve version from the default `.python-version` file. If `.python-version` file doesn't exist Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH vary between runners and can be changed unexpectedly so we recommend always use `setup-python`.
+The `python-version` input is optional. If not supplied, the action will try to resolve the version from the default `.python-version` file. If the `.python-version` file doesn't exist Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH varies between runners and can be changed unexpectedly so we recommend always using `setup-python`.
 
 The action will first check the local [tool cache](docs/advanced-usage.md#hosted-tool-cache) for a [semver](https://github.com/npm/node-semver#versions) match. If unable to find a specific version in the tool cache, the action will attempt to download a version of Python from [GitHub Releases](https://github.com/actions/python-versions/releases) and for PyPy from the official [PyPy's dist](https://downloads.python.org/pypy/).
 
@@ -45,15 +45,15 @@ The `python-version` input supports the [Semantic Versioning Specification](http
 
 ## Supported architectures
 
-Using `architecture` input it is possible to specify required Python/PyPy interpreter architecture: `x86` or `x64`. If input is not specified the architecture defaults to `x64`.
+Using `architecture` input it is possible to specify the required Python/PyPy interpreter architecture: `x86` or `x64`. If the input is not specified the architecture defaults to `x64`.
 
 ## Caching packages dependencies
 
 The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
 
-The action defaults to searching for a dependency file (`requirements.txt` for pip, `Pipfile.lock` for pipenv or `poetry.lock` for poetry) in the repository, and uses its hash as a part of the cache key. Input `cache-dependency-path` is used for cases when multiple dependency files are used, they are located in different subdirectories or different files for the hash want to be used.
+The action defaults to searching for a dependency file (`requirements.txt` for pip, `Pipfile.lock` for pipenv or `poetry.lock` for poetry) in the repository, and uses its hash as a part of the cache key. Input `cache-dependency-path` is used for cases when multiple dependency files are used, they are located in different subdirectories or different files for the hash that want to be used.
 
- - For `pip`, the action will cache global cache directory
+ - For `pip`, the action will cache the global cache directory
  - For `pipenv`, the action will cache virtualenv directory
  - For `poetry`, the action will cache virtualenv directory
 
@@ -68,9 +68,9 @@ steps:
     cache: 'pip' # caching pip dependencies
 - run: pip install -r requirements.txt
 ```
->**Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available that can lead to an increase in total build time.
+>**Note:** Restored cache will not be used if the requirements.txt file is not updated for a long time and a newer version of the dependency is available which can lead to an increase in total build time.
 
->The requirements file format allows to specify dependency versions using logical operators (for example chardet>=3.0.4) or specify dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
+>The requirements file format allows for specifying dependency versions using logical operators (for example chardet>=3.0.4) or specifying dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
 
 See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poetry` in the section: [Caching packages data](docs/advanced-usage.md#caching-packages-data) of the [Advanced usage](docs/advanced-usage.md) guide.
 
@@ -83,7 +83,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Environment variables and action's outputs](docs/advanced-usage.md#environment-variables-and-actions-outputs)
 - [Available versions of Python and PyPy](docs/advanced-usage.md#available-versions-of-python-and-pypy)
 - [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
-- [Using `setup-python` with a self hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
+- [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
 
 ## License
