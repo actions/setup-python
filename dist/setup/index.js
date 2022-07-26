@@ -65338,7 +65338,7 @@ function resolveVersionInput() {
     return version;
 }
 function run() {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (utils_1.IS_MAC) {
             process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
@@ -65346,9 +65346,7 @@ function run() {
         if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
             process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
         }
-        core.debug(`Python is expected to be installed into ${((_b = process.env.AGENT_TOOLSDIRECTORY) === null || _b === void 0 ? void 0 : _b.trim())
-            ? process.env['AGENT_TOOLSDIRECTORY']
-            : process.env['RUNNER_TOOL_CACHE']}`);
+        core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
         try {
             const version = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
