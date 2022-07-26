@@ -422,27 +422,13 @@ If you are experiencing problems while configuring Python on your self-hosted ru
 
 ### Linux
 
-- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source in `/opt/hostedtoolcache/` with the [--enable-shared](https://github.com/actions/python-versions/blob/94f04ae6806c6633c82db94c6406a16e17decd5c/builders/ubuntu-python-builder.psm1#L35) flag, which makes them non-relocatable.
-- By default runner downloads and install the tools to `/opt/hostedtoolcache`. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location.
-  - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`.
-  - A more permanent way of setting the environment variable is to create a `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache`. This ensures the variable is always set if your runner is configured as a service.
-- Create a directory called `hostedtoolcache` inside `/opt`.
-- The user starting the runner must have write permission to the `/opt/hostedtoolcache` directory. It is not possible to start the Linux runner with `sudo` and the `/opt` directory usually requires root privileges to write to. Check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.
-- The runner can be granted write access to the `/opt/hostedtoolcache` directory using a few techniques:
-  - The user starting the runner is the owner, and the owner has write permission.
-  - The user starting the runner is in the owning group, and the owning group has write permission.
-  - All users have write permission.
-- One quick way to grant access is to change the user and group of `/opt/hostedtoolcache` to be the same as the runners using `chown`.
-    - `sudo chown runner-user:runner-group /opt/hostedtoolcache/`.
-- If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://help.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source with the [--enable-shared](https://github.com/actions/python-versions/blob/main/builders/ubuntu-python-builder.psm1#L37) flag.
+- By default runner downloads and install the tools to the `RUNNER_TOOL_CACHE` directory, however `AGENT_TOOLSDIRECTORY` can be set to override this location.
 
 ### Mac
 
-- The same setup that applies to `Linux` also applies to `Mac`, just with a different tools cache directory.
-- Create a directory called `/Users/runner/hostedtoolcache`.
-- Set the `AGENT_TOOLSDIRECTORY` environment variable to `/Users/runner/hostedtoolcache`.
-- Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
-
+- The Python packages that are downloaded from `actions/python-versions` are originally compiled from source with the [--enable-shared](https://github.com/actions/python-versions/blob/main/builders/macos-python-builder.psm1#L44) flag, however lack the relocatable flag.
+- Due to the fixed shared library path, only the hosted tool cache of  `/Users/runner/hostedtoolcache` is supported, and the path must be writeable by the runner user.
 
 # Using Python without `setup-python`
 
