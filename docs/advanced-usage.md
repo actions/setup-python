@@ -453,12 +453,12 @@ One quick way to grant access is to change the user and group of the non-default
  The Python packages for MacOS that are downloaded from `actions/python-versions` are originally compiled from source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before use of `setup-python` on the MacOS self-hosted runner:
  
  - Create a directory called `/Users/runner/hostedtoolcache`
- - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access.
+ - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access
 
 You can check the current user and group that the runner belongs to by typing `ls -l` inside the runners root directory.        
 The runner can be granted write access to the `/Users/runner/hostedtoolcache` directory using a few techniques:
- - The user starting the runner is the owner, and the owner has write permission.
- - The user starting the runner is in the owning group, and the owning group has write permission.
+ - The user starting the runner is the owner, and the owner has write permission
+ - The user starting the runner is in the owning group, and the owning group has write permission
  - All users have write permission.
 One quick way to grant access is to change the user and group of `/Users/runner/hostedtoolcache` to be the same as the runners using `chown`:
 `sudo chown runner-user:runner-group /Users/runner/hostedtoolcache`
