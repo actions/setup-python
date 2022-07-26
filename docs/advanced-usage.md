@@ -179,7 +179,7 @@ jobs:
 
 # Using python-version-file input
 
-`setup-python` action can read Python/PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the `.python-version` file doesn't exist, the action will fail with an error.
+`setup-python` action can read Python/PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
 
 >In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
 
