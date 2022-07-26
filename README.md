@@ -6,7 +6,9 @@
 
 This action provides the following functionalities for GitHub Actions users:
 
-- Optionally downloading and installing the requested version of Python/PyPy and adding it to the PATH
+- Optionally installing and adding to PATH a version of Python that is already installed in the runner's tool cache.
+- Downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the runner's tool cache.
+- Failing if a specific version of Python is not preinstalled or available for download.
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
 
@@ -18,7 +20,7 @@ See [action.yml](action.yml)
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-python@v4 # <- v4 is a major release tag of the action: https://github.com/actions/setup-python/tags
+- uses: actions/setup-python@v4
   with:
     python-version: '3.10' 
 - run: python my_script.py
@@ -49,7 +51,7 @@ Using `architecture` input it is possible to specify the required Python/PyPy in
 
 ## Caching packages dependencies
 
-The action has built-in functionality for caching and restoring dependencies. It uses [actions/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
+The action has built-in functionality for caching and restoring dependencies. It uses [toolkit/cache](https://github.com/actions/toolkit/tree/main/packages/cache) under the hood for caching dependencies but requires less configuration settings. Supported package managers are `pip`, `pipenv` and `poetry`. The `cache` input is optional, and caching is turned off by default.
 
 The action defaults to searching for a dependency file (`requirements.txt` for pip, `Pipfile.lock` for pipenv or `poetry.lock` for poetry) in the repository, and uses its hash as a part of the cache key. Input `cache-dependency-path` is used for cases when multiple dependency files are used, they are located in different subdirectories or different files for the hash that want to be used.
 

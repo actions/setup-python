@@ -1,33 +1,33 @@
 ---
-name: 'Setup Python'
-description: 'Set up a specific version of Python and add the command-line tools to the PATH.'
-author: 'GitHub'
+name: "Setup Python"
+description: "Set up a specific version of Python and add the command-line tools to the PATH."
+author: "GitHub"
 inputs:
   python-version:
     description: "Version range or exact version of Python/PyPy to use, using SemVer's version range syntax. Reads from .python-version if unset."
   python-version-file:
     description: "File containing the Python version to use. Example: .python-version"
   cache:
-    description: 'Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.'
+    description: "Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry."
     required: false
   architecture:
     description: "The target architecture (x86, x64) of the Python/PyPy interpreter."
   check-latest:
-    description: 'Set this option if you want the action to check for the latest available version that satisfies the version spec.'
+    description: "Set this option if you want the action to check for the latest available version that satisfies the version spec."
     default: false
   token:
     description: "Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user."
     default: ${{ github.token }}
   cache-dependency-path:
-    description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
+    description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
   update-environment:
-    description: 'Set this option if you want the action to update environment variables.'
+    description: "Set this option if you want the action to update environment variables."
     default: true
 outputs:
   python-version:
     description: "The installed Python/PyPy version. Useful when given a version range as input."
   cache-hit:
-    description: 'A boolean value to indicate a cache entry was found'
+    description: "A boolean value to indicate a cache entry was found"
   python-path:
     description: "The absolute path to the Python/PyPy executable."
 runs:
