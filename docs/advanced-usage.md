@@ -73,7 +73,7 @@ steps:
 
 You can also use several types of ranges that are specified in [semver](https://github.com/npm/node-semver#ranges), for instance:
 
- - **[hyphen ranges](https://github.com/npm/node-semver#hyphen-ranges-xyz---abc)** to download and set up the latest available version of Python (includes both pre-release and stable versions):
+- **[hyphen ranges](https://github.com/npm/node-semver#hyphen-ranges-xyz---abc)** to download and set up the latest available version of Python (includes both pre-release and stable versions):
 
 ```yaml
 steps:
@@ -84,7 +84,7 @@ steps:
 - run: python my_script.py
 ```
 
-**[x-ranges](https://github.com/npm/node-semver#x-ranges-12x-1x-12-)** to specify the latest stable version of Python (for specified major version):
+- **[x-ranges](https://github.com/npm/node-semver#x-ranges-12x-1x-12-)** to specify the latest stable version of Python (for specified major version):
 
 ```yaml
 steps:
