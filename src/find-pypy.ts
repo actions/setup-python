@@ -6,7 +6,8 @@ import {
   validateVersion,
   getPyPyVersionFromPath,
   readExactPyPyVersionFile,
-  validatePythonVersionFormatForPyPy
+  validatePythonVersionFormatForPyPy,
+  IPyPyManifestRelease
 } from './utils';
 
 import * as semver from 'semver';
@@ -21,13 +22,39 @@ interface IPyPyVersionSpec {
 export async function findPyPyVersion(
   versionSpec: string,
   architecture: string,
-  updateEnvironment: boolean
+  updateEnvironment: boolean,
+  checkLatest: boolean
 ): Promise<{resolvedPyPyVersion: string; resolvedPythonVersion: string}> {
   let resolvedPyPyVersion = '';
   let resolvedPythonVersion = '';
   let installDir: string | null;
+  let releases: IPyPyManifestRelease[] | undefined;
 
   const pypyVersionSpec = parsePyPyVersion(versionSpec);
+
+  if (checkLatest) {
+    releases = await pypyInstall.getAvailablePyPyVersions();
+    if (releases && releases.length > 0) {
+      const releaseData = pypyInstall.findRelease(
+        releases,
+        pypyVersionSpec.pythonVersion,
+        pypyVersionSpec.pypyVersion,
+        architecture
+      );
+
+      if (releaseData) {
+        core.info(
+          `Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`
+        );
+        pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
+        pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
+      } else {
+        core.info(
+          `Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`
+        );
+      }
+    }
+  }
 
   ({installDir, resolvedPythonVersion, resolvedPyPyVersion} = findPyPyToolCache(
     pypyVersionSpec.pythonVersion,
@@ -43,7 +70,8 @@ export async function findPyPyVersion(
     } = await pypyInstall.installPyPy(
       pypyVersionSpec.pypyVersion,
       pypyVersionSpec.pythonVersion,
-      architecture
+      architecture,
+      releases
     ));
   }
 

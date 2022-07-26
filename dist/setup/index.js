@@ -64430,8 +64430,17 @@ class PipCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.cacheDependencyPath);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+            let primaryKey = '';
+            let restoreKey = '';
+            if (utils_1.IS_LINUX) {
+                const osRelease = yield utils_1.getLinuxOSReleaseInfo();
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}`;
+            }
+            else {
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+            }
             return {
                 primaryKey,
                 restoreKey: [restoreKey]
@@ -64564,9 +64573,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const glob = __importStar(__nccwpck_require__(8090));
+const io = __importStar(__nccwpck_require__(7436));
 const path = __importStar(__nccwpck_require__(1017));
 const exec = __importStar(__nccwpck_require__(1514));
+const core = __importStar(__nccwpck_require__(2186));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
+const utils_1 = __nccwpck_require__(1314);
 class PoetryCache extends cache_distributor_1.default {
     constructor(pythonVersion, patterns = '**/poetry.lock') {
         super('poetry', patterns);
@@ -64581,6 +64593,17 @@ class PoetryCache extends cache_distributor_1.default {
             const paths = [virtualenvsPath];
             if (poetryConfig['virtualenvs.in-project'] === true) {
                 paths.push(path.join(process.cwd(), '.venv'));
+            }
+            const pythonLocation = yield io.which('python');
+            if (pythonLocation) {
+                core.debug(`pythonLocation is ${pythonLocation}`);
+                const { exitCode, stderr } = yield exec.getExecOutput(`poetry env use ${pythonLocation}`, undefined, { ignoreReturnCode: true });
+                if (exitCode) {
+                    utils_1.logWarning(stderr);
+                }
+            }
+            else {
+                utils_1.logWarning('python binaries were not found in PATH');
             }
             return paths;
         });
@@ -64662,19 +64685,34 @@ const utils_1 = __nccwpck_require__(1314);
 const semver = __importStar(__nccwpck_require__(1383));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
-function findPyPyVersion(versionSpec, architecture, updateEnvironment) {
+function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLatest) {
     return __awaiter(this, void 0, void 0, function* () {
         let resolvedPyPyVersion = '';
         let resolvedPythonVersion = '';
         let installDir;
+        let releases;
         const pypyVersionSpec = parsePyPyVersion(versionSpec);
+        if (checkLatest) {
+            releases = yield pypyInstall.getAvailablePyPyVersions();
+            if (releases && releases.length > 0) {
+                const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture);
+                if (releaseData) {
+                    core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
+                    pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
+                    pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
+                }
+                else {
+                    core.info(`Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`);
+                }
+            }
+        }
         ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
         if (!installDir) {
             ({
                 installDir,
                 resolvedPythonVersion,
                 resolvedPyPyVersion
-            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture));
+            } = yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, releases));
         }
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
@@ -64824,15 +64862,28 @@ function binDir(installDir) {
         return path.join(installDir, 'bin');
     }
 }
-function useCpythonVersion(version, architecture, updateEnvironment) {
+function useCpythonVersion(version, architecture, updateEnvironment, checkLatest) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        let manifest = null;
         const desugaredVersionSpec = desugarDevVersion(version);
-        const semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
+        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec);
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+        if (checkLatest) {
+            manifest = yield installer.getManifest();
+            const resolvedVersion = (_a = (yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
+            if (resolvedVersion) {
+                semanticVersionSpec = resolvedVersion;
+                core.info(`Resolved as '${semanticVersionSpec}'`);
+            }
+            else {
+                core.info(`Failed to resolve version ${semanticVersionSpec} from manifest`);
+            }
+        }
         let installDir = tc.find('Python', semanticVersionSpec, architecture);
         if (!installDir) {
             core.info(`Version ${semanticVersionSpec} was not found in the local cache`);
-            const foundRelease = yield installer.findReleaseFromManifest(semanticVersionSpec, architecture);
+            const foundRelease = yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest);
             if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
                 core.info(`Version ${semanticVersionSpec} is available for downloading`);
                 yield installer.installCpythonFromRelease(foundRelease);
@@ -64951,7 +65002,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.installPyPy = void 0;
+exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
@@ -64960,10 +65011,10 @@ const httpm = __importStar(__nccwpck_require__(9925));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const utils_1 = __nccwpck_require__(1314);
-function installPyPy(pypyVersion, pythonVersion, architecture) {
+function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
-        const releases = yield getAvailablePyPyVersions();
+        releases = releases !== null && releases !== void 0 ? releases : (yield getAvailablePyPyVersions());
         if (!releases || releases.length === 0) {
             throw new Error('No release was found in PyPy version.json');
         }
@@ -65009,6 +65060,7 @@ function getAvailablePyPyVersions() {
         return response.result;
     });
 }
+exports.getAvailablePyPyVersions = getAvailablePyPyVersions;
 function createPyPySymlink(pypyBinaryPath, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const version = semver.coerce(pythonVersion);
@@ -65131,7 +65183,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installCpythonFromRelease = exports.findReleaseFromManifest = exports.MANIFEST_URL = void 0;
+exports.installCpythonFromRelease = exports.getManifest = exports.findReleaseFromManifest = exports.MANIFEST_URL = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
@@ -65143,13 +65195,21 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
-function findReleaseFromManifest(semanticVersionSpec, architecture) {
+function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     return __awaiter(this, void 0, void 0, function* () {
-        const manifest = yield tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
-        return yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
+        if (!manifest) {
+            manifest = yield getManifest();
+        }
+        const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
+        return foundRelease;
     });
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
+function getManifest() {
+    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
+    return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
+}
+exports.getManifest = getManifest;
 function installPython(workingDirectory) {
     return __awaiter(this, void 0, void 0, function* () {
         const options = {
@@ -65232,7 +65292,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logWarning = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
@@ -65262,17 +65321,20 @@ function resolveVersionInput() {
     }
     if (versionFile) {
         if (!fs_1.default.existsSync(versionFile)) {
-            logWarning(`The specified python version file at: ${versionFile} doesn't exist. Attempting to find .python-version file.`);
-            versionFile = '.python-version';
-            if (!fs_1.default.existsSync(versionFile)) {
-                throw new Error(`The ${versionFile} doesn't exist.`);
-            }
+            throw new Error(`The specified python version file at: ${versionFile} doesn't exist.`);
         }
         version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
         return version;
     }
-    core.warning("Neither 'python-version' nor 'python-version-file' inputs were supplied.");
+    utils_1.logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file.");
+    versionFile = '.python-version';
+    if (fs_1.default.existsSync(versionFile)) {
+        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        core.info(`Resolved ${versionFile} as ${version}`);
+        return version;
+    }
+    utils_1.logWarning(`${versionFile} doesn't exist.`);
     return version;
 }
 function run() {
@@ -65290,17 +65352,18 @@ function run() {
         core.debug(`Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`);
         try {
             const version = resolveVersionInput();
+            const checkLatest = core.getBooleanInput('check-latest');
             if (version) {
                 let pythonVersion;
                 const arch = core.getInput('architecture') || os.arch();
                 const updateEnvironment = core.getBooleanInput('update-environment');
                 if (isPyPyVersion(version)) {
-                    const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment);
+                    const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
                     core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
                 else {
-                    const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment);
+                    const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest);
                     pythonVersion = installed.version;
                     core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
@@ -65320,11 +65383,6 @@ function run() {
         }
     });
 }
-function logWarning(message) {
-    const warningPrefix = '[warning]';
-    core.info(`${warningPrefix}${message}`);
-}
-exports.logWarning = logWarning;
 run();
 
 
@@ -65354,16 +65412,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const semver = __importStar(__nccwpck_require__(1383));
+const exec = __importStar(__nccwpck_require__(1514));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
 exports.WINDOWS_ARCHS = ['x86', 'x64'];
@@ -65447,6 +65515,22 @@ function isCacheFeatureAvailable() {
     return true;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
+function getLinuxOSReleaseInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+            silent: true
+        });
+        const [osRelease, osVersion] = stdout.trim().split('\n');
+        core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
+        return `${osVersion}-${osRelease}`;
+    });
+}
+exports.getLinuxOSReleaseInfo = getLinuxOSReleaseInfo;
+function logWarning(message) {
+    const warningPrefix = '[warning]';
+    core.info(`${warningPrefix}${message}`);
+}
+exports.logWarning = logWarning;
 
 
 /***/ }),
