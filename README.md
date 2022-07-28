@@ -4,7 +4,7 @@
   <a href="https://github.com/actions/setup-python"><img alt="GitHub Actions status" src="https://github.com/actions/setup-python/workflows/Main%20workflow/badge.svg"></a>
 </p>
 
-This action provides the following functionalities for GitHub Actions users:
+This action provides the following functionality for GitHub Actions users:
 
 - Optionally installing and adding to PATH a version of Python that is already installed in the runner's tool cache.
 - Downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the runner's tool cache.
@@ -35,11 +35,11 @@ steps:
     python-version: 'pypy3.9' 
 - run: python my_script.py
 ```
-The `python-version` input is optional. If not supplied, the action will try to resolve the version from the default `.python-version` file. If the `.python-version` file doesn't exist Python/PyPy version from the PATH will be used. The default version of Python/PyPy in PATH varies between runners and can be changed unexpectedly so we recommend always using `setup-python`.
+The `python-version` input is optional. If not supplied, the action will try to resolve the version from the default `.python-version` file. If the `.python-version` file doesn't exist Python or PyPy version from the PATH will be used. The default version of Python or PyPy in PATH varies between runners and can be changed unexpectedly so we recommend always using `setup-python`.
 
 The action will first check the local [tool cache](docs/advanced-usage.md#hosted-tool-cache) for a [semver](https://github.com/npm/node-semver#versions) match. If unable to find a specific version in the tool cache, the action will attempt to download a version of Python from [GitHub Releases](https://github.com/actions/python-versions/releases) and for PyPy from the official [PyPy's dist](https://downloads.python.org/pypy/).
 
-For information regarding locally cached versions of Python/PyPy on GitHub hosted runners, check out [GitHub Actions Virtual Environments](https://github.com/actions/virtual-environments).
+For information regarding locally cached versions of Python or PyPy on GitHub hosted runners, check out [GitHub Actions Virtual Environments](https://github.com/actions/virtual-environments).
 
 ## Supported version syntax
 
@@ -47,7 +47,7 @@ The `python-version` input supports the [Semantic Versioning Specification](http
 
 ## Supported architectures
 
-Using `architecture` input it is possible to specify the required Python/PyPy interpreter architecture: `x86` or `x64`. If the input is not specified the architecture defaults to `x64`.
+Using `architecture` input it is possible to specify the required Python or PyPy interpreter architecture: `x86` or `x64`. If the input is not specified the architecture defaults to `x64`.
 
 ## Caching packages dependencies
 

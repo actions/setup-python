@@ -14,7 +14,7 @@
 - [Using `setup-python` with a self-hosted runner](advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
     - [Windows](advanced-usage.md#windows)
     - [Linux](advanced-usage.md#linux)
-    - [MacOS](advanced-usage.md#macos)
+    - [macOS](advanced-usage.md#macos)
 - [Using `setup-python` on GHES](advanced-usage.md#using-setup-python-on-ghes)
 
 # Using python-version input
@@ -32,8 +32,8 @@ steps:
 - run: python my_script.py
 ```
 
-- The only downside to this is that set-up will take a little longer since the exact version will have to be downloaded if the exact version is not already installed on the runner due to more recent versions.
-- MSI installers are used on Windows for this, so runs will take a little longer to set up vs MacOS and Linux.
+- The only downside to this is that setup may take a little longer. If the exact version is not already installed on the runner due to more recent versions, the exact version will have to be downloaded.
+- MSI installers are used on Windows for this, so runs will take a little longer to set up vs macOS and Linux.
 
 You can specify **only a major and minor version** if you are okay with the most recent patch version being used:
 
@@ -131,7 +131,7 @@ More details on PyPy syntax can be found in the [Available versions of PyPy](#py
 
 ## Matrix Testing
 
-Using `setup-python` it's possible to use [matrix syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix) to install several versions of Python/PyPy:
+Using `setup-python` it's possible to use [matrix syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix) to install several versions of Python or PyPy:
 
 ```yaml
 jobs:
@@ -178,7 +178,7 @@ jobs:
 
 # Using python-version-file input
 
-`setup-python` action can read Python/PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
+`setup-python` action can read Python or PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
 
 >In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
 
@@ -192,9 +192,9 @@ steps:
 ```
 # Check latest version
 
-The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python/PyPy` version is always used.
+The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python or PyPy` version is always used.
 
-If `check-latest` is set to `true`, the action first checks if the cached version is the latest one. If the locally cached version is not the most up-to-date, a `Python/PyPy` version will then be downloaded. Set `check-latest` to `true` if you want the most up-to-date `Python/PyPy` version to always be used.
+If `check-latest` is set to `true`, the action first checks if the cached version is the latest one. If the locally cached version is not the most up-to-date, a `Python or PyPy` version will then be downloaded. Set `check-latest` to `true` if you want the most up-to-date `Python or PyPy` version to always be used.
 
 ```yaml
 steps:
@@ -205,7 +205,7 @@ steps:
       check-latest: true
   - run: python my_script.py
 ```
-> Setting `check-latest` to `true` has performance implications as downloading `Python/PyPy` versions is slower than using cached versions.
+> Setting `check-latest` to `true` has performance implications as downloading `Python or PyPy` versions is slower than using cached versions.
 
 
 # Caching packages data
@@ -284,7 +284,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output it's possible to get the installed by action Python/PyPy version. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
+Using **python-version** output it's possible to get the installed by action Python or PyPy version. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
 
 ```yaml
 jobs:
@@ -301,7 +301,7 @@ jobs:
 
 ### `python-path`
 
-**python-path** output is available with the absolute path of the Python/PyPy interpreter executable if you need it:
+**python-path** output is available with the absolute path of the Python or PyPy interpreter executable if you need it:
 
 ```yaml
 jobs:
@@ -347,10 +347,10 @@ These environment variables become available after setup-python action execution
 ## Using `update-environment` flag
 
 The `update-environment` flag defaults to `true`.
-With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for Python/PyPy to just work out of the box.
+With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for Python or PyPy to just work out of the box.
 
 If `update-environment` is set to `false`, the action will not add/update environment variables.
-This can prove useful if you want the only side-effect to be to ensure Python/PyPy is installed and rely on the `python-path` output to run executable.
+This can prove useful if you want the only side-effect to be to ensure Python or PyPy is installed and rely on the `python-path` output to run executable.
 Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
 
 ```yaml
@@ -378,7 +378,7 @@ Such a requirement on side-effect could be because you don't want your composite
     - All available versions are listed in the [version-manifest.json](https://github.com/actions/python-versions/blob/main/versions-manifest.json) file.
     - If there is a specific version of Python that is not available, you can open an issue here
 
->**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For MacOS and Ubuntu images, python versions are built from the source code. For Windows, the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
+>**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For macOS and Ubuntu images, python versions are built from the source code. For Windows, the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
 
 ## PyPy
 
@@ -447,9 +447,9 @@ One quick way to grant access is to change the user and group of the non-default
 > If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
 
 
-## MacOS
+## macOS
 
- The Python packages for MacOS that are downloaded from `actions/python-versions` are originally compiled from the source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before the use of `setup-python` on the MacOS self-hosted runner:
+ The Python packages for macOS that are downloaded from `actions/python-versions` are originally compiled from the source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before the use of `setup-python` on the macOS self-hosted runner:
  
  - Create a directory called `/Users/runner/hostedtoolcache`
  - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access
