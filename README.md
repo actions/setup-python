@@ -6,9 +6,7 @@
 
 This action provides the following functionality for GitHub Actions users:
 
-- Optionally installing and adding to PATH a version of Python that is already installed in the runner's tool cache.
-- Downloading, installing and adding to PATH an available version of Python from GitHub Releases ([actions/python-versions](https://github.com/actions/python-versions/releases)) if a specific version is not available in the runner's tool cache.
-- Failing if a specific version of Python is not preinstalled or available for download.
+- Installing a version of Python or PyPy and (by default) adding it to the PATH
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
 

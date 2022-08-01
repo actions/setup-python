@@ -1,4 +1,4 @@
-# Contents
+# Advanced Usage
 - [Using python-version input](advanced-usage.md#using-python-version-input)
     - [Specifying a Python version](advanced-usage.md#specifying-a-python-version)
     - [Specifying a PyPy version](advanced-usage.md#specifying-a-pypy-version)
@@ -17,9 +17,9 @@
     - [macOS](advanced-usage.md#macos)
 - [Using `setup-python` on GHES](advanced-usage.md#using-setup-python-on-ghes)
 
-# Using python-version input
+## Using the `python-version` input
 
-## Specifying a Python version
+### Specifying a Python version
 
 If there is a specific version of Python that you need and you don't want to worry about any potential breaking changes due to patch updates (going from `3.7.5` to `3.7.6` for example), you should specify the **exact major, minor, and patch version** (such as `3.7.5`):
 
@@ -96,7 +96,7 @@ steps:
 ```
 Please refer to the [Advanced range syntax section](https://github.com/npm/node-semver#advanced-range-syntax) of the [semver](https://github.com/npm/node-semver) to check other available range syntaxes.
 
-## Specifying a PyPy version
+### Specifying a PyPy version
 The version of PyPy should be specified in the format `pypy<python_version>[-v<pypy_version>]` or `pypy-<python_version>[-v<pypy_version>]`.
 The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy version will be used in this case.
 
@@ -129,7 +129,7 @@ jobs:
 ```
 More details on PyPy syntax can be found in the [Available versions of PyPy](#pypy) section.
 
-## Matrix Testing
+### Matrix Testing
 
 Using `setup-python` it's possible to use [matrix syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix) to install several versions of Python or PyPy:
 
@@ -176,7 +176,7 @@ jobs:
         run: python --version
 ```
 
-# Using python-version-file input
+## Using the `python-version-file` input
 
 `setup-python` action can read Python or PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
 
@@ -190,7 +190,7 @@ steps:
     python-version-file: '.python-version' # Read python version from a file .python-version
 - run: python my_script.py
 ```
-# Check latest version
+## Check latest version
 
 The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python or PyPy` version is always used.
 
@@ -208,7 +208,7 @@ steps:
 > Setting `check-latest` to `true` has performance implications as downloading `Python or PyPy` versions is slower than using cached versions.
 
 
-# Caching packages data
+## Caching packages
 
 **Caching pipenv dependencies:**
 ```yaml
@@ -278,9 +278,9 @@ steps:
 - run: pip install -e . -r subdirectory/requirements-dev.txt
 ```
 
-# Environment variables and action's outputs
+# Outputs and environment variables
 
-## Action's outputs
+## Outputs
 
 ### `python-version`
 
@@ -363,8 +363,8 @@ Such a requirement on side-effect could be because you don't want your composite
        update-environment: false
    - run: ${{ steps.cp310.outputs.python-path }} my_script.py
 ```
-# Available versions of Python and PyPy
-## Python
+## Available versions of Python and PyPy
+### Python
 
 `setup-python` is able to configure **Python** from two sources:
 
@@ -380,7 +380,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
 >**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For macOS and Ubuntu images, python versions are built from the source code. For Windows, the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
 
-## PyPy
+### PyPy
 
  `setup-python` is able to configure **PyPy** from two sources:
 
@@ -394,7 +394,7 @@ Such a requirement on side-effect could be because you don't want your composite
   - PyPy < 7.3.3 are not available to install on-flight.
   - If some versions are not available, you can open an issue in https://foss.heptapod.net/pypy/pypy/
 
-# Hosted tool cache
+## Hosted tool cache
 
 GitHub hosted runners have a tool cache that comes with a few versions of Python + PyPy already installed. This tool cache helps speed up runs and tool setup by not requiring any new downloads. There is an environment variable called `RUNNER_TOOL_CACHE` on each runner that describes the location of the tool cache with Python and PyPy installed. `setup-python` works by taking a specific version of Python or PyPy from this tool cache and adding it to PATH.
 
@@ -409,14 +409,14 @@ GitHub virtual environments are set up in [actions/virtual-environments](https:/
 - Tool cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
 
 
-# Using `setup-python` with a self-hosted runner
+## Using `setup-python` with a self-hosted runner
 
 Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` may not work.
 
 If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
 
 
-## Windows
+### Windows
 
 - Your runner needs to be running with administrator privileges so that the appropriate directories and files can be set up when downloading and installing a new version of Python for the first time.
 - If your runner is configured as a service, make sure the account that is running the service has the appropriate write permissions so that Python can get installed. The default `NT AUTHORITY\NETWORK SERVICE` should be sufficient.
@@ -428,7 +428,7 @@ If you have a supported self-hosted runner and you would like to use `setup-pyth
 
 >If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see additional logs.
 
-## Linux
+### Linux
 
 By default runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Linux self-hosted runners:
 - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/path/to/folder`.
@@ -447,7 +447,7 @@ One quick way to grant access is to change the user and group of the non-default
 > If your runner is configured as a service and you run into problems, make sure the user that the service is running as is correct. For more information, you can [check the status of your self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#checking-the-status-of-the-service).
 
 
-## macOS
+### macOS
 
  The Python packages for macOS that are downloaded from `actions/python-versions` are originally compiled from the source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before the use of `setup-python` on the macOS self-hosted runner:
  
@@ -466,7 +466,7 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 
 
-# Using `setup-python` on GHES
+## Using `setup-python` on GHES
 
 `setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: `##[error]API rate limit exceeded for...`.
 
