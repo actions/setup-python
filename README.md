@@ -41,7 +41,7 @@ For information regarding locally cached versions of Python or PyPy on GitHub ho
 
 ## Supported version syntax
 
-The `python-version` input supports the [Semantic Versioning Specification](https://semver.org/) and some special version notations (e.g. `semver ranges`, `x.y-dev syntax`, etc.), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
+The `python-version` input supports the [Semantic Versioning Specification](https://semver.org/) and some special version notations (e.g. `semver ranges`, `x.y-dev syntax`, etc.), for detailed examples please refer to the section: [Using python-version input](docs/advanced-usage.md#using-the-python-version-input) of the [Advanced usage](docs/advanced-usage.md) guide.
 
 ## Supported architectures
 
@@ -72,7 +72,7 @@ steps:
 
 >The requirements file format allows for specifying dependency versions using logical operators (for example chardet>=3.0.4) or specifying dependencies without any versions. In this case the pip install -r requirements.txt command will always try to install the latest available package version. To be sure that the cache will be used, please stick to a specific dependency version and update it manually if necessary.
 
-See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poetry` in the section: [Caching packages data](docs/advanced-usage.md#caching-packages-data) of the [Advanced usage](docs/advanced-usage.md) guide.
+See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poetry` in the section: [Caching packages](docs/advanced-usage.md#caching-packages) of the [Advanced usage](docs/advanced-usage.md) guide.
 
 ## Advanced usage
 
