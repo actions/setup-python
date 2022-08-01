@@ -76,11 +76,11 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 
 ## Advanced usage
 
-- [Using python-version input](docs/advanced-usage.md#using-python-version-input)
-- [Using python-version-file input](docs/advanced-usage.md#using-python-version-file-input)
+- [Using the python-version input](docs/advanced-usage.md#using-the-python-version-input)
+- [Using the python-version-file input](docs/advanced-usage.md#using-the-python-version-file-input)
 - [Check latest version](docs/advanced-usage.md#check-latest-version)
-- [Caching packages data](docs/advanced-usage.md#caching-packages-data)
-- [Environment variables and action's outputs](docs/advanced-usage.md#environment-variables-and-actions-outputs)
+- [Caching packages](docs/advanced-usage.md#caching-packages)
+- [Outputs and environment variables](docs/advanced-usage.md#outputs-and-environment-variables)
 - [Available versions of Python and PyPy](docs/advanced-usage.md#available-versions-of-python-and-pypy)
 - [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
