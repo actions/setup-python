@@ -65340,16 +65340,13 @@ function resolveVersionInput() {
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        // According to the README windows binaries do not require to be installed
-        // in the specific location, but Mac and Linux do
-        if (!utils_1.IS_WINDOWS && !((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim())) {
-            if (utils_1.IS_LINUX)
-                process.env['AGENT_TOOLSDIRECTORY'] = '/opt/hostedtoolcache';
-            else
-                process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+        if (utils_1.IS_MAC) {
+            process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+        }
+        if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
             process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
         }
-        core.debug(`Python is expected to be installed into RUNNER_TOOL_CACHE=${process.env['RUNNER_TOOL_CACHE']}`);
+        core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
         try {
             const version = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
@@ -65425,7 +65422,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
@@ -65434,6 +65431,7 @@ const semver = __importStar(__nccwpck_require__(1383));
 const exec = __importStar(__nccwpck_require__(1514));
 exports.IS_WINDOWS = process.platform === 'win32';
 exports.IS_LINUX = process.platform === 'linux';
+exports.IS_MAC = process.platform === 'darwin';
 exports.WINDOWS_ARCHS = ['x86', 'x64'];
 exports.WINDOWS_PLATFORMS = ['win32', 'win64'];
 const PYPY_VERSION_FILE = 'PYPY_VERSION';
