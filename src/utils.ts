@@ -3,9 +3,11 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as exec from '@actions/exec';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
+export const IS_MAC = process.platform === 'darwin';
 export const WINDOWS_ARCHS = ['x86', 'x64'];
 export const WINDOWS_PLATFORMS = ['win32', 'win64'];
 const PYPY_VERSION_FILE = 'PYPY_VERSION';
@@ -118,4 +120,25 @@ export function isCacheFeatureAvailable(): boolean {
   }
 
   return true;
+}
+
+export async function getLinuxOSReleaseInfo() {
+  const {stdout, stderr, exitCode} = await exec.getExecOutput(
+    'lsb_release',
+    ['-i', '-r', '-s'],
+    {
+      silent: true
+    }
+  );
+
+  const [osRelease, osVersion] = stdout.trim().split('\n');
+
+  core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
+
+  return `${osVersion}-${osRelease}`;
+}
+
+export function logWarning(message: string): void {
+  const warningPrefix = '[warning]';
+  core.info(`${warningPrefix}${message}`);
 }

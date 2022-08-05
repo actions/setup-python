@@ -4,6 +4,7 @@ import {HttpClient} from '@actions/http-client';
 import * as ifm from '@actions/http-client/interfaces';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
+import * as core from '@actions/core';
 import * as path from 'path';
 
 import * as installer from '../src/install-pypy';
@@ -50,6 +51,22 @@ describe('findRelease', () => {
     platform: process.platform,
     download_url: `https://test.download.python.org/pypy/pypy3.6-v7.3.3-${extensionName}`
   };
+
+  let getBooleanInputSpy: jest.SpyInstance;
+  let warningSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
+  let infoSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    infoSpy = jest.spyOn(core, 'info');
+    infoSpy.mockImplementation(() => {});
+
+    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy.mockImplementation(() => null);
+
+    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy.mockImplementation(() => null);
+  });
 
   it("Python version is found, but PyPy version doesn't match", () => {
     const pythonVersion = '3.6';
@@ -133,6 +150,10 @@ describe('findRelease', () => {
 
 describe('installPyPy', () => {
   let tcFind: jest.SpyInstance;
+  let getBooleanInputSpy: jest.SpyInstance;
+  let warningSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
+  let infoSpy: jest.SpyInstance;
   let spyExtractZip: jest.SpyInstance;
   let spyExtractTar: jest.SpyInstance;
   let spyFsReadDir: jest.SpyInstance;
@@ -157,6 +178,15 @@ describe('installPyPy', () => {
 
     spyExtractTar = jest.spyOn(tc, 'extractTar');
     spyExtractTar.mockImplementation(() => tempDir);
+
+    infoSpy = jest.spyOn(core, 'info');
+    infoSpy.mockImplementation(() => {});
+
+    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy.mockImplementation(() => null);
+
+    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy.mockImplementation(() => null);
 
     spyFsReadDir = jest.spyOn(fs, 'readdirSync');
     spyFsReadDir.mockImplementation(() => ['PyPyTest']);
@@ -194,7 +224,7 @@ describe('installPyPy', () => {
 
   it('throw if release is not found', async () => {
     await expect(
-      installer.installPyPy('7.3.3', '3.6.17', architecture)
+      installer.installPyPy('7.3.3', '3.6.17', architecture, undefined)
     ).rejects.toThrowError(
       `PyPy version 3.6.17 (7.3.3) with arch ${architecture} not found`
     );
@@ -214,7 +244,7 @@ describe('installPyPy', () => {
     spyChmodSync.mockImplementation(() => undefined);
 
     await expect(
-      installer.installPyPy('7.3.x', '3.6.12', architecture)
+      installer.installPyPy('7.3.x', '3.6.12', architecture, undefined)
     ).resolves.toEqual({
       installDir: path.join(toolDir, 'PyPy', '3.6.12', architecture),
       resolvedPythonVersion: '3.6.12',

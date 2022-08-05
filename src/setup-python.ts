@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable} from './utils';
+import {isCacheFeatureAvailable, logWarning, IS_MAC} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -28,7 +28,7 @@ function resolveVersionInput(): string {
 
   if (version && versionFile) {
     core.warning(
-      'Both python-version and python-version-file inputs are specified, only python-version will be used'
+      'Both python-version and python-version-file inputs are specified, only python-version will be used.'
     );
   }
 
@@ -36,42 +36,70 @@ function resolveVersionInput(): string {
     return version;
   }
 
-  versionFile = versionFile || '.python-version';
-  if (!fs.existsSync(versionFile)) {
-    throw new Error(
-      `The specified python version file at: ${versionFile} does not exist`
-    );
+  if (versionFile) {
+    if (!fs.existsSync(versionFile)) {
+      throw new Error(
+        `The specified python version file at: ${versionFile} doesn't exist.`
+      );
+    }
+    version = fs.readFileSync(versionFile, 'utf8');
+    core.info(`Resolved ${versionFile} as ${version}`);
+    return version;
   }
-  version = fs.readFileSync(versionFile, 'utf8');
-  core.info(`Resolved ${versionFile} as ${version}`);
+
+  logWarning(
+    "Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file."
+  );
+  versionFile = '.python-version';
+  if (fs.existsSync(versionFile)) {
+    version = fs.readFileSync(versionFile, 'utf8');
+    core.info(`Resolved ${versionFile} as ${version}`);
+    return version;
+  }
+
+  logWarning(`${versionFile} doesn't exist.`);
 
   return version;
 }
 
 async function run() {
-  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
-    core.debug(
-      `Python is expected to be installed into AGENT_TOOLSDIRECTORY=${process.env['AGENT_TOOLSDIRECTORY']}`
-    );
-    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
-  } else {
-    core.debug(
-      `Python is expected to be installed into RUNNER_TOOL_CACHE==${process.env['RUNNER_TOOL_CACHE']}`
-    );
+  if (IS_MAC) {
+    process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
   }
+
+  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+  }
+
+  core.debug(
+    `Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`
+  );
   try {
     const version = resolveVersionInput();
+    const checkLatest = core.getBooleanInput('check-latest');
+
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
+      const updateEnvironment = core.getBooleanInput('update-environment');
       if (isPyPyVersion(version)) {
-        const installed = await finderPyPy.findPyPyVersion(version, arch);
+        const installed = await finderPyPy.findPyPyVersion(
+          version,
+          arch,
+          updateEnvironment,
+          checkLatest
+        );
         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
         core.info(
           `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
         );
       } else {
-        const installed = await finder.useCpythonVersion(version, arch);
+        const installed = await finder.useCpythonVersion(
+          version,
+          arch,
+          updateEnvironment,
+          checkLatest
+        );
         pythonVersion = installed.version;
         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
       }
