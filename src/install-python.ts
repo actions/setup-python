@@ -3,10 +3,10 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
-import {IS_WINDOWS, IS_LINUX, isGhes} from './utils';
+import {IS_WINDOWS, IS_LINUX} from './utils';
 
 const TOKEN = core.getInput('token');
-const AUTH = !TOKEN || isGhes() ? undefined : `token ${TOKEN}`;
+const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
