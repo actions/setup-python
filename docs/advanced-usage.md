@@ -63,7 +63,7 @@ steps:
 - run: python my_script.py
 ```
 
-It's also possible to use **x.y-dev syntax** to download and set up the latest patch version of Python, alpha and beta releases included. (for specified major & minor versions):
+It's also possible to use **x.y-dev syntax** to download and set up the latest patch version of Python, alpha, beta and rc (release candidate) releases included. (for specified major & minor versions):
 
 ```yaml
 steps:
