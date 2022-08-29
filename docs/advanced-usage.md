@@ -407,14 +407,14 @@ GitHub hosted runners have a tool cache that comes with a few versions of Python
 |**Python tool cache**|`RUNNER_TOOL_CACHE/Python/*`|
 |**PyPy tool cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
-GitHub virtual environments are set up in [actions/virtual-environments](https://github.com/actions/virtual-environments). During the setup, the available versions of Python and PyPy are automatically downloaded, set up and documented.
-- Tool cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
-- Tool cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
+GitHub runner images are set up in [actions/runner-images](https://github.com/actions/runner-images). During the setup, the available versions of Python and PyPy are automatically downloaded, set up and documented.
+- Tool cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
+- Tool cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
 
 
 ## Using `setup-python` with a self-hosted runner
 
-Python distributions are only available for the same [environments](https://github.com/actions/virtual-environments#available-environments) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` may not work.
+Python distributions are only available for the same [environments](https://github.com/actions/runner-images#available-images) that GitHub Actions hosted environments are available for. If you are using an unsupported version of Ubuntu such as `19.04` or another Linux distribution such as Fedora, `setup-python` may not work.
 
 If you have a supported self-hosted runner and you would like to use `setup-python`, there are a few extra things you need to make sure are set up so that new versions of Python can be downloaded and configured on your runner.
 
