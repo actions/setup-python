@@ -322,7 +322,7 @@ jobs:
 
 **cache-hit** output is available with a boolean value that indicates whether a cache hit occurred on the primary key:
 
-```
+```yaml
 jobs:
   build:
     runs-on: ubuntu-latest
