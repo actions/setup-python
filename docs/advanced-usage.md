@@ -469,17 +469,48 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 
 
-## Using `setup-python` on GHES
+## Using `setup-python` on GHES:
 
-`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: `##[error]API rate limit exceeded for...`.
+### Avoiding rate limit issues
 
-To get a higher rate limit, you can [generate a personal access token on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action:
+`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: `##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)`.
+
+To get a higher rate limit, you can [generate a personal access token (PAT) on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action. It is important to understand that this needs to be a token from github.com and _not_ from your Github Enterprise account. If you or your colleagues do not yet have a github.com account, you might need to create one.
+
+Here are the steps you need to follow to avoid the rate limit:
+
+1. Create a PAT on any github.com account by using [this link](https://github.com/settings/tokens/new) after logging into github.com (not your Enterprise instance).  This PAT does _not_ need any rights, so make sure all the boxes are unchecked.
+2. Store this PAT in the repository / organization where you run your action, e.g. as `GH_GITHUB_COM_TOKEN`. You can do this by navigating to your repository -> Settings -> Secrets -> Actions -> "New repository secret".
+3. Since this functionality is not yet merged into any release version, for now, use the action with the hash below. Once this is merged into main, use the "normal" action like `@v4`. Also, change _python-version_ as needed.
 
 ```yml
-uses: actions/setup-python@v4
-with:
-  token: ${{ secrets.GH_DOTCOM_TOKEN }}
-  python-version: 3.11
+- name: Set up Python
+  uses: actions/setup-python@98c991d13f3149457a7c1ac4083885d0d9db98e1
+  with:
+    python-version: 3.8
+    token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
 ```
 
+Requests should now be authenticated. To actually check this is however difficult, since caching as well as the hourly rate reset make it hard to know. Here is how you can check success:
+
+1. Enable debugging for your github actions by following [these instructions](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging)
+2. If you do not have access to your github runner's console, start a job with a `python-version` that you are sure wasn't used yet to avoid it simply being read from cache.
+3. In your github action logs, check for the following line:
+    
+```
+    Version 3.8 was not found in the local cache
+    ##[debug]Getting manifest from actions/python-versions@main
+    ##[debug]set auth  <--- Make sure this line exists.
+    ##[debug]check 3.11.0-rc.2 satisfies 3.8
+```
+
+4. If you have access to your runner's console, you can manually trigger the rate limit by running the following line 60 times (or less, until you get an error response):
+
+```
+    curl -I https://api.github.com/users/octocat/orgs
+```
+    
+5. Now, trigger your github action run. It will fail if auth was not successful, but run through if it was.
+
+### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server@3.2/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
