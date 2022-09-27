@@ -469,7 +469,7 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 
 
-## Using `setup-python` on GHES:
+## Using `setup-python` on GHES
 
 ### Avoiding rate limit issues
 
