@@ -473,7 +473,9 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 ### Avoiding rate limit issues
 
-`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: `##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)`.
+`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: 
+
+    ##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)
 
 To get a higher rate limit, you can [generate a personal access token (PAT) on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action. It is important to understand that this needs to be a token from github.com and _not_ from your GHES instance. If you or your colleagues do not yet have a github.com account, you might need to create one.
 
@@ -491,26 +493,18 @@ Here are the steps you need to follow to avoid the rate limit:
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
 ```
 
-Requests should now be authenticated. To actually check this is however difficult, since caching as well as the hourly rate reset make it hard to know. Here is how you can check success:
+Requests should now be authenticated. To ensure this was set up correctly, if you have access to your runner, you can simply test this with Github's [rate limit API](https://docs.github.com/en/rest/rate-limit). However, if you do not have access to your runner, you can confirm authentication via the following workaround:
 
 1. Enable debugging for your github actions by following [these instructions](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging)
-2. If you do not have access to your github runner's console, start a job with a `python-version` that you are sure wasn't used yet to avoid it simply being read from cache.
+2. Start a job with a `python-version` that you are sure wasn't used before to avoid it simply being read from cache.
 3. In your github action logs, check for the following line:
     
 ```
     Version 3.8 was not found in the local cache
     ##[debug]Getting manifest from actions/python-versions@main
-    ##[debug]set auth  <--- Make sure this line exists.
+    ##[debug]set auth   <-------- Make sure this line exists.
     ##[debug]check 3.11.0-rc.2 satisfies 3.8
 ```
-
-4. If you have access to your runner's console, you can manually trigger the rate limit by running the following line 60 times (or less, until you get an error response):
-
-```
-    curl -I https://api.github.com/users/octocat/orgs
-```
-    
-5. Now, trigger your github action run. It will fail if auth was not successful, but run through if it was.
 
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server@3.2/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
