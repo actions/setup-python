@@ -475,12 +475,12 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 `setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: `##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)`.
 
-To get a higher rate limit, you can [generate a personal access token (PAT) on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action. It is important to understand that this needs to be a token from github.com and _not_ from your Github Enterprise account. If you or your colleagues do not yet have a github.com account, you might need to create one.
+To get a higher rate limit, you can [generate a personal access token (PAT) on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action. It is important to understand that this needs to be a token from github.com and _not_ from your GHES instance. If you or your colleagues do not yet have a github.com account, you might need to create one.
 
 Here are the steps you need to follow to avoid the rate limit:
 
 1. Create a PAT on any github.com account by using [this link](https://github.com/settings/tokens/new) after logging into github.com (not your Enterprise instance).  This PAT does _not_ need any rights, so make sure all the boxes are unchecked.
-2. Store this PAT in the repository / organization where you run your action, e.g. as `GH_GITHUB_COM_TOKEN`. You can do this by navigating to your repository -> Settings -> Secrets -> Actions -> "New repository secret".
+2. Store this PAT in the repository / organization where you run your workflow, e.g. as `GH_GITHUB_COM_TOKEN`. You can do this by navigating to your repository -> **Settings** -> **Secrets** -> **Actions** -> **New repository secret**.
 3. Since this functionality is not yet merged into any release version, for now, use the action with the hash below. Once this is merged into main, use the "normal" action like `@v4`. Also, change _python-version_ as needed.
 
 ```yml
