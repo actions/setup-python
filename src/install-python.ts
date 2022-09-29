@@ -72,15 +72,36 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
-  const pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
-  core.info('Extract downloaded archive');
-  let pythonExtractedFolder;
-  if (IS_WINDOWS) {
-    pythonExtractedFolder = await tc.extractZip(pythonPath);
-  } else {
-    pythonExtractedFolder = await tc.extractTar(pythonPath);
-  }
+  let pythonPath = '';
+  try {
+    pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
+    core.info('Extract downloaded archive');
+    let pythonExtractedFolder;
+    if (IS_WINDOWS) {
+      pythonExtractedFolder = await tc.extractZip(pythonPath);
+    } else {
+      pythonExtractedFolder = await tc.extractTar(pythonPath);
+    }
 
-  core.info('Execute installation script');
-  await installPython(pythonExtractedFolder);
+    core.info('Execute installation script');
+    await installPython(pythonExtractedFolder);
+  } catch (err) {
+    if (err instanceof Error) {
+      // Rate limit?
+      if (
+        err instanceof tc.HTTPError &&
+        (err.httpStatusCode === 403 || err.httpStatusCode === 429)
+      ) {
+        core.info(
+          `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
+        );
+      } else {
+        core.info(err.message);
+      }
+      if (err.stack !== undefined) {
+        core.debug(err.stack);
+      }
+    }
+    throw err;
+  }
 }
