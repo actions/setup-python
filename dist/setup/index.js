@@ -66108,16 +66108,30 @@ class PoetryCache extends cache_distributor_1.default {
             // Same virtualenvs path may appear for different projects, hence we use a Set
             const paths = new Set();
             const globber = yield glob.create(this.patterns);
+            const pythonLocation = yield io.which('python');
+            if (pythonLocation) {
+                core.debug(`pythonLocation is ${pythonLocation}`);
+            }
+            else {
+                utils_1.logWarning('python binaries were not found in PATH');
+            }
             try {
                 for (var _b = __asyncValues(globber.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
                     const file = _c.value;
                     const basedir = path.dirname(file);
+                    core.debug(`Processing Poetry project at ${basedir}`);
                     const poetryConfig = yield this.getPoetryConfiguration(basedir);
                     const cacheDir = poetryConfig['cache-dir'];
                     const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
                     paths.add(virtualenvsPath);
                     if (poetryConfig['virtualenvs.in-project'] === true) {
                         paths.add(path.join(basedir, '.venv'));
+                    }
+                    if (pythonLocation) {
+                        const { exitCode, stderr } = yield exec.getExecOutput('poetry', ['env', 'use', pythonLocation], { ignoreReturnCode: true, cwd: basedir });
+                        if (exitCode) {
+                            utils_1.logWarning(stderr);
+                        }
                     }
                 }
             }
@@ -66127,17 +66141,6 @@ class PoetryCache extends cache_distributor_1.default {
                     if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
                 }
                 finally { if (e_1) throw e_1.error; }
-            }
-            const pythonLocation = yield io.which('python');
-            if (pythonLocation) {
-                core.debug(`pythonLocation is ${pythonLocation}`);
-                const { exitCode, stderr } = yield exec.getExecOutput(`poetry env use ${pythonLocation}`, undefined, { ignoreReturnCode: true });
-                if (exitCode) {
-                    utils_1.logWarning(stderr);
-                }
-            }
-            else {
-                utils_1.logWarning('python binaries were not found in PATH');
             }
             return [...paths];
         });

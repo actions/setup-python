@@ -20,8 +20,17 @@ class PoetryCache extends CacheDistributor {
     const paths = new Set<string>();
     const globber = await glob.create(this.patterns);
 
+    const pythonLocation = await io.which('python');
+    if (pythonLocation) {
+      core.debug(`pythonLocation is ${pythonLocation}`);
+    } else {
+      logWarning('python binaries were not found in PATH');
+    }
+
     for await (const file of globber.globGenerator()) {
       const basedir = path.dirname(file);
+      core.debug(`Processing Poetry project at ${basedir}`);
+
       const poetryConfig = await this.getPoetryConfiguration(basedir);
 
       const cacheDir = poetryConfig['cache-dir'];
@@ -35,26 +44,18 @@ class PoetryCache extends CacheDistributor {
       if (poetryConfig['virtualenvs.in-project'] === true) {
         paths.add(path.join(basedir, '.venv'));
       }
-    }
 
-    const pythonLocation = await io.which('python');
+      if (pythonLocation) {
+        const {exitCode, stderr} = await exec.getExecOutput(
+          'poetry',
+          ['env', 'use', pythonLocation],
+          {ignoreReturnCode: true, cwd: basedir}
+        );
 
-    if (pythonLocation) {
-      core.debug(`pythonLocation is ${pythonLocation}`);
-      const {
-        exitCode,
-        stderr
-      } = await exec.getExecOutput(
-        `poetry env use ${pythonLocation}`,
-        undefined,
-        {ignoreReturnCode: true}
-      );
-
-      if (exitCode) {
-        logWarning(stderr);
+        if (exitCode) {
+          logWarning(stderr);
+        }
       }
-    } else {
-      logWarning('python binaries were not found in PATH');
     }
 
     return [...paths];
