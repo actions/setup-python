@@ -27,7 +27,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let infoSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
-  let saveSatetSpy: jest.SpyInstance;
+  let saveStateSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
 
@@ -52,8 +52,8 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     debugSpy = jest.spyOn(core, 'debug');
     debugSpy.mockImplementation(input => undefined);
 
-    saveSatetSpy = jest.spyOn(core, 'saveState');
-    saveSatetSpy.mockImplementation(input => undefined);
+    saveStateSpy = jest.spyOn(core, 'saveState');
+    saveStateSpy.mockImplementation(input => undefined);
 
     getStateSpy = jest.spyOn(core, 'getState');
     getStateSpy.mockImplementation(input => undefined);
