@@ -66105,7 +66105,8 @@ class PoetryCache extends cache_distributor_1.default {
     getCacheGlobalDirectories() {
         var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const paths = [];
+            // Same virtualenvs path may appear for different projects, hence we use a Set
+            const paths = new Set();
             const globber = yield glob.create(this.patterns);
             try {
                 for (var _b = __asyncValues(globber.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
@@ -66114,9 +66115,9 @@ class PoetryCache extends cache_distributor_1.default {
                     const poetryConfig = yield this.getPoetryConfiguration(basedir);
                     const cacheDir = poetryConfig['cache-dir'];
                     const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
-                    paths.push(virtualenvsPath);
+                    paths.add(virtualenvsPath);
                     if (poetryConfig['virtualenvs.in-project'] === true) {
-                        paths.push(path.join(basedir, '.venv'));
+                        paths.add(path.join(basedir, '.venv'));
                     }
                 }
             }
@@ -66138,7 +66139,7 @@ class PoetryCache extends cache_distributor_1.default {
             else {
                 utils_1.logWarning('python binaries were not found in PATH');
             }
-            return paths;
+            return [...paths];
         });
     }
     computeKeys() {

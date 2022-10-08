@@ -16,7 +16,8 @@ class PoetryCache extends CacheDistributor {
   }
 
   protected async getCacheGlobalDirectories() {
-    const paths = [];
+    // Same virtualenvs path may appear for different projects, hence we use a Set
+    const paths = new Set<string>();
     const globber = await glob.create(this.patterns);
 
     for await (const file of globber.globGenerator()) {
@@ -29,10 +30,10 @@ class PoetryCache extends CacheDistributor {
         cacheDir
       );
 
-      paths.push(virtualenvsPath);
+      paths.add(virtualenvsPath);
 
       if (poetryConfig['virtualenvs.in-project'] === true) {
-        paths.push(path.join(basedir, '.venv'));
+        paths.add(path.join(basedir, '.venv'));
       }
     }
 
@@ -56,7 +57,7 @@ class PoetryCache extends CacheDistributor {
       logWarning('python binaries were not found in PATH');
     }
 
-    return paths;
+    return [...paths];
   }
 
   protected async computeKeys() {
