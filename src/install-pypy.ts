@@ -157,7 +157,7 @@ export function findRelease(
     const isArchPresent =
       item.files &&
       (IS_WINDOWS
-        ? isArchPresentForWindows(item)
+        ? isArchPresentForWindows(item, architecture)
         : isArchPresentForMacOrLinux(item, architecture, process.platform));
     return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
   });
@@ -205,10 +205,10 @@ export function pypyVersionToSemantic(versionSpec: string) {
   return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
 
-export function isArchPresentForWindows(item: any) {
+export function isArchPresentForWindows(item: any, architecture: string) {
   return item.files.some(
     (file: any) =>
-      WINDOWS_ARCHS.includes(file.arch) &&
+      file.arch === (architecture === 'x32' ? 'x86' : architecture) && // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
       WINDOWS_PLATFORMS.includes(file.platform)
   );
 }
