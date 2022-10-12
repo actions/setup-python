@@ -206,10 +206,13 @@ export function pypyVersionToSemantic(versionSpec: string) {
 }
 
 export function isArchPresentForWindows(item: any, architecture: string) {
+  // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
+  if (architecture === 'x32') {
+    architecture = 'x86';
+  }
   return item.files.some(
     (file: any) =>
-      file.arch === (architecture === 'x32' ? 'x86' : architecture) && // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
-      WINDOWS_PLATFORMS.includes(file.platform)
+      file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform)
   );
 }
 

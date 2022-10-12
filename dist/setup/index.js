@@ -66565,8 +66565,11 @@ function pypyVersionToSemantic(versionSpec) {
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
 function isArchPresentForWindows(item, architecture) {
-    return item.files.some((file) => file.arch === (architecture === 'x32' ? 'x86' : architecture) && // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
-        utils_1.WINDOWS_PLATFORMS.includes(file.platform));
+    // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
+    if (architecture === 'x32') {
+        architecture = 'x86';
+    }
+    return item.files.some((file) => file.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(file.platform));
 }
 exports.isArchPresentForWindows = isArchPresentForWindows;
 function isArchPresentForMacOrLinux(item, architecture, platform) {
