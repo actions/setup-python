@@ -210,10 +210,12 @@ export function isArchPresentForWindows(item: any, architecture: string) {
   if (architecture === 'x32') {
     architecture = 'x86';
   }
-  core.info(`DEBUG: pypy: ${item.pypy_version}, python: ${item.python_version}, arch: ${item.files.arch}`)
+  core.info(`DEBUG: pypy: ${item.pypy_version}, python: ${item.python_version}`)
   const result = item.files.some(
-    (file: any) =>
+    (file: any) => {
+      core.info(`arch: ${file.arch}`);
       file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform)
+    }
   );
   core.info(`result: ${result}`)
   return result
