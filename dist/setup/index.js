@@ -66572,7 +66572,9 @@ function isArchPresentForWindows(item, architecture) {
     core.info(`DEBUG: pypy: ${item.pypy_version}, python: ${item.python_version}, architecture: ${architecture}`);
     const result = item.files.some((file) => {
         core.info(`arch: ${file.arch}`);
-        file.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(file.platform);
+        const res = file.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(file.platform);
+        core.info(`res: ${res}`);
+        return res;
     });
     core.info(`result: ${result}`);
     return result;

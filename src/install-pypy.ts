@@ -214,7 +214,9 @@ export function isArchPresentForWindows(item: any, architecture: string) {
   const result = item.files.some(
     (file: any) => {
       core.info(`arch: ${file.arch}`);
-      file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform)
+      const res = file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform);
+      core.info(`res: ${res}`);
+      return res;
     }
   );
   core.info(`result: ${result}`)
