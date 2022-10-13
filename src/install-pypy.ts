@@ -206,10 +206,7 @@ export function pypyVersionToSemantic(versionSpec: string) {
 }
 
 export function isArchPresentForWindows(item: any, architecture: string) {
-  // convert x32 to x86 cause os.arch() return x32 for 32-bit system but PyPy releases json has x86 arch value.
-  if (architecture === 'x32') {
-    architecture = 'x86';
-  }
+  architecture = ReplaceX32toX86(architecture);
   return item.files.some(
     (file: any) => {
       return file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform);
@@ -228,9 +225,7 @@ export function isArchPresentForMacOrLinux(
 }
 
 export function findAssetForWindows(releases: any, architecture: string) {
-  if (architecture === 'x32') {
-    architecture = 'x86';
-  }
+  architecture = ReplaceX32toX86(architecture);
   return releases.files.find(
     (item: any) => {
       return item.arch === architecture && WINDOWS_PLATFORMS.includes(item.platform);
@@ -246,4 +241,12 @@ export function findAssetForMacOrLinux(
   return releases.files.find(
     (item: any) => item.arch === architecture && item.platform === platform
   );
+}
+
+function ReplaceX32toX86(architecture: string): string {
+  // convert x32 to x86 because os.arch() return x32 for 32-bit systems but PyPy releases json has x86 arch value.
+  if (architecture === 'x32') {
+    architecture = 'x86';
+  }
+  return architecture;
 }
