@@ -181,7 +181,7 @@ export function findRelease(
 
   const foundRelease = sortedReleases[0];
   const foundAsset = IS_WINDOWS
-    ? findAssetForWindows(foundRelease)
+    ? findAssetForWindows(foundRelease, architecture)
     : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
 
   return {
@@ -210,17 +210,11 @@ export function isArchPresentForWindows(item: any, architecture: string) {
   if (architecture === 'x32') {
     architecture = 'x86';
   }
-  core.info(`DEBUG: pypy: ${item.pypy_version}, python: ${item.python_version}, architecture: ${architecture}`)
-  const result = item.files.some(
+  return item.files.some(
     (file: any) => {
-      core.info(`arch: ${file.arch}`);
-      const res = file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform);
-      core.info(`res: ${res}`);
-      return res;
+      return file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform);
     }
   );
-  core.info(`result: ${result}`)
-  return result
 }
 
 export function isArchPresentForMacOrLinux(
@@ -233,11 +227,11 @@ export function isArchPresentForMacOrLinux(
   );
 }
 
-export function findAssetForWindows(releases: any) {
+export function findAssetForWindows(releases: any, architecture: string) {
   return releases.files.find(
-    (item: any) =>
-      WINDOWS_ARCHS.includes(item.arch) &&
-      WINDOWS_PLATFORMS.includes(item.platform)
+    (item: any) => {
+      return item.arch === architecture && WINDOWS_PLATFORMS.includes(item.platform);
+    }    
   );
 }
 
