@@ -66579,6 +66579,9 @@ function isArchPresentForMacOrLinux(item, architecture, platform) {
 }
 exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
 function findAssetForWindows(releases, architecture) {
+    if (architecture === 'x32') {
+        architecture = 'x86';
+    }
     return releases.files.find((item) => {
         return item.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(item.platform);
     });

@@ -228,6 +228,9 @@ export function isArchPresentForMacOrLinux(
 }
 
 export function findAssetForWindows(releases: any, architecture: string) {
+  if (architecture === 'x32') {
+    architecture = 'x86';
+  }
   return releases.files.find(
     (item: any) => {
       return item.arch === architecture && WINDOWS_PLATFORMS.includes(item.platform);
