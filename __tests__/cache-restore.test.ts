@@ -102,11 +102,17 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   describe('Restore dependencies', () => {
     it.each([
-      ['pip', '3.8.12', undefined, requirementsHash, undefined],
       [
         'pip',
         '3.8.12',
-        '**/requirements-linux.txt',
+        '__tests__/data/**/requirements.txt',
+        requirementsHash,
+        undefined
+      ],
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/**/requirements-linux.txt',
         requirementsLinuxHash,
         undefined
       ],
@@ -124,7 +130,13 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         requirementsHash,
         undefined
       ],
-      ['pipenv', '3.9.1', undefined, pipFileLockHash, undefined],
+      [
+        'pipenv',
+        '3.9.1',
+        '__tests__/data/**/Pipfile.lock',
+        pipFileLockHash,
+        undefined
+      ],
       [
         'pipenv',
         '3.9.12',
@@ -135,7 +147,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       [
         'poetry',
         '3.9.1',
-        undefined,
+        '__tests__/data/**/poetry.lock',
         poetryLockHash,
         [
           '/Users/patrick/Library/Caches/pypoetry/virtualenvs',
@@ -208,8 +220,13 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   describe('Dependencies changed', () => {
     it.each([
-      ['pip', '3.8.12', undefined, pipFileLockHash],
-      ['pip', '3.8.12', '**/requirements-linux.txt', pipFileLockHash],
+      ['pip', '3.8.12', '__tests__/data/**/requirements.txt', pipFileLockHash],
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/**/requirements-linux.txt',
+        pipFileLockHash
+      ],
       [
         'pip',
         '3.8.12',
@@ -217,9 +234,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         pipFileLockHash
       ],
       ['pip', '3.8.12', '__tests__/data/requirements.txt', pipFileLockHash],
-      ['pipenv', '3.9.1', undefined, requirementsHash],
+      ['pipenv', '3.9.1', '__tests__/data/**/Pipfile.lock', requirementsHash],
       ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash],
-      ['poetry', '3.9.1', undefined, requirementsHash]
+      ['poetry', '3.9.1', '__tests__/data/**/poetry.lock', requirementsHash]
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
