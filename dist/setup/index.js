@@ -66615,9 +66615,7 @@ function pypyVersionToSemantic(versionSpec) {
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
 function isArchPresentForWindows(item, architecture) {
     architecture = ReplaceX32toX86(architecture);
-    return item.files.some((file) => {
-        return (file.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(file.platform));
-    });
+    return item.files.some((file) => file.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(file.platform));
 }
 exports.isArchPresentForWindows = isArchPresentForWindows;
 function isArchPresentForMacOrLinux(item, architecture, platform) {
@@ -66626,9 +66624,7 @@ function isArchPresentForMacOrLinux(item, architecture, platform) {
 exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
 function findAssetForWindows(releases, architecture) {
     architecture = ReplaceX32toX86(architecture);
-    return releases.files.find((item) => {
-        return (item.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(item.platform));
-    });
+    return releases.files.find((item) => item.arch === architecture && utils_1.WINDOWS_PLATFORMS.includes(item.platform));
 }
 exports.findAssetForWindows = findAssetForWindows;
 function findAssetForMacOrLinux(releases, architecture, platform) {
