@@ -207,7 +207,8 @@ export function pypyVersionToSemantic(versionSpec: string) {
 
 export function isArchPresentForWindows(item: any, architecture: string) {
   architecture = ReplaceX32toX86(architecture);
-  return item.files.some((file: any) =>
+  return item.files.some(
+    (file: any) =>
       file.arch === architecture && WINDOWS_PLATFORMS.includes(file.platform)
   );
 }
@@ -224,7 +225,8 @@ export function isArchPresentForMacOrLinux(
 
 export function findAssetForWindows(releases: any, architecture: string) {
   architecture = ReplaceX32toX86(architecture);
-  return releases.files.find((item: any) =>
+  return releases.files.find(
+    (item: any) =>
       item.arch === architecture && WINDOWS_PLATFORMS.includes(item.platform)
   );
 }
