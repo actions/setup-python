@@ -8,7 +8,6 @@ import fs from 'fs';
 
 import {
   IS_WINDOWS,
-  WINDOWS_ARCHS,
   WINDOWS_PLATFORMS,
   IPyPyManifestRelease,
   createSymlinkInFolder,
@@ -242,7 +241,7 @@ export function findAssetForMacOrLinux(
 }
 
 function ReplaceX32toX86(architecture: string): string {
-  // convert x32 to x86 because os.arch() return x32 for 32-bit systems but PyPy releases json has x86 arch value.
+  // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
   if (architecture === 'x32') {
     architecture = 'x86';
   }

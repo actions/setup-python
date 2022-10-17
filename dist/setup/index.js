@@ -66632,7 +66632,7 @@ function findAssetForMacOrLinux(releases, architecture, platform) {
 }
 exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
 function ReplaceX32toX86(architecture) {
-    // convert x32 to x86 because os.arch() return x32 for 32-bit systems but PyPy releases json has x86 arch value.
+    // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
     if (architecture === 'x32') {
         architecture = 'x86';
     }
