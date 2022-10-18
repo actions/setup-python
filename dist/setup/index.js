@@ -66577,7 +66577,7 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
             semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
         const isArchPresent = item.files &&
             (utils_1.IS_WINDOWS
-                ? isArchPresentForWindows(item)
+                ? isArchPresentForWindows(item, architecture)
                 : isArchPresentForMacOrLinux(item, architecture, process.platform));
         return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
     });
@@ -66590,7 +66590,7 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
     });
     const foundRelease = sortedReleases[0];
     const foundAsset = utils_1.IS_WINDOWS
-        ? findAssetForWindows(foundRelease)
+        ? findAssetForWindows(foundRelease, architecture)
         : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
     return {
         foundAsset,
@@ -66613,24 +66613,31 @@ function pypyVersionToSemantic(versionSpec) {
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
-function isArchPresentForWindows(item) {
-    return item.files.some((file) => utils_1.WINDOWS_ARCHS.includes(file.arch) &&
-        utils_1.WINDOWS_PLATFORMS.includes(file.platform));
+function isArchPresentForWindows(item, architecture) {
+    architecture = replaceX32toX86(architecture);
+    return item.files.some((file) => utils_1.WINDOWS_PLATFORMS.includes(file.platform) && file.arch === architecture);
 }
 exports.isArchPresentForWindows = isArchPresentForWindows;
 function isArchPresentForMacOrLinux(item, architecture, platform) {
     return item.files.some((file) => file.arch === architecture && file.platform === platform);
 }
 exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
-function findAssetForWindows(releases) {
-    return releases.files.find((item) => utils_1.WINDOWS_ARCHS.includes(item.arch) &&
-        utils_1.WINDOWS_PLATFORMS.includes(item.platform));
+function findAssetForWindows(releases, architecture) {
+    architecture = replaceX32toX86(architecture);
+    return releases.files.find((item) => utils_1.WINDOWS_PLATFORMS.includes(item.platform) && item.arch === architecture);
 }
 exports.findAssetForWindows = findAssetForWindows;
 function findAssetForMacOrLinux(releases, architecture, platform) {
     return releases.files.find((item) => item.arch === architecture && item.platform === platform);
 }
 exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
+function replaceX32toX86(architecture) {
+    // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
+    if (architecture === 'x32') {
+        architecture = 'x86';
+    }
+    return architecture;
+}
 
 
 /***/ }),
