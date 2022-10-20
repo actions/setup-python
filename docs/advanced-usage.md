@@ -487,24 +487,13 @@ Here are the steps you need to follow to avoid the rate limit:
 
 ```yml
 - name: Set up Python
-  uses: actions/setup-python@98c991d13f3149457a7c1ac4083885d0d9db98e1
+  uses: actions/setup-python@4.3
   with:
     python-version: 3.8
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
 ```
 
-Requests should now be authenticated. To ensure this was set up correctly, if you have access to your runner, you can simply test this with Github's [rate limit API](https://docs.github.com/en/rest/rate-limit). However, if you do not have access to your runner, you can confirm authentication via the following workaround:
-
-1. Enable debugging for your github actions by following [these instructions](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging)
-2. Start a job with a `python-version` that you are sure wasn't used before to avoid it simply being read from cache.
-3. In your github action logs, check for the following line:
-    
-```
-    Version 3.8 was not found in the local cache
-    ##[debug]Getting manifest from actions/python-versions@main
-    ##[debug]set auth   <-------- Make sure this line exists.
-    ##[debug]check 3.11.0-rc.2 satisfies 3.8
-```
+Requests should now be authenticated. To verify that you are getting the higher rate limit, you can call GitHub's [rate limit API](https://docs.github.com/en/rest/rate-limit) from within your workflow ((example)[https://github.com/actions/setup-python/pull/443#issuecomment-1206776401]).
 
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server@3.2/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
