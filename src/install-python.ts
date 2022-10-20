@@ -86,19 +86,16 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     core.info('Execute installation script');
     await installPython(pythonExtractedFolder);
   } catch (err) {
-    if (err instanceof Error) {
+    if (err instanceof tc.HTTPError) {
       // Rate limit?
-      if (
-        err instanceof tc.HTTPError &&
-        (err.httpStatusCode === 403 || err.httpStatusCode === 429)
-      ) {
+      if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
         core.info(
           `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
         );
       } else {
         core.info(err.message);
       }
-      if (err.stack !== undefined) {
+      if (err.stack) {
         core.debug(err.stack);
       }
     }
