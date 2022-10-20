@@ -473,7 +473,7 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 ### Avoiding rate limit issues
 
-`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that looks like: 
+`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that look like this: 
 
     ##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)
 
@@ -483,11 +483,11 @@ Here are the steps you need to follow to avoid the rate limit:
 
 1. Create a PAT on any github.com account by using [this link](https://github.com/settings/tokens/new) after logging into github.com (not your Enterprise instance).  This PAT does _not_ need any rights, so make sure all the boxes are unchecked.
 2. Store this PAT in the repository / organization where you run your workflow, e.g. as `GH_GITHUB_COM_TOKEN`. You can do this by navigating to your repository -> **Settings** -> **Secrets** -> **Actions** -> **New repository secret**.
-3. Since this functionality is not yet merged into any release version, for now, use the action with the hash below. Once this is merged into main, use the "normal" action like `@v4`. Also, change _python-version_ as needed.
+3. To use this functionality, you need to use any version newer than `v4.3`. Also, change _python-version_ as needed.
 
 ```yml
 - name: Set up Python
-  uses: actions/setup-python@4.3
+  uses: actions/setup-python@4
   with:
     python-version: 3.8
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
