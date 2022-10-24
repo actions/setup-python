@@ -66511,27 +66511,45 @@ function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
         const { foundAsset, resolvedPythonVersion, resolvedPyPyVersion } = releaseData;
         let downloadUrl = `${foundAsset.download_url}`;
         core.info(`Downloading PyPy from "${downloadUrl}" ...`);
-        const pypyPath = yield tc.downloadTool(downloadUrl);
-        core.info('Extracting downloaded archive...');
-        if (utils_1.IS_WINDOWS) {
-            downloadDir = yield tc.extractZip(pypyPath);
+        try {
+            const pypyPath = yield tc.downloadTool(downloadUrl);
+            core.info('Extracting downloaded archive...');
+            if (utils_1.IS_WINDOWS) {
+                downloadDir = yield tc.extractZip(pypyPath);
+            }
+            else {
+                downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
+            }
+            // root folder in archive can have unpredictable name so just take the first folder
+            // downloadDir is unique folder under TEMP and can't contain any other folders
+            const archiveName = fs_1.default.readdirSync(downloadDir)[0];
+            const toolDir = path.join(downloadDir, archiveName);
+            let installDir = toolDir;
+            if (!utils_1.isNightlyKeyword(resolvedPyPyVersion)) {
+                installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
+            }
+            utils_1.writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
+            const binaryPath = getPyPyBinaryPath(installDir);
+            yield createPyPySymlink(binaryPath, resolvedPythonVersion);
+            yield installPip(binaryPath);
+            return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
         }
-        else {
-            downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
+        catch (err) {
+            if (err instanceof Error) {
+                // Rate limit?
+                if (err instanceof tc.HTTPError &&
+                    (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
+                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                }
+                else {
+                    core.info(err.message);
+                }
+                if (err.stack !== undefined) {
+                    core.debug(err.stack);
+                }
+            }
+            throw err;
         }
-        // root folder in archive can have unpredictable name so just take the first folder
-        // downloadDir is unique folder under TEMP and can't contain any other folders
-        const archiveName = fs_1.default.readdirSync(downloadDir)[0];
-        const toolDir = path.join(downloadDir, archiveName);
-        let installDir = toolDir;
-        if (!utils_1.isNightlyKeyword(resolvedPyPyVersion)) {
-            installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
-        }
-        utils_1.writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
-        const binaryPath = getPyPyBinaryPath(installDir);
-        yield createPyPySymlink(binaryPath, resolvedPythonVersion);
-        yield installPip(binaryPath);
-        return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
     });
 }
 exports.installPyPy = installPyPy;
@@ -66730,17 +66748,35 @@ function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
         const downloadUrl = release.files[0].download_url;
         core.info(`Download from "${downloadUrl}"`);
-        const pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
-        core.info('Extract downloaded archive');
-        let pythonExtractedFolder;
-        if (utils_1.IS_WINDOWS) {
-            pythonExtractedFolder = yield tc.extractZip(pythonPath);
+        let pythonPath = '';
+        try {
+            pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
+            core.info('Extract downloaded archive');
+            let pythonExtractedFolder;
+            if (utils_1.IS_WINDOWS) {
+                pythonExtractedFolder = yield tc.extractZip(pythonPath);
+            }
+            else {
+                pythonExtractedFolder = yield tc.extractTar(pythonPath);
+            }
+            core.info('Execute installation script');
+            yield installPython(pythonExtractedFolder);
         }
-        else {
-            pythonExtractedFolder = yield tc.extractTar(pythonPath);
+        catch (err) {
+            if (err instanceof tc.HTTPError) {
+                // Rate limit?
+                if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
+                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                }
+                else {
+                    core.info(err.message);
+                }
+                if (err.stack) {
+                    core.debug(err.stack);
+                }
+            }
+            throw err;
         }
-        core.info('Execute installation script');
-        yield installPython(pythonExtractedFolder);
     });
 }
 exports.installCpythonFromRelease = installCpythonFromRelease;
