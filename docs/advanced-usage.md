@@ -493,7 +493,7 @@ Here are the steps you need to follow to avoid the rate limit:
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
 ```
 
-Requests should now be authenticated. To verify that you are getting the higher rate limit, you can call GitHub's [rate limit API](https://docs.github.com/en/rest/rate-limit) from within your workflow ((example)[https://github.com/actions/setup-python/pull/443#issuecomment-1206776401]).
+Requests should now be authenticated. To verify that you are getting the higher rate limit, you can call GitHub's [rate limit API](https://docs.github.com/en/rest/rate-limit) from within your workflow ([example](https://github.com/actions/setup-python/pull/443#issuecomment-1206776401)).
 
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server@3.2/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
