@@ -1,6 +1,6 @@
 {
   "name": "setup-python",
-  "version": "2.2.2",
+  "version": "2.3.3",
   "private": true,
   "description": "Setup python action",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@actions/cache": "^1.0.8",
-    "@actions/core": "^1.2.3",
+    "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.0",
     "@actions/glob": "^0.2.0",
     "@actions/io": "^1.0.2",
