@@ -60,28 +60,6 @@ jobs:
             pipenv install --keep-outdated --python ${{ matrix.python-version }}
           }
 
-  python-poetry-dependencies-caching:
-    name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.8']
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
-      - name: Init pyproject.toml
-        run: mv ./__tests__/data/pyproject.toml .
-      - name: Setup Python
-        uses: ./
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
-      - name: Install dependencies
-        run: poetry install
-
   python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
