@@ -1,0 +1,13 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flake8 = "==4.0.1"
+numpy = "==1.23.0"
+
+[dev-packages]
+
+[requires]
+python_version = "*"
