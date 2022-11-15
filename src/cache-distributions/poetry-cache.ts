@@ -41,7 +41,7 @@ class PoetryCache extends CacheDistributor {
 
       paths.add(virtualenvsPath);
 
-      if (poetryConfig['virtualenvs.in-project'] === true) {
+      if (poetryConfig['virtualenvs.in-project']) {
         paths.add(path.join(basedir, '.venv'));
       }
 

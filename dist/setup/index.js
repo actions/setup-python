@@ -66124,7 +66124,7 @@ class PoetryCache extends cache_distributor_1.default {
                     const cacheDir = poetryConfig['cache-dir'];
                     const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
                     paths.add(virtualenvsPath);
-                    if (poetryConfig['virtualenvs.in-project'] === true) {
+                    if (poetryConfig['virtualenvs.in-project']) {
                         paths.add(path.join(basedir, '.venv'));
                     }
                     if (pythonLocation) {
