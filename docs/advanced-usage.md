@@ -281,6 +281,20 @@ steps:
 - run: pip install -e . -r subdirectory/requirements-dev.txt
 ```
 
+**Caching projects that use setup.py:**
+
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '3.11'
+    cache: 'pip'
+    cache-dependency-path: setup.py
+- run: pip install -e .
+  # Or pip install -e '.[test]' to install test dependencies
+```
+
 # Outputs and environment variables
 
 ## Outputs
