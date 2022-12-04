@@ -8,7 +8,6 @@ import fs from 'fs';
 
 import {
   IS_WINDOWS,
-  WINDOWS_ARCHS,
   WINDOWS_PLATFORMS,
   IPyPyManifestRelease,
   createSymlinkInFolder,
@@ -47,37 +46,58 @@ export async function installPyPy(
   let downloadUrl = `${foundAsset.download_url}`;
 
   core.info(`Downloading PyPy from "${downloadUrl}" ...`);
-  const pypyPath = await tc.downloadTool(downloadUrl);
 
-  core.info('Extracting downloaded archive...');
-  if (IS_WINDOWS) {
-    downloadDir = await tc.extractZip(pypyPath);
-  } else {
-    downloadDir = await tc.extractTar(pypyPath, undefined, 'x');
+  try {
+    const pypyPath = await tc.downloadTool(downloadUrl);
+
+    core.info('Extracting downloaded archive...');
+    if (IS_WINDOWS) {
+      downloadDir = await tc.extractZip(pypyPath);
+    } else {
+      downloadDir = await tc.extractTar(pypyPath, undefined, 'x');
+    }
+
+    // root folder in archive can have unpredictable name so just take the first folder
+    // downloadDir is unique folder under TEMP and can't contain any other folders
+    const archiveName = fs.readdirSync(downloadDir)[0];
+
+    const toolDir = path.join(downloadDir, archiveName);
+    let installDir = toolDir;
+    if (!isNightlyKeyword(resolvedPyPyVersion)) {
+      installDir = await tc.cacheDir(
+        toolDir,
+        'PyPy',
+        resolvedPythonVersion,
+        architecture
+      );
+    }
+
+    writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
+
+    const binaryPath = getPyPyBinaryPath(installDir);
+    await createPyPySymlink(binaryPath, resolvedPythonVersion);
+    await installPip(binaryPath);
+
+    return {installDir, resolvedPythonVersion, resolvedPyPyVersion};
+  } catch (err) {
+    if (err instanceof Error) {
+      // Rate limit?
+      if (
+        err instanceof tc.HTTPError &&
+        (err.httpStatusCode === 403 || err.httpStatusCode === 429)
+      ) {
+        core.info(
+          `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
+        );
+      } else {
+        core.info(err.message);
+      }
+      if (err.stack !== undefined) {
+        core.debug(err.stack);
+      }
+    }
+    throw err;
   }
-
-  // root folder in archive can have unpredictable name so just take the first folder
-  // downloadDir is unique folder under TEMP and can't contain any other folders
-  const archiveName = fs.readdirSync(downloadDir)[0];
-
-  const toolDir = path.join(downloadDir, archiveName);
-  let installDir = toolDir;
-  if (!isNightlyKeyword(resolvedPyPyVersion)) {
-    installDir = await tc.cacheDir(
-      toolDir,
-      'PyPy',
-      resolvedPythonVersion,
-      architecture
-    );
-  }
-
-  writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
-
-  const binaryPath = getPyPyBinaryPath(installDir);
-  await createPyPySymlink(binaryPath, resolvedPythonVersion);
-  await installPip(binaryPath);
-
-  return {installDir, resolvedPythonVersion, resolvedPyPyVersion};
 }
 
 export async function getAvailablePyPyVersions() {
@@ -157,7 +177,7 @@ export function findRelease(
     const isArchPresent =
       item.files &&
       (IS_WINDOWS
-        ? isArchPresentForWindows(item)
+        ? isArchPresentForWindows(item, architecture)
         : isArchPresentForMacOrLinux(item, architecture, process.platform));
     return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
   });
@@ -181,7 +201,7 @@ export function findRelease(
 
   const foundRelease = sortedReleases[0];
   const foundAsset = IS_WINDOWS
-    ? findAssetForWindows(foundRelease)
+    ? findAssetForWindows(foundRelease, architecture)
     : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
 
   return {
@@ -205,11 +225,11 @@ export function pypyVersionToSemantic(versionSpec: string) {
   return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
 
-export function isArchPresentForWindows(item: any) {
+export function isArchPresentForWindows(item: any, architecture: string) {
+  architecture = replaceX32toX86(architecture);
   return item.files.some(
     (file: any) =>
-      WINDOWS_ARCHS.includes(file.arch) &&
-      WINDOWS_PLATFORMS.includes(file.platform)
+      WINDOWS_PLATFORMS.includes(file.platform) && file.arch === architecture
   );
 }
 
@@ -223,11 +243,11 @@ export function isArchPresentForMacOrLinux(
   );
 }
 
-export function findAssetForWindows(releases: any) {
+export function findAssetForWindows(releases: any, architecture: string) {
+  architecture = replaceX32toX86(architecture);
   return releases.files.find(
     (item: any) =>
-      WINDOWS_ARCHS.includes(item.arch) &&
-      WINDOWS_PLATFORMS.includes(item.platform)
+      WINDOWS_PLATFORMS.includes(item.platform) && item.arch === architecture
   );
 }
 
@@ -239,4 +259,12 @@ export function findAssetForMacOrLinux(
   return releases.files.find(
     (item: any) => item.arch === architecture && item.platform === platform
   );
+}
+
+function replaceX32toX86(architecture: string): string {
+  // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
+  if (architecture === 'x32') {
+    architecture = 'x86';
+  }
+  return architecture;
 }

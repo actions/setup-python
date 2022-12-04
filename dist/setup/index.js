@@ -66511,27 +66511,45 @@ function installPyPy(pypyVersion, pythonVersion, architecture, releases) {
         const { foundAsset, resolvedPythonVersion, resolvedPyPyVersion } = releaseData;
         let downloadUrl = `${foundAsset.download_url}`;
         core.info(`Downloading PyPy from "${downloadUrl}" ...`);
-        const pypyPath = yield tc.downloadTool(downloadUrl);
-        core.info('Extracting downloaded archive...');
-        if (utils_1.IS_WINDOWS) {
-            downloadDir = yield tc.extractZip(pypyPath);
+        try {
+            const pypyPath = yield tc.downloadTool(downloadUrl);
+            core.info('Extracting downloaded archive...');
+            if (utils_1.IS_WINDOWS) {
+                downloadDir = yield tc.extractZip(pypyPath);
+            }
+            else {
+                downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
+            }
+            // root folder in archive can have unpredictable name so just take the first folder
+            // downloadDir is unique folder under TEMP and can't contain any other folders
+            const archiveName = fs_1.default.readdirSync(downloadDir)[0];
+            const toolDir = path.join(downloadDir, archiveName);
+            let installDir = toolDir;
+            if (!utils_1.isNightlyKeyword(resolvedPyPyVersion)) {
+                installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
+            }
+            utils_1.writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
+            const binaryPath = getPyPyBinaryPath(installDir);
+            yield createPyPySymlink(binaryPath, resolvedPythonVersion);
+            yield installPip(binaryPath);
+            return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
         }
-        else {
-            downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
+        catch (err) {
+            if (err instanceof Error) {
+                // Rate limit?
+                if (err instanceof tc.HTTPError &&
+                    (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
+                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                }
+                else {
+                    core.info(err.message);
+                }
+                if (err.stack !== undefined) {
+                    core.debug(err.stack);
+                }
+            }
+            throw err;
         }
-        // root folder in archive can have unpredictable name so just take the first folder
-        // downloadDir is unique folder under TEMP and can't contain any other folders
-        const archiveName = fs_1.default.readdirSync(downloadDir)[0];
-        const toolDir = path.join(downloadDir, archiveName);
-        let installDir = toolDir;
-        if (!utils_1.isNightlyKeyword(resolvedPyPyVersion)) {
-            installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
-        }
-        utils_1.writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
-        const binaryPath = getPyPyBinaryPath(installDir);
-        yield createPyPySymlink(binaryPath, resolvedPythonVersion);
-        yield installPip(binaryPath);
-        return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
     });
 }
 exports.installPyPy = installPyPy;
@@ -66577,7 +66595,7 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
             semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
         const isArchPresent = item.files &&
             (utils_1.IS_WINDOWS
-                ? isArchPresentForWindows(item)
+                ? isArchPresentForWindows(item, architecture)
                 : isArchPresentForMacOrLinux(item, architecture, process.platform));
         return isPythonVersionSatisfied && isPyPyVersionSatisfied && isArchPresent;
     });
@@ -66590,7 +66608,7 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture) {
     });
     const foundRelease = sortedReleases[0];
     const foundAsset = utils_1.IS_WINDOWS
-        ? findAssetForWindows(foundRelease)
+        ? findAssetForWindows(foundRelease, architecture)
         : findAssetForMacOrLinux(foundRelease, architecture, process.platform);
     return {
         foundAsset,
@@ -66613,24 +66631,31 @@ function pypyVersionToSemantic(versionSpec) {
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
 exports.pypyVersionToSemantic = pypyVersionToSemantic;
-function isArchPresentForWindows(item) {
-    return item.files.some((file) => utils_1.WINDOWS_ARCHS.includes(file.arch) &&
-        utils_1.WINDOWS_PLATFORMS.includes(file.platform));
+function isArchPresentForWindows(item, architecture) {
+    architecture = replaceX32toX86(architecture);
+    return item.files.some((file) => utils_1.WINDOWS_PLATFORMS.includes(file.platform) && file.arch === architecture);
 }
 exports.isArchPresentForWindows = isArchPresentForWindows;
 function isArchPresentForMacOrLinux(item, architecture, platform) {
     return item.files.some((file) => file.arch === architecture && file.platform === platform);
 }
 exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
-function findAssetForWindows(releases) {
-    return releases.files.find((item) => utils_1.WINDOWS_ARCHS.includes(item.arch) &&
-        utils_1.WINDOWS_PLATFORMS.includes(item.platform));
+function findAssetForWindows(releases, architecture) {
+    architecture = replaceX32toX86(architecture);
+    return releases.files.find((item) => utils_1.WINDOWS_PLATFORMS.includes(item.platform) && item.arch === architecture);
 }
 exports.findAssetForWindows = findAssetForWindows;
 function findAssetForMacOrLinux(releases, architecture, platform) {
     return releases.files.find((item) => item.arch === architecture && item.platform === platform);
 }
 exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
+function replaceX32toX86(architecture) {
+    // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
+    if (architecture === 'x32') {
+        architecture = 'x86';
+    }
+    return architecture;
+}
 
 
 /***/ }),
@@ -66723,17 +66748,35 @@ function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
         const downloadUrl = release.files[0].download_url;
         core.info(`Download from "${downloadUrl}"`);
-        const pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
-        core.info('Extract downloaded archive');
-        let pythonExtractedFolder;
-        if (utils_1.IS_WINDOWS) {
-            pythonExtractedFolder = yield tc.extractZip(pythonPath);
+        let pythonPath = '';
+        try {
+            pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
+            core.info('Extract downloaded archive');
+            let pythonExtractedFolder;
+            if (utils_1.IS_WINDOWS) {
+                pythonExtractedFolder = yield tc.extractZip(pythonPath);
+            }
+            else {
+                pythonExtractedFolder = yield tc.extractTar(pythonPath);
+            }
+            core.info('Execute installation script');
+            yield installPython(pythonExtractedFolder);
         }
-        else {
-            pythonExtractedFolder = yield tc.extractTar(pythonPath);
+        catch (err) {
+            if (err instanceof tc.HTTPError) {
+                // Rate limit?
+                if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
+                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                }
+                else {
+                    core.info(err.message);
+                }
+                if (err.stack) {
+                    core.debug(err.stack);
+                }
+            }
+            throw err;
         }
-        core.info('Execute installation script');
-        yield installPython(pythonExtractedFolder);
     });
 }
 exports.installCpythonFromRelease = installCpythonFromRelease;
