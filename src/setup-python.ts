@@ -22,17 +22,17 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
   await cacheDistributor.restoreCache();
 }
 
-function resolveVersionInput(): string {
-  let version = core.getInput('python-version');
+function resolveVersionInput(): string | string[] {
+  let version: string | string[] = core.getMultilineInput('python-version');
   let versionFile = core.getInput('python-version-file');
 
-  if (version && versionFile) {
+  if (version.length && versionFile) {
     core.warning(
       'Both python-version and python-version-file inputs are specified, only python-version will be used.'
     );
   }
 
-  if (version) {
+  if (version.length) {
     return version;
   }
 
@@ -75,35 +75,43 @@ async function run() {
     `Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`
   );
   try {
-    const version = resolveVersionInput();
+    let versions: string[];
+    const resolvedVersionInput = resolveVersionInput();
     const checkLatest = core.getBooleanInput('check-latest');
 
-    if (version) {
-      let pythonVersion: string;
-      const arch: string = core.getInput('architecture') || os.arch();
-      const updateEnvironment = core.getBooleanInput('update-environment');
-      if (isPyPyVersion(version)) {
-        const installed = await finderPyPy.findPyPyVersion(
-          version,
-          arch,
-          updateEnvironment,
-          checkLatest
-        );
-        pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-        core.info(
-          `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
-        );
-      } else {
-        const installed = await finder.useCpythonVersion(
-          version,
-          arch,
-          updateEnvironment,
-          checkLatest
-        );
-        pythonVersion = installed.version;
-        core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
-      }
+    if (Array.isArray(resolvedVersionInput)) {
+      versions = resolvedVersionInput as string[];
+    } else {
+      versions = [resolvedVersionInput as string];
+    }
 
+    if (versions.length) {
+      let pythonVersion = '';
+      for (const version of versions) {
+        const arch: string = core.getInput('architecture') || os.arch();
+        const updateEnvironment = core.getBooleanInput('update-environment');
+        if (isPyPyVersion(version)) {
+          const installed = await finderPyPy.findPyPyVersion(
+            version,
+            arch,
+            updateEnvironment,
+            checkLatest
+          );
+          pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+          core.info(
+            `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
+          );
+        } else {
+          const installed = await finder.useCpythonVersion(
+            version,
+            arch,
+            updateEnvironment,
+            checkLatest
+          );
+          pythonVersion = installed.version;
+          core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
+        }
+      }
       const cache = core.getInput('cache');
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);

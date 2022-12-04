@@ -66797,12 +66797,12 @@ function cacheDependencies(cache, pythonVersion) {
     });
 }
 function resolveVersionInput() {
-    let version = core.getInput('python-version');
+    let version = core.getMultilineInput('python-version');
     let versionFile = core.getInput('python-version-file');
-    if (version && versionFile) {
+    if (version.length && versionFile) {
         core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used.');
     }
-    if (version) {
+    if (version.length) {
         return version;
     }
     if (versionFile) {
@@ -66834,21 +66834,30 @@ function run() {
         }
         core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
         try {
-            const version = resolveVersionInput();
+            let versions;
+            const resolvedVersionInput = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
-            if (version) {
-                let pythonVersion;
-                const arch = core.getInput('architecture') || os.arch();
-                const updateEnvironment = core.getBooleanInput('update-environment');
-                if (isPyPyVersion(version)) {
-                    const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
-                    pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-                    core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
-                }
-                else {
-                    const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest);
-                    pythonVersion = installed.version;
-                    core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
+            if (Array.isArray(resolvedVersionInput)) {
+                versions = resolvedVersionInput;
+            }
+            else {
+                versions = [resolvedVersionInput];
+            }
+            if (versions.length) {
+                let pythonVersion = '';
+                for (const version of versions) {
+                    const arch = core.getInput('architecture') || os.arch();
+                    const updateEnvironment = core.getBooleanInput('update-environment');
+                    if (isPyPyVersion(version)) {
+                        const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
+                        pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+                        core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                    }
+                    else {
+                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest);
+                        pythonVersion = installed.version;
+                        core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
+                    }
                 }
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {
