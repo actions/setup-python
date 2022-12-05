@@ -158,13 +158,9 @@ async function getWindowsInfo() {
 }
 
 async function getMacOSInfo() {
-  const {stdout} = await exec.getExecOutput(
-    'sw_vers',
-    ['-productVersion'],
-    {
-      silent: true
-    }
-  );
+  const {stdout} = await exec.getExecOutput('sw_vers', ['-productVersion'], {
+    silent: true
+  });
 
   const macOSVersion = stdout.trim();
 
@@ -172,13 +168,9 @@ async function getMacOSInfo() {
 }
 
 async function getLinuxInfo() {
-  const {stdout} = await exec.getExecOutput(
-    'lsb_release',
-    ['-i', '-r', '-s'],
-    {
-      silent: true
-    }
-  );
+  const {stdout} = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+    silent: true
+  });
 
   const [osName, osVersion] = stdout.trim().split('\n');
 
@@ -187,7 +179,7 @@ async function getLinuxInfo() {
 
 export async function getOSInfo() {
   let osInfo;
-  if (IS_WINDOWS){
+  if (IS_WINDOWS) {
     osInfo = await getWindowsInfo();
   } else if (IS_LINUX) {
     osInfo = await getLinuxInfo();
