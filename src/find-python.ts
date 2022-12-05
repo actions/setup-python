@@ -88,7 +88,7 @@ export async function useCpythonVersion(
     const osInfo = await getOSInfo();
     throw new Error(
       [
-        `Version ${version} with arch ${architecture} not found for ${osInfo}`,
+        `The version '${version}' with architecture '${architecture}' was not found for ${osInfo ? osInfo : 'this operating system'}.`,
         `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
       ].join(os.EOL)
     );
