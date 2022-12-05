@@ -142,3 +142,58 @@ export function logWarning(message: string): void {
   const warningPrefix = '[warning]';
   core.info(`${warningPrefix}${message}`);
 }
+
+async function getWindowsInfo() {
+  const {stdout} = await exec.getExecOutput(
+    'powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"',
+    undefined,
+    {
+      silent: true
+    }
+  );
+
+  const windowsVersion = stdout.trim().split(' ')[3];
+
+  return `Windows ${windowsVersion}`;
+}
+
+async function getMacOSInfo() {
+  const {stdout} = await exec.getExecOutput(
+    'sw_vers',
+    ['-productVersion'],
+    {
+      silent: true
+    }
+  );
+
+  const macOSVersion = stdout.trim();
+
+  return `macOS ${macOSVersion}`;
+}
+
+async function getLinuxInfo() {
+  const {stdout} = await exec.getExecOutput(
+    'lsb_release',
+    ['-i', '-r', '-s'],
+    {
+      silent: true
+    }
+  );
+
+  const [osName, osVersion] = stdout.trim().split('\n');
+
+  return `${osName} ${osVersion}`;
+}
+
+export async function getOSInfo() {
+  let osInfo;
+  if (IS_WINDOWS){
+    osInfo = await getWindowsInfo();
+  } else if (IS_LINUX) {
+    osInfo = await getLinuxInfo();
+  } else if (IS_MAC) {
+    osInfo = await getMacOSInfo();
+  }
+
+  return osInfo;
+}

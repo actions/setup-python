@@ -1,6 +1,6 @@
 import * as os from 'os';
 import * as path from 'path';
-import {IS_WINDOWS, IS_LINUX} from './utils';
+import {IS_WINDOWS, IS_LINUX, getOSInfo} from './utils';
 
 import * as semver from 'semver';
 
@@ -85,9 +85,10 @@ export async function useCpythonVersion(
   }
 
   if (!installDir) {
+    const osInfo = await getOSInfo();
     throw new Error(
       [
-        `Version ${version} with arch ${architecture} not found`,
+        `Version ${version} with arch ${architecture} not found for ${osInfo}`,
         `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
       ].join(os.EOL)
     );

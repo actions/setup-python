@@ -66377,8 +66377,9 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             }
         }
         if (!installDir) {
+            const osInfo = yield utils_1.getOSInfo();
             throw new Error([
-                `Version ${version} with arch ${architecture} not found`,
+                `Version ${version} with arch ${architecture} not found for ${osInfo}`,
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
@@ -66951,7 +66952,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getOSInfo = exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
@@ -67058,6 +67059,49 @@ function logWarning(message) {
     core.info(`${warningPrefix}${message}`);
 }
 exports.logWarning = logWarning;
+function getWindowsInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', undefined, {
+            silent: true
+        });
+        const windowsVersion = stdout.trim().split(' ')[3];
+        return `Windows ${windowsVersion}`;
+    });
+}
+function getMacOSInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('sw_vers', ['-productVersion'], {
+            silent: true
+        });
+        const macOSVersion = stdout.trim();
+        return `macOS ${macOSVersion}`;
+    });
+}
+function getLinuxInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+            silent: true
+        });
+        const [osName, osVersion] = stdout.trim().split('\n');
+        return `${osName} ${osVersion}`;
+    });
+}
+function getOSInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let osInfo;
+        if (exports.IS_WINDOWS) {
+            osInfo = yield getWindowsInfo();
+        }
+        else if (exports.IS_LINUX) {
+            osInfo = yield getLinuxInfo();
+        }
+        else if (exports.IS_MAC) {
+            osInfo = yield getMacOSInfo();
+        }
+        return osInfo;
+    });
+}
+exports.getOSInfo = getOSInfo;
 
 
 /***/ }),
