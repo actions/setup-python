@@ -179,13 +179,18 @@ async function getLinuxInfo() {
 
 export async function getOSInfo() {
   let osInfo;
-  if (IS_WINDOWS) {
-    osInfo = await getWindowsInfo();
-  } else if (IS_LINUX) {
-    osInfo = await getLinuxInfo();
-  } else if (IS_MAC) {
-    osInfo = await getMacOSInfo();
+  try {
+    if (IS_WINDOWS) {
+      osInfo = await getWindowsInfo();
+    } else if (IS_LINUX) {
+      osInfo = await getLinuxInfo();
+    } else if (IS_MAC) {
+      osInfo = await getMacOSInfo();
+    }
+  } catch (err) {
+    const error = err as Error;
+    core.debug(error.message);
+  } finally {
+    return osInfo;
   }
-
-  return osInfo;
 }

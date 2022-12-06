@@ -67089,16 +67089,24 @@ function getLinuxInfo() {
 function getOSInfo() {
     return __awaiter(this, void 0, void 0, function* () {
         let osInfo;
-        if (exports.IS_WINDOWS) {
-            osInfo = yield getWindowsInfo();
+        try {
+            if (exports.IS_WINDOWS) {
+                osInfo = yield getWindowsInfo();
+            }
+            else if (exports.IS_LINUX) {
+                osInfo = yield getLinuxInfo();
+            }
+            else if (exports.IS_MAC) {
+                osInfo = yield getMacOSInfo();
+            }
         }
-        else if (exports.IS_LINUX) {
-            osInfo = yield getLinuxInfo();
+        catch (err) {
+            const error = err;
+            core.debug(error.message);
         }
-        else if (exports.IS_MAC) {
-            osInfo = yield getMacOSInfo();
+        finally {
+            return osInfo;
         }
-        return osInfo;
     });
 }
 exports.getOSInfo = getOSInfo;
