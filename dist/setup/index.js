@@ -65943,9 +65943,9 @@ class PipCache extends cache_distributor_1.default {
             let primaryKey = '';
             let restoreKey = '';
             if (utils_1.IS_LINUX) {
-                const osRelease = yield utils_1.getLinuxOSReleaseInfo();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}`;
+                const osInfo = yield utils_1.getLinuxInfo();
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             else {
                 primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
@@ -66401,8 +66401,11 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             }
         }
         if (!installDir) {
+            const osInfo = yield utils_1.getOSInfo();
             throw new Error([
-                `Version ${version} with arch ${architecture} not found`,
+                `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
+                    ? `${osInfo.osName} ${osInfo.osVersion}`
+                    : 'this operating system'}.`,
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
@@ -66975,7 +66978,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logWarning = exports.getLinuxOSReleaseInfo = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
@@ -67066,22 +67069,64 @@ function isCacheFeatureAvailable() {
     return true;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
-function getLinuxOSReleaseInfo() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { stdout, stderr, exitCode } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
-            silent: true
-        });
-        const [osRelease, osVersion] = stdout.trim().split('\n');
-        core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
-        return `${osVersion}-${osRelease}`;
-    });
-}
-exports.getLinuxOSReleaseInfo = getLinuxOSReleaseInfo;
 function logWarning(message) {
     const warningPrefix = '[warning]';
     core.info(`${warningPrefix}${message}`);
 }
 exports.logWarning = logWarning;
+function getWindowsInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', undefined, {
+            silent: true
+        });
+        const windowsVersion = stdout.trim().split(' ')[3];
+        return { osName: 'Windows', osVersion: windowsVersion };
+    });
+}
+function getMacOSInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('sw_vers', ['-productVersion'], {
+            silent: true
+        });
+        const macOSVersion = stdout.trim();
+        return { osName: 'macOS', osVersion: macOSVersion };
+    });
+}
+function getLinuxInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+            silent: true
+        });
+        const [osName, osVersion] = stdout.trim().split('\n');
+        core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+        return { osName: osName, osVersion: osVersion };
+    });
+}
+exports.getLinuxInfo = getLinuxInfo;
+function getOSInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let osInfo;
+        try {
+            if (exports.IS_WINDOWS) {
+                osInfo = yield getWindowsInfo();
+            }
+            else if (exports.IS_LINUX) {
+                osInfo = yield getLinuxInfo();
+            }
+            else if (exports.IS_MAC) {
+                osInfo = yield getMacOSInfo();
+            }
+        }
+        catch (err) {
+            const error = err;
+            core.debug(error.message);
+        }
+        finally {
+            return osInfo;
+        }
+    });
+}
+exports.getOSInfo = getOSInfo;
 
 
 /***/ }),
