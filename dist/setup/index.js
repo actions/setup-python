@@ -66379,7 +66379,9 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
         if (!installDir) {
             const osInfo = yield utils_1.getOSInfo();
             throw new Error([
-                `The version '${version}' with architecture '${architecture}' was not found for ${osInfo ? `${osInfo.osName} ${osInfo.osVersion}` : 'this operating system'}.`,
+                `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
+                    ? `${osInfo.osName} ${osInfo.osVersion}`
+                    : 'this operating system'}.`,
                 `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
             ].join(os.EOL));
         }
@@ -67054,7 +67056,7 @@ function getWindowsInfo() {
             silent: true
         });
         const windowsVersion = stdout.trim().split(' ')[3];
-        return { osName: "Windows", osVersion: windowsVersion };
+        return { osName: 'Windows', osVersion: windowsVersion };
     });
 }
 function getMacOSInfo() {
@@ -67063,7 +67065,7 @@ function getMacOSInfo() {
             silent: true
         });
         const macOSVersion = stdout.trim();
-        return { osName: "macOS", osVersion: macOSVersion };
+        return { osName: 'macOS', osVersion: macOSVersion };
     });
 }
 function getLinuxInfo() {
