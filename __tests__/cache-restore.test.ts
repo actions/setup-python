@@ -30,7 +30,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
-  let getLinuxOSReleaseInfoSpy: jest.SpyInstance;
+  let getLinuxInfoSpy: jest.SpyInstance;
 
   // cache spy
   let restoreCacheSpy: jest.SpyInstance;
@@ -83,7 +83,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
     whichSpy = jest.spyOn(io, 'which');
     whichSpy.mockImplementation(() => '/path/to/python');
-    getLinuxOSReleaseInfoSpy = jest.spyOn(utils, 'getLinuxOSReleaseInfo');
+    getLinuxInfoSpy = jest.spyOn(utils, 'getLinuxInfo');
   });
 
   describe('Validate provided package manager', () => {
@@ -121,8 +121,8 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         );
 
         if (process.platform === 'linux') {
-          getLinuxOSReleaseInfoSpy.mockImplementation(() =>
-            Promise.resolve('Ubuntu-20.4')
+          getLinuxInfoSpy.mockImplementation(() =>
+            Promise.resolve({osName: 'Ubuntu', osVersion: '20.04'})
           );
         }
 
@@ -130,7 +130,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
         if (process.platform === 'linux' && packageManager === 'pip') {
           expect(infoSpy).toHaveBeenCalledWith(
-            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.4-python-${pythonVersion}-${packageManager}-${fileHash}`
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.04-python-${pythonVersion}-${packageManager}-${fileHash}`
           );
         } else {
           expect(infoSpy).toHaveBeenCalledWith(
