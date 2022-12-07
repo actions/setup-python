@@ -122,22 +122,6 @@ export function isCacheFeatureAvailable(): boolean {
   return true;
 }
 
-export async function getLinuxOSReleaseInfo() {
-  const {stdout, stderr, exitCode} = await exec.getExecOutput(
-    'lsb_release',
-    ['-i', '-r', '-s'],
-    {
-      silent: true
-    }
-  );
-
-  const [osRelease, osVersion] = stdout.trim().split('\n');
-
-  core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
-
-  return `${osVersion}-${osRelease}`;
-}
-
 export function logWarning(message: string): void {
   const warningPrefix = '[warning]';
   core.info(`${warningPrefix}${message}`);
@@ -154,7 +138,7 @@ async function getWindowsInfo() {
 
   const windowsVersion = stdout.trim().split(' ')[3];
 
-  return `Windows ${windowsVersion}`;
+  return {osName: 'Windows', osVersion: windowsVersion};
 }
 
 async function getMacOSInfo() {
@@ -164,17 +148,19 @@ async function getMacOSInfo() {
 
   const macOSVersion = stdout.trim();
 
-  return `macOS ${macOSVersion}`;
+  return {osName: 'macOS', osVersion: macOSVersion};
 }
 
-async function getLinuxInfo() {
+export async function getLinuxInfo() {
   const {stdout} = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
     silent: true
   });
 
   const [osName, osVersion] = stdout.trim().split('\n');
 
-  return `${osName} ${osVersion}`;
+  core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+
+  return {osName: osName, osVersion: osVersion};
 }
 
 export async function getOSInfo() {

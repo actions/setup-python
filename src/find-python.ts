@@ -89,7 +89,9 @@ export async function useCpythonVersion(
     throw new Error(
       [
         `The version '${version}' with architecture '${architecture}' was not found for ${
-          osInfo ? osInfo : 'this operating system'
+          osInfo
+            ? `${osInfo.osName} ${osInfo.osVersion}`
+            : 'this operating system'
         }.`,
         `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
       ].join(os.EOL)
