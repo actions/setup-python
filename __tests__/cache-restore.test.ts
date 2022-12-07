@@ -30,7 +30,6 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let saveSatetSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
-  let getLinuxInfoSpy: jest.SpyInstance;
 
   // cache spy
   let restoreCacheSpy: jest.SpyInstance;
@@ -67,6 +66,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       if (input.includes('poetry')) {
         return {stdout: poetryConfigOutput, stderr: '', exitCode: 0};
       }
+      if (input.includes('lsb_release')) {
+        return {stdout: 'Ubuntu\n20.04', stderr: '', exitCode: 0};
+      }
 
       return {stdout: '', stderr: 'Error occured', exitCode: 2};
     });
@@ -83,7 +85,6 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
     whichSpy = jest.spyOn(io, 'which');
     whichSpy.mockImplementation(() => '/path/to/python');
-    getLinuxInfoSpy = jest.spyOn(utils, 'getLinuxInfo');
   });
 
   describe('Validate provided package manager', () => {
@@ -120,17 +121,11 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           dependencyFile
         );
 
-        if (process.platform === 'linux') {
-          getLinuxInfoSpy.mockImplementation(() =>
-            Promise.resolve({osName: 'Ubuntu', osVersion: '20.04'})
-          );
-        }
-
         await cacheDistributor.restoreCache();
 
         if (process.platform === 'linux' && packageManager === 'pip') {
           expect(infoSpy).toHaveBeenCalledWith(
-            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-Ubuntu-20.04-python-${pythonVersion}-${packageManager}-${fileHash}`
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-20.04-Ubuntu-python-${pythonVersion}-${packageManager}-${fileHash}`
           );
         } else {
           expect(infoSpy).toHaveBeenCalledWith(
