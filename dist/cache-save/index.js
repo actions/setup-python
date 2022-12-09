@@ -59711,6 +59711,9 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
+    handleLoadedCache() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
     restoreCache() {
         return __awaiter(this, void 0, void 0, function* () {
             const { primaryKey, restoreKey } = yield this.computeKeys();
@@ -59723,6 +59726,7 @@ class CacheDistributor {
             core.saveState(State.CACHE_PATHS, cachePath);
             core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
+            yield this.handleLoadedCache();
             this.handleMatchResult(matchedKey, primaryKey);
         });
     }

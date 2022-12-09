@@ -10,7 +10,8 @@ import {logWarning} from '../utils';
 class PoetryCache extends CacheDistributor {
   constructor(
     private pythonVersion: string,
-    protected patterns: string = '**/poetry.lock'
+    protected patterns: string = '**/poetry.lock',
+    protected poetryProjects: Set<string> = new Set<string>()
   ) {
     super('poetry', patterns);
   }
@@ -20,16 +21,10 @@ class PoetryCache extends CacheDistributor {
     const paths = new Set<string>();
     const globber = await glob.create(this.patterns);
 
-    const pythonLocation = await io.which('python');
-    if (pythonLocation) {
-      core.debug(`pythonLocation is ${pythonLocation}`);
-    } else {
-      logWarning('python binaries were not found in PATH');
-    }
-
     for await (const file of globber.globGenerator()) {
       const basedir = path.dirname(file);
       core.debug(`Processing Poetry project at ${basedir}`);
+      this.poetryProjects.add(basedir);
 
       const poetryConfig = await this.getPoetryConfiguration(basedir);
 
@@ -44,18 +39,6 @@ class PoetryCache extends CacheDistributor {
       if (poetryConfig['virtualenvs.in-project']) {
         paths.add(path.join(basedir, '.venv'));
       }
-
-      if (pythonLocation) {
-        const {exitCode, stderr} = await exec.getExecOutput(
-          'poetry',
-          ['env', 'use', pythonLocation],
-          {ignoreReturnCode: true, cwd: basedir}
-        );
-
-        if (exitCode) {
-          logWarning(stderr);
-        }
-      }
     }
 
     return [...paths];
@@ -69,6 +52,33 @@ class PoetryCache extends CacheDistributor {
       primaryKey,
       restoreKey
     };
+  }
+
+  protected async handleLoadedCache() {
+    await super.handleLoadedCache();
+
+    // After the cache is loaded -- make sure virtualenvs use the correct Python version (the one that we have just installed).
+    // This will handle invalid caches, recreating virtualenvs if necessary.
+
+    const pythonLocation = await io.which('python');
+    if (pythonLocation) {
+      core.debug(`pythonLocation is ${pythonLocation}`);
+    } else {
+      logWarning('python binaries were not found in PATH');
+      return;
+    }
+
+    for (const poetryProject of this.poetryProjects) {
+      const {exitCode, stderr} = await exec.getExecOutput(
+        'poetry',
+        ['env', 'use', pythonLocation],
+        {ignoreReturnCode: true, cwd: poetryProject}
+      );
+
+      if (exitCode) {
+        logWarning(stderr);
+      }
+    }
   }
 
   private async getPoetryConfiguration(basedir: string) {

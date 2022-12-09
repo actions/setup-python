@@ -19,6 +19,7 @@ abstract class CacheDistributor {
     primaryKey: string;
     restoreKey: string[] | undefined;
   }>;
+  protected async handleLoadedCache() {}
 
   public async restoreCache() {
     const {primaryKey, restoreKey} = await this.computeKeys();
@@ -40,6 +41,8 @@ abstract class CacheDistributor {
       primaryKey,
       restoreKey
     );
+
+    await this.handleLoadedCache();
 
     this.handleMatchResult(matchedKey, primaryKey);
   }
