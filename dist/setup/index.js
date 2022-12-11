@@ -66896,21 +66896,23 @@ function resolveVersionInput() {
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        if (utils_1.IS_MAC) {
-            process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
-        }
-        if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
-            process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
-        }
-        core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
         try {
             const version = resolveVersionInput();
-            const checkLatest = core.getBooleanInput('check-latest');
             if (version) {
                 let pythonVersion;
                 const arch = core.getInput('architecture') || os.arch();
                 const updateEnvironment = core.getBooleanInput('update-environment');
-                if (isPyPyVersion(version)) {
+                const checkLatest = core.getBooleanInput('check-latest');
+                const isPyPy = isPyPyVersion(version);
+                const forceMacToolsDirectory = utils_1.IS_MAC && !isPyPy && arch === 'x64';
+                if (forceMacToolsDirectory) {
+                    process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+                }
+                if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
+                    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+                }
+                core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
+                if (isPyPy) {
                     const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
                     pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
                     core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);

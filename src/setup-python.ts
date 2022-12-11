@@ -63,26 +63,30 @@ function resolveVersionInput(): string {
 }
 
 async function run() {
-  if (IS_MAC) {
-    process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
-  }
-
-  if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
-    process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
-  }
-
-  core.debug(
-    `Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`
-  );
   try {
     const version = resolveVersionInput();
-    const checkLatest = core.getBooleanInput('check-latest');
 
     if (version) {
       let pythonVersion: string;
       const arch: string = core.getInput('architecture') || os.arch();
       const updateEnvironment = core.getBooleanInput('update-environment');
-      if (isPyPyVersion(version)) {
+      const checkLatest = core.getBooleanInput('check-latest');
+      const isPyPy = isPyPyVersion(version);
+      const forceMacToolsDirectory = IS_MAC && !isPyPy && arch === 'x64';
+
+      if (forceMacToolsDirectory) {
+        process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+      }
+
+      if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+        process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+      }
+
+      core.debug(
+        `Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`
+      );
+
+      if (isPyPy) {
         const installed = await finderPyPy.findPyPyVersion(
           version,
           arch,
