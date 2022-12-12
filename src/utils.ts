@@ -105,21 +105,20 @@ export function isGhes(): boolean {
 }
 
 export function isCacheFeatureAvailable(): boolean {
-  if (!cache.isFeatureAvailable()) {
-    if (isGhes()) {
-      throw new Error(
-        'Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.'
-      );
-    } else {
-      core.warning(
-        'The runner was not able to contact the cache service. Caching will be skipped'
-      );
-    }
-
-    return false;
+  if (cache.isFeatureAvailable()) {
+    return true;
   }
 
-  return true;
+  if (isGhes()) {
+    throw new Error(
+      'Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.'
+    );
+  }
+
+  core.warning(
+    'The runner was not able to contact the cache service. Caching will be skipped'
+  );
+  return false;
 }
 
 export function logWarning(message: string): void {
