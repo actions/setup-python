@@ -9,8 +9,13 @@ on:
     paths-ignore:
       - '**.md'
 jobs:
-  run:
-    name: Run
+  call-basic-validation:
+    name: Basic validation
+    #uses: actions/reusable-workflows/.github/workflows/basic-validation.yml@main
+    uses: IvanZosimov/reusable-workflows/.github/workflows/basic-validation.yml@main
+
+  test-setup-python:
+    name: Test setup-python
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
@@ -18,21 +23,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Set Node.js 16.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: npm
-
-    - name: npm ci
-      run: npm ci
-
-    - name: Lint
-      run: npm run format-check
-
-    - name: npm test
-      run: npm test
 
     - name: Run with setup-python 2.7
       uses: ./
