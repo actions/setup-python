@@ -1,4 +1,5 @@
 name: Licensed
+
 on:
   push:
     branches:

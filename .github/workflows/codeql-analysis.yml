@@ -1,4 +1,4 @@
-name: CodeQL analysis 
+name: CodeQL analysis
 
 on:
   push:
@@ -12,4 +12,3 @@ jobs:
     name: CodeQL analysis 
     #uses: actions/reusable-workflows/.github/workflows/codeql-analysis.yml@main
     uses: IvanZosimov/reusable-workflows/.github/workflows/codeql-analysis.yml@main
-
