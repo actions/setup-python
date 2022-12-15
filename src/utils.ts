@@ -122,23 +122,61 @@ export function isCacheFeatureAvailable(): boolean {
   return true;
 }
 
-export async function getLinuxOSReleaseInfo() {
-  const {stdout, stderr, exitCode} = await exec.getExecOutput(
-    'lsb_release',
-    ['-i', '-r', '-s'],
+export function logWarning(message: string): void {
+  const warningPrefix = '[warning]';
+  core.info(`${warningPrefix}${message}`);
+}
+
+async function getWindowsInfo() {
+  const {stdout} = await exec.getExecOutput(
+    'powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"',
+    undefined,
     {
       silent: true
     }
   );
 
-  const [osRelease, osVersion] = stdout.trim().split('\n');
+  const windowsVersion = stdout.trim().split(' ')[3];
 
-  core.debug(`OS Release: ${osRelease}, Version: ${osVersion}`);
-
-  return `${osVersion}-${osRelease}`;
+  return {osName: 'Windows', osVersion: windowsVersion};
 }
 
-export function logWarning(message: string): void {
-  const warningPrefix = '[warning]';
-  core.info(`${warningPrefix}${message}`);
+async function getMacOSInfo() {
+  const {stdout} = await exec.getExecOutput('sw_vers', ['-productVersion'], {
+    silent: true
+  });
+
+  const macOSVersion = stdout.trim();
+
+  return {osName: 'macOS', osVersion: macOSVersion};
+}
+
+export async function getLinuxInfo() {
+  const {stdout} = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+    silent: true
+  });
+
+  const [osName, osVersion] = stdout.trim().split('\n');
+
+  core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+
+  return {osName: osName, osVersion: osVersion};
+}
+
+export async function getOSInfo() {
+  let osInfo;
+  try {
+    if (IS_WINDOWS) {
+      osInfo = await getWindowsInfo();
+    } else if (IS_LINUX) {
+      osInfo = await getLinuxInfo();
+    } else if (IS_MAC) {
+      osInfo = await getMacOSInfo();
+    }
+  } catch (err) {
+    const error = err as Error;
+    core.debug(error.message);
+  } finally {
+    return osInfo;
+  }
 }

@@ -7,7 +7,7 @@ import * as path from 'path';
 import os from 'os';
 
 import CacheDistributor from './cache-distributor';
-import {getLinuxOSReleaseInfo, IS_LINUX, IS_WINDOWS} from '../utils';
+import {getLinuxInfo, IS_LINUX, IS_WINDOWS} from '../utils';
 
 class PipCache extends CacheDistributor {
   constructor(
@@ -61,9 +61,9 @@ class PipCache extends CacheDistributor {
     let restoreKey = '';
 
     if (IS_LINUX) {
-      const osRelease = await getLinuxOSReleaseInfo();
-      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-      restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osRelease}-python-${this.pythonVersion}-${this.packageManager}`;
+      const osInfo = await getLinuxInfo();
+      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+      restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
     } else {
       primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
       restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
