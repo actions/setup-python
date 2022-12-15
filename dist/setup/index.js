@@ -66867,31 +66867,31 @@ function cacheDependencies(cache, pythonVersion) {
     });
 }
 function resolveVersionInput() {
-    let version = core.getMultilineInput('python-version');
+    let versions = core.getMultilineInput('python-version');
     let versionFile = core.getInput('python-version-file');
-    if (version.length && versionFile) {
+    if (versions.length && versionFile) {
         core.warning('Both python-version and python-version-file inputs are specified, only python-version will be used.');
     }
-    if (version.length) {
-        return version;
+    if (versions.length) {
+        return versions;
     }
     if (versionFile) {
         if (!fs_1.default.existsSync(versionFile)) {
             throw new Error(`The specified python version file at: ${versionFile} doesn't exist.`);
         }
-        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        const version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
-        return version;
+        return [version];
     }
     utils_1.logWarning("Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file.");
     versionFile = '.python-version';
     if (fs_1.default.existsSync(versionFile)) {
-        version = fs_1.default.readFileSync(versionFile, 'utf8');
+        const version = fs_1.default.readFileSync(versionFile, 'utf8');
         core.info(`Resolved ${versionFile} as ${version}`);
-        return version;
+        return [version];
     }
     utils_1.logWarning(`${versionFile} doesn't exist.`);
-    return version;
+    return versions;
 }
 function run() {
     var _a;
@@ -66904,20 +66904,13 @@ function run() {
         }
         core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
         try {
-            let versions;
-            const resolvedVersionInput = resolveVersionInput();
+            const versions = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
-            if (Array.isArray(resolvedVersionInput)) {
-                versions = resolvedVersionInput;
-            }
-            else {
-                versions = [resolvedVersionInput];
-            }
             if (versions.length) {
                 let pythonVersion = '';
+                const arch = core.getInput('architecture') || os.arch();
+                const updateEnvironment = core.getBooleanInput('update-environment');
                 for (const version of versions) {
-                    const arch = core.getInput('architecture') || os.arch();
-                    const updateEnvironment = core.getBooleanInput('update-environment');
                     if (isPyPyVersion(version)) {
                         const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
                         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
