@@ -66910,6 +66910,7 @@ function run() {
                 let pythonVersion = '';
                 const arch = core.getInput('architecture') || os.arch();
                 const updateEnvironment = core.getBooleanInput('update-environment');
+                core.startGroup('Installed versions');
                 for (const version of versions) {
                     if (isPyPyVersion(version)) {
                         const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest);
@@ -66922,6 +66923,7 @@ function run() {
                         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                     }
                 }
+                core.endGroup();
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {
                     yield cacheDependencies(cache, pythonVersion);

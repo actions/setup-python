@@ -82,6 +82,7 @@ async function run() {
       let pythonVersion = '';
       const arch: string = core.getInput('architecture') || os.arch();
       const updateEnvironment = core.getBooleanInput('update-environment');
+      core.startGroup('Installed versions');
       for (const version of versions) {
         if (isPyPyVersion(version)) {
           const installed = await finderPyPy.findPyPyVersion(
@@ -105,6 +106,7 @@ async function run() {
           core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
         }
       }
+      core.endGroup();
       const cache = core.getInput('cache');
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
