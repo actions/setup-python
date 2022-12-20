@@ -8,7 +8,7 @@
     "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
     "format": "prettier --write \"{,!(node_modules)/**/}*.ts\"",
     "format-check": "prettier --check \"{,!(node_modules)/**/}*.ts\"",
-    "lint": "",
+    "lint": "echo \"Fake command that does nothing. It is used in reusable workflows\"",
     "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
     "test": "jest --coverage"
   },

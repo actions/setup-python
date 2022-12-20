@@ -10,5 +10,5 @@ on:
 
 jobs:
   call-licensed:
-    name: Licensed # The reusable workflow can be found here: https://github.com/actions/reusable-workflows/blob/main/.github/workflows/licensed.yml
+    name: Licensed
     uses: actions/reusable-workflows/.github/workflows/licensed.yml@main
