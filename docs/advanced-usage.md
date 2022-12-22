@@ -2,6 +2,7 @@
 - [Using the python-version input](advanced-usage.md#using-the-python-version-input)
     - [Specifying a Python version](advanced-usage.md#specifying-a-python-version)
     - [Specifying a PyPy version](advanced-usage.md#specifying-a-pypy-version)
+    - [Specifying multiple Python and PyPy versions](advanced-usage.md#specifying-multiple-python/pypy-version)
     - [Matrix Testing](advanced-usage.md#matrix-testing)
 - [Using the python-version-file input](advanced-usage.md#using-the-python-version-file-input)
 - [Check latest version](advanced-usage.md#check-latest-version)
@@ -131,6 +132,62 @@ jobs:
     - run: python my_script.py
 ```
 More details on PyPy syntax can be found in the [Available versions of PyPy](#pypy) section.
+
+### Specifying multiple Python/PyPy version
+The python-version input can get multiple python/pypy versions. The last specified version will be used as a default one. 
+
+Download and set up multiple Python versions:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: |
+            3.8
+            3.9
+            3.10
+    - run: python my_script.py
+```
+
+Download and set up multiple PyPy versions:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: |
+            pypy-3.7-v7.3.x
+            pypy3.9-nightly
+            pypy3.8
+    - run: python my_script.py
+```
+
+Download and set up multiple Python/PyPy versions:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: |
+            3.8
+            3.9
+            pypy3.9-nightly
+            pypy3.8
+            3.10
+    - run: python my_script.py
+```
 
 ### Matrix Testing
 

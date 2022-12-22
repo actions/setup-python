@@ -191,8 +191,35 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "${{ matrix.python }}"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          if ("$pythonVersion" -NotMatch "${{ matrix.python-version }}"){
+            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python-version }}"
+            exit 1
+          }
+          $pythonVersion
+        shell: pwsh
+
+  setup-python-multiple-python-versions:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python and check latest
+        uses: ./
+        with:
+          python-version: |
+              3.7
+              3.8
+              3.9
+              3.10
+          check-latest: true
+      - name: Validate version
+        run: |
+          $pythonVersion = (python --version)
+          if ("$pythonVersion" -NotMatch "3.10"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.10"
             exit 1
           }
           $pythonVersion
