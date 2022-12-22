@@ -74,7 +74,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
-        pypy: ['pypy2.7', 'pypy3.7', 'pypy3.8', 'pypy3.8-nightly']
+        pypy: ['pypy2.7', 'pypy3.7', 'pypy3.8', 'pypy3.9-nightly']
 
     steps:
       - name: Checkout
