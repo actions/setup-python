@@ -66141,7 +66141,8 @@ class PoetryCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
