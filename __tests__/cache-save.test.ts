@@ -18,7 +18,7 @@ describe('run', () => {
   let infoSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
-  let saveSatetSpy: jest.SpyInstance;
+  let saveStateSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let getInputSpy: jest.SpyInstance;
   let setFailedSpy: jest.SpyInstance;
@@ -43,8 +43,8 @@ describe('run', () => {
     debugSpy = jest.spyOn(core, 'debug');
     debugSpy.mockImplementation(input => undefined);
 
-    saveSatetSpy = jest.spyOn(core, 'saveState');
-    saveSatetSpy.mockImplementation(input => undefined);
+    saveStateSpy = jest.spyOn(core, 'saveState');
+    saveStateSpy.mockImplementation(input => undefined);
 
     getStateSpy = jest.spyOn(core, 'getState');
     getStateSpy.mockImplementation(input => {

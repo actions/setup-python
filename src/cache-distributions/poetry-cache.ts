@@ -10,52 +10,44 @@ import {logWarning} from '../utils';
 class PoetryCache extends CacheDistributor {
   constructor(
     private pythonVersion: string,
-    protected patterns: string = '**/poetry.lock'
+    protected patterns: string = '**/poetry.lock',
+    protected poetryProjects: Set<string> = new Set<string>()
   ) {
     super('poetry', patterns);
   }
 
   protected async getCacheGlobalDirectories() {
-    const poetryConfig = await this.getPoetryConfiguration();
+    // Same virtualenvs path may appear for different projects, hence we use a Set
+    const paths = new Set<string>();
+    const globber = await glob.create(this.patterns);
 
-    const cacheDir = poetryConfig['cache-dir'];
-    const virtualenvsPath = poetryConfig['virtualenvs.path'].replace(
-      '{cache-dir}',
-      cacheDir
-    );
+    for await (const file of globber.globGenerator()) {
+      const basedir = path.dirname(file);
+      core.debug(`Processing Poetry project at ${basedir}`);
+      this.poetryProjects.add(basedir);
 
-    const paths = [virtualenvsPath];
+      const poetryConfig = await this.getPoetryConfiguration(basedir);
 
-    if (poetryConfig['virtualenvs.in-project'] === true) {
-      paths.push(path.join(process.cwd(), '.venv'));
-    }
-
-    const pythonLocation = await io.which('python');
-
-    if (pythonLocation) {
-      core.debug(`pythonLocation is ${pythonLocation}`);
-      const {
-        exitCode,
-        stderr
-      } = await exec.getExecOutput(
-        `poetry env use ${pythonLocation}`,
-        undefined,
-        {ignoreReturnCode: true}
+      const cacheDir = poetryConfig['cache-dir'];
+      const virtualenvsPath = poetryConfig['virtualenvs.path'].replace(
+        '{cache-dir}',
+        cacheDir
       );
 
-      if (exitCode) {
-        logWarning(stderr);
+      paths.add(virtualenvsPath);
+
+      if (poetryConfig['virtualenvs.in-project']) {
+        paths.add(path.join(basedir, '.venv'));
       }
-    } else {
-      logWarning('python binaries were not found in PATH');
     }
 
-    return paths;
+    return [...paths];
   }
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.patterns);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
     const restoreKey = undefined;
     return {
       primaryKey,
@@ -63,11 +55,39 @@ class PoetryCache extends CacheDistributor {
     };
   }
 
-  private async getPoetryConfiguration() {
-    const {stdout, stderr, exitCode} = await exec.getExecOutput('poetry', [
-      'config',
-      '--list'
-    ]);
+  protected async handleLoadedCache() {
+    await super.handleLoadedCache();
+
+    // After the cache is loaded -- make sure virtualenvs use the correct Python version (the one that we have just installed).
+    // This will handle invalid caches, recreating virtualenvs if necessary.
+
+    const pythonLocation = await io.which('python');
+    if (pythonLocation) {
+      core.debug(`pythonLocation is ${pythonLocation}`);
+    } else {
+      logWarning('python binaries were not found in PATH');
+      return;
+    }
+
+    for (const poetryProject of this.poetryProjects) {
+      const {exitCode, stderr} = await exec.getExecOutput(
+        'poetry',
+        ['env', 'use', pythonLocation],
+        {ignoreReturnCode: true, cwd: poetryProject}
+      );
+
+      if (exitCode) {
+        logWarning(stderr);
+      }
+    }
+  }
+
+  private async getPoetryConfiguration(basedir: string) {
+    const {stdout, stderr, exitCode} = await exec.getExecOutput(
+      'poetry',
+      ['config', '--list'],
+      {cwd: basedir}
+    );
 
     if (exitCode && stderr) {
       throw new Error(

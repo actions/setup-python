@@ -65787,6 +65787,9 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
+    handleLoadedCache() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
     restoreCache() {
         return __awaiter(this, void 0, void 0, function* () {
             const { primaryKey, restoreKey } = yield this.computeKeys();
@@ -65799,6 +65802,7 @@ class CacheDistributor {
             core.saveState(State.CACHE_PATHS, cachePath);
             core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
             const matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
+            yield this.handleLoadedCache();
             this.handleMatchResult(matchedKey, primaryKey);
         });
     }
@@ -66078,6 +66082,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -66090,38 +66101,48 @@ const core = __importStar(__nccwpck_require__(2186));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
 const utils_1 = __nccwpck_require__(1314);
 class PoetryCache extends cache_distributor_1.default {
-    constructor(pythonVersion, patterns = '**/poetry.lock') {
+    constructor(pythonVersion, patterns = '**/poetry.lock', poetryProjects = new Set()) {
         super('poetry', patterns);
         this.pythonVersion = pythonVersion;
         this.patterns = patterns;
+        this.poetryProjects = poetryProjects;
     }
     getCacheGlobalDirectories() {
+        var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const poetryConfig = yield this.getPoetryConfiguration();
-            const cacheDir = poetryConfig['cache-dir'];
-            const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
-            const paths = [virtualenvsPath];
-            if (poetryConfig['virtualenvs.in-project'] === true) {
-                paths.push(path.join(process.cwd(), '.venv'));
-            }
-            const pythonLocation = yield io.which('python');
-            if (pythonLocation) {
-                core.debug(`pythonLocation is ${pythonLocation}`);
-                const { exitCode, stderr } = yield exec.getExecOutput(`poetry env use ${pythonLocation}`, undefined, { ignoreReturnCode: true });
-                if (exitCode) {
-                    utils_1.logWarning(stderr);
+            // Same virtualenvs path may appear for different projects, hence we use a Set
+            const paths = new Set();
+            const globber = yield glob.create(this.patterns);
+            try {
+                for (var _b = __asyncValues(globber.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
+                    const file = _c.value;
+                    const basedir = path.dirname(file);
+                    core.debug(`Processing Poetry project at ${basedir}`);
+                    this.poetryProjects.add(basedir);
+                    const poetryConfig = yield this.getPoetryConfiguration(basedir);
+                    const cacheDir = poetryConfig['cache-dir'];
+                    const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
+                    paths.add(virtualenvsPath);
+                    if (poetryConfig['virtualenvs.in-project']) {
+                        paths.add(path.join(basedir, '.venv'));
+                    }
                 }
             }
-            else {
-                utils_1.logWarning('python binaries were not found in PATH');
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
-            return paths;
+            return [...paths];
         });
     }
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -66129,12 +66150,33 @@ class PoetryCache extends cache_distributor_1.default {
             };
         });
     }
-    getPoetryConfiguration() {
+    handleLoadedCache() {
+        const _super = Object.create(null, {
+            handleLoadedCache: { get: () => super.handleLoadedCache }
+        });
         return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr, exitCode } = yield exec.getExecOutput('poetry', [
-                'config',
-                '--list'
-            ]);
+            yield _super.handleLoadedCache.call(this);
+            // After the cache is loaded -- make sure virtualenvs use the correct Python version (the one that we have just installed).
+            // This will handle invalid caches, recreating virtualenvs if necessary.
+            const pythonLocation = yield io.which('python');
+            if (pythonLocation) {
+                core.debug(`pythonLocation is ${pythonLocation}`);
+            }
+            else {
+                utils_1.logWarning('python binaries were not found in PATH');
+                return;
+            }
+            for (const poetryProject of this.poetryProjects) {
+                const { exitCode, stderr } = yield exec.getExecOutput('poetry', ['env', 'use', pythonLocation], { ignoreReturnCode: true, cwd: poetryProject });
+                if (exitCode) {
+                    utils_1.logWarning(stderr);
+                }
+            }
+        });
+    }
+    getPoetryConfiguration(basedir) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { stdout, stderr, exitCode } = yield exec.getExecOutput('poetry', ['config', '--list'], { cwd: basedir });
             if (exitCode && stderr) {
                 throw new Error('Could not get cache folder path for poetry package manager');
             }

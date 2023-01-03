@@ -55,7 +55,7 @@ The action defaults to searching for a dependency file (`requirements.txt` for p
 
  - For `pip`, the action will cache the global cache directory
  - For `pipenv`, the action will cache virtualenv directory
- - For `poetry`, the action will cache virtualenv directory
+ - For `poetry`, the action will cache virtualenv directories -- one for each poetry project found
 
 **Caching pip dependencies:**
 

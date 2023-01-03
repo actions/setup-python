@@ -1,8 +1,10 @@
+import * as path from 'path';
 import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
 import * as io from '@actions/io';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
+import {State} from '../src/cache-distributions/cache-distributor';
 import * as utils from './../src/utils';
 
 describe('restore-cache', () => {
@@ -13,7 +15,7 @@ describe('restore-cache', () => {
   const requirementsLinuxHash =
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
   const poetryLockHash =
-    '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
+    'f24ea1ad73968e6c8d80c16a093ade72d9332c433aeef979a0dd943e6a99b2ab';
   const poetryConfigOutput = `
 cache-dir = "/Users/patrick/Library/Caches/pypoetry"
 experimental.new-installer = false
@@ -27,7 +29,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
   let infoSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
-  let saveSatetSpy: jest.SpyInstance;
+  let saveStateSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let setOutputSpy: jest.SpyInstance;
 
@@ -52,8 +54,8 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     debugSpy = jest.spyOn(core, 'debug');
     debugSpy.mockImplementation(input => undefined);
 
-    saveSatetSpy = jest.spyOn(core, 'saveState');
-    saveSatetSpy.mockImplementation(input => undefined);
+    saveStateSpy = jest.spyOn(core, 'saveState');
+    saveStateSpy.mockImplementation(input => undefined);
 
     getStateSpy = jest.spyOn(core, 'getState');
     getStateSpy.mockImplementation(input => undefined);
@@ -100,21 +102,68 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   describe('Restore dependencies', () => {
     it.each([
-      ['pip', '3.8.12', undefined, requirementsHash],
-      ['pip', '3.8.12', '**/requirements-linux.txt', requirementsLinuxHash],
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/**/requirements.txt',
+        requirementsHash,
+        undefined
+      ],
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/**/requirements-linux.txt',
+        requirementsLinuxHash,
+        undefined
+      ],
       [
         'pip',
         '3.8.12',
         '__tests__/data/requirements-linux.txt',
-        requirementsLinuxHash
+        requirementsLinuxHash,
+        undefined
       ],
-      ['pip', '3.8.12', '__tests__/data/requirements.txt', requirementsHash],
-      ['pipenv', '3.9.1', undefined, pipFileLockHash],
-      ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash],
-      ['poetry', '3.9.1', undefined, poetryLockHash]
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/requirements.txt',
+        requirementsHash,
+        undefined
+      ],
+      [
+        'pipenv',
+        '3.9.1',
+        '__tests__/data/**/Pipfile.lock',
+        pipFileLockHash,
+        undefined
+      ],
+      [
+        'pipenv',
+        '3.9.12',
+        '__tests__/data/requirements.txt',
+        requirementsHash,
+        undefined
+      ],
+      [
+        'poetry',
+        '3.9.1',
+        '__tests__/data/**/poetry.lock',
+        poetryLockHash,
+        [
+          '/Users/patrick/Library/Caches/pypoetry/virtualenvs',
+          path.join(__dirname, 'data', 'inner', '.venv'),
+          path.join(__dirname, 'data', '.venv')
+        ]
+      ]
     ])(
       'restored dependencies for %s by primaryKey',
-      async (packageManager, pythonVersion, dependencyFile, fileHash) => {
+      async (
+        packageManager,
+        pythonVersion,
+        dependencyFile,
+        fileHash,
+        cachePaths
+      ) => {
         const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
@@ -123,9 +172,20 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
         await cacheDistributor.restoreCache();
 
+        if (cachePaths !== undefined) {
+          expect(saveStateSpy).toHaveBeenCalledWith(
+            State.CACHE_PATHS,
+            cachePaths
+          );
+        }
+
         if (process.platform === 'linux' && packageManager === 'pip') {
           expect(infoSpy).toHaveBeenCalledWith(
             `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-20.04-Ubuntu-python-${pythonVersion}-${packageManager}-${fileHash}`
+          );
+        } else if (packageManager === 'poetry') {
+          expect(infoSpy).toHaveBeenCalledWith(
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-v2-${fileHash}`
           );
         } else {
           expect(infoSpy).toHaveBeenCalledWith(
@@ -164,8 +224,13 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
   describe('Dependencies changed', () => {
     it.each([
-      ['pip', '3.8.12', undefined, pipFileLockHash],
-      ['pip', '3.8.12', '**/requirements-linux.txt', pipFileLockHash],
+      ['pip', '3.8.12', '__tests__/data/**/requirements.txt', pipFileLockHash],
+      [
+        'pip',
+        '3.8.12',
+        '__tests__/data/**/requirements-linux.txt',
+        pipFileLockHash
+      ],
       [
         'pip',
         '3.8.12',
@@ -173,9 +238,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         pipFileLockHash
       ],
       ['pip', '3.8.12', '__tests__/data/requirements.txt', pipFileLockHash],
-      ['pipenv', '3.9.1', undefined, requirementsHash],
+      ['pipenv', '3.9.1', '__tests__/data/**/Pipfile.lock', requirementsHash],
       ['pipenv', '3.9.12', '__tests__/data/requirements.txt', requirementsHash],
-      ['poetry', '3.9.1', undefined, requirementsHash]
+      ['poetry', '3.9.1', '__tests__/data/**/poetry.lock', requirementsHash]
     ])(
       'restored dependencies for %s by primaryKey',
       async (packageManager, pythonVersion, dependencyFile, fileHash) => {
