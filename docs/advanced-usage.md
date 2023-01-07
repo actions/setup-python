@@ -259,7 +259,7 @@ If `check-latest` is set to `true`, the action first checks if the cached versio
 ```yaml
 steps:
   - uses: actions/checkout@v3
-  - uses: actions/setup-python@v3
+  - uses: actions/setup-python@v4
     with:
       python-version: '3.7'
       check-latest: true
