@@ -239,9 +239,10 @@ jobs:
 
 ## Using the `python-version-file` input
 
-`setup-python` action can read Python or PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
+The python-version-file input accepts a path to a file containing the version of Python to be used by a project, for example .python-version, or .tool-versions. 
+If both the python-version and the python-version-file inputs are provided then the python-version input is used. 
 
->In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
+> The action will search for the python version file relative to the repository root.
 
 ```yaml
 steps:

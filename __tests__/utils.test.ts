@@ -1,6 +1,7 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import {
+  parsePythonVersionFile,
   validateVersion,
   validatePythonVersionFormatForPyPy,
   isCacheFeatureAvailable
@@ -8,6 +9,20 @@ import {
 
 jest.mock('@actions/cache');
 jest.mock('@actions/core');
+
+describe('parsePythonVersionFile', () => {
+  it('handle the content of a .python-version file', () => {
+    expect(parsePythonVersionFile('3.6')).toEqual('3.6')
+  });
+
+  it('trims extra spaces at the end of the content', () => {
+    expect(parsePythonVersionFile('3.7   ')).toEqual('3.7')
+  });
+
+  it('parses correctly the content of .tool-version files', () => {
+    expect(parsePythonVersionFile('python 3.7')).toEqual('3.7')
+  });
+});
 
 describe('validatePythonVersionFormatForPyPy', () => {
   it.each([
