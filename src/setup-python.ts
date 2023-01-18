@@ -37,18 +37,13 @@ function resolveVersionInput() {
   }
 
   if (versionFile) {
-    const versionFilePath = path.join(
-      process.env.GITHUB_WORKSPACE!,
-      versionFile
-    );
-
-    if (!fs.existsSync(versionFilePath)) {
+    if (!fs.existsSync(versionFile)) {
       throw new Error(
-        `The specified python version file at: ${versionFilePath} doesn't exist.`
+        `The specified python version file at: ${versionFile} doesn't exist.`
       );
     }
 
-    const version = parsePythonVersionFile(fs.readFileSync(versionFilePath, 'utf8'));
+    const version = parsePythonVersionFile(fs.readFileSync(versionFile, 'utf8'));
     core.info(`Resolved ${versionFile} as ${version}`);
 
     return [version];
