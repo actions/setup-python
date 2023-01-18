@@ -558,7 +558,7 @@ Here are the steps you need to follow to avoid the rate limit:
 
 ```yml
 - name: Set up Python
-  uses: actions/setup-python@4
+  uses: actions/setup-python@v4
   with:
     python-version: 3.8
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
