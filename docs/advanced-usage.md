@@ -242,7 +242,7 @@ jobs:
 The python-version-file input accepts a path to a file containing the version of Python to be used by a project, for example .python-version, or .tool-versions. 
 If both the python-version and the python-version-file inputs are provided then the python-version input is used. 
 
-> In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
+>In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
 
 ```yaml
 steps:

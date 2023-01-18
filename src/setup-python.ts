@@ -5,7 +5,12 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {parsePythonVersionFile, isCacheFeatureAvailable, logWarning, IS_MAC} from './utils';
+import {
+  parsePythonVersionFile,
+  isCacheFeatureAvailable,
+  logWarning,
+  IS_MAC
+} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -43,7 +48,9 @@ function resolveVersionInput() {
       );
     }
 
-    const version = parsePythonVersionFile(fs.readFileSync(versionFile, 'utf8'));
+    const version = parsePythonVersionFile(
+      fs.readFileSync(versionFile, 'utf8')
+    );
     core.info(`Resolved ${versionFile} as ${version}`);
 
     return [version];

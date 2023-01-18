@@ -65,14 +65,17 @@ export async function findPyPyVersion(
   ));
 
   if (!installDir) {
-    ({installDir, resolvedPythonVersion, resolvedPyPyVersion} =
-      await pypyInstall.installPyPy(
-        pypyVersionSpec.pypyVersion,
-        pypyVersionSpec.pythonVersion,
-        architecture,
-        allowPreReleases,
-        releases
-      ));
+    ({
+      installDir,
+      resolvedPythonVersion,
+      resolvedPyPyVersion
+    } = await pypyInstall.installPyPy(
+      pypyVersionSpec.pypyVersion,
+      pypyVersionSpec.pythonVersion,
+      architecture,
+      allowPreReleases,
+      releases
+    ));
   }
 
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';

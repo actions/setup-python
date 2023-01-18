@@ -12,15 +12,21 @@ jest.mock('@actions/core');
 
 describe('parsePythonVersionFile', () => {
   it('handle the content of a .python-version file', () => {
-    expect(parsePythonVersionFile('3.6')).toEqual('3.6')
+    expect(parsePythonVersionFile('3.6')).toEqual('3.6');
   });
 
   it('trims extra spaces at the end of the content', () => {
-    expect(parsePythonVersionFile('3.7   ')).toEqual('3.7')
+    expect(parsePythonVersionFile('3.7   ')).toEqual('3.7');
   });
 
   it('parses correctly the content of .tool-version files', () => {
-    expect(parsePythonVersionFile('python 3.7')).toEqual('3.7')
+    expect(parsePythonVersionFile('python 3.7')).toEqual('3.7');
+  });
+
+  it('parses correctly pypy version content of the .tool-version files', () => {
+    expect(parsePythonVersionFile('python pypy3.9-7.3.10')).toEqual(
+      'pypy3.9-7.3.10'
+    );
   });
 });
 
