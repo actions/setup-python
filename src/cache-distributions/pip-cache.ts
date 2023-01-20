@@ -57,6 +57,7 @@ class PipCache extends CacheDistributor {
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.cacheDependencyPath);
+    core.info(`Cache key hash: ${hash}, path: ${this.cacheDependencyPath}`);
     let primaryKey = '';
     let restoreKey = '';
 

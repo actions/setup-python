@@ -65944,6 +65944,7 @@ class PipCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.cacheDependencyPath);
+            core.info(`Cache key hash: ${hash}, path: ${this.cacheDependencyPath}`);
             let primaryKey = '';
             let restoreKey = '';
             if (utils_1.IS_LINUX) {
