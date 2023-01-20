@@ -10,7 +10,6 @@ import CacheDistributor from './cache-distributor';
 import {getLinuxInfo, IS_LINUX, IS_WINDOWS} from '../utils';
 
 class PipCache extends CacheDistributor {
-
   private readonly cacheDependencyBackupPath: string = '**/pyproject.toml';
 
   constructor(
@@ -59,8 +58,9 @@ class PipCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash = await glob.hashFiles(this.cacheDependencyPath) 
-    || await glob.hashFiles(this.cacheDependencyBackupPath);
+    const hash =
+      (await glob.hashFiles(this.cacheDependencyPath)) ||
+      (await glob.hashFiles(this.cacheDependencyBackupPath));
     let primaryKey = '';
     let restoreKey = '';
 
