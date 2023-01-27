@@ -77,6 +77,7 @@ async function run() {
   try {
     const versions = resolveVersionInput();
     const checkLatest = core.getBooleanInput('check-latest');
+    const allowPreReleases = core.getBooleanInput('allow-prereleases');
 
     if (versions.length) {
       let pythonVersion = '';
@@ -89,7 +90,8 @@ async function run() {
             version,
             arch,
             updateEnvironment,
-            checkLatest
+            checkLatest,
+            allowPreReleases
           );
           pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
           core.info(
@@ -100,7 +102,8 @@ async function run() {
             version,
             arch,
             updateEnvironment,
-            checkLatest
+            checkLatest,
+            allowPreReleases
           );
           pythonVersion = installed.version;
           core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);

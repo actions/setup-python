@@ -273,7 +273,13 @@ describe('findPyPyVersion', () => {
 
   it('found PyPy in toolcache', async () => {
     await expect(
-      finder.findPyPyVersion('pypy-3.6-v7.3.x', architecture, true, false)
+      finder.findPyPyVersion(
+        'pypy-3.6-v7.3.x',
+        architecture,
+        true,
+        false,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.6.12',
       resolvedPyPyVersion: '7.3.3'
@@ -291,13 +297,13 @@ describe('findPyPyVersion', () => {
 
   it('throw on invalid input format', async () => {
     await expect(
-      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true, false)
+      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true, false, false)
     ).rejects.toThrow();
   });
 
   it('throw on invalid input format pypy3.7-7.3.x', async () => {
     await expect(
-      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true, false)
+      finder.findPyPyVersion('pypy3.7-v7.3.x', architecture, true, false, false)
     ).rejects.toThrow();
   });
 
@@ -309,7 +315,13 @@ describe('findPyPyVersion', () => {
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture, true, false)
+      finder.findPyPyVersion(
+        'pypy-3.7-v7.3.x',
+        architecture,
+        true,
+        false,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.7.9',
       resolvedPyPyVersion: '7.3.3'
@@ -333,7 +345,13 @@ describe('findPyPyVersion', () => {
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture, false, false)
+      finder.findPyPyVersion(
+        'pypy-3.7-v7.3.x',
+        architecture,
+        false,
+        false,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.7.9',
       resolvedPyPyVersion: '7.3.3'
@@ -344,7 +362,13 @@ describe('findPyPyVersion', () => {
 
   it('throw if release is not found', async () => {
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.5.x', architecture, true, false)
+      finder.findPyPyVersion(
+        'pypy-3.7-v7.5.x',
+        architecture,
+        true,
+        false,
+        false
+      )
     ).rejects.toThrowError(
       `PyPy version 3.7 (v7.5.x) with arch ${architecture} not found`
     );
@@ -352,7 +376,13 @@ describe('findPyPyVersion', () => {
 
   it('check-latest enabled version found and used from toolcache', async () => {
     await expect(
-      finder.findPyPyVersion('pypy-3.6-v7.3.x', architecture, false, true)
+      finder.findPyPyVersion(
+        'pypy-3.6-v7.3.x',
+        architecture,
+        false,
+        true,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.6.12',
       resolvedPyPyVersion: '7.3.3'
@@ -371,7 +401,13 @@ describe('findPyPyVersion', () => {
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
-      finder.findPyPyVersion('pypy-3.7-v7.3.x', architecture, false, true)
+      finder.findPyPyVersion(
+        'pypy-3.7-v7.3.x',
+        architecture,
+        false,
+        true,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.7.9',
       resolvedPyPyVersion: '7.3.3'
@@ -391,7 +427,13 @@ describe('findPyPyVersion', () => {
       return pypyPath;
     });
     await expect(
-      finder.findPyPyVersion('pypy-3.8-v7.3.x', architecture, false, true)
+      finder.findPyPyVersion(
+        'pypy-3.8-v7.3.x',
+        architecture,
+        false,
+        true,
+        false
+      )
     ).resolves.toEqual({
       resolvedPythonVersion: '3.8.8',
       resolvedPyPyVersion: '7.3.3'
@@ -400,5 +442,23 @@ describe('findPyPyVersion', () => {
     expect(infoSpy).toHaveBeenCalledWith(
       'Failed to resolve PyPy v7.3.x with Python (3.8) from manifest'
     );
+  });
+
+  it('found and install successfully, pre-release fallback', async () => {
+    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir.mockImplementation(() =>
+      path.join(toolDir, 'PyPy', '3.8.12', architecture)
+    );
+    spyChmodSync = jest.spyOn(fs, 'chmodSync');
+    spyChmodSync.mockImplementation(() => undefined);
+    await expect(
+      finder.findPyPyVersion('pypy3.8', architecture, false, false, false)
+    ).rejects.toThrowError();
+    await expect(
+      finder.findPyPyVersion('pypy3.8', architecture, false, false, true)
+    ).resolves.toEqual({
+      resolvedPythonVersion: '3.8.12',
+      resolvedPyPyVersion: '7.3.8rc2'
+    });
   });
 });

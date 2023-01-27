@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
@@ -19,6 +20,7 @@ export async function installPyPy(
   pypyVersion: string,
   pythonVersion: string,
   architecture: string,
+  allowPreReleases: boolean,
   releases: IPyPyManifestRelease[] | undefined
 ) {
   let downloadDir;
@@ -29,12 +31,30 @@ export async function installPyPy(
     throw new Error('No release was found in PyPy version.json');
   }
 
-  const releaseData = findRelease(
+  let releaseData = findRelease(
     releases,
     pythonVersion,
     pypyVersion,
-    architecture
+    architecture,
+    false
   );
+
+  if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
+    // check for pre-release
+    core.info(
+      [
+        `Stable PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`,
+        `Trying pre-release versions`
+      ].join(os.EOL)
+    );
+    releaseData = findRelease(
+      releases,
+      pythonVersion,
+      pypyVersion,
+      architecture,
+      true
+    );
+  }
 
   if (!releaseData || !releaseData.foundAsset) {
     throw new Error(
@@ -162,8 +182,10 @@ export function findRelease(
   releases: IPyPyManifestRelease[],
   pythonVersion: string,
   pypyVersion: string,
-  architecture: string
+  architecture: string,
+  includePrerelease: boolean
 ) {
+  const options = {includePrerelease: includePrerelease};
   const filterReleases = releases.filter(item => {
     const isPythonVersionSatisfied = semver.satisfies(
       semver.coerce(item.python_version)!,
@@ -173,7 +195,11 @@ export function findRelease(
       isNightlyKeyword(pypyVersion) && isNightlyKeyword(item.pypy_version);
     const isPyPyVersionSatisfied =
       isPyPyNightly ||
-      semver.satisfies(pypyVersionToSemantic(item.pypy_version), pypyVersion);
+      semver.satisfies(
+        pypyVersionToSemantic(item.pypy_version),
+        pypyVersion,
+        options
+      );
     const isArchPresent =
       item.files &&
       (IS_WINDOWS
