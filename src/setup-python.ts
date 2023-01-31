@@ -47,17 +47,12 @@ function resolveVersionInput() {
     return [version];
   }
 
-  logWarning(
-    "Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file."
-  );
   versionFile = '.python-version';
   if (fs.existsSync(versionFile)) {
     const version = fs.readFileSync(versionFile, 'utf8');
     core.info(`Resolved ${versionFile} as ${version}`);
     return [version];
   }
-
-  logWarning(`${versionFile} doesn't exist.`);
 
   return versions;
 }
