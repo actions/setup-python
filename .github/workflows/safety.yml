@@ -1,0 +1,12 @@
+name: safety
+on: [pull_request, push]
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      # - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: pip install safety
+      - run: safety check
