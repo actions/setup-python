@@ -8,9 +8,10 @@ import os from 'os';
 
 import CacheDistributor from './cache-distributor';
 import {getLinuxInfo, IS_LINUX, IS_WINDOWS} from '../utils';
+import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 class PipCache extends CacheDistributor {
-  private readonly cacheDependencyBackupPath: string = '**/pyproject.toml';
+  private cacheDependencyBackupPath: string = CACHE_DEPENDENCY_BACKUP_PATH;
 
   constructor(
     private pythonVersion: string,

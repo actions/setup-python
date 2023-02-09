@@ -5,7 +5,7 @@ import * as exec from '@actions/exec';
 import * as io from '@actions/io';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
 import {State} from '../src/cache-distributions/cache-distributor';
-import * as utils from './../src/utils';
+import * as constants from '../src/cache-distributions/constants';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
@@ -196,11 +196,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       30000
     );
 
-    it.each([
-      ['pip', '3.8.12', 'requirements-linux.txt', 'requirements-linux.txt'],
-      ['pip', '3.8.12', 'requirements.txt', 'requirements.txt'],
-      ['pipenv', '3.9.12', 'requirements.txt', 'requirements.txt']
-    ])(
+    it.each([['pipenv', '3.9.12', 'requirements.txt', 'requirements.txt']])(
       'Should throw an error because dependency file is not found',
       async (
         packageManager,
@@ -213,11 +209,46 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           pythonVersion,
           dependencyFile
         );
+
         await expect(cacheDistributor.restoreCache()).rejects.toThrowError(
           `No file in ${process.cwd()} matched to [${cacheDependencyPath
             .split('\n')
             .join(',')}], make sure you have checked out the target repository`
         );
+      }
+    );
+
+    it.each([
+      ['pip', '3.8.12', 'requirements-linux.txt'],
+      ['pip', '3.8.12', 'requirements.txt']
+    ])(
+      'Shouldn`t throw an error as there is a default file `pyproject.toml` to use when requirements.txt is not specified',
+      async (packageManager, pythonVersion, dependencyFile) => {
+        const cacheDistributor = getCacheDistributor(
+          packageManager,
+          pythonVersion,
+          dependencyFile
+        );
+        await expect(cacheDistributor.restoreCache()).resolves;
+      }
+    );
+
+    it.each([
+      ['pip', '3.8.12', 'requirements-linux.txt'],
+      ['pip', '3.8.12', 'requirements.txt']
+    ])(
+      'Should throw an error as there is no default file `pyproject.toml` to use when requirements.txt is not specified',
+      async (packageManager, pythonVersion, dependencyFile) => {
+        jest.mock('../src/cache-distributions/constants', () => ({
+          CACHE_DEPENDENCY_BACKUP_PATH: '**/pyprojecttest.toml'
+        }));
+
+        const cacheDistributor = getCacheDistributor(
+          packageManager,
+          pythonVersion,
+          dependencyFile
+        );
+        await expect(cacheDistributor.restoreCache()).resolves;
       }
     );
   });
