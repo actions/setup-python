@@ -70208,6 +70208,7 @@ function run() {
             const allowPreReleases = core.getBooleanInput('allow-prereleases');
             if (versions.length) {
                 let pythonVersion = '';
+                const pythonVersions = [];
                 const arch = core.getInput('architecture') || os.arch();
                 const updateEnvironment = core.getBooleanInput('update-environment');
                 core.startGroup('Installed versions');
@@ -70215,11 +70216,13 @@ function run() {
                     if (isPyPyVersion(version)) {
                         const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+                        pythonVersions.push(`${installed.resolvedPythonVersion}-pypy${installed.resolvedPyPyVersion}`);
                         core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                     }
                     else if (isGraalPyVersion(version)) {
                         const installed = yield finderGraalPy.findGraalPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = `${installed}`;
+                        pythonVersions.push(`graalpy${installed}`);
                         core.info(`Successfully set up GraalPy ${installed}`);
                     }
                     else {
@@ -70228,9 +70231,11 @@ function run() {
                         }
                         const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = installed.version;
+                        pythonVersions.push(installed.version);
                         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                     }
                 }
+                core.setOutput('python-versions', pythonVersions.sort().join(','));
                 core.endGroup();
                 const cache = core.getInput('cache');
                 if (cache && utils_1.isCacheFeatureAvailable()) {

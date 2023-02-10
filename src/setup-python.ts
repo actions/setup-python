@@ -95,6 +95,7 @@ async function run() {
 
     if (versions.length) {
       let pythonVersion = '';
+      const pythonVersions: string[] = [];
       const arch: string = core.getInput('architecture') || os.arch();
       const updateEnvironment = core.getBooleanInput('update-environment');
       core.startGroup('Installed versions');
@@ -108,6 +109,9 @@ async function run() {
             allowPreReleases
           );
           pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+          pythonVersions.push(
+            `${installed.resolvedPythonVersion}-pypy${installed.resolvedPyPyVersion}`
+          );
           core.info(
             `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
           );
@@ -120,6 +124,7 @@ async function run() {
             allowPreReleases
           );
           pythonVersion = `${installed}`;
+          pythonVersions.push(`graalpy${installed}`);
           core.info(`Successfully set up GraalPy ${installed}`);
         } else {
           if (version.startsWith('2')) {
@@ -135,9 +140,11 @@ async function run() {
             allowPreReleases
           );
           pythonVersion = installed.version;
+          pythonVersions.push(installed.version);
           core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
         }
       }
+      core.setOutput('python-versions', pythonVersions.sort().join(','));
       core.endGroup();
       const cache = core.getInput('cache');
       if (cache && isCacheFeatureAvailable()) {

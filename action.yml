@@ -29,6 +29,8 @@ inputs:
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
+  python-versions:
+    description: "A comma-separated list of all installed Python implementations and versions. Useful for cache-busting."
   cache-hit:
     description: "A boolean value to indicate a cache entry was found"
   python-path:
