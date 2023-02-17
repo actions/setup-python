@@ -59722,7 +59722,7 @@ class CacheDistributor {
                 const file = this.packageManager === 'pip'
                     ? `${this.cacheDependencyPath
                         .split('\n')
-                        .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}}`
+                        .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
                     : this.cacheDependencyPath.split('\n').join(',');
                 throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
             }
