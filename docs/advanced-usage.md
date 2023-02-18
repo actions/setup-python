@@ -594,6 +594,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python_version }}"
+          allow-prereleases: true
       - run: pipx run nox --error-on-missing-interpreters -s tests-${{ matrix.python_version }}
 ```
 
