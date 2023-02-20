@@ -66283,7 +66283,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
             core.addPath(pythonLocation);
             core.addPath(_binDir);
         }
-        core.setOutput('python-version', 'pypy' + resolvedPyPyVersion.trim());
+        core.setOutput('python-version', 'pypy' + resolvedPyPyVersion);
         core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
     });
@@ -66699,7 +66699,7 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture, include
     return {
         foundAsset,
         resolvedPythonVersion: foundRelease.python_version,
-        resolvedPyPyVersion: foundRelease.pypy_version
+        resolvedPyPyVersion: foundRelease.pypy_version.trim()
     };
 }
 exports.findRelease = findRelease;
@@ -67095,7 +67095,7 @@ function readExactPyPyVersionFile(installDir) {
     let pypyVersion = '';
     let fileVersion = path.join(installDir, PYPY_VERSION_FILE);
     if (fs_1.default.existsSync(fileVersion)) {
-        pypyVersion = fs_1.default.readFileSync(fileVersion).toString();
+        pypyVersion = fs_1.default.readFileSync(fileVersion).toString().trim();
     }
     return pypyVersion;
 }

@@ -73,7 +73,7 @@ export function readExactPyPyVersionFile(installDir: string) {
   let pypyVersion = '';
   let fileVersion = path.join(installDir, PYPY_VERSION_FILE);
   if (fs.existsSync(fileVersion)) {
-    pypyVersion = fs.readFileSync(fileVersion).toString();
+    pypyVersion = fs.readFileSync(fileVersion).toString().trim();
   }
 
   return pypyVersion;

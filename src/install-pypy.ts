@@ -233,7 +233,7 @@ export function findRelease(
   return {
     foundAsset,
     resolvedPythonVersion: foundRelease.python_version,
-    resolvedPyPyVersion: foundRelease.pypy_version
+    resolvedPyPyVersion: foundRelease.pypy_version.trim()
   };
 }
 
