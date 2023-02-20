@@ -1,5 +1,6 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 export enum State {
   STATE_CACHE_PRIMARY_KEY = 'cache-primary-key',
@@ -24,10 +25,14 @@ abstract class CacheDistributor {
   public async restoreCache() {
     const {primaryKey, restoreKey} = await this.computeKeys();
     if (primaryKey.endsWith('-')) {
+      const file =
+        this.packageManager === 'pip'
+          ? `${this.cacheDependencyPath
+              .split('\n')
+              .join(',')} or ${CACHE_DEPENDENCY_BACKUP_PATH}`
+          : this.cacheDependencyPath.split('\n').join(',');
       throw new Error(
-        `No file in ${process.cwd()} matched to [${this.cacheDependencyPath
-          .split('\n')
-          .join(',')}], make sure you have checked out the target repository`
+        `No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`
       );
     }
 

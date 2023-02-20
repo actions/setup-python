@@ -59699,6 +59699,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.State = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
+const constants_1 = __nccwpck_require__(8248);
 var State;
 (function (State) {
     State["STATE_CACHE_PRIMARY_KEY"] = "cache-primary-key";
@@ -59718,9 +59719,12 @@ class CacheDistributor {
         return __awaiter(this, void 0, void 0, function* () {
             const { primaryKey, restoreKey } = yield this.computeKeys();
             if (primaryKey.endsWith('-')) {
-                throw new Error(`No file in ${process.cwd()} matched to [${this.cacheDependencyPath
-                    .split('\n')
-                    .join(',')}], make sure you have checked out the target repository`);
+                const file = this.packageManager === 'pip'
+                    ? `${this.cacheDependencyPath
+                        .split('\n')
+                        .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
+                    : this.cacheDependencyPath.split('\n').join(',');
+                throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
             }
             const cachePath = yield this.getCacheGlobalDirectories();
             core.saveState(State.CACHE_PATHS, cachePath);
@@ -59742,6 +59746,19 @@ class CacheDistributor {
     }
 }
 exports["default"] = CacheDistributor;
+
+
+/***/ }),
+
+/***/ 8248:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CACHE_DEPENDENCY_BACKUP_PATH = void 0;
+const CACHE_DEPENDENCY_BACKUP_PATH = '**/pyproject.toml';
+exports.CACHE_DEPENDENCY_BACKUP_PATH = CACHE_DEPENDENCY_BACKUP_PATH;
 
 
 /***/ }),
