@@ -15,7 +15,7 @@ class PipCache extends CacheDistributor {
 
   constructor(
     private pythonVersion: string,
-    cacheDependencyPath: string = '**/requirements.txt'
+    cacheDependencyPath = '**/requirements.txt'
   ) {
     super('pip', cacheDependencyPath);
   }

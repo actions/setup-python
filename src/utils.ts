@@ -1,3 +1,4 @@
+/* eslint no-unsafe-finally: "off" */
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import fs from 'fs';
@@ -71,7 +72,7 @@ export function getPyPyVersionFromPath(installDir: string) {
  */
 export function readExactPyPyVersionFile(installDir: string) {
   let pypyVersion = '';
-  let fileVersion = path.join(installDir, PYPY_VERSION_FILE);
+  const fileVersion = path.join(installDir, PYPY_VERSION_FILE);
   if (fs.existsSync(fileVersion)) {
     pypyVersion = fs.readFileSync(fileVersion).toString().trim();
   }

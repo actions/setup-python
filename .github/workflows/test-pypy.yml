@@ -1,6 +1,6 @@
 name: Validate PyPy e2e
 
-on: 
+on:
   push:
     branches:
       - main
@@ -21,22 +21,22 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
         pypy:
-        - 'pypy-2.7'
-        - 'pypy-3.7'
-        - 'pypy3.9'
-        - 'pypy-2.7-v7.3.4'
-        - 'pypy-3.7-v7.3.5'
-        - 'pypy-3.7-v7.3.4'
-        - 'pypy-3.7-v7.3.x'
-        - 'pypy-3.7-v7.x'
-        - 'pypy-2.7-v7.3.4rc1'
-        - 'pypy-3.7-nightly'
-        - 'pypy3.8-v7.3.7'
+          - 'pypy-2.7'
+          - 'pypy-3.7'
+          - 'pypy3.9'
+          - 'pypy-2.7-v7.3.4'
+          - 'pypy-3.7-v7.3.5'
+          - 'pypy-3.7-v7.3.4'
+          - 'pypy-3.7-v7.3.x'
+          - 'pypy-3.7-v7.x'
+          - 'pypy-2.7-v7.3.4rc1'
+          - 'pypy-3.7-nightly'
+          - 'pypy3.8-v7.3.7'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-  
+
       - name: setup-python ${{ matrix.pypy }}
         id: setup-python
         uses: ./
@@ -49,7 +49,7 @@ jobs:
 
       - name: PyPy and Python version
         run: python --version
-  
+
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
@@ -138,8 +138,8 @@ jobs:
         uses: ./
         with:
           python-version: |
-              pypy-3.7-v7.3.x
-              pypy3.8
+            pypy-3.7-v7.3.x
+            pypy3.8
           check-latest: true
       - name: PyPy and Python version
         run: python --version

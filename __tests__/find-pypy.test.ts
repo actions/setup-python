@@ -17,7 +17,7 @@ import {
   getPyPyVersionFromPath
 } from '../src/utils';
 
-const manifestData = require('./data/pypy.json');
+import manifestData from './data/pypy.json';
 
 let architecture: string;
 
@@ -51,7 +51,7 @@ describe('parsePyPyVersion', () => {
   it.each(['', 'pypy-', 'pypy', 'p', 'notpypy-'])(
     'throw on invalid input "%s"',
     input => {
-      expect(() => finder.parsePyPyVersion(input)).toThrowError(
+      expect(() => finder.parsePyPyVersion(input)).toThrow(
         "Invalid 'version' property for PyPy. PyPy version should be specified as 'pypy<python-version>' or 'pypy-<python-version>'. See README for examples and documentation."
       );
     }
@@ -60,7 +60,7 @@ describe('parsePyPyVersion', () => {
   it.each(['pypy-2', 'pypy-3', 'pypy2', 'pypy3', 'pypy3.x', 'pypy3.8.10'])(
     'throw on invalid input "%s"',
     input => {
-      expect(() => finder.parsePyPyVersion(input)).toThrowError(
+      expect(() => finder.parsePyPyVersion(input)).toThrow(
         "Invalid format of Python version for PyPy. Python version should be specified in format 'x.y'. See README for examples and documentation."
       );
     }
@@ -369,7 +369,7 @@ describe('findPyPyVersion', () => {
         false,
         false
       )
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `PyPy version 3.7 (v7.5.x) with arch ${architecture} not found`
     );
   });
@@ -453,7 +453,7 @@ describe('findPyPyVersion', () => {
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
       finder.findPyPyVersion('pypy3.8', architecture, false, false, false)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     await expect(
       finder.findPyPyVersion('pypy3.8', architecture, false, false, true)
     ).resolves.toEqual({

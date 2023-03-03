@@ -24,7 +24,7 @@ import * as core from '@actions/core';
 import * as finder from '../src/find-python';
 import * as installer from '../src/install-python';
 
-const manifestData = require('./data/versions-manifest.json');
+import manifestData from './data/versions-manifest.json';
 
 describe('Finder tests', () => {
   let writeSpy: jest.SpyInstance;
@@ -192,7 +192,7 @@ describe('Finder tests', () => {
     expect(infoSpy).toHaveBeenCalledWith(
       'Version 1.2.3 was not found in the local cache'
     );
-    expect(infoSpy).toBeCalledWith(
+    expect(infoSpy).toHaveBeenCalledWith(
       'Version 1.2.3 is available for downloading'
     );
     expect(installSpy).toHaveBeenCalled();
@@ -252,7 +252,7 @@ describe('Finder tests', () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await expect(
       finder.useCpythonVersion('1.1', 'x64', false, false, false)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     await expect(
       finder.useCpythonVersion('1.1', 'x64', false, false, true)
     ).resolves.toEqual({
@@ -262,7 +262,7 @@ describe('Finder tests', () => {
     // Check 1.1.0 version specifier does not fallback to '1.1.0-beta.2'
     await expect(
       finder.useCpythonVersion('1.1.0', 'x64', false, false, true)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
   });
 
   it('Errors if Python is not installed', async () => {

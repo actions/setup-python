@@ -9,7 +9,7 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-      
+
 jobs:
   test-setup-python:
     name: Test setup-python
@@ -18,71 +18,71 @@ jobs:
       matrix:
         operating-system: [ubuntu-20.04, windows-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Run with setup-python 2.7
-      uses: ./
-      with:
-        python-version: 2.7
-    - name: Verify 2.7
-      run: python __tests__/verify-python.py 2.7
+      - name: Run with setup-python 2.7
+        uses: ./
+        with:
+          python-version: 2.7
+      - name: Verify 2.7
+        run: python __tests__/verify-python.py 2.7
 
-    - name: Run with setup-python 3.5
-      uses: ./
-      with:
-        python-version: 3.5
-    - name: Verify 3.5
-      run: python __tests__/verify-python.py 3.5
+      - name: Run with setup-python 3.5
+        uses: ./
+        with:
+          python-version: 3.5
+      - name: Verify 3.5
+        run: python __tests__/verify-python.py 3.5
 
-    - name: Run with setup-python 3.6
-      uses: ./
-      with:
-        python-version: 3.6
-    - name: Verify 3.6
-      run: python __tests__/verify-python.py 3.6
+      - name: Run with setup-python 3.6
+        uses: ./
+        with:
+          python-version: 3.6
+      - name: Verify 3.6
+        run: python __tests__/verify-python.py 3.6
 
-    - name: Run with setup-python 3.7
-      uses: ./
-      with:
-        python-version: 3.7
-    - name: Verify 3.7
-      run: python __tests__/verify-python.py 3.7
+      - name: Run with setup-python 3.7
+        uses: ./
+        with:
+          python-version: 3.7
+      - name: Verify 3.7
+        run: python __tests__/verify-python.py 3.7
 
-    - name: Run with setup-python 3.8
-      uses: ./
-      with:
-        python-version: 3.8
-    - name: Verify 3.8
-      run: python __tests__/verify-python.py 3.8
+      - name: Run with setup-python 3.8
+        uses: ./
+        with:
+          python-version: 3.8
+      - name: Verify 3.8
+        run: python __tests__/verify-python.py 3.8
 
-    - name: Run with setup-python 3.7.5
-      uses: ./
-      with:
-        python-version: 3.7.5
-    - name: Verify 3.7.5
-      run: python __tests__/verify-python.py 3.7.5
+      - name: Run with setup-python 3.7.5
+        uses: ./
+        with:
+          python-version: 3.7.5
+      - name: Verify 3.7.5
+        run: python __tests__/verify-python.py 3.7.5
 
-    - name: Run with setup-python 3.6.7
-      uses: ./
-      with:
-        python-version: 3.6.7
-    - name: Verify 3.6.7
-      run: python __tests__/verify-python.py 3.6.7
+      - name: Run with setup-python 3.6.7
+        uses: ./
+        with:
+          python-version: 3.6.7
+      - name: Verify 3.6.7
+        run: python __tests__/verify-python.py 3.6.7
 
-    - name: Run with setup-python 3.8.1
-      uses: ./
-      with:
-        python-version: 3.8.1
-    - name: Verify 3.8.1
-      run: python __tests__/verify-python.py 3.8.1
+      - name: Run with setup-python 3.8.1
+        uses: ./
+        with:
+          python-version: 3.8.1
+      - name: Verify 3.8.1
+        run: python __tests__/verify-python.py 3.8.1
 
-    - name: Run with setup-python 3.10
-      id: cp310
-      uses: ./
-      with:
-        python-version: "3.10"
-    - name: Verify 3.10
-      run: python __tests__/verify-python.py 3.10
-    - name: Run python-path sample 3.10
-      run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
+      - name: Run with setup-python 3.10
+        id: cp310
+        uses: ./
+        with:
+          python-version: '3.10'
+      - name: Verify 3.10
+        run: python __tests__/verify-python.py 3.10
+      - name: Run python-path sample 3.10
+        run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
