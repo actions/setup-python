@@ -244,7 +244,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           dependencyFile
         ) as any; // Widening PipCache | PipenvCache | PoetryCache type to any allow us to change private property on the cacheDistributor to test value: "**/pyprojecttest.toml"
 
-        cacheDistributor.cacheDependencyBackupPath = 'some value';
+        cacheDistributor.cacheDependencyBackupPath = '**/pyprojecttest.toml';
 
         await expect(cacheDistributor.restoreCache()).rejects.toThrow();
       }
