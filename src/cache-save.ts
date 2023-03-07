@@ -43,7 +43,16 @@ async function saveCache(packageManager: string) {
     return;
   }
 
-  const cacheId = await cache.saveCache(cachePaths, primaryKey);
+  let cacheId = 0;
+
+  try {
+    cacheId = await cache.saveCache(cachePaths, primaryKey);
+  } catch (err) {
+    const message = (err as Error).message;
+    core.info(`[warning]${message}`);
+    return;
+  }
+
   if (cacheId == -1) {
     return;
   }

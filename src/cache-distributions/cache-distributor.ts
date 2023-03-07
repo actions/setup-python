@@ -39,13 +39,18 @@ abstract class CacheDistributor {
     const cachePath = await this.getCacheGlobalDirectories();
 
     core.saveState(State.CACHE_PATHS, cachePath);
-    core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
 
-    const matchedKey = await cache.restoreCache(
-      cachePath,
-      primaryKey,
-      restoreKey
-    );
+    let matchedKey: string | undefined;
+    try {
+      matchedKey = await cache.restoreCache(cachePath, primaryKey, restoreKey);
+    } catch (err) {
+      const message = (err as Error).message;
+      core.info(`[warning]${message}`);
+      core.setOutput('cache-hit', false);
+      return;
+    }
+
+    core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
 
     await this.handleLoadedCache();
 
