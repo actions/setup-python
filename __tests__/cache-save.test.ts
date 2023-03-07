@@ -241,7 +241,7 @@ describe('run', () => {
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
 
-    it('saves with error from toolkit, should fail workflow', async () => {
+    it('saves with error from toolkit, should not fail the workflow', async () => {
       inputs['cache'] = 'npm';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.STATE_CACHE_PRIMARY_KEY) {
@@ -263,7 +263,7 @@ describe('run', () => {
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith();
       expect(saveCacheSpy).toHaveBeenCalled();
-      expect(setFailedSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
     });
   });
 
