@@ -14,7 +14,7 @@ import {
   IS_WINDOWS
 } from '../src/utils';
 
-const manifestData = require('./data/pypy.json');
+import manifestData from './data/pypy.json';
 
 let architecture: string;
 if (IS_WINDOWS) {
@@ -294,7 +294,7 @@ describe('installPyPy', () => {
   it('throw if release is not found', async () => {
     await expect(
       installer.installPyPy('7.3.3', '3.6.17', architecture, false, undefined)
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `PyPy version 3.6.17 (7.3.3) with arch ${architecture} not found`
     );
 
@@ -338,7 +338,7 @@ describe('installPyPy', () => {
 
     await expect(
       installer.installPyPy('7.4.x', '3.6.12', architecture, false, undefined)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     await expect(
       installer.installPyPy('7.4.x', '3.6.12', architecture, true, undefined)
     ).resolves.toEqual({

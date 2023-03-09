@@ -116,22 +116,6 @@ describe('run', () => {
       );
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
-
-    it('should not save cache for pipenv', async () => {
-      inputs['cache'] = 'pipenv';
-
-      await run();
-
-      expect(getInputSpy).toHaveBeenCalled();
-      expect(debugSpy).toHaveBeenCalledWith(
-        `paths for caching are ${__dirname}`
-      );
-      expect(getStateSpy).toHaveBeenCalledTimes(3);
-      expect(infoSpy).toHaveBeenCalledWith(
-        `Cache hit occurred on the primary key ${requirementsHash}, not saving cache.`
-      );
-      expect(setFailedSpy).not.toHaveBeenCalled();
-    });
   });
 
   describe('action saves the cache', () => {

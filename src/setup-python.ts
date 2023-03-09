@@ -23,7 +23,7 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 }
 
 function resolveVersionInput() {
-  let versions = core.getMultilineInput('python-version');
+  const versions = core.getMultilineInput('python-version');
   let versionFile = core.getInput('python-version-file');
 
   if (versions.length && versionFile) {

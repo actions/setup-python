@@ -1,2 +1,1 @@
-const CACHE_DEPENDENCY_BACKUP_PATH: string = '**/pyproject.toml';
-export {CACHE_DEPENDENCY_BACKUP_PATH};
+export const CACHE_DEPENDENCY_BACKUP_PATH = '**/pyproject.toml';

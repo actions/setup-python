@@ -5,7 +5,6 @@ import * as exec from '@actions/exec';
 import * as io from '@actions/io';
 import {getCacheDistributor} from '../src/cache-distributions/cache-factory';
 import {State} from '../src/cache-distributions/cache-distributor';
-import * as constants from '../src/cache-distributions/constants';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
@@ -95,7 +94,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
       async packageManager => {
         expect(() =>
           getCacheDistributor(packageManager, '3.8.12', undefined)
-        ).toThrowError(`Caching for '${packageManager}' is not supported`);
+        ).toThrow(`Caching for '${packageManager}' is not supported`);
       }
     );
   });
@@ -210,7 +209,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           dependencyFile
         );
 
-        await expect(cacheDistributor.restoreCache()).rejects.toThrowError(
+        await expect(cacheDistributor.restoreCache()).rejects.toThrow(
           `No file in ${process.cwd()} matched to [${cacheDependencyPath
             .split('\n')
             .join(',')}], make sure you have checked out the target repository`
@@ -229,7 +228,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           pythonVersion,
           dependencyFile
         );
-        await expect(cacheDistributor.restoreCache()).resolves;
+        await expect(cacheDistributor.restoreCache()).resolves.not.toThrow();
       }
     );
 
@@ -239,16 +238,15 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
     ])(
       'Should throw an error as there is no default file `pyproject.toml` to use when requirements.txt is not specified',
       async (packageManager, pythonVersion, dependencyFile) => {
-        jest.mock('../src/cache-distributions/constants', () => ({
-          CACHE_DEPENDENCY_BACKUP_PATH: '**/pyprojecttest.toml'
-        }));
-
         const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
           dependencyFile
-        );
-        await expect(cacheDistributor.restoreCache()).resolves;
+        ) as any; // Widening PipCache | PipenvCache | PoetryCache type to any allow us to change private property on the cacheDistributor to test value: "**/pyprojecttest.toml"
+
+        cacheDistributor.cacheDependencyBackupPath = '**/pyprojecttest.toml';
+
+        await expect(cacheDistributor.restoreCache()).rejects.toThrow();
       }
     );
   });

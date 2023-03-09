@@ -63,7 +63,7 @@ export async function installPyPy(
   }
 
   const {foundAsset, resolvedPythonVersion, resolvedPyPyVersion} = releaseData;
-  let downloadUrl = `${foundAsset.download_url}`;
+  const downloadUrl = `${foundAsset.download_url}`;
 
   core.info(`Downloading PyPy from "${downloadUrl}" ...`);
 
@@ -143,7 +143,7 @@ async function createPyPySymlink(
   const pythonMinor = semver.minor(version);
   const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
   const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
-  let binaryExtension = IS_WINDOWS ? '.exe' : '';
+  const binaryExtension = IS_WINDOWS ? '.exe' : '';
 
   core.info('Creating symlinks...');
   createSymlinkInFolder(
