@@ -74,10 +74,9 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @param primaryKey an explicit key for restoring the cache
  * @param restoreKeys an optional ordered list of keys to use for restoring the cache if no cache hit occurred for key
  * @param downloadOptions cache download options
- * @param enableCrossOsArchive an optional boolean enabled to restore on windows any cache created on any platform
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
-function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
+function restoreCache(paths, primaryKey, restoreKeys, options) {
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
@@ -95,8 +94,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
         try {
             // path are needed to compute version
             const cacheEntry = yield cacheHttpClient.getCacheEntry(keys, paths, {
-                compressionMethod,
-                enableCrossOsArchive
+                compressionMethod
             });
             if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
                 // Cache not found
@@ -143,11 +141,10 @@ exports.restoreCache = restoreCache;
  *
  * @param paths a list of file paths to be cached
  * @param key an explicit key for restoring the cache
- * @param enableCrossOsArchive an optional boolean enabled to save cache on windows which could be restored on any platform
  * @param options cache upload options
  * @returns number returns cacheId if the cache was saved successfully and throws an error if save fails
  */
-function saveCache(paths, key, options, enableCrossOsArchive = false) {
+function saveCache(paths, key, options) {
     var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
@@ -178,7 +175,6 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
             core.debug('Reserving Cache');
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
                 compressionMethod,
-                enableCrossOsArchive,
                 cacheSize: archiveFileSize
             });
             if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) {
@@ -251,6 +247,7 @@ const crypto = __importStar(__nccwpck_require__(6113));
 const fs = __importStar(__nccwpck_require__(7147));
 const url_1 = __nccwpck_require__(7310);
 const utils = __importStar(__nccwpck_require__(1518));
+const constants_1 = __nccwpck_require__(8840);
 const downloadUtils_1 = __nccwpck_require__(5500);
 const options_1 = __nccwpck_require__(6215);
 const requestUtils_1 = __nccwpck_require__(3981);
@@ -280,17 +277,10 @@ function createHttpClient() {
     const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
     return new http_client_1.HttpClient('actions/cache', [bearerCredentialHandler], getRequestOptions());
 }
-function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false) {
-    const components = paths;
-    // Add compression method to cache version to restore
-    // compressed cache as per compression method
-    if (compressionMethod) {
-        components.push(compressionMethod);
-    }
-    // Only check for windows platforms if enableCrossOsArchive is false
-    if (process.platform === 'win32' && !enableCrossOsArchive) {
-        components.push('windows-only');
-    }
+function getCacheVersion(paths, compressionMethod) {
+    const components = paths.concat(!compressionMethod || compressionMethod === constants_1.CompressionMethod.Gzip
+        ? []
+        : [compressionMethod]);
     // Add salt to cache version to support breaking changes in cache entry
     components.push(versionSalt);
     return crypto
@@ -302,15 +292,10 @@ exports.getCacheVersion = getCacheVersion;
 function getCacheEntry(keys, paths, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
+        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
         const resource = `cache?keys=${encodeURIComponent(keys.join(','))}&version=${version}`;
         const response = yield requestUtils_1.retryTypedResponse('getCacheEntry', () => __awaiter(this, void 0, void 0, function* () { return httpClient.getJson(getCacheApiUrl(resource)); }));
-        // Cache not found
         if (response.statusCode === 204) {
-            // List cache for primary key only if cache miss occurs
-            if (core.isDebug()) {
-                yield printCachesListForDiagnostics(keys[0], httpClient, version);
-            }
             return null;
         }
         if (!requestUtils_1.isSuccessStatusCode(response.statusCode)) {
@@ -319,7 +304,6 @@ function getCacheEntry(keys, paths, options) {
         const cacheResult = response.result;
         const cacheDownloadUrl = cacheResult === null || cacheResult === void 0 ? void 0 : cacheResult.archiveLocation;
         if (!cacheDownloadUrl) {
-            // Cache achiveLocation not found. This should never happen, and hence bail out.
             throw new Error('Cache not found.');
         }
         core.setSecret(cacheDownloadUrl);
@@ -329,22 +313,6 @@ function getCacheEntry(keys, paths, options) {
     });
 }
 exports.getCacheEntry = getCacheEntry;
-function printCachesListForDiagnostics(key, httpClient, version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const resource = `caches?key=${encodeURIComponent(key)}`;
-        const response = yield requestUtils_1.retryTypedResponse('listCache', () => __awaiter(this, void 0, void 0, function* () { return httpClient.getJson(getCacheApiUrl(resource)); }));
-        if (response.statusCode === 200) {
-            const cacheListResult = response.result;
-            const totalCount = cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.totalCount;
-            if (totalCount && totalCount > 0) {
-                core.debug(`No matching cache found for cache key '${key}', version '${version} and scope ${process.env['GITHUB_REF']}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key \nOther caches with similar key:`);
-                for (const cacheEntry of (cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.artifactCaches) || []) {
-                    core.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
-                }
-            }
-        }
-    });
-}
 function downloadCache(archiveLocation, archivePath, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const archiveUrl = new url_1.URL(archiveLocation);
@@ -365,7 +333,7 @@ exports.downloadCache = downloadCache;
 function reserveCache(key, paths, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
+        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
         const reserveCacheRequest = {
             key,
             version,
@@ -583,13 +551,12 @@ function unlinkFile(filePath) {
     });
 }
 exports.unlinkFile = unlinkFile;
-function getVersion(app, additionalArgs = []) {
+function getVersion(app) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug(`Checking ${app} --version`);
         let versionOutput = '';
-        additionalArgs.push('--version');
-        core.debug(`Checking ${app} ${additionalArgs.join(' ')}`);
         try {
-            yield exec.exec(`${app}`, additionalArgs, {
+            yield exec.exec(`${app} --version`, [], {
                 ignoreReturnCode: true,
                 silent: true,
                 listeners: {
@@ -609,14 +576,23 @@ function getVersion(app, additionalArgs = []) {
 // Use zstandard if possible to maximize cache performance
 function getCompressionMethod() {
     return __awaiter(this, void 0, void 0, function* () {
-        const versionOutput = yield getVersion('zstd', ['--quiet']);
-        const version = semver.clean(versionOutput);
-        core.debug(`zstd version: ${version}`);
-        if (versionOutput === '') {
+        if (process.platform === 'win32' && !(yield isGnuTarInstalled())) {
+            // Disable zstd due to bug https://github.com/actions/cache/issues/301
             return constants_1.CompressionMethod.Gzip;
         }
-        else {
+        const versionOutput = yield getVersion('zstd');
+        const version = semver.clean(versionOutput);
+        if (!versionOutput.toLowerCase().includes('zstd command line interface')) {
+            // zstd is not installed
+            return constants_1.CompressionMethod.Gzip;
+        }
+        else if (!version || semver.lt(version, 'v1.3.2')) {
+            // zstd is installed but using a version earlier than v1.3.2
+            // v1.3.2 is required to use the `--long` options in zstd
             return constants_1.CompressionMethod.ZstdWithoutLong;
+        }
+        else {
+            return constants_1.CompressionMethod.Zstd;
         }
     });
 }
@@ -627,16 +603,13 @@ function getCacheFileName(compressionMethod) {
         : constants_1.CacheFilename.Zstd;
 }
 exports.getCacheFileName = getCacheFileName;
-function getGnuTarPathOnWindows() {
+function isGnuTarInstalled() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (fs.existsSync(constants_1.GnuTarPathOnWindows)) {
-            return constants_1.GnuTarPathOnWindows;
-        }
         const versionOutput = yield getVersion('tar');
-        return versionOutput.toLowerCase().includes('gnu tar') ? io.which('tar') : '';
+        return versionOutput.toLowerCase().includes('gnu tar');
     });
 }
-exports.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
+exports.isGnuTarInstalled = isGnuTarInstalled;
 function assertDefined(name, value) {
     if (value === undefined) {
         throw Error(`Expected ${name} but value was undefiend`);
@@ -672,11 +645,6 @@ var CompressionMethod;
     CompressionMethod["ZstdWithoutLong"] = "zstd-without-long";
     CompressionMethod["Zstd"] = "zstd";
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
-var ArchiveToolType;
-(function (ArchiveToolType) {
-    ArchiveToolType["GNU"] = "gnu";
-    ArchiveToolType["BSD"] = "bsd";
-})(ArchiveToolType = exports.ArchiveToolType || (exports.ArchiveToolType = {}));
 // The default number of retry attempts.
 exports.DefaultRetryAttempts = 2;
 // The default delay in milliseconds between retry attempts.
@@ -685,12 +653,6 @@ exports.DefaultRetryDelay = 5000;
 // over the socket during this period, the socket is destroyed and the download
 // is aborted.
 exports.SocketTimeout = 5000;
-// The default path of GNUtar on hosted Windows runners
-exports.GnuTarPathOnWindows = `${process.env['PROGRAMFILES']}\\Git\\usr\\bin\\tar.exe`;
-// The default path of BSDtar on hosted Windows runners
-exports.SystemTarPathOnWindows = `${process.env['SYSTEMDRIVE']}\\Windows\\System32\\tar.exe`;
-exports.TarFilename = 'cache.tar';
-exports.ManifestFilename = 'manifest.txt';
 //# sourceMappingURL=constants.js.map
 
 /***/ }),
@@ -1109,19 +1071,21 @@ const path = __importStar(__nccwpck_require__(1017));
 const utils = __importStar(__nccwpck_require__(1518));
 const constants_1 = __nccwpck_require__(8840);
 const IS_WINDOWS = process.platform === 'win32';
-// Returns tar path and type: BSD or GNU
-function getTarPath() {
+function getTarPath(args, compressionMethod) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (process.platform) {
             case 'win32': {
-                const gnuTar = yield utils.getGnuTarPathOnWindows();
-                const systemTar = constants_1.SystemTarPathOnWindows;
-                if (gnuTar) {
-                    // Use GNUtar as default on windows
-                    return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
+                const systemTar = `${process.env['windir']}\\System32\\tar.exe`;
+                if (compressionMethod !== constants_1.CompressionMethod.Gzip) {
+                    // We only use zstandard compression on windows when gnu tar is installed due to
+                    // a bug with compressing large files with bsdtar + zstd
+                    args.push('--force-local');
                 }
                 else if (fs_1.existsSync(systemTar)) {
-                    return { path: systemTar, type: constants_1.ArchiveToolType.BSD };
+                    return systemTar;
+                }
+                else if (yield utils.isGnuTarInstalled()) {
+                    args.push('--force-local');
                 }
                 break;
             }
@@ -1129,92 +1093,25 @@ function getTarPath() {
                 const gnuTar = yield io.which('gtar', false);
                 if (gnuTar) {
                     // fix permission denied errors when extracting BSD tar archive with GNU tar - https://github.com/actions/cache/issues/527
-                    return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
+                    args.push('--delay-directory-restore');
+                    return gnuTar;
                 }
-                else {
-                    return {
-                        path: yield io.which('tar', true),
-                        type: constants_1.ArchiveToolType.BSD
-                    };
-                }
+                break;
             }
             default:
                 break;
         }
-        // Default assumption is GNU tar is present in path
-        return {
-            path: yield io.which('tar', true),
-            type: constants_1.ArchiveToolType.GNU
-        };
+        return yield io.which('tar', true);
     });
 }
-// Return arguments for tar as per tarPath, compressionMethod, method type and os
-function getTarArgs(tarPath, compressionMethod, type, archivePath = '') {
+function execTar(args, compressionMethod, cwd) {
     return __awaiter(this, void 0, void 0, function* () {
-        const args = [`"${tarPath.path}"`];
-        const cacheFileName = utils.getCacheFileName(compressionMethod);
-        const tarFile = 'cache.tar';
-        const workingDirectory = getWorkingDirectory();
-        // Speficic args for BSD tar on windows for workaround
-        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD &&
-            compressionMethod !== constants_1.CompressionMethod.Gzip &&
-            IS_WINDOWS;
-        // Method specific args
-        switch (type) {
-            case 'create':
-                args.push('--posix', '-cf', BSD_TAR_ZSTD
-                    ? tarFile
-                    : cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'), '--exclude', BSD_TAR_ZSTD
-                    ? tarFile
-                    : cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'), '-P', '-C', workingDirectory.replace(new RegExp(`\\${path.sep}`, 'g'), '/'), '--files-from', constants_1.ManifestFilename);
-                break;
-            case 'extract':
-                args.push('-xf', BSD_TAR_ZSTD
-                    ? tarFile
-                    : archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/'), '-P', '-C', workingDirectory.replace(new RegExp(`\\${path.sep}`, 'g'), '/'));
-                break;
-            case 'list':
-                args.push('-tf', BSD_TAR_ZSTD
-                    ? tarFile
-                    : archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/'), '-P');
-                break;
+        try {
+            yield exec_1.exec(`"${yield getTarPath(args, compressionMethod)}"`, args, { cwd });
         }
-        // Platform specific args
-        if (tarPath.type === constants_1.ArchiveToolType.GNU) {
-            switch (process.platform) {
-                case 'win32':
-                    args.push('--force-local');
-                    break;
-                case 'darwin':
-                    args.push('--delay-directory-restore');
-                    break;
-            }
+        catch (error) {
+            throw new Error(`Tar failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
         }
-        return args;
-    });
-}
-// Returns commands to run tar and compression program
-function getCommands(compressionMethod, type, archivePath = '') {
-    return __awaiter(this, void 0, void 0, function* () {
-        let args;
-        const tarPath = yield getTarPath();
-        const tarArgs = yield getTarArgs(tarPath, compressionMethod, type, archivePath);
-        const compressionArgs = type !== 'create'
-            ? yield getDecompressionProgram(tarPath, compressionMethod, archivePath)
-            : yield getCompressionProgram(tarPath, compressionMethod);
-        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD &&
-            compressionMethod !== constants_1.CompressionMethod.Gzip &&
-            IS_WINDOWS;
-        if (BSD_TAR_ZSTD && type !== 'create') {
-            args = [[...compressionArgs].join(' '), [...tarArgs].join(' ')];
-        }
-        else {
-            args = [[...tarArgs].join(' '), [...compressionArgs].join(' ')];
-        }
-        if (BSD_TAR_ZSTD) {
-            return args;
-        }
-        return [args.join(' ')];
     });
 }
 function getWorkingDirectory() {
@@ -1222,119 +1119,91 @@ function getWorkingDirectory() {
     return (_a = process.env['GITHUB_WORKSPACE']) !== null && _a !== void 0 ? _a : process.cwd();
 }
 // Common function for extractTar and listTar to get the compression method
-function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // -d: Decompress.
-        // unzstd is equivalent to 'zstd -d'
-        // --long=#: Enables long distance matching with # bits. Maximum is 30 (1GB) on 32-bit OS and 31 (2GB) on 64-bit.
-        // Using 30 here because we also support 32-bit self-hosted runners.
-        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD &&
-            compressionMethod !== constants_1.CompressionMethod.Gzip &&
-            IS_WINDOWS;
-        switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-                return BSD_TAR_ZSTD
-                    ? [
-                        'zstd -d --long=30 --force -o',
-                        constants_1.TarFilename,
-                        archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/')
-                    ]
-                    : [
-                        '--use-compress-program',
-                        IS_WINDOWS ? '"zstd -d --long=30"' : 'unzstd --long=30'
-                    ];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-                return BSD_TAR_ZSTD
-                    ? [
-                        'zstd -d --force -o',
-                        constants_1.TarFilename,
-                        archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/')
-                    ]
-                    : ['--use-compress-program', IS_WINDOWS ? '"zstd -d"' : 'unzstd'];
-            default:
-                return ['-z'];
-        }
-    });
+function getCompressionProgram(compressionMethod) {
+    // -d: Decompress.
+    // unzstd is equivalent to 'zstd -d'
+    // --long=#: Enables long distance matching with # bits. Maximum is 30 (1GB) on 32-bit OS and 31 (2GB) on 64-bit.
+    // Using 30 here because we also support 32-bit self-hosted runners.
+    switch (compressionMethod) {
+        case constants_1.CompressionMethod.Zstd:
+            return [
+                '--use-compress-program',
+                IS_WINDOWS ? 'zstd -d --long=30' : 'unzstd --long=30'
+            ];
+        case constants_1.CompressionMethod.ZstdWithoutLong:
+            return ['--use-compress-program', IS_WINDOWS ? 'zstd -d' : 'unzstd'];
+        default:
+            return ['-z'];
+    }
 }
-// Used for creating the archive
-// -T#: Compress using # working thread. If # is 0, attempt to detect and use the number of physical CPU cores.
-// zstdmt is equivalent to 'zstd -T0'
-// --long=#: Enables long distance matching with # bits. Maximum is 30 (1GB) on 32-bit OS and 31 (2GB) on 64-bit.
-// Using 30 here because we also support 32-bit self-hosted runners.
-// Long range mode is added to zstd in v1.3.2 release, so we will not use --long in older version of zstd.
-function getCompressionProgram(tarPath, compressionMethod) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const cacheFileName = utils.getCacheFileName(compressionMethod);
-        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD &&
-            compressionMethod !== constants_1.CompressionMethod.Gzip &&
-            IS_WINDOWS;
-        switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-                return BSD_TAR_ZSTD
-                    ? [
-                        'zstd -T0 --long=30 --force -o',
-                        cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
-                        constants_1.TarFilename
-                    ]
-                    : [
-                        '--use-compress-program',
-                        IS_WINDOWS ? '"zstd -T0 --long=30"' : 'zstdmt --long=30'
-                    ];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-                return BSD_TAR_ZSTD
-                    ? [
-                        'zstd -T0 --force -o',
-                        cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
-                        constants_1.TarFilename
-                    ]
-                    : ['--use-compress-program', IS_WINDOWS ? '"zstd -T0"' : 'zstdmt'];
-            default:
-                return ['-z'];
-        }
-    });
-}
-// Executes all commands as separate processes
-function execCommands(commands, cwd) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (const command of commands) {
-            try {
-                yield exec_1.exec(command, undefined, {
-                    cwd,
-                    env: Object.assign(Object.assign({}, process.env), { MSYS: 'winsymlinks:nativestrict' })
-                });
-            }
-            catch (error) {
-                throw new Error(`${command.split(' ')[0]} failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
-            }
-        }
-    });
-}
-// List the contents of a tar
 function listTar(archivePath, compressionMethod) {
     return __awaiter(this, void 0, void 0, function* () {
-        const commands = yield getCommands(compressionMethod, 'list', archivePath);
-        yield execCommands(commands);
+        const args = [
+            ...getCompressionProgram(compressionMethod),
+            '-tf',
+            archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
+            '-P'
+        ];
+        yield execTar(args, compressionMethod);
     });
 }
 exports.listTar = listTar;
-// Extract a tar
 function extractTar(archivePath, compressionMethod) {
     return __awaiter(this, void 0, void 0, function* () {
         // Create directory to extract tar into
         const workingDirectory = getWorkingDirectory();
         yield io.mkdirP(workingDirectory);
-        const commands = yield getCommands(compressionMethod, 'extract', archivePath);
-        yield execCommands(commands);
+        const args = [
+            ...getCompressionProgram(compressionMethod),
+            '-xf',
+            archivePath.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
+            '-P',
+            '-C',
+            workingDirectory.replace(new RegExp(`\\${path.sep}`, 'g'), '/')
+        ];
+        yield execTar(args, compressionMethod);
     });
 }
 exports.extractTar = extractTar;
-// Create a tar
 function createTar(archiveFolder, sourceDirectories, compressionMethod) {
     return __awaiter(this, void 0, void 0, function* () {
         // Write source directories to manifest.txt to avoid command length limits
-        fs_1.writeFileSync(path.join(archiveFolder, constants_1.ManifestFilename), sourceDirectories.join('\n'));
-        const commands = yield getCommands(compressionMethod, 'create');
-        yield execCommands(commands, archiveFolder);
+        const manifestFilename = 'manifest.txt';
+        const cacheFileName = utils.getCacheFileName(compressionMethod);
+        fs_1.writeFileSync(path.join(archiveFolder, manifestFilename), sourceDirectories.join('\n'));
+        const workingDirectory = getWorkingDirectory();
+        // -T#: Compress using # working thread. If # is 0, attempt to detect and use the number of physical CPU cores.
+        // zstdmt is equivalent to 'zstd -T0'
+        // --long=#: Enables long distance matching with # bits. Maximum is 30 (1GB) on 32-bit OS and 31 (2GB) on 64-bit.
+        // Using 30 here because we also support 32-bit self-hosted runners.
+        // Long range mode is added to zstd in v1.3.2 release, so we will not use --long in older version of zstd.
+        function getCompressionProgram() {
+            switch (compressionMethod) {
+                case constants_1.CompressionMethod.Zstd:
+                    return [
+                        '--use-compress-program',
+                        IS_WINDOWS ? 'zstd -T0 --long=30' : 'zstdmt --long=30'
+                    ];
+                case constants_1.CompressionMethod.ZstdWithoutLong:
+                    return ['--use-compress-program', IS_WINDOWS ? 'zstd -T0' : 'zstdmt'];
+                default:
+                    return ['-z'];
+            }
+        }
+        const args = [
+            '--posix',
+            ...getCompressionProgram(),
+            '-cf',
+            cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
+            '--exclude',
+            cacheFileName.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
+            '-P',
+            '-C',
+            workingDirectory.replace(new RegExp(`\\${path.sep}`, 'g'), '/'),
+            '--files-from',
+            manifestFilename
+        ];
+        yield execTar(args, compressionMethod, archiveFolder);
     });
 }
 exports.createTar = createTar;
@@ -12664,18 +12533,19 @@ function coerce (version, options) {
 /***/ }),
 
 /***/ 2557:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
+var tslib = __nccwpck_require__(9268);
+
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-/// <reference path="../shims-public.d.ts" />
-const listenersMap = new WeakMap();
-const abortedMap = new WeakMap();
+var listenersMap = new WeakMap();
+var abortedMap = new WeakMap();
 /**
  * An aborter instance implements AbortSignal interface, can abort HTTP requests.
  *
@@ -12689,8 +12559,8 @@ const abortedMap = new WeakMap();
  * await doAsyncWork(AbortSignal.none);
  * ```
  */
-class AbortSignal {
-    constructor() {
+var AbortSignal = /** @class */ (function () {
+    function AbortSignal() {
         /**
          * onabort event listener.
          */
@@ -12698,65 +12568,74 @@ class AbortSignal {
         listenersMap.set(this, []);
         abortedMap.set(this, false);
     }
-    /**
-     * Status of whether aborted or not.
-     *
-     * @readonly
-     */
-    get aborted() {
-        if (!abortedMap.has(this)) {
-            throw new TypeError("Expected `this` to be an instance of AbortSignal.");
-        }
-        return abortedMap.get(this);
-    }
-    /**
-     * Creates a new AbortSignal instance that will never be aborted.
-     *
-     * @readonly
-     */
-    static get none() {
-        return new AbortSignal();
-    }
+    Object.defineProperty(AbortSignal.prototype, "aborted", {
+        /**
+         * Status of whether aborted or not.
+         *
+         * @readonly
+         */
+        get: function () {
+            if (!abortedMap.has(this)) {
+                throw new TypeError("Expected `this` to be an instance of AbortSignal.");
+            }
+            return abortedMap.get(this);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(AbortSignal, "none", {
+        /**
+         * Creates a new AbortSignal instance that will never be aborted.
+         *
+         * @readonly
+         */
+        get: function () {
+            return new AbortSignal();
+        },
+        enumerable: false,
+        configurable: true
+    });
     /**
      * Added new "abort" event listener, only support "abort" event.
      *
      * @param _type - Only support "abort" event
      * @param listener - The listener to be added
      */
-    addEventListener(
+    AbortSignal.prototype.addEventListener = function (
     // tslint:disable-next-line:variable-name
     _type, listener) {
         if (!listenersMap.has(this)) {
             throw new TypeError("Expected `this` to be an instance of AbortSignal.");
         }
-        const listeners = listenersMap.get(this);
+        var listeners = listenersMap.get(this);
         listeners.push(listener);
-    }
+    };
     /**
      * Remove "abort" event listener, only support "abort" event.
      *
      * @param _type - Only support "abort" event
      * @param listener - The listener to be removed
      */
-    removeEventListener(
+    AbortSignal.prototype.removeEventListener = function (
     // tslint:disable-next-line:variable-name
     _type, listener) {
         if (!listenersMap.has(this)) {
             throw new TypeError("Expected `this` to be an instance of AbortSignal.");
         }
-        const listeners = listenersMap.get(this);
-        const index = listeners.indexOf(listener);
+        var listeners = listenersMap.get(this);
+        var index = listeners.indexOf(listener);
         if (index > -1) {
             listeners.splice(index, 1);
         }
-    }
+    };
     /**
      * Dispatches a synthetic event to the AbortSignal.
      */
-    dispatchEvent(_event) {
+    AbortSignal.prototype.dispatchEvent = function (_event) {
         throw new Error("This is a stub dispatchEvent implementation that should not be used.  It only exists for type-checking purposes.");
-    }
-}
+    };
+    return AbortSignal;
+}());
 /**
  * Helper to trigger an abort event immediately, the onabort and all abort event listeners will be triggered.
  * Will try to trigger abort event for all linked AbortSignal nodes.
@@ -12774,12 +12653,12 @@ function abortSignal(signal) {
     if (signal.onabort) {
         signal.onabort.call(signal);
     }
-    const listeners = listenersMap.get(signal);
+    var listeners = listenersMap.get(signal);
     if (listeners) {
         // Create a copy of listeners so mutations to the array
         // (e.g. via removeListener calls) don't affect the listeners
         // we invoke.
-        listeners.slice().forEach((listener) => {
+        listeners.slice().forEach(function (listener) {
             listener.call(signal, { type: "abort" });
         });
     }
@@ -12805,12 +12684,15 @@ function abortSignal(signal) {
  * }
  * ```
  */
-class AbortError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "AbortError";
+var AbortError = /** @class */ (function (_super) {
+    tslib.__extends(AbortError, _super);
+    function AbortError(message) {
+        var _this = _super.call(this, message) || this;
+        _this.name = "AbortError";
+        return _this;
     }
-}
+    return AbortError;
+}(Error));
 /**
  * An AbortController provides an AbortSignal and the associated controls to signal
  * that an asynchronous operation should be aborted.
@@ -12845,9 +12727,10 @@ class AbortError extends Error {
  * await doAsyncWork(aborter.withTimeout(25 * 1000));
  * ```
  */
-class AbortController {
+var AbortController = /** @class */ (function () {
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(parentSignals) {
+    function AbortController(parentSignals) {
+        var _this = this;
         this._signal = new AbortSignal();
         if (!parentSignals) {
             return;
@@ -12857,7 +12740,8 @@ class AbortController {
             // eslint-disable-next-line prefer-rest-params
             parentSignals = arguments;
         }
-        for (const parentSignal of parentSignals) {
+        for (var _i = 0, parentSignals_1 = parentSignals; _i < parentSignals_1.length; _i++) {
+            var parentSignal = parentSignals_1[_i];
             // if the parent signal has already had abort() called,
             // then call abort on this signal as well.
             if (parentSignal.aborted) {
@@ -12865,47 +12749,365 @@ class AbortController {
             }
             else {
                 // when the parent signal aborts, this signal should as well.
-                parentSignal.addEventListener("abort", () => {
-                    this.abort();
+                parentSignal.addEventListener("abort", function () {
+                    _this.abort();
                 });
             }
         }
     }
-    /**
-     * The AbortSignal associated with this controller that will signal aborted
-     * when the abort method is called on this controller.
-     *
-     * @readonly
-     */
-    get signal() {
-        return this._signal;
-    }
+    Object.defineProperty(AbortController.prototype, "signal", {
+        /**
+         * The AbortSignal associated with this controller that will signal aborted
+         * when the abort method is called on this controller.
+         *
+         * @readonly
+         */
+        get: function () {
+            return this._signal;
+        },
+        enumerable: false,
+        configurable: true
+    });
     /**
      * Signal that any operations passed this controller's associated abort signal
      * to cancel any remaining work and throw an `AbortError`.
      */
-    abort() {
+    AbortController.prototype.abort = function () {
         abortSignal(this._signal);
-    }
+    };
     /**
      * Creates a new AbortSignal instance that will abort after the provided ms.
      * @param ms - Elapsed time in milliseconds to trigger an abort.
      */
-    static timeout(ms) {
-        const signal = new AbortSignal();
-        const timer = setTimeout(abortSignal, ms, signal);
+    AbortController.timeout = function (ms) {
+        var signal = new AbortSignal();
+        var timer = setTimeout(abortSignal, ms, signal);
         // Prevent the active Timer from keeping the Node.js event loop active.
         if (typeof timer.unref === "function") {
             timer.unref();
         }
         return signal;
-    }
-}
+    };
+    return AbortController;
+}());
 
 exports.AbortController = AbortController;
 exports.AbortError = AbortError;
 exports.AbortSignal = AbortSignal;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 9268:
+/***/ ((module) => {
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global global, define, System, Reflect, Promise */
+var __extends;
+var __assign;
+var __rest;
+var __decorate;
+var __param;
+var __metadata;
+var __awaiter;
+var __generator;
+var __exportStar;
+var __values;
+var __read;
+var __spread;
+var __spreadArrays;
+var __spreadArray;
+var __await;
+var __asyncGenerator;
+var __asyncDelegator;
+var __asyncValues;
+var __makeTemplateObject;
+var __importStar;
+var __importDefault;
+var __classPrivateFieldGet;
+var __classPrivateFieldSet;
+var __createBinding;
+(function (factory) {
+    var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
+    if (typeof define === "function" && define.amd) {
+        define("tslib", ["exports"], function (exports) { factory(createExporter(root, createExporter(exports))); });
+    }
+    else if ( true && typeof module.exports === "object") {
+        factory(createExporter(root, createExporter(module.exports)));
+    }
+    else {
+        factory(createExporter(root));
+    }
+    function createExporter(exports, previous) {
+        if (exports !== root) {
+            if (typeof Object.create === "function") {
+                Object.defineProperty(exports, "__esModule", { value: true });
+            }
+            else {
+                exports.__esModule = true;
+            }
+        }
+        return function (id, v) { return exports[id] = previous ? previous(id, v) : v; };
+    }
+})
+(function (exporter) {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+
+    __extends = function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+
+    __assign = Object.assign || function (t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+
+    __rest = function (s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+            t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                    t[p[i]] = s[p[i]];
+            }
+        return t;
+    };
+
+    __decorate = function (decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    };
+
+    __param = function (paramIndex, decorator) {
+        return function (target, key) { decorator(target, key, paramIndex); }
+    };
+
+    __metadata = function (metadataKey, metadataValue) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+    };
+
+    __awaiter = function (thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    };
+
+    __generator = function (thisArg, body) {
+        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+        function verb(n) { return function (v) { return step([n, v]); }; }
+        function step(op) {
+            if (f) throw new TypeError("Generator is already executing.");
+            while (_) try {
+                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [op[0] & 2, t.value];
+                switch (op[0]) {
+                    case 0: case 1: t = op; break;
+                    case 4: _.label++; return { value: op[1], done: false };
+                    case 5: _.label++; y = op[1]; op = [0]; continue;
+                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop(); continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        }
+    };
+
+    __exportStar = function(m, o) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p)) __createBinding(o, m, p);
+    };
+
+    __createBinding = Object.create ? (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    }) : (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+    });
+
+    __values = function (o) {
+        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+        if (m) return m.call(o);
+        if (o && typeof o.length === "number") return {
+            next: function () {
+                if (o && i >= o.length) o = void 0;
+                return { value: o && o[i++], done: !o };
+            }
+        };
+        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+    };
+
+    __read = function (o, n) {
+        var m = typeof Symbol === "function" && o[Symbol.iterator];
+        if (!m) return o;
+        var i = m.call(o), r, ar = [], e;
+        try {
+            while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+        }
+        catch (error) { e = { error: error }; }
+        finally {
+            try {
+                if (r && !r.done && (m = i["return"])) m.call(i);
+            }
+            finally { if (e) throw e.error; }
+        }
+        return ar;
+    };
+
+    /** @deprecated */
+    __spread = function () {
+        for (var ar = [], i = 0; i < arguments.length; i++)
+            ar = ar.concat(__read(arguments[i]));
+        return ar;
+    };
+
+    /** @deprecated */
+    __spreadArrays = function () {
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+        for (var r = Array(s), k = 0, i = 0; i < il; i++)
+            for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+                r[k] = a[j];
+        return r;
+    };
+
+    __spreadArray = function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+
+    __await = function (v) {
+        return this instanceof __await ? (this.v = v, this) : new __await(v);
+    };
+
+    __asyncGenerator = function (thisArg, _arguments, generator) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var g = generator.apply(thisArg, _arguments || []), i, q = [];
+        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+        function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+        function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+        function fulfill(value) { resume("next", value); }
+        function reject(value) { resume("throw", value); }
+        function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+    };
+
+    __asyncDelegator = function (o) {
+        var i, p;
+        return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+    };
+
+    __asyncValues = function (o) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var m = o[Symbol.asyncIterator], i;
+        return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+        function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+    };
+
+    __makeTemplateObject = function (cooked, raw) {
+        if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+        return cooked;
+    };
+
+    var __setModuleDefault = Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+        o["default"] = v;
+    };
+
+    __importStar = function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+
+    __importDefault = function (mod) {
+        return (mod && mod.__esModule) ? mod : { "default": mod };
+    };
+
+    __classPrivateFieldGet = function (receiver, state, kind, f) {
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+    };
+
+    __classPrivateFieldSet = function (receiver, state, value, kind, f) {
+        if (kind === "m") throw new TypeError("Private method is not writable");
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+    };
+
+    exporter("__extends", __extends);
+    exporter("__assign", __assign);
+    exporter("__rest", __rest);
+    exporter("__decorate", __decorate);
+    exporter("__param", __param);
+    exporter("__metadata", __metadata);
+    exporter("__awaiter", __awaiter);
+    exporter("__generator", __generator);
+    exporter("__exportStar", __exportStar);
+    exporter("__createBinding", __createBinding);
+    exporter("__values", __values);
+    exporter("__read", __read);
+    exporter("__spread", __spread);
+    exporter("__spreadArrays", __spreadArrays);
+    exporter("__spreadArray", __spreadArray);
+    exporter("__await", __await);
+    exporter("__asyncGenerator", __asyncGenerator);
+    exporter("__asyncDelegator", __asyncDelegator);
+    exporter("__asyncValues", __asyncValues);
+    exporter("__makeTemplateObject", __makeTemplateObject);
+    exporter("__importStar", __importStar);
+    exporter("__importDefault", __importDefault);
+    exporter("__classPrivateFieldGet", __classPrivateFieldGet);
+    exporter("__classPrivateFieldSet", __classPrivateFieldSet);
+});
 
 
 /***/ }),
@@ -49047,348 +49249,6 @@ DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
 
 /***/ }),
 
-/***/ 7129:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-// A linked list to keep track of recently-used-ness
-const Yallist = __nccwpck_require__(665)
-
-const MAX = Symbol('max')
-const LENGTH = Symbol('length')
-const LENGTH_CALCULATOR = Symbol('lengthCalculator')
-const ALLOW_STALE = Symbol('allowStale')
-const MAX_AGE = Symbol('maxAge')
-const DISPOSE = Symbol('dispose')
-const NO_DISPOSE_ON_SET = Symbol('noDisposeOnSet')
-const LRU_LIST = Symbol('lruList')
-const CACHE = Symbol('cache')
-const UPDATE_AGE_ON_GET = Symbol('updateAgeOnGet')
-
-const naiveLength = () => 1
-
-// lruList is a yallist where the head is the youngest
-// item, and the tail is the oldest.  the list contains the Hit
-// objects as the entries.
-// Each Hit object has a reference to its Yallist.Node.  This
-// never changes.
-//
-// cache is a Map (or PseudoMap) that matches the keys to
-// the Yallist.Node object.
-class LRUCache {
-  constructor (options) {
-    if (typeof options === 'number')
-      options = { max: options }
-
-    if (!options)
-      options = {}
-
-    if (options.max && (typeof options.max !== 'number' || options.max < 0))
-      throw new TypeError('max must be a non-negative number')
-    // Kind of weird to have a default max of Infinity, but oh well.
-    const max = this[MAX] = options.max || Infinity
-
-    const lc = options.length || naiveLength
-    this[LENGTH_CALCULATOR] = (typeof lc !== 'function') ? naiveLength : lc
-    this[ALLOW_STALE] = options.stale || false
-    if (options.maxAge && typeof options.maxAge !== 'number')
-      throw new TypeError('maxAge must be a number')
-    this[MAX_AGE] = options.maxAge || 0
-    this[DISPOSE] = options.dispose
-    this[NO_DISPOSE_ON_SET] = options.noDisposeOnSet || false
-    this[UPDATE_AGE_ON_GET] = options.updateAgeOnGet || false
-    this.reset()
-  }
-
-  // resize the cache when the max changes.
-  set max (mL) {
-    if (typeof mL !== 'number' || mL < 0)
-      throw new TypeError('max must be a non-negative number')
-
-    this[MAX] = mL || Infinity
-    trim(this)
-  }
-  get max () {
-    return this[MAX]
-  }
-
-  set allowStale (allowStale) {
-    this[ALLOW_STALE] = !!allowStale
-  }
-  get allowStale () {
-    return this[ALLOW_STALE]
-  }
-
-  set maxAge (mA) {
-    if (typeof mA !== 'number')
-      throw new TypeError('maxAge must be a non-negative number')
-
-    this[MAX_AGE] = mA
-    trim(this)
-  }
-  get maxAge () {
-    return this[MAX_AGE]
-  }
-
-  // resize the cache when the lengthCalculator changes.
-  set lengthCalculator (lC) {
-    if (typeof lC !== 'function')
-      lC = naiveLength
-
-    if (lC !== this[LENGTH_CALCULATOR]) {
-      this[LENGTH_CALCULATOR] = lC
-      this[LENGTH] = 0
-      this[LRU_LIST].forEach(hit => {
-        hit.length = this[LENGTH_CALCULATOR](hit.value, hit.key)
-        this[LENGTH] += hit.length
-      })
-    }
-    trim(this)
-  }
-  get lengthCalculator () { return this[LENGTH_CALCULATOR] }
-
-  get length () { return this[LENGTH] }
-  get itemCount () { return this[LRU_LIST].length }
-
-  rforEach (fn, thisp) {
-    thisp = thisp || this
-    for (let walker = this[LRU_LIST].tail; walker !== null;) {
-      const prev = walker.prev
-      forEachStep(this, fn, walker, thisp)
-      walker = prev
-    }
-  }
-
-  forEach (fn, thisp) {
-    thisp = thisp || this
-    for (let walker = this[LRU_LIST].head; walker !== null;) {
-      const next = walker.next
-      forEachStep(this, fn, walker, thisp)
-      walker = next
-    }
-  }
-
-  keys () {
-    return this[LRU_LIST].toArray().map(k => k.key)
-  }
-
-  values () {
-    return this[LRU_LIST].toArray().map(k => k.value)
-  }
-
-  reset () {
-    if (this[DISPOSE] &&
-        this[LRU_LIST] &&
-        this[LRU_LIST].length) {
-      this[LRU_LIST].forEach(hit => this[DISPOSE](hit.key, hit.value))
-    }
-
-    this[CACHE] = new Map() // hash of items by key
-    this[LRU_LIST] = new Yallist() // list of items in order of use recency
-    this[LENGTH] = 0 // length of items in the list
-  }
-
-  dump () {
-    return this[LRU_LIST].map(hit =>
-      isStale(this, hit) ? false : {
-        k: hit.key,
-        v: hit.value,
-        e: hit.now + (hit.maxAge || 0)
-      }).toArray().filter(h => h)
-  }
-
-  dumpLru () {
-    return this[LRU_LIST]
-  }
-
-  set (key, value, maxAge) {
-    maxAge = maxAge || this[MAX_AGE]
-
-    if (maxAge && typeof maxAge !== 'number')
-      throw new TypeError('maxAge must be a number')
-
-    const now = maxAge ? Date.now() : 0
-    const len = this[LENGTH_CALCULATOR](value, key)
-
-    if (this[CACHE].has(key)) {
-      if (len > this[MAX]) {
-        del(this, this[CACHE].get(key))
-        return false
-      }
-
-      const node = this[CACHE].get(key)
-      const item = node.value
-
-      // dispose of the old one before overwriting
-      // split out into 2 ifs for better coverage tracking
-      if (this[DISPOSE]) {
-        if (!this[NO_DISPOSE_ON_SET])
-          this[DISPOSE](key, item.value)
-      }
-
-      item.now = now
-      item.maxAge = maxAge
-      item.value = value
-      this[LENGTH] += len - item.length
-      item.length = len
-      this.get(key)
-      trim(this)
-      return true
-    }
-
-    const hit = new Entry(key, value, len, now, maxAge)
-
-    // oversized objects fall out of cache automatically.
-    if (hit.length > this[MAX]) {
-      if (this[DISPOSE])
-        this[DISPOSE](key, value)
-
-      return false
-    }
-
-    this[LENGTH] += hit.length
-    this[LRU_LIST].unshift(hit)
-    this[CACHE].set(key, this[LRU_LIST].head)
-    trim(this)
-    return true
-  }
-
-  has (key) {
-    if (!this[CACHE].has(key)) return false
-    const hit = this[CACHE].get(key).value
-    return !isStale(this, hit)
-  }
-
-  get (key) {
-    return get(this, key, true)
-  }
-
-  peek (key) {
-    return get(this, key, false)
-  }
-
-  pop () {
-    const node = this[LRU_LIST].tail
-    if (!node)
-      return null
-
-    del(this, node)
-    return node.value
-  }
-
-  del (key) {
-    del(this, this[CACHE].get(key))
-  }
-
-  load (arr) {
-    // reset the cache
-    this.reset()
-
-    const now = Date.now()
-    // A previous serialized cache has the most recent items first
-    for (let l = arr.length - 1; l >= 0; l--) {
-      const hit = arr[l]
-      const expiresAt = hit.e || 0
-      if (expiresAt === 0)
-        // the item was created without expiration in a non aged cache
-        this.set(hit.k, hit.v)
-      else {
-        const maxAge = expiresAt - now
-        // dont add already expired items
-        if (maxAge > 0) {
-          this.set(hit.k, hit.v, maxAge)
-        }
-      }
-    }
-  }
-
-  prune () {
-    this[CACHE].forEach((value, key) => get(this, key, false))
-  }
-}
-
-const get = (self, key, doUse) => {
-  const node = self[CACHE].get(key)
-  if (node) {
-    const hit = node.value
-    if (isStale(self, hit)) {
-      del(self, node)
-      if (!self[ALLOW_STALE])
-        return undefined
-    } else {
-      if (doUse) {
-        if (self[UPDATE_AGE_ON_GET])
-          node.value.now = Date.now()
-        self[LRU_LIST].unshiftNode(node)
-      }
-    }
-    return hit.value
-  }
-}
-
-const isStale = (self, hit) => {
-  if (!hit || (!hit.maxAge && !self[MAX_AGE]))
-    return false
-
-  const diff = Date.now() - hit.now
-  return hit.maxAge ? diff > hit.maxAge
-    : self[MAX_AGE] && (diff > self[MAX_AGE])
-}
-
-const trim = self => {
-  if (self[LENGTH] > self[MAX]) {
-    for (let walker = self[LRU_LIST].tail;
-      self[LENGTH] > self[MAX] && walker !== null;) {
-      // We know that we're about to delete this one, and also
-      // what the next least recently used key will be, so just
-      // go ahead and set it now.
-      const prev = walker.prev
-      del(self, walker)
-      walker = prev
-    }
-  }
-}
-
-const del = (self, node) => {
-  if (node) {
-    const hit = node.value
-    if (self[DISPOSE])
-      self[DISPOSE](hit.key, hit.value)
-
-    self[LENGTH] -= hit.length
-    self[CACHE].delete(hit.key)
-    self[LRU_LIST].removeNode(node)
-  }
-}
-
-class Entry {
-  constructor (key, value, length, now, maxAge) {
-    this.key = key
-    this.value = value
-    this.length = length
-    this.now = now
-    this.maxAge = maxAge || 0
-  }
-}
-
-const forEachStep = (self, fn, node, thisp) => {
-  let hit = node.value
-  if (isStale(self, hit)) {
-    del(self, node)
-    if (!self[ALLOW_STALE])
-      hit = undefined
-  }
-  if (hit)
-    fn.call(thisp, hit.value, hit.key, self)
-}
-
-module.exports = LRUCache
-
-
-/***/ }),
-
 /***/ 7426:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -56282,9 +56142,13 @@ class Comparator {
   static get ANY () {
     return ANY
   }
-
   constructor (comp, options) {
-    options = parseOptions(options)
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
 
     if (comp instanceof Comparator) {
       if (comp.loose === !!options.loose) {
@@ -56359,7 +56223,7 @@ class Comparator {
     if (!options || typeof options !== 'object') {
       options = {
         loose: !!options,
-        includePrerelease: false,
+        includePrerelease: false
       }
     }
 
@@ -56406,8 +56270,7 @@ class Comparator {
 
 module.exports = Comparator
 
-const parseOptions = __nccwpck_require__(785)
-const { re, t } = __nccwpck_require__(9523)
+const {re, t} = __nccwpck_require__(9523)
 const cmp = __nccwpck_require__(5098)
 const debug = __nccwpck_require__(106)
 const SemVer = __nccwpck_require__(8088)
@@ -56422,7 +56285,12 @@ const Range = __nccwpck_require__(9828)
 // hoisted class for cyclic dependency
 class Range {
   constructor (range, options) {
-    options = parseOptions(options)
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
 
     if (range instanceof Range) {
       if (
@@ -56450,9 +56318,9 @@ class Range {
     // First, split based on boolean or ||
     this.raw = range
     this.set = range
-      .split('||')
+      .split(/\s*\|\|\s*/)
       // map the range to a 2d array of comparators
-      .map(r => this.parseRange(r.trim()))
+      .map(range => this.parseRange(range.trim()))
       // throw out any comparator lists that are empty
       // this generally means that it was not a valid range, which is allowed
       // in loose mode, but will still throw if the WHOLE range is invalid.
@@ -56460,24 +56328,6 @@ class Range {
 
     if (!this.set.length) {
       throw new TypeError(`Invalid SemVer Range: ${range}`)
-    }
-
-    // if we have any that are not the null set, throw out null sets.
-    if (this.set.length > 1) {
-      // keep the first one, in case they're all null sets
-      const first = this.set[0]
-      this.set = this.set.filter(c => !isNullSet(c[0]))
-      if (this.set.length === 0) {
-        this.set = [first]
-      } else if (this.set.length > 1) {
-        // if we have any that are *, then the range is just *
-        for (const c of this.set) {
-          if (c.length === 1 && isAny(c[0])) {
-            this.set = [c]
-            break
-          }
-        }
-      }
     }
 
     this.format()
@@ -56498,25 +56348,15 @@ class Range {
   }
 
   parseRange (range) {
-    range = range.trim()
-
-    // memoize range parsing for performance.
-    // this is a very hot path, and fully deterministic.
-    const memoOpts = Object.keys(this.options).join(',')
-    const memoKey = `parseRange:${memoOpts}:${range}`
-    const cached = cache.get(memoKey)
-    if (cached) {
-      return cached
-    }
-
     const loose = this.options.loose
+    range = range.trim()
     // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
     const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE]
-    range = range.replace(hr, hyphenReplace(this.options.includePrerelease))
+    range = range.replace(hr, hyphenReplace)
     debug('hyphen replace', range)
     // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
     range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace)
-    debug('comparator trim', range)
+    debug('comparator trim', range, re[t.COMPARATORTRIM])
 
     // `~ 1.2.3` => `~1.2.3`
     range = range.replace(re[t.TILDETRIM], tildeTrimReplace)
@@ -56530,41 +56370,15 @@ class Range {
     // At this point, the range is completely trimmed and
     // ready to be split into comparators.
 
-    let rangeList = range
+    const compRe = loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
+    return range
       .split(' ')
       .map(comp => parseComparator(comp, this.options))
       .join(' ')
       .split(/\s+/)
-      // >=0.0.0 is equivalent to *
-      .map(comp => replaceGTE0(comp, this.options))
-
-    if (loose) {
       // in loose mode, throw out any that are not valid comparators
-      rangeList = rangeList.filter(comp => {
-        debug('loose invalid filter', comp, this.options)
-        return !!comp.match(re[t.COMPARATORLOOSE])
-      })
-    }
-    debug('range list', rangeList)
-
-    // if any comparators are the null set, then replace with JUST null set
-    // if more than one comparator, remove any * comparators
-    // also, don't include the same comparator more than once
-    const rangeMap = new Map()
-    const comparators = rangeList.map(comp => new Comparator(comp, this.options))
-    for (const comp of comparators) {
-      if (isNullSet(comp)) {
-        return [comp]
-      }
-      rangeMap.set(comp.value, comp)
-    }
-    if (rangeMap.size > 1 && rangeMap.has('')) {
-      rangeMap.delete('')
-    }
-
-    const result = [...rangeMap.values()]
-    cache.set(memoKey, result)
-    return result
+      .filter(this.options.loose ? comp => !!comp.match(compRe) : () => true)
+      .map(comp => new Comparator(comp, this.options))
   }
 
   intersects (range, options) {
@@ -56613,10 +56427,6 @@ class Range {
 }
 module.exports = Range
 
-const LRU = __nccwpck_require__(7129)
-const cache = new LRU({ max: 1000 })
-
-const parseOptions = __nccwpck_require__(785)
 const Comparator = __nccwpck_require__(1532)
 const debug = __nccwpck_require__(106)
 const SemVer = __nccwpck_require__(8088)
@@ -56625,11 +56435,8 @@ const {
   t,
   comparatorTrimReplace,
   tildeTrimReplace,
-  caretTrimReplace,
+  caretTrimReplace
 } = __nccwpck_require__(9523)
-
-const isNullSet = c => c.value === '<0.0.0-0'
-const isAny = c => c.value === ''
 
 // take a set of comparators and determine whether there
 // exists a version which can satisfy it
@@ -56668,15 +56475,14 @@ const parseComparator = (comp, options) => {
 const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
 
 // ~, ~> --> * (any, kinda silly)
-// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0-0
-// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0-0
-// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0-0
-// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0-0
-// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0-0
-// ~0.0.1 --> >=0.0.1 <0.1.0-0
+// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
+// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
+// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
+// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
 const replaceTildes = (comp, options) =>
-  comp.trim().split(/\s+/).map((c) => {
-    return replaceTilde(c, options)
+  comp.trim().split(/\s+/).map((comp) => {
+    return replaceTilde(comp, options)
   }).join(' ')
 
 const replaceTilde = (comp, options) => {
@@ -56688,18 +56494,18 @@ const replaceTilde = (comp, options) => {
     if (isX(M)) {
       ret = ''
     } else if (isX(m)) {
-      ret = `>=${M}.0.0 <${+M + 1}.0.0-0`
+      ret = `>=${M}.0.0 <${+M + 1}.0.0`
     } else if (isX(p)) {
-      // ~1.2 == >=1.2.0 <1.3.0-0
-      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`
+      // ~1.2 == >=1.2.0 <1.3.0
+      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0`
     } else if (pr) {
       debug('replaceTilde pr', pr)
       ret = `>=${M}.${m}.${p}-${pr
-      } <${M}.${+m + 1}.0-0`
+      } <${M}.${+m + 1}.0`
     } else {
-      // ~1.2.3 == >=1.2.3 <1.3.0-0
+      // ~1.2.3 == >=1.2.3 <1.3.0
       ret = `>=${M}.${m}.${p
-      } <${M}.${+m + 1}.0-0`
+      } <${M}.${+m + 1}.0`
     }
 
     debug('tilde return', ret)
@@ -56708,22 +56514,19 @@ const replaceTilde = (comp, options) => {
 }
 
 // ^ --> * (any, kinda silly)
-// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0-0
-// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0-0
-// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0-0
-// ^1.2.3 --> >=1.2.3 <2.0.0-0
-// ^1.2.0 --> >=1.2.0 <2.0.0-0
-// ^0.0.1 --> >=0.0.1 <0.0.2-0
-// ^0.1.0 --> >=0.1.0 <0.2.0-0
+// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
+// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
+// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+// ^1.2.3 --> >=1.2.3 <2.0.0
+// ^1.2.0 --> >=1.2.0 <2.0.0
 const replaceCarets = (comp, options) =>
-  comp.trim().split(/\s+/).map((c) => {
-    return replaceCaret(c, options)
+  comp.trim().split(/\s+/).map((comp) => {
+    return replaceCaret(comp, options)
   }).join(' ')
 
 const replaceCaret = (comp, options) => {
   debug('caret', comp, options)
   const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET]
-  const z = options.includePrerelease ? '-0' : ''
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('caret', comp, _, M, m, p, pr)
     let ret
@@ -56731,40 +56534,40 @@ const replaceCaret = (comp, options) => {
     if (isX(M)) {
       ret = ''
     } else if (isX(m)) {
-      ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`
+      ret = `>=${M}.0.0 <${+M + 1}.0.0`
     } else if (isX(p)) {
       if (M === '0') {
-        ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`
+        ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0`
       } else {
-        ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`
+        ret = `>=${M}.${m}.0 <${+M + 1}.0.0`
       }
     } else if (pr) {
       debug('replaceCaret pr', pr)
       if (M === '0') {
         if (m === '0') {
           ret = `>=${M}.${m}.${p}-${pr
-          } <${M}.${m}.${+p + 1}-0`
+          } <${M}.${m}.${+p + 1}`
         } else {
           ret = `>=${M}.${m}.${p}-${pr
-          } <${M}.${+m + 1}.0-0`
+          } <${M}.${+m + 1}.0`
         }
       } else {
         ret = `>=${M}.${m}.${p}-${pr
-        } <${+M + 1}.0.0-0`
+        } <${+M + 1}.0.0`
       }
     } else {
       debug('no pr')
       if (M === '0') {
         if (m === '0') {
           ret = `>=${M}.${m}.${p
-          }${z} <${M}.${m}.${+p + 1}-0`
+          } <${M}.${m}.${+p + 1}`
         } else {
           ret = `>=${M}.${m}.${p
-          }${z} <${M}.${+m + 1}.0-0`
+          } <${M}.${+m + 1}.0`
         }
       } else {
         ret = `>=${M}.${m}.${p
-        } <${+M + 1}.0.0-0`
+        } <${+M + 1}.0.0`
       }
     }
 
@@ -56775,8 +56578,8 @@ const replaceCaret = (comp, options) => {
 
 const replaceXRanges = (comp, options) => {
   debug('replaceXRanges', comp, options)
-  return comp.split(/\s+/).map((c) => {
-    return replaceXRange(c, options)
+  return comp.split(/\s+/).map((comp) => {
+    return replaceXRange(comp, options)
   }).join(' ')
 }
 
@@ -56837,16 +56640,12 @@ const replaceXRange = (comp, options) => {
         }
       }
 
-      if (gtlt === '<') {
-        pr = '-0'
-      }
-
       ret = `${gtlt + M}.${m}.${p}${pr}`
     } else if (xm) {
-      ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`
+      ret = `>=${M}.0.0${pr} <${+M + 1}.0.0${pr}`
     } else if (xp) {
       ret = `>=${M}.${m}.0${pr
-      } <${M}.${+m + 1}.0-0`
+      } <${M}.${+m + 1}.0${pr}`
     }
 
     debug('xRange return', ret)
@@ -56863,42 +56662,32 @@ const replaceStars = (comp, options) => {
   return comp.trim().replace(re[t.STAR], '')
 }
 
-const replaceGTE0 = (comp, options) => {
-  debug('replaceGTE0', comp, options)
-  return comp.trim()
-    .replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], '')
-}
-
 // This function is passed to string.replace(re[t.HYPHENRANGE])
 // M, m, patch, prerelease, build
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
-// 1.2.3 - 3.4 => >=1.2.0 <3.5.0-0 Any 3.4.x will do
-// 1.2 - 3.4 => >=1.2.0 <3.5.0-0
-const hyphenReplace = incPr => ($0,
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+// 1.2 - 3.4 => >=1.2.0 <3.5.0
+const hyphenReplace = ($0,
   from, fM, fm, fp, fpr, fb,
   to, tM, tm, tp, tpr, tb) => {
   if (isX(fM)) {
     from = ''
   } else if (isX(fm)) {
-    from = `>=${fM}.0.0${incPr ? '-0' : ''}`
+    from = `>=${fM}.0.0`
   } else if (isX(fp)) {
-    from = `>=${fM}.${fm}.0${incPr ? '-0' : ''}`
-  } else if (fpr) {
-    from = `>=${from}`
+    from = `>=${fM}.${fm}.0`
   } else {
-    from = `>=${from}${incPr ? '-0' : ''}`
+    from = `>=${from}`
   }
 
   if (isX(tM)) {
     to = ''
   } else if (isX(tm)) {
-    to = `<${+tM + 1}.0.0-0`
+    to = `<${+tM + 1}.0.0`
   } else if (isX(tp)) {
-    to = `<${tM}.${+tm + 1}.0-0`
+    to = `<${tM}.${+tm + 1}.0`
   } else if (tpr) {
     to = `<=${tM}.${tm}.${tp}-${tpr}`
-  } else if (incPr) {
-    to = `<${tM}.${tm}.${+tp + 1}-0`
   } else {
     to = `<=${to}`
   }
@@ -56952,12 +56741,15 @@ const debug = __nccwpck_require__(106)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(2293)
 const { re, t } = __nccwpck_require__(9523)
 
-const parseOptions = __nccwpck_require__(785)
 const { compareIdentifiers } = __nccwpck_require__(2463)
 class SemVer {
   constructor (version, options) {
-    options = parseOptions(options)
-
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
     if (version instanceof SemVer) {
       if (version.loose === !!options.loose &&
           version.includePrerelease === !!options.includePrerelease) {
@@ -57215,7 +57007,7 @@ class SemVer {
         if (identifier) {
           // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
           // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
-          if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
+          if (this.prerelease[0] === identifier) {
             if (isNaN(this.prerelease[1])) {
               this.prerelease = [identifier, 0]
             }
@@ -57265,21 +57057,17 @@ const lte = __nccwpck_require__(7520)
 const cmp = (a, op, b, loose) => {
   switch (op) {
     case '===':
-      if (typeof a === 'object') {
+      if (typeof a === 'object')
         a = a.version
-      }
-      if (typeof b === 'object') {
+      if (typeof b === 'object')
         b = b.version
-      }
       return a === b
 
     case '!==':
-      if (typeof a === 'object') {
+      if (typeof a === 'object')
         a = a.version
-      }
-      if (typeof b === 'object') {
+      if (typeof b === 'object')
         b = b.version
-      }
       return a !== b
 
     case '':
@@ -57316,7 +57104,7 @@ module.exports = cmp
 
 const SemVer = __nccwpck_require__(8088)
 const parse = __nccwpck_require__(5925)
-const { re, t } = __nccwpck_require__(9523)
+const {re, t} = __nccwpck_require__(9523)
 
 const coerce = (version, options) => {
   if (version instanceof SemVer) {
@@ -57359,9 +57147,8 @@ const coerce = (version, options) => {
     re[t.COERCERTL].lastIndex = -1
   }
 
-  if (match === null) {
+  if (match === null)
     return null
-  }
 
   return parse(`${match[2]}.${match[3] || '0'}.${match[4] || '0'}`, options)
 }
@@ -57478,10 +57265,7 @@ const inc = (version, release, options, identifier) => {
   }
 
   try {
-    return new SemVer(
-      version instanceof SemVer ? version.version : version,
-      options
-    ).inc(release, identifier).version
+    return new SemVer(version, options).inc(release, identifier).version
   } catch (er) {
     return null
   }
@@ -57544,13 +57328,17 @@ module.exports = neq
 /***/ 5925:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { MAX_LENGTH } = __nccwpck_require__(2293)
+const {MAX_LENGTH} = __nccwpck_require__(2293)
 const { re, t } = __nccwpck_require__(9523)
 const SemVer = __nccwpck_require__(8088)
 
-const parseOptions = __nccwpck_require__(785)
 const parse = (version, options) => {
-  options = parseOptions(options)
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
 
   if (version instanceof SemVer) {
     return version
@@ -57669,91 +57457,49 @@ module.exports = valid
 
 // just pre-load all the stuff that index.js lazily exports
 const internalRe = __nccwpck_require__(9523)
-const constants = __nccwpck_require__(2293)
-const SemVer = __nccwpck_require__(8088)
-const identifiers = __nccwpck_require__(2463)
-const parse = __nccwpck_require__(5925)
-const valid = __nccwpck_require__(9601)
-const clean = __nccwpck_require__(8848)
-const inc = __nccwpck_require__(900)
-const diff = __nccwpck_require__(4297)
-const major = __nccwpck_require__(6688)
-const minor = __nccwpck_require__(8447)
-const patch = __nccwpck_require__(2866)
-const prerelease = __nccwpck_require__(4016)
-const compare = __nccwpck_require__(4309)
-const rcompare = __nccwpck_require__(6417)
-const compareLoose = __nccwpck_require__(2804)
-const compareBuild = __nccwpck_require__(2156)
-const sort = __nccwpck_require__(1426)
-const rsort = __nccwpck_require__(8701)
-const gt = __nccwpck_require__(4123)
-const lt = __nccwpck_require__(194)
-const eq = __nccwpck_require__(1898)
-const neq = __nccwpck_require__(6017)
-const gte = __nccwpck_require__(5522)
-const lte = __nccwpck_require__(7520)
-const cmp = __nccwpck_require__(5098)
-const coerce = __nccwpck_require__(3466)
-const Comparator = __nccwpck_require__(1532)
-const Range = __nccwpck_require__(9828)
-const satisfies = __nccwpck_require__(6055)
-const toComparators = __nccwpck_require__(2706)
-const maxSatisfying = __nccwpck_require__(579)
-const minSatisfying = __nccwpck_require__(832)
-const minVersion = __nccwpck_require__(4179)
-const validRange = __nccwpck_require__(2098)
-const outside = __nccwpck_require__(420)
-const gtr = __nccwpck_require__(9380)
-const ltr = __nccwpck_require__(8726)
-const intersects = __nccwpck_require__(7008)
-const simplifyRange = __nccwpck_require__(5297)
-const subset = __nccwpck_require__(7863)
 module.exports = {
-  parse,
-  valid,
-  clean,
-  inc,
-  diff,
-  major,
-  minor,
-  patch,
-  prerelease,
-  compare,
-  rcompare,
-  compareLoose,
-  compareBuild,
-  sort,
-  rsort,
-  gt,
-  lt,
-  eq,
-  neq,
-  gte,
-  lte,
-  cmp,
-  coerce,
-  Comparator,
-  Range,
-  satisfies,
-  toComparators,
-  maxSatisfying,
-  minSatisfying,
-  minVersion,
-  validRange,
-  outside,
-  gtr,
-  ltr,
-  intersects,
-  simplifyRange,
-  subset,
-  SemVer,
   re: internalRe.re,
   src: internalRe.src,
   tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: constants.SEMVER_SPEC_VERSION,
-  compareIdentifiers: identifiers.compareIdentifiers,
-  rcompareIdentifiers: identifiers.rcompareIdentifiers,
+  SEMVER_SPEC_VERSION: (__nccwpck_require__(2293).SEMVER_SPEC_VERSION),
+  SemVer: __nccwpck_require__(8088),
+  compareIdentifiers: (__nccwpck_require__(2463).compareIdentifiers),
+  rcompareIdentifiers: (__nccwpck_require__(2463).rcompareIdentifiers),
+  parse: __nccwpck_require__(5925),
+  valid: __nccwpck_require__(9601),
+  clean: __nccwpck_require__(8848),
+  inc: __nccwpck_require__(900),
+  diff: __nccwpck_require__(4297),
+  major: __nccwpck_require__(6688),
+  minor: __nccwpck_require__(8447),
+  patch: __nccwpck_require__(2866),
+  prerelease: __nccwpck_require__(4016),
+  compare: __nccwpck_require__(4309),
+  rcompare: __nccwpck_require__(6417),
+  compareLoose: __nccwpck_require__(2804),
+  compareBuild: __nccwpck_require__(2156),
+  sort: __nccwpck_require__(1426),
+  rsort: __nccwpck_require__(8701),
+  gt: __nccwpck_require__(4123),
+  lt: __nccwpck_require__(194),
+  eq: __nccwpck_require__(1898),
+  neq: __nccwpck_require__(6017),
+  gte: __nccwpck_require__(5522),
+  lte: __nccwpck_require__(7520),
+  cmp: __nccwpck_require__(5098),
+  coerce: __nccwpck_require__(3466),
+  Comparator: __nccwpck_require__(1532),
+  Range: __nccwpck_require__(9828),
+  satisfies: __nccwpck_require__(6055),
+  toComparators: __nccwpck_require__(2706),
+  maxSatisfying: __nccwpck_require__(579),
+  minSatisfying: __nccwpck_require__(832),
+  minVersion: __nccwpck_require__(4179),
+  validRange: __nccwpck_require__(2098),
+  outside: __nccwpck_require__(420),
+  gtr: __nccwpck_require__(9380),
+  ltr: __nccwpck_require__(8726),
+  intersects: __nccwpck_require__(7008),
 }
 
 
@@ -57768,7 +57514,7 @@ const SEMVER_SPEC_VERSION = '2.0.0'
 
 const MAX_LENGTH = 256
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
-/* istanbul ignore next */ 9007199254740991
+  /* istanbul ignore next */ 9007199254740991
 
 // Max safe segment length for coercion.
 const MAX_SAFE_COMPONENT_LENGTH = 16
@@ -57777,7 +57523,7 @@ module.exports = {
   SEMVER_SPEC_VERSION,
   MAX_LENGTH,
   MAX_SAFE_INTEGER,
-  MAX_SAFE_COMPONENT_LENGTH,
+  MAX_SAFE_COMPONENT_LENGTH
 }
 
 
@@ -57823,26 +57569,8 @@ const rcompareIdentifiers = (a, b) => compareIdentifiers(b, a)
 
 module.exports = {
   compareIdentifiers,
-  rcompareIdentifiers,
+  rcompareIdentifiers
 }
-
-
-/***/ }),
-
-/***/ 785:
-/***/ ((module) => {
-
-// parse out just the options we care about so we always get a consistent
-// obj with keys in a consistent order.
-const opts = ['includePrerelease', 'loose', 'rtl']
-const parseOptions = options =>
-  !options ? {}
-  : typeof options !== 'object' ? { loose: true }
-  : opts.filter(k => options[k]).reduce((o, k) => {
-    o[k] = true
-    return o
-  }, {})
-module.exports = parseOptions
 
 
 /***/ }),
@@ -57862,7 +57590,7 @@ let R = 0
 
 const createToken = (name, value, isGlobal) => {
   const index = R++
-  debug(name, index, value)
+  debug(index, value)
   t[name] = index
   src[index] = value
   re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
@@ -58029,9 +57757,6 @@ createToken('HYPHENRANGELOOSE', `^\\s*(${src[t.XRANGEPLAINLOOSE]})` +
 
 // Star ranges basically just allow anything at all.
 createToken('STAR', '(<|>)?=?\\s*\\*')
-// >=0.0.0 is like a star
-createToken('GTE0', '^\\s*>=\\s*0\\.0\\.0\\s*$')
-createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 
 
 /***/ }),
@@ -58159,7 +57884,6 @@ const minVersion = (range, loose) => {
   for (let i = 0; i < range.set.length; ++i) {
     const comparators = range.set[i]
 
-    let setMin = null
     comparators.forEach((comparator) => {
       // Clone to avoid manipulating the comparator's semver object.
       const compver = new SemVer(comparator.semver.version)
@@ -58174,8 +57898,8 @@ const minVersion = (range, loose) => {
           /* fallthrough */
         case '':
         case '>=':
-          if (!setMin || gt(compver, setMin)) {
-            setMin = compver
+          if (!minver || gt(minver, compver)) {
+            minver = compver
           }
           break
         case '<':
@@ -58187,9 +57911,6 @@ const minVersion = (range, loose) => {
           throw new Error(`Unexpected operation: ${comparator.operator}`)
       }
     })
-    if (setMin && (!minver || gt(minver, setMin))) {
-      minver = setMin
-    }
   }
 
   if (minver && range.test(minver)) {
@@ -58208,7 +57929,7 @@ module.exports = minVersion
 
 const SemVer = __nccwpck_require__(8088)
 const Comparator = __nccwpck_require__(1532)
-const { ANY } = Comparator
+const {ANY} = Comparator
 const Range = __nccwpck_require__(9828)
 const satisfies = __nccwpck_require__(6055)
 const gt = __nccwpck_require__(4123)
@@ -58240,7 +57961,7 @@ const outside = (version, range, hilo, options) => {
       throw new TypeError('Must provide a hilo val of "<" or ">"')
   }
 
-  // If it satisfies the range it is not outside
+  // If it satisifes the range it is not outside
   if (satisfies(version, range, options)) {
     return false
   }
@@ -58286,311 +58007,6 @@ const outside = (version, range, hilo, options) => {
 }
 
 module.exports = outside
-
-
-/***/ }),
-
-/***/ 5297:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-// given a set of versions and a range, create a "simplified" range
-// that includes the same versions that the original range does
-// If the original range is shorter than the simplified one, return that.
-const satisfies = __nccwpck_require__(6055)
-const compare = __nccwpck_require__(4309)
-module.exports = (versions, range, options) => {
-  const set = []
-  let first = null
-  let prev = null
-  const v = versions.sort((a, b) => compare(a, b, options))
-  for (const version of v) {
-    const included = satisfies(version, range, options)
-    if (included) {
-      prev = version
-      if (!first) {
-        first = version
-      }
-    } else {
-      if (prev) {
-        set.push([first, prev])
-      }
-      prev = null
-      first = null
-    }
-  }
-  if (first) {
-    set.push([first, null])
-  }
-
-  const ranges = []
-  for (const [min, max] of set) {
-    if (min === max) {
-      ranges.push(min)
-    } else if (!max && min === v[0]) {
-      ranges.push('*')
-    } else if (!max) {
-      ranges.push(`>=${min}`)
-    } else if (min === v[0]) {
-      ranges.push(`<=${max}`)
-    } else {
-      ranges.push(`${min} - ${max}`)
-    }
-  }
-  const simplified = ranges.join(' || ')
-  const original = typeof range.raw === 'string' ? range.raw : String(range)
-  return simplified.length < original.length ? simplified : range
-}
-
-
-/***/ }),
-
-/***/ 7863:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const Range = __nccwpck_require__(9828)
-const Comparator = __nccwpck_require__(1532)
-const { ANY } = Comparator
-const satisfies = __nccwpck_require__(6055)
-const compare = __nccwpck_require__(4309)
-
-// Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
-// - Every simple range `r1, r2, ...` is a null set, OR
-// - Every simple range `r1, r2, ...` which is not a null set is a subset of
-//   some `R1, R2, ...`
-//
-// Simple range `c1 c2 ...` is a subset of simple range `C1 C2 ...` iff:
-// - If c is only the ANY comparator
-//   - If C is only the ANY comparator, return true
-//   - Else if in prerelease mode, return false
-//   - else replace c with `[>=0.0.0]`
-// - If C is only the ANY comparator
-//   - if in prerelease mode, return true
-//   - else replace C with `[>=0.0.0]`
-// - Let EQ be the set of = comparators in c
-// - If EQ is more than one, return true (null set)
-// - Let GT be the highest > or >= comparator in c
-// - Let LT be the lowest < or <= comparator in c
-// - If GT and LT, and GT.semver > LT.semver, return true (null set)
-// - If any C is a = range, and GT or LT are set, return false
-// - If EQ
-//   - If GT, and EQ does not satisfy GT, return true (null set)
-//   - If LT, and EQ does not satisfy LT, return true (null set)
-//   - If EQ satisfies every C, return true
-//   - Else return false
-// - If GT
-//   - If GT.semver is lower than any > or >= comp in C, return false
-//   - If GT is >=, and GT.semver does not satisfy every C, return false
-//   - If GT.semver has a prerelease, and not in prerelease mode
-//     - If no C has a prerelease and the GT.semver tuple, return false
-// - If LT
-//   - If LT.semver is greater than any < or <= comp in C, return false
-//   - If LT is <=, and LT.semver does not satisfy every C, return false
-//   - If GT.semver has a prerelease, and not in prerelease mode
-//     - If no C has a prerelease and the LT.semver tuple, return false
-// - Else return true
-
-const subset = (sub, dom, options = {}) => {
-  if (sub === dom) {
-    return true
-  }
-
-  sub = new Range(sub, options)
-  dom = new Range(dom, options)
-  let sawNonNull = false
-
-  OUTER: for (const simpleSub of sub.set) {
-    for (const simpleDom of dom.set) {
-      const isSub = simpleSubset(simpleSub, simpleDom, options)
-      sawNonNull = sawNonNull || isSub !== null
-      if (isSub) {
-        continue OUTER
-      }
-    }
-    // the null set is a subset of everything, but null simple ranges in
-    // a complex range should be ignored.  so if we saw a non-null range,
-    // then we know this isn't a subset, but if EVERY simple range was null,
-    // then it is a subset.
-    if (sawNonNull) {
-      return false
-    }
-  }
-  return true
-}
-
-const simpleSubset = (sub, dom, options) => {
-  if (sub === dom) {
-    return true
-  }
-
-  if (sub.length === 1 && sub[0].semver === ANY) {
-    if (dom.length === 1 && dom[0].semver === ANY) {
-      return true
-    } else if (options.includePrerelease) {
-      sub = [new Comparator('>=0.0.0-0')]
-    } else {
-      sub = [new Comparator('>=0.0.0')]
-    }
-  }
-
-  if (dom.length === 1 && dom[0].semver === ANY) {
-    if (options.includePrerelease) {
-      return true
-    } else {
-      dom = [new Comparator('>=0.0.0')]
-    }
-  }
-
-  const eqSet = new Set()
-  let gt, lt
-  for (const c of sub) {
-    if (c.operator === '>' || c.operator === '>=') {
-      gt = higherGT(gt, c, options)
-    } else if (c.operator === '<' || c.operator === '<=') {
-      lt = lowerLT(lt, c, options)
-    } else {
-      eqSet.add(c.semver)
-    }
-  }
-
-  if (eqSet.size > 1) {
-    return null
-  }
-
-  let gtltComp
-  if (gt && lt) {
-    gtltComp = compare(gt.semver, lt.semver, options)
-    if (gtltComp > 0) {
-      return null
-    } else if (gtltComp === 0 && (gt.operator !== '>=' || lt.operator !== '<=')) {
-      return null
-    }
-  }
-
-  // will iterate one or zero times
-  for (const eq of eqSet) {
-    if (gt && !satisfies(eq, String(gt), options)) {
-      return null
-    }
-
-    if (lt && !satisfies(eq, String(lt), options)) {
-      return null
-    }
-
-    for (const c of dom) {
-      if (!satisfies(eq, String(c), options)) {
-        return false
-      }
-    }
-
-    return true
-  }
-
-  let higher, lower
-  let hasDomLT, hasDomGT
-  // if the subset has a prerelease, we need a comparator in the superset
-  // with the same tuple and a prerelease, or it's not a subset
-  let needDomLTPre = lt &&
-    !options.includePrerelease &&
-    lt.semver.prerelease.length ? lt.semver : false
-  let needDomGTPre = gt &&
-    !options.includePrerelease &&
-    gt.semver.prerelease.length ? gt.semver : false
-  // exception: <1.2.3-0 is the same as <1.2.3
-  if (needDomLTPre && needDomLTPre.prerelease.length === 1 &&
-      lt.operator === '<' && needDomLTPre.prerelease[0] === 0) {
-    needDomLTPre = false
-  }
-
-  for (const c of dom) {
-    hasDomGT = hasDomGT || c.operator === '>' || c.operator === '>='
-    hasDomLT = hasDomLT || c.operator === '<' || c.operator === '<='
-    if (gt) {
-      if (needDomGTPre) {
-        if (c.semver.prerelease && c.semver.prerelease.length &&
-            c.semver.major === needDomGTPre.major &&
-            c.semver.minor === needDomGTPre.minor &&
-            c.semver.patch === needDomGTPre.patch) {
-          needDomGTPre = false
-        }
-      }
-      if (c.operator === '>' || c.operator === '>=') {
-        higher = higherGT(gt, c, options)
-        if (higher === c && higher !== gt) {
-          return false
-        }
-      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options)) {
-        return false
-      }
-    }
-    if (lt) {
-      if (needDomLTPre) {
-        if (c.semver.prerelease && c.semver.prerelease.length &&
-            c.semver.major === needDomLTPre.major &&
-            c.semver.minor === needDomLTPre.minor &&
-            c.semver.patch === needDomLTPre.patch) {
-          needDomLTPre = false
-        }
-      }
-      if (c.operator === '<' || c.operator === '<=') {
-        lower = lowerLT(lt, c, options)
-        if (lower === c && lower !== lt) {
-          return false
-        }
-      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options)) {
-        return false
-      }
-    }
-    if (!c.operator && (lt || gt) && gtltComp !== 0) {
-      return false
-    }
-  }
-
-  // if there was a < or >, and nothing in the dom, then must be false
-  // UNLESS it was limited by another range in the other direction.
-  // Eg, >1.0.0 <1.0.1 is still a subset of <2.0.0
-  if (gt && hasDomLT && !lt && gtltComp !== 0) {
-    return false
-  }
-
-  if (lt && hasDomGT && !gt && gtltComp !== 0) {
-    return false
-  }
-
-  // we needed a prerelease range in a specific tuple, but didn't get one
-  // then this isn't a subset.  eg >=1.2.3-pre is not a subset of >=1.0.0,
-  // because it includes prereleases in the 1.2.3 tuple
-  if (needDomGTPre || needDomLTPre) {
-    return false
-  }
-
-  return true
-}
-
-// >=1.2.3 is lower than >1.2.3
-const higherGT = (a, b, options) => {
-  if (!a) {
-    return b
-  }
-  const comp = compare(a.semver, b.semver, options)
-  return comp > 0 ? a
-    : comp < 0 ? b
-    : b.operator === '>' && a.operator === '>=' ? b
-    : a
-}
-
-// <=1.2.3 is higher than <1.2.3
-const lowerLT = (a, b, options) => {
-  if (!a) {
-    return b
-  }
-  const comp = compare(a.semver, b.semver, options)
-  return comp < 0 ? a
-    : comp > 0 ? b
-    : b.operator === '<' && a.operator === '<=' ? b
-    : a
-}
-
-module.exports = subset
 
 
 /***/ }),
@@ -66322,456 +65738,6 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 4091:
-/***/ ((module) => {
-
-"use strict";
-
-module.exports = function (Yallist) {
-  Yallist.prototype[Symbol.iterator] = function* () {
-    for (let walker = this.head; walker; walker = walker.next) {
-      yield walker.value
-    }
-  }
-}
-
-
-/***/ }),
-
-/***/ 665:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-module.exports = Yallist
-
-Yallist.Node = Node
-Yallist.create = Yallist
-
-function Yallist (list) {
-  var self = this
-  if (!(self instanceof Yallist)) {
-    self = new Yallist()
-  }
-
-  self.tail = null
-  self.head = null
-  self.length = 0
-
-  if (list && typeof list.forEach === 'function') {
-    list.forEach(function (item) {
-      self.push(item)
-    })
-  } else if (arguments.length > 0) {
-    for (var i = 0, l = arguments.length; i < l; i++) {
-      self.push(arguments[i])
-    }
-  }
-
-  return self
-}
-
-Yallist.prototype.removeNode = function (node) {
-  if (node.list !== this) {
-    throw new Error('removing node which does not belong to this list')
-  }
-
-  var next = node.next
-  var prev = node.prev
-
-  if (next) {
-    next.prev = prev
-  }
-
-  if (prev) {
-    prev.next = next
-  }
-
-  if (node === this.head) {
-    this.head = next
-  }
-  if (node === this.tail) {
-    this.tail = prev
-  }
-
-  node.list.length--
-  node.next = null
-  node.prev = null
-  node.list = null
-
-  return next
-}
-
-Yallist.prototype.unshiftNode = function (node) {
-  if (node === this.head) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var head = this.head
-  node.list = this
-  node.next = head
-  if (head) {
-    head.prev = node
-  }
-
-  this.head = node
-  if (!this.tail) {
-    this.tail = node
-  }
-  this.length++
-}
-
-Yallist.prototype.pushNode = function (node) {
-  if (node === this.tail) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var tail = this.tail
-  node.list = this
-  node.prev = tail
-  if (tail) {
-    tail.next = node
-  }
-
-  this.tail = node
-  if (!this.head) {
-    this.head = node
-  }
-  this.length++
-}
-
-Yallist.prototype.push = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    push(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.unshift = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    unshift(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.pop = function () {
-  if (!this.tail) {
-    return undefined
-  }
-
-  var res = this.tail.value
-  this.tail = this.tail.prev
-  if (this.tail) {
-    this.tail.next = null
-  } else {
-    this.head = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.shift = function () {
-  if (!this.head) {
-    return undefined
-  }
-
-  var res = this.head.value
-  this.head = this.head.next
-  if (this.head) {
-    this.head.prev = null
-  } else {
-    this.tail = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.forEach = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.head, i = 0; walker !== null; i++) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.next
-  }
-}
-
-Yallist.prototype.forEachReverse = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.prev
-  }
-}
-
-Yallist.prototype.get = function (n) {
-  for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.next
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.getReverse = function (n) {
-  for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.prev
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.map = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.head; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.next
-  }
-  return res
-}
-
-Yallist.prototype.mapReverse = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.tail; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.prev
-  }
-  return res
-}
-
-Yallist.prototype.reduce = function (fn, initial) {
-  var acc
-  var walker = this.head
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.head) {
-    walker = this.head.next
-    acc = this.head.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = 0; walker !== null; i++) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.next
-  }
-
-  return acc
-}
-
-Yallist.prototype.reduceReverse = function (fn, initial) {
-  var acc
-  var walker = this.tail
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.tail) {
-    walker = this.tail.prev
-    acc = this.tail.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = this.length - 1; walker !== null; i--) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.prev
-  }
-
-  return acc
-}
-
-Yallist.prototype.toArray = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.head; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.next
-  }
-  return arr
-}
-
-Yallist.prototype.toArrayReverse = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.tail; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.prev
-  }
-  return arr
-}
-
-Yallist.prototype.slice = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
-    walker = walker.next
-  }
-  for (; walker !== null && i < to; i++, walker = walker.next) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.sliceReverse = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
-    walker = walker.prev
-  }
-  for (; walker !== null && i > from; i--, walker = walker.prev) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.splice = function (start, deleteCount, ...nodes) {
-  if (start > this.length) {
-    start = this.length - 1
-  }
-  if (start < 0) {
-    start = this.length + start;
-  }
-
-  for (var i = 0, walker = this.head; walker !== null && i < start; i++) {
-    walker = walker.next
-  }
-
-  var ret = []
-  for (var i = 0; walker && i < deleteCount; i++) {
-    ret.push(walker.value)
-    walker = this.removeNode(walker)
-  }
-  if (walker === null) {
-    walker = this.tail
-  }
-
-  if (walker !== this.head && walker !== this.tail) {
-    walker = walker.prev
-  }
-
-  for (var i = 0; i < nodes.length; i++) {
-    walker = insert(this, walker, nodes[i])
-  }
-  return ret;
-}
-
-Yallist.prototype.reverse = function () {
-  var head = this.head
-  var tail = this.tail
-  for (var walker = head; walker !== null; walker = walker.prev) {
-    var p = walker.prev
-    walker.prev = walker.next
-    walker.next = p
-  }
-  this.head = tail
-  this.tail = head
-  return this
-}
-
-function insert (self, node, value) {
-  var inserted = node === self.head ?
-    new Node(value, null, node, self) :
-    new Node(value, node, node.next, self)
-
-  if (inserted.next === null) {
-    self.tail = inserted
-  }
-  if (inserted.prev === null) {
-    self.head = inserted
-  }
-
-  self.length++
-
-  return inserted
-}
-
-function push (self, item) {
-  self.tail = new Node(item, self.tail, null, self)
-  if (!self.head) {
-    self.head = self.tail
-  }
-  self.length++
-}
-
-function unshift (self, item) {
-  self.head = new Node(item, null, self.head, self)
-  if (!self.tail) {
-    self.tail = self.head
-  }
-  self.length++
-}
-
-function Node (value, prev, next, list) {
-  if (!(this instanceof Node)) {
-    return new Node(value, prev, next, list)
-  }
-
-  this.list = list
-  this.value = value
-
-  if (prev) {
-    prev.next = this
-    this.prev = prev
-  } else {
-    this.prev = null
-  }
-
-  if (next) {
-    next.prev = this
-    this.next = next
-  } else {
-    this.next = null
-  }
-}
-
-try {
-  // add if support for Symbol.iterator is present
-  __nccwpck_require__(4091)(Yallist)
-} catch (er) {}
-
-
-/***/ }),
-
 /***/ 8953:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -68029,6 +66995,9 @@ function run() {
                 let pythonVersion = '';
                 const arch = core.getInput('architecture') || os.arch();
                 const updateEnvironment = core.getBooleanInput('update-environment');
+                const pythonBinPath = `${process.env.HOME}/.local/bin`;
+                core.info(`Adding ${pythonBinPath} to PATH`);
+                core.exportVariable('PATH', `${pythonBinPath}:${process.env.PATH}`);
                 core.startGroup('Installed versions');
                 for (const version of versions) {
                     if (isPyPyVersion(version)) {

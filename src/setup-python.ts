@@ -84,6 +84,7 @@ async function run() {
       const arch: string = core.getInput('architecture') || os.arch();
       const updateEnvironment = core.getBooleanInput('update-environment');
       const pythonBinPath = `${process.env.HOME}/.local/bin`;
+      core.info(`Adding ${pythonBinPath} to PATH`)
       core.exportVariable('PATH', `${pythonBinPath}:${process.env.PATH}`);
       core.startGroup('Installed versions');
       for (const version of versions) {
