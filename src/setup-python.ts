@@ -83,6 +83,8 @@ async function run() {
       let pythonVersion = '';
       const arch: string = core.getInput('architecture') || os.arch();
       const updateEnvironment = core.getBooleanInput('update-environment');
+      const pythonBinPath = `${process.env.HOME}/.local/bin`;
+      core.exportVariable('PATH', `${pythonBinPath}:${process.env.PATH}`);
       core.startGroup('Installed versions');
       for (const version of versions) {
         if (isPyPyVersion(version)) {
