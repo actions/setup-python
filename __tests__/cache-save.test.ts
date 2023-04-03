@@ -87,6 +87,7 @@ describe('run', () => {
   describe('Validate unchanged cache is not saved', () => {
     it('should not save cache for pip', async () => {
       inputs['cache'] = 'pip';
+      inputs['python-version'] = '3.10.0';
 
       await run();
 
@@ -103,6 +104,7 @@ describe('run', () => {
 
     it('should not save cache for pipenv', async () => {
       inputs['cache'] = 'pipenv';
+      inputs['python-version'] = '3.10.0';
 
       await run();
 
@@ -121,6 +123,7 @@ describe('run', () => {
   describe('action saves the cache', () => {
     it('saves cache from pip', async () => {
       inputs['cache'] = 'pip';
+      inputs['python-version'] = '3.10.0';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return requirementsHash;
@@ -147,6 +150,7 @@ describe('run', () => {
 
     it('saves cache from pipenv', async () => {
       inputs['cache'] = 'pipenv';
+      inputs['python-version'] = '3.10.0';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return pipFileLockHash;
@@ -173,6 +177,7 @@ describe('run', () => {
 
     it('saves cache from poetry', async () => {
       inputs['cache'] = 'poetry';
+      inputs['python-version'] = '3.10.0';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return poetryLockHash;
@@ -199,6 +204,7 @@ describe('run', () => {
 
     it('saves with -1 cacheId , should not fail workflow', async () => {
       inputs['cache'] = 'poetry';
+      inputs['python-version'] = '3.10.0';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.STATE_CACHE_PRIMARY_KEY) {
           return poetryLockHash;
@@ -227,6 +233,7 @@ describe('run', () => {
 
     it('saves with error from toolkit, should not fail the workflow', async () => {
       inputs['cache'] = 'npm';
+      inputs['python-version'] = '3.10.0';
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.STATE_CACHE_PRIMARY_KEY) {
           return poetryLockHash;
