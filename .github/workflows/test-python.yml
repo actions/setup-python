@@ -26,9 +26,9 @@ jobs:
           - os: ubuntu-22.04
             python: 3.5.4
           - os: ubuntu-22.04
-            python: 3.6.4
+            python: 3.6.7
           - os: ubuntu-22.04
-            python: 3.7.4
+            python: 3.7.5
           - os: windows-latest
             python: 3.8.15
     steps:
@@ -70,9 +70,9 @@ jobs:
           - os: ubuntu-22.04
             python: 3.5.4
           - os: ubuntu-22.04
-            python: 3.6.4
+            python: 3.6.7
           - os: ubuntu-22.04
-            python: 3.7.4
+            python: 3.7.5
           - os: windows-latest
             python: 3.8.15
     steps:
