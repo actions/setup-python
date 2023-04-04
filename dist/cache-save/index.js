@@ -59630,7 +59630,7 @@ function saveCache(packageManager) {
     return __awaiter(this, void 0, void 0, function* () {
         const cachePathState = core.getState(cache_distributor_1.State.CACHE_PATHS);
         if (!cachePathState) {
-            core.warning('State paths for saving/restoring is empty. Could you please check previous logs and verify that the version python is specified version?');
+            core.warning('Cache paths are empty. Please check the previous logs and make sure that the python version is specified');
             return;
         }
         const cachePaths = JSON.parse(cachePathState);

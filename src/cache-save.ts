@@ -21,7 +21,7 @@ async function saveCache(packageManager: string) {
 
   if (!cachePathState) {
     core.warning(
-      'State paths for saving/restoring is empty. Could you please check previous logs and verify that the version python is specified version?'
+      'Cache paths are empty. Please check the previous logs and make sure that the python version is specified'
     );
     return;
   }
