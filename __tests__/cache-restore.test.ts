@@ -163,6 +163,12 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         fileHash,
         cachePaths
       ) => {
+        restoreCacheSpy.mockImplementation(
+          (cachePaths: string[], primaryKey: string, restoreKey?: string) => {
+            return primaryKey.includes(fileHash) ? primaryKey : '';
+          }
+        );
+
         const cacheDistributor = getCacheDistributor(
           packageManager,
           pythonVersion,
