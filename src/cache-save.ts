@@ -17,7 +17,16 @@ export async function run() {
 }
 
 async function saveCache(packageManager: string) {
-  const cachePaths = JSON.parse(core.getState(State.CACHE_PATHS)) as string[];
+  const cachePathState = core.getState(State.CACHE_PATHS);
+
+  if (!cachePathState) {
+    core.warning(
+      'Cache paths are empty. Please check the previous logs and make sure that the python version is specified'
+    );
+    return;
+  }
+
+  const cachePaths = JSON.parse(cachePathState) as string[];
 
   core.debug(`paths for caching are ${cachePaths.join(', ')}`);
 

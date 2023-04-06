@@ -59628,7 +59628,12 @@ function run() {
 exports.run = run;
 function saveCache(packageManager) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cachePaths = JSON.parse(core.getState(cache_distributor_1.State.CACHE_PATHS));
+        const cachePathState = core.getState(cache_distributor_1.State.CACHE_PATHS);
+        if (!cachePathState) {
+            core.warning('Cache paths are empty. Please check the previous logs and make sure that the python version is specified');
+            return;
+        }
+        const cachePaths = JSON.parse(cachePathState);
         core.debug(`paths for caching are ${cachePaths.join(', ')}`);
         if (!isCacheDirectoryExists(cachePaths)) {
             throw new Error(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}`);
