@@ -359,7 +359,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output it's possible to get the installed by action Python or PyPy version. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.10.0 ), but down in a workflow you need to operate with the exact installed version (e.g. 3.10.1). 
+Using **python-version** output it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.10.0, 3.x, * ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.10.0). 
 
 ```yaml
 jobs:
@@ -368,10 +368,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
-      id: cp310
+      id: setuppy
       with:
         python-version: "3.8.0 - 3.10.0"
-    - run: echo '${{ steps.cp310.outputs.python-version }}'
+    - run: echo '${{ steps.setuppy.outputs.python-version }}'
 ```
 
 ### `python-path`
