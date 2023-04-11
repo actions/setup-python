@@ -101,7 +101,7 @@ steps:
 - run: python my_script.py
 ```
 
-- **[x-ranges](https://github.com/npm/node-semver#x-ranges-12x-1x-12-)** to specify the latest stable version of Python (for specified major version):
+- **[x-ranges](https://github.com/npm/node-semver#x-ranges-12x-1x-12-)** to specify the latest stable version of Python (for the specified major version):
 
 ```yaml
 steps:
@@ -145,7 +145,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
 ```
-More details on PyPy syntax can be found in the [Available versions of PyPy](#pypy) section.
+More details on the syntax for PyPy can be found in the [Available versions of PyPy](#pypy) section.
 
 ### Specifying multiple Python/PyPy versions
 The python-version input can get multiple python/pypy versions. The last specified version will be used as a default one. 
@@ -205,7 +205,7 @@ jobs:
 
 ### Matrix Testing
 
-Using `setup-python` it's possible to use [matrix syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix) to install several versions of Python or PyPy:
+Using `setup-python` it's possible to use the [matrix syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix) to install several versions of Python or PyPy:
 
 ```yaml
 jobs:
@@ -252,7 +252,7 @@ jobs:
 
 ## Using the `python-version-file` input
 
-`setup-python` action can read Python or PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
+`setup-python` action can read the Python or PyPy version from a version file. `python-version-file` input is used to specify the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with an error.
 
 >In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
 
@@ -289,7 +289,7 @@ steps:
       check-latest: true
   - run: python my_script.py
 ```
-> Setting `check-latest` to `true` has performance implications as downloading `Python or PyPy` versions is slower than using cached versions.
+> Setting `check-latest` to `true` impacts performance as downloading `Python or PyPy` versions is slower than using cached versions.
 
 
 ## Caching packages
@@ -383,7 +383,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.12.0, 3.x, * ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
+Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.12.0, 3.x, * ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
 
 ```yaml
 jobs:
@@ -400,7 +400,7 @@ jobs:
 
 ### `python-path`
 
-**python-path** output is available with the absolute path of the Python or PyPy interpreter executable if you need it:
+**python-path** output is available to get the absolute path of the Python or PyPy interpreter executable:
 
 ```yaml
 jobs:
@@ -449,7 +449,7 @@ The `update-environment` flag defaults to `true`.
 With this setting, the action will add/update environment variables (e.g. `PATH`, `PKG_CONFIG_PATH`, `pythonLocation`) for Python or PyPy to just work out of the box.
 
 If `update-environment` is set to `false`, the action will not add/update environment variables.
-This can prove useful if you want the only side-effect to be to ensure Python or PyPy is installed and rely on the `python-path` output to run executable.
+This can prove useful if you only want the side-effect to ensure that Python or PyPy is installed and rely on the `python-path` output to run the executable.
 Such a requirement on side-effect could be because you don't want your composite action messing with your user's workflows.
 
 ```yaml
@@ -469,7 +469,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
 - Preinstalled versions of Python in the tool cache on GitHub-hosted runners.
     - For detailed information regarding the available versions of Python that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
-    - For every minor version of Python, expect only the latest patch to be preinstalled.
+    - For every minor versions of Python, expect only the latest patch to be preinstalled.
     - If `3.12.1` is installed for example, and `3.12.2` is released, expect `3.12.1` to be removed and replaced by `3.12.2` in the tool cache.
     - If the exact patch version doesn't matter to you, specifying just the major and minor versions will get you the latest preinstalled patch version. In the previous example, the version spec `3.12` will use the `3.12.2` Python version found in the cache.
     - Use `-dev` instead of a patch number (e.g., `3.14-dev`) to install the latest patch version release for a given minor version, *alpha and beta releases included*.
@@ -534,11 +534,11 @@ If you have a supported self-hosted runner and you would like to use `setup-pyth
 
 ### Linux
 
-By default runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Linux self-hosted runners:
+By default, the runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Linux self-hosted runners:
 - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/path/to/folder`.
 - More permanent way of setting the environment variable is to create an `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/path/to/folder`. This ensures the variable is always set if your runner is configured as a service.
 
-If you're using a non-default tool cache directory be sure that the user starting the runner has write permission to the new tool cache directory. To check the current user and group that the runner belongs type `ls -l` inside the runner's root directory.
+If you're using a non-default tool cache directory be sure that the user starting the runner has write permission to the new tool cache directory. To check the current user and group that the runner belongs, type `ls -l` inside the runner's root directory.
 
 The runner can be granted write access to any directory using a few techniques:
 - The user starting the runner is the owner, and the owner has write permission.
