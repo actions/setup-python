@@ -247,6 +247,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
+        if: ${{ python-version != 'pypy2.7' }} # in if statements, use single-quotes (not double-quotes) in expressions to test input `python-version`
         run: python --version
 ```
 
