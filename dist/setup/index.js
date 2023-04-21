@@ -66750,10 +66750,10 @@ class PoetryCache extends cache_distributor_1.default {
             const hash = yield glob.hashFiles(this.patterns);
             // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
             const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
-            const restoreKey = undefined;
+            const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-`;
             return {
                 primaryKey,
-                restoreKey
+                restoreKey: [restoreKey]
             };
         });
     }

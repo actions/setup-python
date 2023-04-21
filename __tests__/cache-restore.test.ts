@@ -300,7 +300,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
             result = 'pipenv cache is not found';
             break;
           case 'poetry':
-            result = 'poetry cache is not found';
+            result = `Cache restored from key: ${pipFileLockHash}`;
             break;
         }
 
