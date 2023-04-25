@@ -417,7 +417,7 @@ These environment variables become available after setup-python action execution
 | pythonLocation      |Contains the absolute path to the folder where the requested version of Python or PyPy is installed|
 | Python_ROOT_DIR   | https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython        |
 | Python2_ROOT_DIR   |https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2|
-| Python3_ROOT_DIR   |https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython3|
+| Python3_ROOT_DIR   |https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3|
 
 ## Using `update-environment` flag
 
