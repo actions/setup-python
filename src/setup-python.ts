@@ -42,7 +42,7 @@ function resolveVersionInput() {
         `The specified python version file at: ${versionFile} doesn't exist.`
       );
     }
-    const version = fs.readFileSync(versionFile, 'utf8');
+    const version = fs.readFileSync(versionFile, 'utf8').trimEnd();
     core.info(`Resolved ${versionFile} as ${version}`);
     return [version];
   }
@@ -52,7 +52,7 @@ function resolveVersionInput() {
   );
   versionFile = '.python-version';
   if (fs.existsSync(versionFile)) {
-    const version = fs.readFileSync(versionFile, 'utf8');
+    const version = fs.readFileSync(versionFile, 'utf8').trimEnd();
     core.info(`Resolved ${versionFile} as ${version}`);
     return [version];
   }
