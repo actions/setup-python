@@ -1,0 +1,24 @@
+---
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  born_to_fail:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: create requirements file
+        run: echo django > requirements.txt
+
+      - name: Install python
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b
+        id: pynstall
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      # true if cache-hit occured on the primary key
+      - run: echo '${{ steps.pynstall.outputs.cache-hit }}'
+
