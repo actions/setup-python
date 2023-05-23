@@ -2662,6 +2662,9 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let version = core.getInput('python-version');
+            if (version.startsWith('2')) {
+                core.warning('The support for python 2.7 will be removed on June 19. Related issue: https://github.com/actions/setup-python/issues/672');
+            }
             if (version) {
                 const arch = core.getInput('architecture', { required: true });
                 const installed = yield finder.findPythonVersion(version, arch);
