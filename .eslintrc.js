@@ -29,7 +29,7 @@ module.exports = {
     ],
     'no-control-regex': 'off',
     'no-constant-condition': ['error', {checkLoops: false}],
-    'node/no-extraneous-import': 'error',
+    'node/no-extraneous-import': 'error'
   },
   overrides: [
     {
