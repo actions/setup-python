@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
         pypy:
         - 'pypy-2.7'
         - 'pypy-3.7'
