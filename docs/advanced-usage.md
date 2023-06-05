@@ -405,7 +405,7 @@ jobs:
       with:
         python-version: "3.8.0"
         cache: "poetry"
-    - run: echo '${{ steps.cp310.outputs.cache-hit }}' # true if cache-hit occured on the primary key
+    - run: echo '${{ steps.cp310.outputs.cache-hit }}' # true if cache-hit occurred on the primary key
 ```
 
 ## Environment variables
