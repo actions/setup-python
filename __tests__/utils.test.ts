@@ -1,9 +1,17 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import * as io from '@actions/io';
+
+import fs from 'fs';
+import path from 'path';
+
 import {
   validateVersion,
   validatePythonVersionFormatForPyPy,
-  isCacheFeatureAvailable
+  isCacheFeatureAvailable,
+  getVersionInputFromFile,
+  getVersionInputFromPlainFile,
+  getVersionInputFromTomlFile
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -72,4 +80,49 @@ describe('isCacheFeatureAvailable', () => {
     jest.spyOn(cache, 'isFeatureAvailable').mockImplementation(() => true);
     expect(isCacheFeatureAvailable()).toBe(true);
   });
+});
+
+const tempDir = path.join(
+  __dirname,
+  'runner',
+  path.join(Math.random().toString(36).substring(7)),
+  'temp'
+);
+
+describe('Version from file test', () => {
+  it.each([getVersionInputFromPlainFile, getVersionInputFromFile])(
+    'Version from plain file test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'python-version.file';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent = '3.7';
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersionFileContent]);
+    }
+  );
+  it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
+    'Version from standard pyproject.toml test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'pyproject.toml';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '>=3.7';
+      const pythonVersionFileContent = `[project]\nrequires-python = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+  it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
+    'Version from poetry pyproject.toml test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'pyproject.toml';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '>=3.7';
+      const pythonVersionFileContent = `[tool.poetry.dependencies]\npython = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
 });

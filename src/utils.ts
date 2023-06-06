@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as toml from 'toml';
 import * as exec from '@actions/exec';
 
 export const IS_WINDOWS = process.platform === 'win32';
@@ -179,5 +180,67 @@ export async function getOSInfo() {
     core.debug(error.message);
   } finally {
     return osInfo;
+  }
+}
+
+/**
+ * Python version extracted from the TOML file.
+ * If the `project` key is present at the root level, the version is assumed to
+ * be specified according to PEP 621 in `project.requires-python`.
+ * Otherwise, if the `tool` key is present at the root level, the version is
+ * assumed to be specified using poetry under `tool.poetry.dependencies.python`.
+ * If none is present, returns an empty list.
+ */
+export function getVersionInputFromTomlFile(versionFile: string): string[] {
+  core.debug(`Trying to resolve version form ${versionFile}`);
+
+  const pyprojectFile = fs.readFileSync(versionFile, 'utf8');
+  const pyprojectConfig = toml.parse(pyprojectFile);
+  const versions = [];
+
+  if ('project' in pyprojectConfig) {
+    // standard project metadata (PEP 621)
+    const projectMetadata = pyprojectConfig['project'];
+    if ('requires-python' in projectMetadata) {
+      versions.push(projectMetadata['requires-python']);
+    }
+  } else {
+    // python poetry
+    if ('tool' in pyprojectConfig) {
+      const toolMetadata = pyprojectConfig['tool'];
+      if ('poetry' in toolMetadata) {
+        const poetryMetadata = toolMetadata['poetry'];
+        if ('dependencies' in poetryMetadata) {
+          const dependenciesMetadata = poetryMetadata['dependencies'];
+          if ('python' in dependenciesMetadata) {
+            versions.push(dependenciesMetadata['python']);
+          }
+        }
+      }
+    }
+  }
+
+  core.info(`Extracted ${versions} from ${versionFile}`);
+  return versions;
+}
+
+/**
+ * Python version extracted from a plain text file.
+ */
+export function getVersionInputFromPlainFile(versionFile: string): string[] {
+  core.debug(`Trying to resolve version form ${versionFile}`);
+  const version = fs.readFileSync(versionFile, 'utf8');
+  core.info(`Resolved ${versionFile} as ${version}`);
+  return [version];
+}
+
+/**
+ * Python version extracted from a plain or TOML file.
+ */
+export function getVersionInputFromFile(versionFile: string): string[] {
+  if (versionFile.endsWith('.toml')) {
+    return getVersionInputFromTomlFile(versionFile);
+  } else {
+    return getVersionInputFromPlainFile(versionFile);
   }
 }
