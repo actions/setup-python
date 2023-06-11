@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as toml from 'toml';
+import * as toml from '@iarna/toml';
 import * as exec from '@actions/exec';
 
 export const IS_WINDOWS = process.platform === 'win32';
@@ -184,6 +184,23 @@ export async function getOSInfo() {
 }
 
 /**
+ * Extract a value from an object by following the keys path provided.
+ * If the value is present, it is returned. Otherwise undefined is returned.
+ */
+function extractValue(obj: any, keys: string[]): string | undefined {
+  if (keys.length > 0) {
+    const value = obj[keys[0]];
+    if (keys.length > 1 && value !== undefined) {
+      return extractValue(value, keys.slice(1));
+    } else {
+      return value;
+    }
+  } else {
+    return;
+  }
+}
+
+/**
  * Python version extracted from the TOML file.
  * If the `project` key is present at the root level, the version is assumed to
  * be specified according to PEP 621 in `project.requires-python`.
@@ -196,28 +213,19 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
 
   const pyprojectFile = fs.readFileSync(versionFile, 'utf8');
   const pyprojectConfig = toml.parse(pyprojectFile);
-  const versions = [];
+  let keys = [];
 
   if ('project' in pyprojectConfig) {
     // standard project metadata (PEP 621)
-    const projectMetadata = pyprojectConfig['project'];
-    if ('requires-python' in projectMetadata) {
-      versions.push(projectMetadata['requires-python']);
-    }
+    keys = ['project', 'requires-python'];
   } else {
     // python poetry
-    if ('tool' in pyprojectConfig) {
-      const toolMetadata = pyprojectConfig['tool'];
-      if ('poetry' in toolMetadata) {
-        const poetryMetadata = toolMetadata['poetry'];
-        if ('dependencies' in poetryMetadata) {
-          const dependenciesMetadata = poetryMetadata['dependencies'];
-          if ('python' in dependenciesMetadata) {
-            versions.push(dependenciesMetadata['python']);
-          }
-        }
-      }
-    }
+    keys = ['tool', 'poetry', 'dependencies', 'python'];
+  }
+  const versions = [];
+  const version = extractValue(pyprojectConfig, keys);
+  if (version !== undefined) {
+    versions.push(version);
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);

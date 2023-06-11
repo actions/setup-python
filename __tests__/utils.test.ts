@@ -125,4 +125,14 @@ describe('Version from file test', () => {
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
     }
   );
+  it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
+    'Version undefined',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'pyproject.toml';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      fs.writeFileSync(pythonVersionFilePath, ``);
+      expect(_fn(pythonVersionFilePath)).toEqual([]);
+    }
+  );
 });
