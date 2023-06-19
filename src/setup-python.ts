@@ -5,7 +5,12 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable, logWarning, IS_MAC} from './utils';
+import {
+  parsePythonVersionFile,
+  isCacheFeatureAvailable,
+  logWarning,
+  IS_MAC
+} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -42,15 +47,21 @@ function resolveVersionInput() {
         `The specified python version file at: ${versionFile} doesn't exist.`
       );
     }
-    const version = fs.readFileSync(versionFile, 'utf8');
+
+    const version = parsePythonVersionFile(
+      fs.readFileSync(versionFile, 'utf8')
+    );
     core.info(`Resolved ${versionFile} as ${version}`);
+
     return [version];
   }
 
   logWarning(
     "Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file."
   );
+
   versionFile = '.python-version';
+
   if (fs.existsSync(versionFile)) {
     const version = fs.readFileSync(versionFile, 'utf8');
     core.info(`Resolved ${versionFile} as ${version}`);

@@ -28,6 +28,22 @@ export interface IPyPyManifestRelease {
   files: IPyPyManifestAsset[];
 }
 
+export function parsePythonVersionFile(contents: string): string {
+  let pythonVersion: string | undefined;
+
+  // Try to find the version in tool-version file
+  const found = contents.match(/^(?:python\s+)?v?(?<version>[^\s]+)$/m);
+  pythonVersion = found?.groups?.version;
+
+  // In the case of an unknown format,
+  // return as is and evaluate the version separately.
+  if (!pythonVersion) {
+    pythonVersion = contents.trim();
+  }
+
+  return pythonVersion as string;
+}
+
 /** create Symlinks for downloaded PyPy
  *  It should be executed only for downloaded versions in runtime, because
  *  toolcache versions have this setup.
