@@ -29,6 +29,16 @@ export interface IPyPyManifestRelease {
   files: IPyPyManifestAsset[];
 }
 
+export interface IGraalPyManifestAsset {
+  name: string;
+  browser_download_url: string;
+}
+
+export interface IGraalPyManifestRelease {
+  tag_name: string;
+  assets: IGraalPyManifestAsset[];
+}
+
 /** create Symlinks for downloaded PyPy
  *  It should be executed only for downloaded versions in runtime, because
  *  toolcache versions have this setup.
