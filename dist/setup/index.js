@@ -69700,7 +69700,6 @@ function cacheDependencies(cache, pythonVersion) {
 function resolveVersionInputFromDefaultFile() {
     const couples = [
         ['.python-version', utils_1.getVersionInputFromPlainFile],
-        ['pyproject.toml', utils_1.getVersionInputFromTomlFile]
     ];
     for (const [versionFile, _fn] of couples) {
         utils_1.logWarning(`Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '${versionFile}' file.`);
@@ -69975,6 +69974,10 @@ function getOSInfo() {
     });
 }
 exports.getOSInfo = getOSInfo;
+/**
+ * Extract a value from an object by following the keys path provided.
+ * If the value is present, it is returned. Otherwise undefined is returned.
+ */
 function extractValue(obj, keys) {
     if (keys.length > 0) {
         const value = obj[keys[0]];

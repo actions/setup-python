@@ -10,8 +10,7 @@ import {
   logWarning,
   IS_MAC,
   getVersionInputFromFile,
-  getVersionInputFromPlainFile,
-  getVersionInputFromTomlFile
+  getVersionInputFromPlainFile
 } from './utils';
 
 function isPyPyVersion(versionSpec: string) {
@@ -32,7 +31,6 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 function resolveVersionInputFromDefaultFile(): string[] {
   const couples: [string, (versionFile: string) => string[]][] = [
     ['.python-version', getVersionInputFromPlainFile],
-    ['pyproject.toml', getVersionInputFromTomlFile]
   ];
   for (const [versionFile, _fn] of couples) {
     logWarning(
