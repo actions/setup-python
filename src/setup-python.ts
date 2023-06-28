@@ -30,7 +30,7 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 
 function resolveVersionInputFromDefaultFile(): string[] {
   const couples: [string, (versionFile: string) => string[]][] = [
-    ['.python-version', getVersionInputFromPlainFile],
+    ['.python-version', getVersionInputFromPlainFile]
   ];
   for (const [versionFile, _fn] of couples) {
     logWarning(
@@ -68,7 +68,6 @@ function resolveVersionInput() {
     }
   }
 
-  versions = Array.from(versions, version => version.split(',').join(' '));
   return versions;
 }
 

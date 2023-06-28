@@ -69699,7 +69699,7 @@ function cacheDependencies(cache, pythonVersion) {
 }
 function resolveVersionInputFromDefaultFile() {
     const couples = [
-        ['.python-version', utils_1.getVersionInputFromPlainFile],
+        ['.python-version', utils_1.getVersionInputFromPlainFile]
     ];
     for (const [versionFile, _fn] of couples) {
         utils_1.logWarning(`Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '${versionFile}' file.`);
@@ -69731,7 +69731,6 @@ function resolveVersionInput() {
             versions = resolveVersionInputFromDefaultFile();
         }
     }
-    versions = Array.from(versions, version => version.split(',').join(' '));
     return versions;
 }
 function run() {
@@ -70019,7 +70018,7 @@ function getVersionInputFromTomlFile(versionFile) {
         versions.push(version);
     }
     core.info(`Extracted ${versions} from ${versionFile}`);
-    return versions;
+    return Array.from(versions, version => version.split(',').join(' '));
 }
 exports.getVersionInputFromTomlFile = getVersionInputFromTomlFile;
 /**

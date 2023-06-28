@@ -229,7 +229,7 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);
-  return versions;
+  return Array.from(versions, version => version.split(',').join(' '));
 }
 
 /**
