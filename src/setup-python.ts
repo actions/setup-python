@@ -5,7 +5,13 @@ import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
 import {getCacheDistributor} from './cache-distributions/cache-factory';
-import {isCacheFeatureAvailable, logWarning, IS_MAC} from './utils';
+import {
+  isCacheFeatureAvailable,
+  logWarning,
+  IS_MAC,
+  getVersionInputFromFile,
+  getVersionInputFromPlainFile
+} from './utils';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -22,42 +28,45 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
   await cacheDistributor.restoreCache();
 }
 
-function resolveVersionInput() {
-  const versions = core.getMultilineInput('python-version');
-  let versionFile = core.getInput('python-version-file');
-
-  if (versions.length && versionFile) {
-    core.warning(
-      'Both python-version and python-version-file inputs are specified, only python-version will be used.'
+function resolveVersionInputFromDefaultFile(): string[] {
+  const couples: [string, (versionFile: string) => string[]][] = [
+    ['.python-version', getVersionInputFromPlainFile]
+  ];
+  for (const [versionFile, _fn] of couples) {
+    logWarning(
+      `Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '${versionFile}' file.`
     );
+    if (fs.existsSync(versionFile)) {
+      return _fn(versionFile);
+    } else {
+      logWarning(`${versionFile} doesn't exist.`);
+    }
   }
+  return [];
+}
+
+function resolveVersionInput() {
+  let versions = core.getMultilineInput('python-version');
+  const versionFile = core.getInput('python-version-file');
 
   if (versions.length) {
-    return versions;
-  }
-
-  if (versionFile) {
-    if (!fs.existsSync(versionFile)) {
-      throw new Error(
-        `The specified python version file at: ${versionFile} doesn't exist.`
+    if (versionFile) {
+      core.warning(
+        'Both python-version and python-version-file inputs are specified, only python-version will be used.'
       );
     }
-    const version = fs.readFileSync(versionFile, 'utf8');
-    core.info(`Resolved ${versionFile} as ${version}`);
-    return [version];
+  } else {
+    if (versionFile) {
+      if (!fs.existsSync(versionFile)) {
+        throw new Error(
+          `The specified python version file at: ${versionFile} doesn't exist.`
+        );
+      }
+      versions = getVersionInputFromFile(versionFile);
+    } else {
+      versions = resolveVersionInputFromDefaultFile();
+    }
   }
-
-  logWarning(
-    "Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '.python-version' file."
-  );
-  versionFile = '.python-version';
-  if (fs.existsSync(versionFile)) {
-    const version = fs.readFileSync(versionFile, 'utf8');
-    core.info(`Resolved ${versionFile} as ${version}`);
-    return [version];
-  }
-
-  logWarning(`${versionFile} doesn't exist.`);
 
   return versions;
 }
