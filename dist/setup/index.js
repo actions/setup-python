@@ -69629,6 +69629,7 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
                 installDir = yield tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
             }
             const binaryPath = getGraalPyBinaryPath(installDir);
+            yield createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
             yield installPip(binaryPath);
             return { installDir, resolvedGraalPyVersion };
         }
@@ -69663,6 +69664,19 @@ function getAvailableGraalPyVersions() {
     });
 }
 exports.getAvailableGraalPyVersions = getAvailableGraalPyVersions;
+function createGraalPySymlink(graalpyBinaryPath, graalpyVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const version = semver.coerce(graalpyVersion);
+        const pythonBinaryPostfix = semver.major(version);
+        const pythonMinor = semver.minor(version);
+        const graalpyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        core.info('Creating symlinks...');
+        utils_1.createSymlinkInFolder(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${binaryExtension}`, true);
+        utils_1.createSymlinkInFolder(graalpyBinaryPath, `graalpy${binaryExtension}`, `graalpy${graalpyMajorMinorBinaryPostfix}${binaryExtension}`, true);
+    });
+}
 function installPip(pythonLocation) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info('Installing and updating pip');

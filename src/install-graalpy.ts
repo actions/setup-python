@@ -11,6 +11,7 @@ import {
   IS_WINDOWS,
   IGraalPyManifestAsset,
   IGraalPyManifestRelease,
+  createSymlinkInFolder,
   isNightlyKeyword
 } from './utils';
 
@@ -74,6 +75,7 @@ export async function installGraalPy(
     }
 
     const binaryPath = getGraalPyBinaryPath(installDir);
+    await createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
     await installPip(binaryPath);
 
     return {installDir, resolvedGraalPyVersion};
@@ -110,6 +112,39 @@ export async function getAvailableGraalPyVersions() {
   }
 
   return response.result;
+}
+
+async function createGraalPySymlink(
+  graalpyBinaryPath: string,
+  graalpyVersion: string
+) {
+  const version = semver.coerce(graalpyVersion)!;
+  const pythonBinaryPostfix = semver.major(version);
+  const pythonMinor = semver.minor(version);
+  const graalpyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+  const binaryExtension = IS_WINDOWS ? '.exe' : '';
+
+  core.info('Creating symlinks...');
+  createSymlinkInFolder(
+    graalpyBinaryPath,
+    `graalpy${binaryExtension}`,
+    `python${pythonBinaryPostfix}${binaryExtension}`,
+    true
+  );
+
+  createSymlinkInFolder(
+    graalpyBinaryPath,
+    `graalpy${binaryExtension}`,
+    `python${binaryExtension}`,
+    true
+  );
+
+  createSymlinkInFolder(
+    graalpyBinaryPath,
+    `graalpy${binaryExtension}`,
+    `graalpy${graalpyMajorMinorBinaryPostfix}${binaryExtension}`,
+    true
+  );
 }
 
 async function installPip(pythonLocation: string) {
