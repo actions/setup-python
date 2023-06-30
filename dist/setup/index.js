@@ -69093,6 +69093,132 @@ exports["default"] = PoetryCache;
 
 /***/ }),
 
+/***/ 8040:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseGraalPyVersion = exports.findGraalPyToolCache = exports.findGraalPyVersion = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const graalpyInstall = __importStar(__nccwpck_require__(8265));
+const utils_1 = __nccwpck_require__(1314);
+const semver = __importStar(__nccwpck_require__(1383));
+const core = __importStar(__nccwpck_require__(2186));
+const tc = __importStar(__nccwpck_require__(7784));
+function findGraalPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let resolvedGraalPyVersion = '';
+        let installDir;
+        let releases;
+        let graalpyVersionSpec = parseGraalPyVersion(versionSpec);
+        if (checkLatest) {
+            releases = yield graalpyInstall.getAvailableGraalPyVersions();
+            if (releases && releases.length > 0) {
+                const releaseData = graalpyInstall.findRelease(releases, graalpyVersionSpec, architecture, false);
+                if (releaseData) {
+                    core.info(`Resolved as GraalPy ${releaseData.resolvedGraalPyVersion}`);
+                    graalpyVersionSpec = releaseData.resolvedGraalPyVersion;
+                }
+                else {
+                    core.info(`Failed to resolve GraalPy ${graalpyVersionSpec} from manifest`);
+                }
+            }
+        }
+        ({ installDir, resolvedGraalPyVersion } = findGraalPyToolCache(graalpyVersionSpec, architecture));
+        if (!installDir) {
+            ({ installDir, resolvedGraalPyVersion } = yield graalpyInstall.installGraalPy(graalpyVersionSpec, architecture, allowPreReleases, releases));
+        }
+        const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
+        const _binDir = path.join(installDir, pipDir);
+        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
+        const pythonLocation = graalpyInstall.getGraalPyBinaryPath(installDir);
+        if (updateEnvironment) {
+            core.exportVariable('pythonLocation', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+            core.exportVariable('Python_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+            core.exportVariable('Python2_ROOT_DIR', installDir);
+            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+            core.exportVariable('Python3_ROOT_DIR', installDir);
+            core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+            core.addPath(pythonLocation);
+            core.addPath(_binDir);
+        }
+        core.setOutput('python-version', 'graalpy' + resolvedGraalPyVersion);
+        core.setOutput('python-path', pythonPath);
+        return resolvedGraalPyVersion;
+    });
+}
+exports.findGraalPyVersion = findGraalPyVersion;
+function findGraalPyToolCache(graalpyVersion, architecture) {
+    let resolvedGraalPyVersion = '';
+    let installDir = tc.find('GraalPy', graalpyVersion, architecture);
+    if (installDir) {
+        // 'tc.find' finds tool based on Python version but we also need to check
+        // whether GraalPy version satisfies requested version.
+        resolvedGraalPyVersion = path.basename(path.dirname(installDir));
+        const isGraalPyVersionSatisfies = semver.satisfies(resolvedGraalPyVersion, graalpyVersion);
+        if (!isGraalPyVersionSatisfies) {
+            installDir = null;
+            resolvedGraalPyVersion = '';
+        }
+    }
+    if (!installDir) {
+        core.info(`GraalPy version ${graalpyVersion} was not found in the local cache`);
+    }
+    return { installDir, resolvedGraalPyVersion };
+}
+exports.findGraalPyToolCache = findGraalPyToolCache;
+function parseGraalPyVersion(versionSpec) {
+    const versions = versionSpec.split('-').filter(item => !!item);
+    if (/^(graalpy)(.+)/.test(versions[0])) {
+        const version = versions[0].replace('graalpy', '');
+        versions.splice(0, 1, 'graalpy', version);
+    }
+    if (versions.length < 2 || versions[0] != 'graalpy') {
+        throw new Error("Invalid 'version' property for GraalPy. GraalPy version should be specified as 'graalpy<python-version>' or 'graalpy-<python-version>'. See README for examples and documentation.");
+    }
+    const pythonVersion = versions[1];
+    if (!utils_1.validateVersion(pythonVersion)) {
+        throw new Error("Invalid 'version' property for GraalPy. GraalPy versions should satisfy SemVer notation. See README for examples and documentation.");
+    }
+    return pythonVersion;
+}
+exports.parseGraalPyVersion = parseGraalPyVersion;
+
+
+/***/ }),
+
 /***/ 4003:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -69417,6 +69543,198 @@ function pythonVersionToSemantic(versionSpec, allowPreReleases) {
     return result;
 }
 exports.pythonVersionToSemantic = pythonVersionToSemantic;
+
+
+/***/ }),
+
+/***/ 8265:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findAsset = exports.getGraalPyBinaryPath = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const core = __importStar(__nccwpck_require__(2186));
+const tc = __importStar(__nccwpck_require__(7784));
+const semver = __importStar(__nccwpck_require__(1383));
+const httpm = __importStar(__nccwpck_require__(9925));
+const exec = __importStar(__nccwpck_require__(1514));
+const fs_1 = __importDefault(__nccwpck_require__(7147));
+const utils_1 = __nccwpck_require__(1314);
+function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let downloadDir;
+        releases = releases !== null && releases !== void 0 ? releases : (yield getAvailableGraalPyVersions());
+        if (!releases || releases.length === 0) {
+            throw new Error('No release was found in GraalPy version.json');
+        }
+        let releaseData = findRelease(releases, graalpyVersion, architecture, false);
+        if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
+            // check for pre-release
+            core.info([
+                `Stable GraalPy version ${graalpyVersion} with arch ${architecture} not found`,
+                `Trying pre-release versions`
+            ].join(os.EOL));
+            releaseData = findRelease(releases, graalpyVersion, architecture, true);
+        }
+        if (!releaseData || !releaseData.foundAsset) {
+            throw new Error(`GraalPy version ${graalpyVersion} with arch ${architecture} not found`);
+        }
+        const { foundAsset, resolvedGraalPyVersion } = releaseData;
+        const downloadUrl = `${foundAsset.browser_download_url}`;
+        core.info(`Downloading GraalPy from "${downloadUrl}" ...`);
+        try {
+            const graalpyPath = yield tc.downloadTool(downloadUrl);
+            core.info('Extracting downloaded archive...');
+            downloadDir = yield tc.extractTar(graalpyPath);
+            // root folder in archive can have unpredictable name so just take the first folder
+            // downloadDir is unique folder under TEMP and can't contain any other folders
+            const archiveName = fs_1.default.readdirSync(downloadDir)[0];
+            const toolDir = path.join(downloadDir, archiveName);
+            let installDir = toolDir;
+            if (!utils_1.isNightlyKeyword(resolvedGraalPyVersion)) {
+                installDir = yield tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
+            }
+            const binaryPath = getGraalPyBinaryPath(installDir);
+            yield installPip(binaryPath);
+            return { installDir, resolvedGraalPyVersion };
+        }
+        catch (err) {
+            if (err instanceof Error) {
+                // Rate limit?
+                if (err instanceof tc.HTTPError &&
+                    (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
+                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                }
+                else {
+                    core.info(err.message);
+                }
+                if (err.stack !== undefined) {
+                    core.debug(err.stack);
+                }
+            }
+            throw err;
+        }
+    });
+}
+exports.installGraalPy = installGraalPy;
+function getAvailableGraalPyVersions() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = 'https://api.github.com/repos/oracle/graalpython/releases';
+        const http = new httpm.HttpClient('tool-cache');
+        const response = yield http.getJson(url);
+        if (!response.result) {
+            throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+        }
+        return response.result;
+    });
+}
+exports.getAvailableGraalPyVersions = getAvailableGraalPyVersions;
+function installPip(pythonLocation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info('Installing and updating pip');
+        const pythonBinary = path.join(pythonLocation, 'python');
+        yield exec.exec(`${pythonBinary} -m ensurepip`);
+        yield exec.exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
+    });
+}
+function graalPyTagToVersion(tag) {
+    const versionPattern = /.*-(\d+\.\d+\.\d+(?:\.\d+)?)((?:a|b|rc))?(\d*)?/;
+    const match = tag.match(versionPattern);
+    if (match && match[2]) {
+        return `${match[1]}-${match[2]}.${match[3]}`;
+    }
+    else if (match) {
+        return match[1];
+    }
+    else {
+        return tag.replace(/.*-/, '');
+    }
+}
+exports.graalPyTagToVersion = graalPyTagToVersion;
+function findRelease(releases, graalpyVersion, architecture, includePrerelease) {
+    const options = { includePrerelease: includePrerelease };
+    const filterReleases = releases.filter(item => {
+        const isVersionSatisfied = semver.satisfies(graalPyTagToVersion(item.tag_name), graalpyVersion, options);
+        return (isVersionSatisfied && !!findAsset(item, architecture, process.platform));
+    });
+    if (filterReleases.length === 0) {
+        return null;
+    }
+    const sortedReleases = filterReleases.sort((previous, current) => {
+        return (semver.compare(semver.coerce(graalPyTagToVersion(current.tag_name)), semver.coerce(graalPyTagToVersion(previous.tag_name))) ||
+            semver.compare(semver.coerce(graalPyTagToVersion(current.tag_name)), semver.coerce(graalPyTagToVersion(previous.tag_name))));
+    });
+    const foundRelease = sortedReleases[0];
+    const foundAsset = findAsset(foundRelease, architecture, process.platform);
+    return {
+        foundAsset,
+        resolvedGraalPyVersion: graalPyTagToVersion(foundRelease.tag_name)
+    };
+}
+exports.findRelease = findRelease;
+/** Get GraalPy binary location from the tool of installation directory
+ *  - On Linux and macOS, the Python interpreter is in 'bin'.
+ *  - On Windows, it is in the installation root.
+ */
+function getGraalPyBinaryPath(installDir) {
+    const _binDir = path.join(installDir, 'bin');
+    return utils_1.IS_WINDOWS ? installDir : _binDir;
+}
+exports.getGraalPyBinaryPath = getGraalPyBinaryPath;
+function findAsset(item, architecture, platform) {
+    const graalpyArch = architecture === 'x64'
+        ? 'amd64'
+        : architecture === 'arm64'
+            ? 'aarch64'
+            : architecture;
+    const graalpyPlatform = platform == 'win32' ? 'windows' : platform;
+    if (item.assets) {
+        return item.assets.find((file) => {
+            const match_data = file.name.match('.*(darwin|linux|windows)-(amd64|aarch64).tar.gz$');
+            return (match_data &&
+                match_data[1] === graalpyPlatform &&
+                match_data[2] === graalpyArch);
+        });
+    }
+    else {
+        return undefined;
+    }
+}
+exports.findAsset = findAsset;
 
 
 /***/ }),
@@ -69804,6 +70122,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
+const finderGraalPy = __importStar(__nccwpck_require__(8040));
 const path = __importStar(__nccwpck_require__(1017));
 const os = __importStar(__nccwpck_require__(2037));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
@@ -69811,6 +70130,9 @@ const cache_factory_1 = __nccwpck_require__(7549);
 const utils_1 = __nccwpck_require__(1314);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy');
+}
+function isGraalPyVersion(versionSpec) {
+    return versionSpec.startsWith('graalpy');
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -69879,6 +70201,11 @@ function run() {
                         const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
                         core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
+                    }
+                    else if (isGraalPyVersion(version)) {
+                        const installed = yield finderGraalPy.findGraalPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
+                        pythonVersion = `${installed}`;
+                        core.info(`Successfully set up GraalPy ${installed}`);
                     }
                     else {
                         if (version.startsWith('2')) {

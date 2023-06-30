@@ -10,13 +10,11 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import * as finder from '../src/find-graalpy';
-import {
-  IGraalPyManifestRelease,
-} from '../src/utils';
+import {IGraalPyManifestRelease} from '../src/utils';
 
 import manifestData from './data/graalpy.json';
 
-let architecture = 'x64';
+const architecture = 'x64';
 
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
@@ -25,7 +23,7 @@ describe('parseGraalPyVersion', () => {
   it.each([
     ['graalpy-23', '23'],
     ['graalpy-23.0', '23.0'],
-    ['graalpy23.0', '23.0'],
+    ['graalpy23.0', '23.0']
   ])('%s -> %s', (input, expected) => {
     expect(finder.parseGraalPyVersion(input)).toEqual(expected);
   });
@@ -308,9 +306,7 @@ describe('findGraalPyVersion', () => {
       )
     ).resolves.toEqual('23.0.0');
 
-    expect(infoSpy).toHaveBeenCalledWith(
-      'Resolved as GraalPy 23.0.0'
-    );
+    expect(infoSpy).toHaveBeenCalledWith('Resolved as GraalPy 23.0.0');
   });
 
   it('check-latest enabled version found and install successfully', async () => {
@@ -329,9 +325,7 @@ describe('findGraalPyVersion', () => {
         false
       )
     ).resolves.toEqual('23.0.0');
-    expect(infoSpy).toHaveBeenCalledWith(
-      'Resolved as GraalPy 23.0.0'
-    );
+    expect(infoSpy).toHaveBeenCalledWith('Resolved as GraalPy 23.0.0');
   });
 
   it('check-latest enabled version is not found and used from toolcache', async () => {
@@ -366,7 +360,13 @@ describe('findGraalPyVersion', () => {
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
-      finder.findGraalPyVersion('graalpy23.1', architecture, false, false, false)
+      finder.findGraalPyVersion(
+        'graalpy23.1',
+        architecture,
+        false,
+        false,
+        false
+      )
     ).rejects.toThrow();
     await expect(
       finder.findGraalPyVersion('graalpy23.1', architecture, false, false, true)

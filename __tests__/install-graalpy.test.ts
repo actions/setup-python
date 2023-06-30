@@ -16,7 +16,7 @@ import {
 
 import manifestData from './data/graalpy.json';
 
-let architecture: string = 'x64';
+const architecture = 'x64';
 
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
@@ -36,7 +36,7 @@ describe('findRelease', () => {
   const result = JSON.stringify(manifestData);
   const releases = JSON.parse(result) as IGraalPyManifestRelease[];
   const extension = 'tar.gz';
-  const arch =  architecture === 'x64' ? 'amd64' : 'aarch64';
+  const arch = architecture === 'x64' ? 'amd64' : 'aarch64';
   const extensionName = IS_WINDOWS
     ? `windows-${arch}.${extension}`
     : `${process.platform}-${arch}.${extension}`;
@@ -67,24 +67,14 @@ describe('findRelease', () => {
   it("GraalPy version doesn't match", () => {
     const graalpyVersion = '12.0.0';
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        false
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toEqual(null);
   });
 
   it('GraalPy version matches', () => {
     const graalpyVersion = '23.0.0';
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        false
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toMatchObject({
       foundAsset: files,
       resolvedGraalPyVersion: graalpyVersion
@@ -94,12 +84,7 @@ describe('findRelease', () => {
   it('Preview version of GraalPy is found', () => {
     const graalpyVersion = installer.graalPyTagToVersion('vm-23.1.0a1');
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        false
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toMatchObject({
       foundAsset: {
         name: `graalpython-23.1.0a1-${extensionName}`,
@@ -112,12 +97,7 @@ describe('findRelease', () => {
   it('Latest GraalPy is found', () => {
     const graalpyVersion = 'x';
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        false
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toMatchObject({
       foundAsset: files,
       resolvedGraalPyVersion: '23.0.0'
@@ -127,20 +107,10 @@ describe('findRelease', () => {
   it('GraalPy version matches semver (pre-release)', () => {
     const graalpyVersion = '23.1.x';
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        false
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toBeNull();
     expect(
-      installer.findRelease(
-        releases,
-        graalpyVersion,
-        architecture,
-        true
-      )
+      installer.findRelease(releases, graalpyVersion, architecture, true)
     ).toMatchObject({
       foundAsset: filesRC1,
       resolvedGraalPyVersion: '23.1.0-a.1'
@@ -167,7 +137,9 @@ describe('installGraalPy', () => {
 
   beforeEach(() => {
     tcFind = jest.spyOn(tc, 'find');
-    tcFind.mockImplementation(() => path.join('GraalPy', '3.6.12', architecture));
+    tcFind.mockImplementation(() =>
+      path.join('GraalPy', '3.6.12', architecture)
+    );
 
     spyDownloadTool = jest.spyOn(tc, 'downloadTool');
     spyDownloadTool.mockImplementation(() => path.join(tempDir, 'GraalPy'));

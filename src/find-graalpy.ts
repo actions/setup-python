@@ -1,10 +1,6 @@
 import * as path from 'path';
 import * as graalpyInstall from './install-graalpy';
-import {
-  IS_WINDOWS,
-  validateVersion,
-  IGraalPyManifestRelease
-} from './utils';
+import {IS_WINDOWS, validateVersion, IGraalPyManifestRelease} from './utils';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';
@@ -34,9 +30,7 @@ export async function findGraalPyVersion(
       );
 
       if (releaseData) {
-        core.info(
-          `Resolved as GraalPy ${releaseData.resolvedGraalPyVersion}`
-        );
+        core.info(`Resolved as GraalPy ${releaseData.resolvedGraalPyVersion}`);
         graalpyVersionSpec = releaseData.resolvedGraalPyVersion;
       } else {
         core.info(
@@ -52,13 +46,12 @@ export async function findGraalPyVersion(
   ));
 
   if (!installDir) {
-    ({installDir, resolvedGraalPyVersion} =
-      await graalpyInstall.installGraalPy(
-        graalpyVersionSpec,
-        architecture,
-        allowPreReleases,
-        releases
-      ));
+    ({installDir, resolvedGraalPyVersion} = await graalpyInstall.installGraalPy(
+      graalpyVersionSpec,
+      architecture,
+      allowPreReleases,
+      releases
+    ));
   }
 
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';
@@ -92,7 +85,11 @@ export function findGraalPyToolCache(
   architecture: string
 ) {
   let resolvedGraalPyVersion = '';
-  let installDir: string | null = tc.find('GraalPy', graalpyVersion, architecture);
+  let installDir: string | null = tc.find(
+    'GraalPy',
+    graalpyVersion,
+    architecture
+  );
 
   if (installDir) {
     // 'tc.find' finds tool based on Python version but we also need to check

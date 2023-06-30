@@ -11,7 +11,7 @@ import {
   IS_WINDOWS,
   IGraalPyManifestAsset,
   IGraalPyManifestRelease,
-  isNightlyKeyword,
+  isNightlyKeyword
 } from './utils';
 
 export async function installGraalPy(
@@ -28,12 +28,7 @@ export async function installGraalPy(
     throw new Error('No release was found in GraalPy version.json');
   }
 
-  let releaseData = findRelease(
-    releases,
-    graalpyVersion,
-    architecture,
-    false
-  );
+  let releaseData = findRelease(releases, graalpyVersion, architecture, false);
 
   if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
     // check for pre-release
@@ -43,12 +38,7 @@ export async function installGraalPy(
         `Trying pre-release versions`
       ].join(os.EOL)
     );
-    releaseData = findRelease(
-      releases,
-      graalpyVersion,
-      architecture,
-      true
-    );
+    releaseData = findRelease(releases, graalpyVersion, architecture, true);
   }
 
   if (!releaseData || !releaseData.foundAsset) {
@@ -157,7 +147,9 @@ export function findRelease(
       graalpyVersion,
       options
     );
-    return isVersionSatisfied && !!findAsset(item, architecture, process.platform);
+    return (
+      isVersionSatisfied && !!findAsset(item, architecture, process.platform)
+    );
   });
 
   if (filterReleases.length === 0) {
@@ -200,15 +192,24 @@ export function findAsset(
   architecture: string,
   platform: string
 ) {
-  const graalpyArch = architecture === 'x64' ? 'amd64' : (architecture === 'arm64' ? 'aarch64' : architecture);
-  const graalpyPlatform = platform == "win32" ? "windows" : platform;
+  const graalpyArch =
+    architecture === 'x64'
+      ? 'amd64'
+      : architecture === 'arm64'
+      ? 'aarch64'
+      : architecture;
+  const graalpyPlatform = platform == 'win32' ? 'windows' : platform;
   if (item.assets) {
-    return item.assets.find(
-      (file: IGraalPyManifestAsset) => {
-        const match_data = file.name.match(".*(darwin|linux|windows)-(amd64|aarch64).tar.gz$");
-        return match_data && match_data[1] === graalpyPlatform && match_data[2] === graalpyArch;
-      }
-    );
+    return item.assets.find((file: IGraalPyManifestAsset) => {
+      const match_data = file.name.match(
+        '.*(darwin|linux|windows)-(amd64|aarch64).tar.gz$'
+      );
+      return (
+        match_data &&
+        match_data[1] === graalpyPlatform &&
+        match_data[2] === graalpyArch
+      );
+    });
   } else {
     return undefined;
   }

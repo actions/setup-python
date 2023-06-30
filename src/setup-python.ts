@@ -120,9 +120,7 @@ async function run() {
             allowPreReleases
           );
           pythonVersion = `${installed}`;
-          core.info(
-            `Successfully set up GraalPy ${installed}`
-          );
+          core.info(`Successfully set up GraalPy ${installed}`);
         } else {
           if (version.startsWith('2')) {
             core.warning(
