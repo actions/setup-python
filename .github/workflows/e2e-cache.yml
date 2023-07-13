@@ -65,7 +65,7 @@ jobs:
           } else {
             pipenv install --python ${{ matrix.python-version }} # --keep-outdated
           }
-      - run: python test-pipenv.py
+      - run: pipenv run python test-pipenv.py
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -142,4 +142,4 @@ jobs:
           } else {
             pipenv install --python ${{ matrix.python-version }} # --keep-outdated
           }
-      - run: python test-pipenv.py
+      - run: pipenv run python test-pipenv.py
