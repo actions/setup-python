@@ -8,7 +8,7 @@ import {State} from '../src/cache-distributions/cache-distributor';
 
 describe('restore-cache', () => {
   const pipFileLockHash =
-    'a3bdcc71289e4979ca9e051810d81999cc99823109faf6912e17ff14c8e621a6';
+    'f8428d7cf00ea53a5c3702f0a9cb3cc467f76cd86a34723009350c4e4b32751a';
   const requirementsHash =
     'd8110e0006d7fb5ee76365d565eef9d37df1d11598b912d3eb66d398d57a1121';
   const requirementsLinuxHash =
