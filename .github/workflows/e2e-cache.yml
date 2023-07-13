@@ -43,22 +43,30 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
+        id: cache-pipenv
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-      - name: Install dependencies
+      - name: Prepare environment
         shell: pwsh
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
+          mv ./__tests__/test-pipenv.py .
+      - name: Install dependencies
+        shell: pwsh
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: |
           if ("${{ matrix.python-version }}" -Match "pypy") {
-            pipenv install --keep-outdated --python pypy
+            pipenv install --python pypy # --keep-outdated
           } else {
-            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+            pipenv install --python ${{ matrix.python-version }} # --keep-outdated
           }
+      - name: Run Python Script
+        run: pipenv run python test-pipenv.py
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -112,6 +120,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
+        id: cache-pipenv
         uses: ./
         with:
           python-version: ${{ matrix.python-version }}
@@ -119,13 +128,20 @@ jobs:
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-      - name: Install dependencies
+      - name: Prepare environment
         shell: pwsh
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
+          mv ./__tests__/test-pipenv.py .
+      - name: Install dependencies
+        shell: pwsh
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: |
           if ("${{ matrix.python-version }}" -Match "pypy") {
-            pipenv install --keep-outdated --python pypy
+            pipenv install --python pypy # --keep-outdated
           } else {
-            pipenv install --keep-outdated --python ${{ matrix.python-version }}
+            pipenv install --python ${{ matrix.python-version }} # --keep-outdated
           }
+      - name: Run Python Script
+        run: pipenv run python test-pipenv.py
