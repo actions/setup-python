@@ -78,6 +78,17 @@ steps:
 
 You can also use several types of ranges that are specified in [semver](https://github.com/npm/node-semver#ranges), for instance:
 
+- **[ranges](https://github.com/npm/node-semver#ranges)** to download and set up the latest available version of Python satisfying a range:
+
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version: '>=3.9 <3.10'
+- run: python my_script.py
+```
+
 - **[hyphen ranges](https://github.com/npm/node-semver#hyphen-ranges-xyz---abc)** to download and set up the latest available version of Python (includes both pre-release and stable versions):
 
 ```yaml
@@ -251,6 +262,16 @@ steps:
     python-version-file: '.python-version' # Read python version from a file .python-version
 - run: python my_script.py
 ```
+
+```yaml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+  with:
+    python-version-file: 'pyproject.toml' # Read python version from a file pyproject.toml
+- run: python my_script.py
+```
+
 ## Check latest version
 
 The `check-latest` flag defaults to `false`. Use the default or set `check-latest` to `false` if you prefer stability and if you want to ensure a specific `Python or PyPy` version is always used.
