@@ -1,6 +1,6 @@
 ---
 name: semver
-version: 7.3.8
+version: 7.5.2
 type: npm
 summary: The semantic version parser used by npm.
 homepage: 
