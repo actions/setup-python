@@ -55,7 +55,7 @@ jobs:
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          mv ./__tests__/test-pipenv .
+          mv ./__tests__/test-pipenv.py .
       - name: Install dependencies
         shell: pwsh
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
@@ -132,7 +132,7 @@ jobs:
         run: |
           mv ./__tests__/data/Pipfile.lock .
           mv ./__tests__/data/Pipfile .
-          mv ./__tests__/test-pipenv .
+          mv ./__tests__/test-pipenv.py .
       - name: Install dependencies
         shell: pwsh
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
