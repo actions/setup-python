@@ -69859,7 +69859,7 @@ function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (utils_1.IS_MAC) {
-            process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+            process.env['AGENT_TOOLSDIRECTORY'] = path.join(os.homedir(), 'hostedtoolcache');
         }
         if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
             process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
