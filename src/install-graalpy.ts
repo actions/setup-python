@@ -233,11 +233,16 @@ export function findAsset(
       : architecture === 'arm64'
       ? 'aarch64'
       : architecture;
-  const graalpyPlatform = platform == 'win32' ? 'windows' : platform;
-  if (item.assets) {
+  const graalpyPlatform =
+    platform === 'win32'
+      ? 'windows'
+      : platform === 'darwin'
+      ? 'macos'
+      : platform;
+    if (item.assets) {
     return item.assets.find((file: IGraalPyManifestAsset) => {
       const match_data = file.name.match(
-        '.*(darwin|linux|windows)-(amd64|aarch64).tar.gz$'
+        '.*(macos|linux|windows)-(amd64|aarch64).tar.gz$'
       );
       return (
         match_data &&

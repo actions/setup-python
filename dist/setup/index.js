@@ -69735,10 +69735,14 @@ function findAsset(item, architecture, platform) {
         : architecture === 'arm64'
             ? 'aarch64'
             : architecture;
-    const graalpyPlatform = platform == 'win32' ? 'windows' : platform;
+    const graalpyPlatform = platform === 'win32'
+        ? 'windows'
+        : platform === 'darwin'
+            ? 'macos'
+            : platform;
     if (item.assets) {
         return item.assets.find((file) => {
-            const match_data = file.name.match('.*(darwin|linux|windows)-(amd64|aarch64).tar.gz$');
+            const match_data = file.name.match('.*(macos|linux|windows)-(amd64|aarch64).tar.gz$');
             return (match_data &&
                 match_data[1] === graalpyPlatform &&
                 match_data[2] === graalpyArch);
