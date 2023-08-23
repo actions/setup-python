@@ -15,9 +15,15 @@ inputs:
   check-latest:
     description: "Set this option if you want the action to check for the latest available version that satisfies the version spec."
     default: false
+  github_api_url:
+    description: "The url you wish to gather Python distributions from. Useful when running on GHES when you have a local instance of actions/python-versions and actions/setup-python installed"
+    default: "https://api.github.com"
+  github_raw_url:
+    description: "The endpoint you wish to use as the raw url"
+    default: "https://raw.githubusercontent.com"
   token:
     description: "The token used to authenticate when fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting."
-    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    default: ${{ github.github_api_url == github_api_url && github.token || '' }}
   cache-dependency-path:
     description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
   update-environment:

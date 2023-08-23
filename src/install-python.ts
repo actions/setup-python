@@ -10,7 +10,11 @@ const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
-export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
+const API_URL = core.getInput('github_api_url');
+const GITHUB_API_URL = API_URL ? "https://api.github.com" : API_URL;
+const RAW_URL = core.getInput('github_raw_url');
+const GITHUB_RAW_URL = RAW_URL ? "https://raw.githubusercontent.com" : RAW_URL;
+export const MANIFEST_URL = `${GITHUB_RAW_URL}/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -33,13 +37,14 @@ export async function findReleaseFromManifest(
 
 export function getManifest(): Promise<tc.IToolRelease[]> {
   core.debug(
-    `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
+    `Getting manifest from ${GITHUB_API_URL}/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
     MANIFEST_REPO_OWNER,
     MANIFEST_REPO_NAME,
     AUTH,
-    MANIFEST_REPO_BRANCH
+    MANIFEST_REPO_BRANCH,
+    GITHUB_API_URL
   );
 }
 
