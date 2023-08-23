@@ -190,7 +190,7 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
+          if ("Python ${{ matrix.python }}".replace("==", "") -ne "$pythonVersion"){
             Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
             exit 1
           }
