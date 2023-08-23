@@ -157,7 +157,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13, '==3.10.10']
         exclude:
           - os: ubuntu-22.04
             python: 3.5.4

@@ -229,7 +229,21 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);
-  return Array.from(versions, version => version.split(',').join(' '));
+  const rawVersions = Array.from(versions, version =>
+    version.split(',').join(' ')
+  );
+  const validatedVersions = rawVersions
+    .map(item => semver.validRange(item, true))
+    .filter((versionRange, index) => {
+      if (!versionRange) {
+        core.debug(
+          `The version ${rawVersions[index]} is not valid SemVer range`
+        );
+      }
+
+      return !!versionRange;
+    }) as string[];
+  return validatedVersions;
 }
 
 /**
