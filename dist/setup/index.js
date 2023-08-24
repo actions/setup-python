@@ -10957,10 +10957,10 @@ function findAllVersions(toolName, arch) {
     return versions;
 }
 exports.findAllVersions = findAllVersions;
-function getManifestFromRepo(owner, repo, auth, branch = 'master', serverUrl = "https://api.github.com") {
+function getManifestFromRepo(owner, repo, auth, branch = 'master', serverUrl = 'https://api.github.com') {
     return __awaiter(this, void 0, void 0, function* () {
         let releases = [];
-        const treeUrl = `${serverUrl}/repos/${owner}/${repo}/git/trees/${branch}`;
+        const treeUrl = `${serverUrl}/${owner}/${repo}/git/trees/${branch}`;
         const http = new httpm.HttpClient('tool-cache');
         const headers = {};
         if (auth) {
@@ -69686,11 +69686,10 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 const API_URL = core.getInput('github_api_url');
-const GITHUB_API_URL = API_URL ? "https://api.github.com" : API_URL;
+const GITHUB_API_URL = API_URL ? 'https://api.github.com' : API_URL;
 const RAW_URL = core.getInput('github_raw_url');
-const GITHUB_RAW_URL = RAW_URL ? "https://raw.githubusercontent.com" : RAW_URL;
+const GITHUB_RAW_URL = RAW_URL ? 'https://raw.githubusercontent.com' : RAW_URL;
 exports.MANIFEST_URL = `${GITHUB_RAW_URL}/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
-
 function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!manifest) {
