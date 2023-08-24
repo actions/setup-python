@@ -23,7 +23,7 @@ inputs:
     default: "https://raw.githubusercontent.com"
   token:
     description: "The token used to authenticate when fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting."
-    default: ${{ github.github_api_url == github_api_url && github.token || '' }}
+    default: ${{ github.github_api_url == inputs.github_api_url && github.token || '' }}
   cache-dependency-path:
     description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
   update-environment:
