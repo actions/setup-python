@@ -10960,7 +10960,7 @@ exports.findAllVersions = findAllVersions;
 function getManifestFromRepo(owner, repo, auth, branch = 'master', serverUrl = 'https://api.github.com') {
     return __awaiter(this, void 0, void 0, function* () {
         let releases = [];
-        const treeUrl = `${serverUrl}/${owner}/${repo}/git/trees/${branch}`;
+        const treeUrl = `${serverUrl}/repos/${owner}/${repo}/git/trees/${branch}`;
         const http = new httpm.HttpClient('tool-cache');
         const headers = {};
         if (auth) {
