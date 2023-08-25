@@ -148,13 +148,9 @@ async function createGraalPySymlink(
 }
 
 async function installPip(pythonLocation: string) {
-  core.info('Installing and updating pip');
+  core.info("Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)");
   const pythonBinary = path.join(pythonLocation, 'python');
-  await exec.exec(`${pythonBinary} -m ensurepip`);
-
-  await exec.exec(
-    `${pythonLocation}/python -m pip install --ignore-installed pip`
-  );
+  await exec.exec(`${pythonBinary} -m ensurepip --default-pip`);
 }
 
 export function graalPyTagToVersion(tag: string) {
