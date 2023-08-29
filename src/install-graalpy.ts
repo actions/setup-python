@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as httpm from '@actions/http-client';
+import * as ifm from '@actions/http-client/interfaces';
 import * as exec from '@actions/exec';
 import fs from 'fs';
 
@@ -15,6 +16,9 @@ import {
   isNightlyKeyword,
   getBinaryDirectory
 } from './utils';
+
+const TOKEN = core.getInput('token');
+const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 
 export async function installGraalPy(
   graalpyVersion: string,
@@ -55,7 +59,7 @@ export async function installGraalPy(
   core.info(`Downloading GraalPy from "${downloadUrl}" ...`);
 
   try {
-    const graalpyPath = await tc.downloadTool(downloadUrl);
+    const graalpyPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
 
     core.info('Extracting downloaded archive...');
     downloadDir = await tc.extractTar(graalpyPath);
@@ -105,7 +109,12 @@ export async function getAvailableGraalPyVersions() {
   const url = 'https://api.github.com/repos/oracle/graalpython/releases';
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
 
-  const response = await http.getJson<IGraalPyManifestRelease[]>(url);
+  let headers: ifm.IHeaders = {};
+  if (AUTH) {
+    headers.authorization = AUTH;
+  }
+
+  const response = await http.getJson<IGraalPyManifestRelease[]>(url, headers);
   if (!response.result) {
     throw new Error(
       `Unable to retrieve the list of available GraalPy versions from '${url}'`
