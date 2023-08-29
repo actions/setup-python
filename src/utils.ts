@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as toml from '@iarna/toml';
 import * as exec from '@actions/exec';
+import * as ifm from '@actions/http-client/interfaces';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
@@ -270,4 +271,26 @@ export function getVersionInputFromFile(versionFile: string): string[] {
  */
 export function getBinaryDirectory(installDir: string) {
   return IS_WINDOWS ? installDir : path.join(installDir, 'bin');
+}
+
+/**
+ * Extract next page URL from a HTTP response "link" header. Such headers are used in GitHub APIs.
+ */
+export function getNextPageUrl<T>(response: ifm.ITypedResponse<T>) {
+  const responseHeaders = <ifm.IHeaders>response.headers;
+  const linkHeader = responseHeaders.link;
+  if (typeof linkHeader === 'string') {
+    for (let link of linkHeader.split(/\s*,\s*/)) {
+      const match = link.match(/<([^>]+)>(.*)/);
+      if (match) {
+        const url = match[1];
+        for (let param of match[2].split(/\s*;\s*/)) {
+          if (param.match(/rel="?next"?/)) {
+            return url;
+          }
+        }
+      }
+    }
+  }
+  return null;
 }

@@ -14,7 +14,8 @@ import {
   IGraalPyManifestRelease,
   createSymlinkInFolder,
   isNightlyKeyword,
-  getBinaryDirectory
+  getBinaryDirectory,
+  getNextPageUrl
 } from './utils';
 
 const TOKEN = core.getInput('token');
@@ -106,7 +107,6 @@ export async function installGraalPy(
 }
 
 export async function getAvailableGraalPyVersions() {
-  const url = 'https://api.github.com/repos/oracle/graalpython/releases';
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
 
   let headers: ifm.IHeaders = {};
@@ -114,14 +114,22 @@ export async function getAvailableGraalPyVersions() {
     headers.authorization = AUTH;
   }
 
-  const response = await http.getJson<IGraalPyManifestRelease[]>(url, headers);
-  if (!response.result) {
-    throw new Error(
-      `Unable to retrieve the list of available GraalPy versions from '${url}'`
-    );
-  }
+  let url: string | null =
+    'https://api.github.com/repos/oracle/graalpython/releases';
+  const result: IGraalPyManifestRelease[] = [];
+  do {
+    const response: ifm.ITypedResponse<IGraalPyManifestRelease[]> =
+      await http.getJson(url, headers);
+    if (!response.result) {
+      throw new Error(
+        `Unable to retrieve the list of available GraalPy versions from '${url}'`
+      );
+    }
+    result.push(...response.result);
+    url = getNextPageUrl(response);
+  } while (url);
 
-  return response.result;
+  return result;
 }
 
 async function createGraalPySymlink(
