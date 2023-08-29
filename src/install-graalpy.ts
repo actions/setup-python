@@ -149,7 +149,9 @@ async function createGraalPySymlink(
 }
 
 async function installPip(pythonLocation: string) {
-  core.info("Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)");
+  core.info(
+    "Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)"
+  );
   const pythonBinary = path.join(pythonLocation, 'python');
   await exec.exec(`${pythonBinary} -m ensurepip --default-pip`);
 }
@@ -188,18 +190,12 @@ export function findRelease(
     return null;
   }
 
-  const sortedReleases = filterReleases.sort((previous, current) => {
-    return (
-      semver.compare(
-        semver.coerce(graalPyTagToVersion(current.tag_name))!,
-        semver.coerce(graalPyTagToVersion(previous.tag_name))!
-      ) ||
-      semver.compare(
-        semver.coerce(graalPyTagToVersion(current.tag_name))!,
-        semver.coerce(graalPyTagToVersion(previous.tag_name))!
-      )
-    );
-  });
+  const sortedReleases = filterReleases.sort((previous, current) =>
+    semver.compare(
+      semver.coerce(graalPyTagToVersion(current.tag_name))!,
+      semver.coerce(graalPyTagToVersion(previous.tag_name))!
+    )
+  );
 
   const foundRelease = sortedReleases[0];
   const foundAsset = findAsset(foundRelease, architecture, process.platform);
@@ -227,7 +223,7 @@ export function findAsset(
       : platform === 'darwin'
       ? 'macos'
       : platform;
-    if (item.assets.length) {
+  if (item.assets.length) {
     return item.assets.find((file: IGraalPyManifestAsset) => {
       const match_data = file.name.match(
         '.*(macos|linux|windows)-(amd64|aarch64).tar.gz$'
