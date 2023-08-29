@@ -69161,7 +69161,7 @@ function findGraalPyVersion(versionSpec, architecture, updateEnvironment, checkL
         const _binDir = path.join(installDir, pipDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        const pythonLocation = graalpyInstall.getGraalPyBinaryPath(installDir);
+        const pythonLocation = utils_1.getBinaryDirectory(installDir);
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
             // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
@@ -69290,7 +69290,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
         const _binDir = path.join(installDir, pipDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
         const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
+        const pythonLocation = utils_1.getBinaryDirectory(installDir);
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
             // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
@@ -69584,7 +69584,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAsset = exports.getGraalPyBinaryPath = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
+exports.findAsset = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
@@ -69594,11 +69594,13 @@ const httpm = __importStar(__nccwpck_require__(9925));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const utils_1 = __nccwpck_require__(1314);
+const TOKEN = core.getInput('token');
+const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
         releases = releases !== null && releases !== void 0 ? releases : (yield getAvailableGraalPyVersions());
-        if (!releases || releases.length === 0) {
+        if (!releases || !releases.length) {
             throw new Error('No release was found in GraalPy version.json');
         }
         let releaseData = findRelease(releases, graalpyVersion, architecture, false);
@@ -69617,7 +69619,7 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
         const downloadUrl = `${foundAsset.browser_download_url}`;
         core.info(`Downloading GraalPy from "${downloadUrl}" ...`);
         try {
-            const graalpyPath = yield tc.downloadTool(downloadUrl);
+            const graalpyPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
             core.info('Extracting downloaded archive...');
             downloadDir = yield tc.extractTar(graalpyPath);
             // root folder in archive can have unpredictable name so just take the first folder
@@ -69628,7 +69630,7 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
             if (!utils_1.isNightlyKeyword(resolvedGraalPyVersion)) {
                 installDir = yield tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
             }
-            const binaryPath = getGraalPyBinaryPath(installDir);
+            const binaryPath = utils_1.getBinaryDirectory(installDir);
             yield createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
             yield installPip(binaryPath);
             return { installDir, resolvedGraalPyVersion };
@@ -69654,13 +69656,22 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
 exports.installGraalPy = installGraalPy;
 function getAvailableGraalPyVersions() {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = 'https://api.github.com/repos/oracle/graalpython/releases';
         const http = new httpm.HttpClient('tool-cache');
-        const response = yield http.getJson(url);
-        if (!response.result) {
-            throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+        let headers = {};
+        if (AUTH) {
+            headers.authorization = AUTH;
         }
-        return response.result;
+        let url = 'https://api.github.com/repos/oracle/graalpython/releases';
+        const result = [];
+        do {
+            const response = yield http.getJson(url, headers);
+            if (!response.result) {
+                throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+            }
+            result.push(...response.result);
+            url = utils_1.getNextPageUrl(response);
+        } while (url);
+        return result;
     });
 }
 exports.getAvailableGraalPyVersions = getAvailableGraalPyVersions;
@@ -69679,10 +69690,9 @@ function createGraalPySymlink(graalpyBinaryPath, graalpyVersion) {
 }
 function installPip(pythonLocation) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info('Installing and updating pip');
+        core.info("Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)");
         const pythonBinary = path.join(pythonLocation, 'python');
-        yield exec.exec(`${pythonBinary} -m ensurepip`);
-        yield exec.exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
+        yield exec.exec(`${pythonBinary} -m ensurepip --default-pip`);
     });
 }
 function graalPyTagToVersion(tag) {
@@ -69705,13 +69715,10 @@ function findRelease(releases, graalpyVersion, architecture, includePrerelease) 
         const isVersionSatisfied = semver.satisfies(graalPyTagToVersion(item.tag_name), graalpyVersion, options);
         return (isVersionSatisfied && !!findAsset(item, architecture, process.platform));
     });
-    if (filterReleases.length === 0) {
+    if (!filterReleases.length) {
         return null;
     }
-    const sortedReleases = filterReleases.sort((previous, current) => {
-        return (semver.compare(semver.coerce(graalPyTagToVersion(current.tag_name)), semver.coerce(graalPyTagToVersion(previous.tag_name))) ||
-            semver.compare(semver.coerce(graalPyTagToVersion(current.tag_name)), semver.coerce(graalPyTagToVersion(previous.tag_name))));
-    });
+    const sortedReleases = filterReleases.sort((previous, current) => semver.compare(semver.coerce(graalPyTagToVersion(current.tag_name)), semver.coerce(graalPyTagToVersion(previous.tag_name))));
     const foundRelease = sortedReleases[0];
     const foundAsset = findAsset(foundRelease, architecture, process.platform);
     return {
@@ -69720,15 +69727,6 @@ function findRelease(releases, graalpyVersion, architecture, includePrerelease) 
     };
 }
 exports.findRelease = findRelease;
-/** Get GraalPy binary location from the tool of installation directory
- *  - On Linux and macOS, the Python interpreter is in 'bin'.
- *  - On Windows, it is in the installation root.
- */
-function getGraalPyBinaryPath(installDir) {
-    const _binDir = path.join(installDir, 'bin');
-    return utils_1.IS_WINDOWS ? installDir : _binDir;
-}
-exports.getGraalPyBinaryPath = getGraalPyBinaryPath;
 function findAsset(item, architecture, platform) {
     const graalpyArch = architecture === 'x64'
         ? 'amd64'
@@ -69740,7 +69738,7 @@ function findAsset(item, architecture, platform) {
         : platform === 'darwin'
             ? 'macos'
             : platform;
-    if (item.assets) {
+    if (item.assets.length) {
         return item.assets.find((file) => {
             const match_data = file.name.match('.*(macos|linux|windows)-(amd64|aarch64).tar.gz$');
             return (match_data &&
@@ -69794,7 +69792,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.getPyPyBinaryPath = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
+exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
@@ -69844,7 +69842,7 @@ function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases,
                 installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
             }
             utils_1.writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
-            const binaryPath = getPyPyBinaryPath(installDir);
+            const binaryPath = utils_1.getBinaryDirectory(installDir);
             yield createPyPySymlink(binaryPath, resolvedPythonVersion);
             yield installPip(binaryPath);
             return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
@@ -69933,15 +69931,6 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture, include
     };
 }
 exports.findRelease = findRelease;
-/** Get PyPy binary location from the tool of installation directory
- *  - On Linux and macOS, the Python interpreter is in 'bin'.
- *  - On Windows, it is in the installation root.
- */
-function getPyPyBinaryPath(installDir) {
-    const _binDir = path.join(installDir, 'bin');
-    return utils_1.IS_WINDOWS ? installDir : _binDir;
-}
-exports.getPyPyBinaryPath = getPyPyBinaryPath;
 function pypyVersionToSemantic(versionSpec) {
     const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc))(\d*)/g;
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
@@ -70293,7 +70282,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -70513,6 +70502,37 @@ function getVersionInputFromFile(versionFile) {
     }
 }
 exports.getVersionInputFromFile = getVersionInputFromFile;
+/**
+ * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
+ *  - On Linux and macOS, the Python interpreter is in 'bin'.
+ *  - On Windows, it is in the installation root.
+ */
+function getBinaryDirectory(installDir) {
+    return exports.IS_WINDOWS ? installDir : path.join(installDir, 'bin');
+}
+exports.getBinaryDirectory = getBinaryDirectory;
+/**
+ * Extract next page URL from a HTTP response "link" header. Such headers are used in GitHub APIs.
+ */
+function getNextPageUrl(response) {
+    const responseHeaders = response.headers;
+    const linkHeader = responseHeaders.link;
+    if (typeof linkHeader === 'string') {
+        for (let link of linkHeader.split(/\s*,\s*/)) {
+            const match = link.match(/<([^>]+)>(.*)/);
+            if (match) {
+                const url = match[1];
+                for (let param of match[2].split(/\s*;\s*/)) {
+                    if (param.match(/rel="?next"?/)) {
+                        return url;
+                    }
+                }
+            }
+        }
+    }
+    return null;
+}
+exports.getNextPageUrl = getNextPageUrl;
 
 
 /***/ }),
