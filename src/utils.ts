@@ -262,3 +262,12 @@ export function getVersionInputFromFile(versionFile: string): string[] {
     return getVersionInputFromPlainFile(versionFile);
   }
 }
+
+/**
+ * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
+ *  - On Linux and macOS, the Python interpreter is in 'bin'.
+ *  - On Windows, it is in the installation root.
+ */
+export function getBinaryDirectory(installDir: string) {
+  return IS_WINDOWS ? installDir : path.join(installDir, 'bin');
+}

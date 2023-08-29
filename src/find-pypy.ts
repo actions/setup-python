@@ -7,7 +7,8 @@ import {
   getPyPyVersionFromPath,
   readExactPyPyVersionFile,
   validatePythonVersionFormatForPyPy,
-  IPyPyManifestRelease
+  IPyPyManifestRelease,
+  getBinaryDirectory
 } from './utils';
 
 import * as semver from 'semver';
@@ -82,7 +83,7 @@ export async function findPyPyVersion(
     IS_WINDOWS ? installDir : _binDir,
     `python${binaryExtension}`
   );
-  const pythonLocation = pypyInstall.getPyPyBinaryPath(installDir);
+  const pythonLocation = getBinaryDirectory(installDir);
   if (updateEnvironment) {
     core.exportVariable('pythonLocation', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython

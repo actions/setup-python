@@ -12,7 +12,8 @@ import {
   IGraalPyManifestAsset,
   IGraalPyManifestRelease,
   createSymlinkInFolder,
-  isNightlyKeyword
+  isNightlyKeyword,
+  getBinaryDirectory
 } from './utils';
 
 export async function installGraalPy(
@@ -25,7 +26,7 @@ export async function installGraalPy(
 
   releases = releases ?? (await getAvailableGraalPyVersions());
 
-  if (!releases || releases.length === 0) {
+  if (!releases || !releases.length) {
     throw new Error('No release was found in GraalPy version.json');
   }
 
@@ -74,7 +75,7 @@ export async function installGraalPy(
       );
     }
 
-    const binaryPath = getGraalPyBinaryPath(installDir);
+    const binaryPath = getBinaryDirectory(installDir);
     await createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
     await installPip(binaryPath);
 
@@ -183,7 +184,7 @@ export function findRelease(
     );
   });
 
-  if (filterReleases.length === 0) {
+  if (!filterReleases.length) {
     return null;
   }
 
@@ -209,15 +210,6 @@ export function findRelease(
   };
 }
 
-/** Get GraalPy binary location from the tool of installation directory
- *  - On Linux and macOS, the Python interpreter is in 'bin'.
- *  - On Windows, it is in the installation root.
- */
-export function getGraalPyBinaryPath(installDir: string) {
-  const _binDir = path.join(installDir, 'bin');
-  return IS_WINDOWS ? installDir : _binDir;
-}
-
 export function findAsset(
   item: IGraalPyManifestRelease,
   architecture: string,
@@ -235,7 +227,7 @@ export function findAsset(
       : platform === 'darwin'
       ? 'macos'
       : platform;
-    if (item.assets) {
+    if (item.assets.length) {
     return item.assets.find((file: IGraalPyManifestAsset) => {
       const match_data = file.name.match(
         '.*(macos|linux|windows)-(amd64|aarch64).tar.gz$'
