@@ -90,7 +90,7 @@ export function writeExactPyPyVersionFile(
 }
 
 /**
- * Python version should be specified explicitly like "x.y" (2.7, 3.6, 3.7)
+ * Python version should be specified explicitly like "x.y" (3.10, 3.11, etc)
  * "3.x" or "3" are not supported
  * because it could cause ambiguity when both PyPy version and Python version are not precise
  */
