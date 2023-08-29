@@ -9,8 +9,6 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-  schedule:
-    - cron: 30 3 * * *
 
 jobs:
   setup-graalpy:
