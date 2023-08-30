@@ -39,10 +39,9 @@ describeSkipOnWindows('findRelease', () => {
   const result = JSON.stringify(manifestData);
   const releases = JSON.parse(result) as IGraalPyManifestRelease[];
   const extension = 'tar.gz';
-  const arch = architecture === 'x64' ? 'amd64' : 'aarch64';
-  const extensionName = IS_WINDOWS
-    ? `windows-${arch}.${extension}`
-    : `${process.platform}-${arch}.${extension}`;
+  const arch = installer.toGraalPyArchitecture(architecture);
+  const platform = installer.toGraalPyPlatform(process.platform);
+  const extensionName = `${platform}-${arch}.${extension}`;
   const files: IGraalPyManifestAsset = {
     name: `graalpython-23.0.0-${extensionName}`,
     browser_download_url: `https://github.com/oracle/graalpython/releases/download/graal-23.0.0/graalpython-23.0.0-${extensionName}`
