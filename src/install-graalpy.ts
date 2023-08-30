@@ -109,7 +109,7 @@ export async function installGraalPy(
 export async function getAvailableGraalPyVersions() {
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
 
-  let headers: ifm.IHeaders = {};
+  const headers: ifm.IHeaders = {};
   if (AUTH) {
     headers.authorization = AUTH;
   }

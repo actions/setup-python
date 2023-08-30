@@ -280,11 +280,11 @@ export function getNextPageUrl<T>(response: ifm.ITypedResponse<T>) {
   const responseHeaders = <ifm.IHeaders>response.headers;
   const linkHeader = responseHeaders.link;
   if (typeof linkHeader === 'string') {
-    for (let link of linkHeader.split(/\s*,\s*/)) {
+    for (const link of linkHeader.split(/\s*,\s*/)) {
       const match = link.match(/<([^>]+)>(.*)/);
       if (match) {
         const url = match[1];
-        for (let param of match[2].split(/\s*;\s*/)) {
+        for (const param of match[2].split(/\s*;\s*/)) {
           if (param.match(/rel="?next"?/)) {
             return url;
           }

@@ -69657,7 +69657,7 @@ exports.installGraalPy = installGraalPy;
 function getAvailableGraalPyVersions() {
     return __awaiter(this, void 0, void 0, function* () {
         const http = new httpm.HttpClient('tool-cache');
-        let headers = {};
+        const headers = {};
         if (AUTH) {
             headers.authorization = AUTH;
         }
@@ -70518,11 +70518,11 @@ function getNextPageUrl(response) {
     const responseHeaders = response.headers;
     const linkHeader = responseHeaders.link;
     if (typeof linkHeader === 'string') {
-        for (let link of linkHeader.split(/\s*,\s*/)) {
+        for (const link of linkHeader.split(/\s*,\s*/)) {
             const match = link.match(/<([^>]+)>(.*)/);
             if (match) {
                 const url = match[1];
-                for (let param of match[2].split(/\s*;\s*/)) {
+                for (const param of match[2].split(/\s*;\s*/)) {
                     if (param.match(/rel="?next"?/)) {
                         return url;
                     }
