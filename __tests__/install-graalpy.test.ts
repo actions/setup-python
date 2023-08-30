@@ -21,6 +21,9 @@ const architecture = 'x64';
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
 
+/* GraalPy doesn't have a windows release yet */
+const describeSkipOnWindows = IS_WINDOWS ? describe.skip : describe;
+
 describe('graalpyVersionToSemantic', () => {
   it.each([
     ['23.0.0a1', '23.0.0a1'],
@@ -32,7 +35,7 @@ describe('graalpyVersionToSemantic', () => {
   });
 });
 
-describe('findRelease', () => {
+describeSkipOnWindows('findRelease', () => {
   const result = JSON.stringify(manifestData);
   const releases = JSON.parse(result) as IGraalPyManifestRelease[];
   const extension = 'tar.gz';
@@ -118,7 +121,7 @@ describe('findRelease', () => {
   });
 });
 
-describe('installGraalPy', () => {
+describeSkipOnWindows('installGraalPy', () => {
   let tcFind: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
