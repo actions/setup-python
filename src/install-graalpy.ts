@@ -10,7 +10,6 @@ import fs from 'fs';
 
 import {
   IS_WINDOWS,
-  IGraalPyManifestAsset,
   IGraalPyManifestRelease,
   createSymlinkInFolder,
   isNightlyKeyword,
@@ -223,35 +222,41 @@ export function findRelease(
   };
 }
 
+export function toGraalPyPlatform(platform: string) {
+  switch (platform) {
+    case 'win32':
+      return 'windows';
+    case 'darwin':
+      return 'macos';
+  }
+  return platform;
+}
+
+export function toGraalPyArchitecture(architecture: string) {
+  switch (architecture) {
+    case 'x64':
+      return 'amd64';
+    case 'arm64':
+      return 'aarch64';
+  }
+  return architecture;
+}
+
 export function findAsset(
   item: IGraalPyManifestRelease,
   architecture: string,
   platform: string
 ) {
-  const graalpyArch =
-    architecture === 'x64'
-      ? 'amd64'
-      : architecture === 'arm64'
-      ? 'aarch64'
-      : architecture;
-  const graalpyPlatform =
-    platform === 'win32'
-      ? 'windows'
-      : platform === 'darwin'
-      ? 'macos'
-      : platform;
-  if (item.assets.length) {
-    return item.assets.find((file: IGraalPyManifestAsset) => {
-      const match_data = file.name.match(
-        '.*(macos|linux|windows)-(amd64|aarch64).tar.gz$'
-      );
-      return (
-        match_data &&
-        match_data[1] === graalpyPlatform &&
-        match_data[2] === graalpyArch
-      );
-    });
-  } else {
-    return undefined;
-  }
+  const graalpyArch = toGraalPyArchitecture(architecture);
+  const graalpyPlatform = toGraalPyPlatform(platform);
+  const found = item.assets.filter(
+    file =>
+      file.name.startsWith('graalpy') &&
+      file.name.endsWith(`-${graalpyPlatform}-${graalpyArch}.tar.gz`)
+  );
+  /*
+  In the future there could be more variants of GraalPy for a single release. Pick the shortest name, that one is the most likely to be the primary variant.
+  */
+  found.sort((f1, f2) => f1.name.length - f2.name.length);
+  return found[0];
 }
