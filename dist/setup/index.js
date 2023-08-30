@@ -69584,7 +69584,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAsset = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
+exports.findAsset = exports.toGraalPyArchitecture = exports.toGraalPyPlatform = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
@@ -69727,28 +69727,36 @@ function findRelease(releases, graalpyVersion, architecture, includePrerelease) 
     };
 }
 exports.findRelease = findRelease;
+function toGraalPyPlatform(platform) {
+    switch (platform) {
+        case 'win32':
+            return 'windows';
+        case 'darwin':
+            return 'macos';
+    }
+    return platform;
+}
+exports.toGraalPyPlatform = toGraalPyPlatform;
+function toGraalPyArchitecture(architecture) {
+    switch (architecture) {
+        case 'x64':
+            return 'amd64';
+        case 'arm64':
+            return 'aarch64';
+    }
+    return architecture;
+}
+exports.toGraalPyArchitecture = toGraalPyArchitecture;
 function findAsset(item, architecture, platform) {
-    const graalpyArch = architecture === 'x64'
-        ? 'amd64'
-        : architecture === 'arm64'
-            ? 'aarch64'
-            : architecture;
-    const graalpyPlatform = platform === 'win32'
-        ? 'windows'
-        : platform === 'darwin'
-            ? 'macos'
-            : platform;
-    if (item.assets.length) {
-        return item.assets.find((file) => {
-            const match_data = file.name.match('.*(macos|linux|windows)-(amd64|aarch64).tar.gz$');
-            return (match_data &&
-                match_data[1] === graalpyPlatform &&
-                match_data[2] === graalpyArch);
-        });
-    }
-    else {
-        return undefined;
-    }
+    const graalpyArch = toGraalPyArchitecture(architecture);
+    const graalpyPlatform = toGraalPyPlatform(platform);
+    const found = item.assets.filter(file => file.name.startsWith('graalpy') &&
+        file.name.endsWith(`-${graalpyPlatform}-${graalpyArch}.tar.gz`));
+    /*
+    In the future there could be more variants of GraalPy for a single release. Pick the shortest name, that one is the most likely to be the primary variant.
+    */
+    found.sort((f1, f2) => f1.name.length - f2.name.length);
+    return found[0];
 }
 exports.findAsset = findAsset;
 
