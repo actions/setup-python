@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import * as finder from '../src/find-graalpy';
-import {IGraalPyManifestRelease} from '../src/utils';
+import {IGraalPyManifestRelease, IS_WINDOWS} from '../src/utils';
 
 import manifestData from './data/graalpy.json';
 
@@ -18,6 +18,9 @@ const architecture = 'x64';
 
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
+
+/* GraalPy doesn't have a windows release yet */
+const describeSkipOnWindows = IS_WINDOWS ? describe.skip : describe;
 
 describe('parseGraalPyVersion', () => {
   it.each([
@@ -105,7 +108,7 @@ describe('findGraalPyToolCache', () => {
   });
 });
 
-describe('findGraalPyVersion', () => {
+describeSkipOnWindows('findGraalPyVersion', () => {
   let getBooleanInputSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
