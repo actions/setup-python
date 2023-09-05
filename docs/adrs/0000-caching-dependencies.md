@@ -45,7 +45,7 @@ We won't pursue the goal to provide wide customization of caching in the scope o
 
 ```
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: 3.9
@@ -56,7 +56,7 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: 3.9
@@ -66,7 +66,7 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: 3.9
@@ -80,7 +80,7 @@ steps:
 
 ```
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: 3.9

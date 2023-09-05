@@ -18,7 +18,7 @@ See [action.yml](action.yml)
 **Python**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.10' 
@@ -28,7 +28,7 @@ steps:
 **PyPy**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4 
   with:
     python-version: 'pypy3.9' 
@@ -62,7 +62,7 @@ The action defaults to searching for a dependency file (`requirements.txt` or `p
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
