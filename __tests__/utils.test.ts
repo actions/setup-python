@@ -107,7 +107,7 @@ describe('Version from file test', () => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'pyproject.toml';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersion = '>=3.7';
+      const pythonVersion = '>=3.7.0';
       const pythonVersionFileContent = `[project]\nrequires-python = "${pythonVersion}"`;
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
@@ -119,7 +119,7 @@ describe('Version from file test', () => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'pyproject.toml';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersion = '>=3.7';
+      const pythonVersion = '>=3.7.0';
       const pythonVersionFileContent = `[tool.poetry.dependencies]\npython = "${pythonVersion}"`;
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
