@@ -4,9 +4,7 @@ import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
-import {getCacheDistributor} from './cache-distributions/cache-factory';
 import {
-  isCacheFeatureAvailable,
   logWarning,
   IS_MAC,
   getVersionInputFromFile,
@@ -15,17 +13,6 @@ import {
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
-}
-
-async function cacheDependencies(cache: string, pythonVersion: string) {
-  const cacheDependencyPath =
-    core.getInput('cache-dependency-path') || undefined;
-  const cacheDistributor = getCacheDistributor(
-    cache,
-    pythonVersion,
-    cacheDependencyPath
-  );
-  await cacheDistributor.restoreCache();
 }
 
 function resolveVersionInputFromDefaultFile(): string[] {
@@ -125,7 +112,8 @@ async function run() {
       }
       core.endGroup();
       const cache = core.getInput('cache');
-      if (cache && isCacheFeatureAvailable()) {
+      if (cache) {
+        const {cacheDependencies} = await import('./cache-dependencies');
         await cacheDependencies(cache, pythonVersion);
       }
     } else {

@@ -54782,7 +54782,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var Stream = _interopDefault(__nccwpck_require__(2781));
 var http = _interopDefault(__nccwpck_require__(3685));
 var Url = _interopDefault(__nccwpck_require__(7310));
-var whatwgUrl = _interopDefault(__nccwpck_require__(3323));
+var whatwgUrl = _interopDefault(__nccwpck_require__(629));
 var https = _interopDefault(__nccwpck_require__(5687));
 var zlib = _interopDefault(__nccwpck_require__(9796));
 
@@ -57284,7 +57284,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3323:
+/***/ 629:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -61700,7 +61700,7 @@ const minVersion = __nccwpck_require__(4179)
 const validRange = __nccwpck_require__(2098)
 const outside = __nccwpck_require__(420)
 const gtr = __nccwpck_require__(9380)
-const ltr = __nccwpck_require__(8726)
+const ltr = __nccwpck_require__(3323)
 const intersects = __nccwpck_require__(7008)
 const simplifyRange = __nccwpck_require__(5297)
 const subset = __nccwpck_require__(7863)
@@ -62085,7 +62085,7 @@ module.exports = intersects
 
 /***/ }),
 
-/***/ 8726:
+/***/ 3323:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const outside = __nccwpck_require__(420)
@@ -68607,6 +68607,74 @@ try {
 
 /***/ }),
 
+/***/ 1852:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isCacheFeatureAvailable = exports.cacheDependencies = void 0;
+const cache = __importStar(__nccwpck_require__(7799));
+const core = __importStar(__nccwpck_require__(2186));
+const cache_factory_1 = __nccwpck_require__(7549);
+function cacheDependencies(cache, pythonVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (isCacheFeatureAvailable()) {
+            const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
+            const cacheDistributor = cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
+            yield cacheDistributor.restoreCache();
+        }
+    });
+}
+exports.cacheDependencies = cacheDependencies;
+function isGhes() {
+    const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
+    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+}
+function isCacheFeatureAvailable() {
+    if (cache.isFeatureAvailable()) {
+        return true;
+    }
+    if (isGhes()) {
+        core.warning('Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.');
+        return false;
+    }
+    core.warning('The runner was not able to contact the cache service. Caching will be skipped');
+    return false;
+}
+exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
+
+
+/***/ }),
+
 /***/ 8953:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -69807,17 +69875,9 @@ const finderPyPy = __importStar(__nccwpck_require__(4003));
 const path = __importStar(__nccwpck_require__(1017));
 const os = __importStar(__nccwpck_require__(2037));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
-const cache_factory_1 = __nccwpck_require__(7549);
 const utils_1 = __nccwpck_require__(1314);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy');
-}
-function cacheDependencies(cache, pythonVersion) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
-        const cacheDistributor = cache_factory_1.getCacheDistributor(cache, pythonVersion, cacheDependencyPath);
-        yield cacheDistributor.restoreCache();
-    });
 }
 function resolveVersionInputFromDefaultFile() {
     const couples = [
@@ -69891,7 +69951,8 @@ function run() {
                 }
                 core.endGroup();
                 const cache = core.getInput('cache');
-                if (cache && utils_1.isCacheFeatureAvailable()) {
+                if (cache) {
+                    const { cacheDependencies } = yield Promise.resolve().then(() => __importStar(__nccwpck_require__(1852)));
                     yield cacheDependencies(cache, pythonVersion);
                 }
             }
@@ -69948,9 +70009,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
-const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
@@ -70023,23 +70083,6 @@ function validatePythonVersionFormatForPyPy(version) {
     return re.test(version);
 }
 exports.validatePythonVersionFormatForPyPy = validatePythonVersionFormatForPyPy;
-function isGhes() {
-    const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
-    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
-}
-exports.isGhes = isGhes;
-function isCacheFeatureAvailable() {
-    if (cache.isFeatureAvailable()) {
-        return true;
-    }
-    if (isGhes()) {
-        core.warning('Caching is only supported on GHES version >= 3.5. If you are on a version >= 3.5, please check with your GHES admin if the Actions cache service is enabled or not.');
-        return false;
-    }
-    core.warning('The runner was not able to contact the cache service. Caching will be skipped');
-    return false;
-}
-exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 function logWarning(message) {
     const warningPrefix = '[warning]';
     core.info(`${warningPrefix}${message}`);

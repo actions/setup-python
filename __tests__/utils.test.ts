@@ -8,11 +8,11 @@ import path from 'path';
 import {
   validateVersion,
   validatePythonVersionFormatForPyPy,
-  isCacheFeatureAvailable,
   getVersionInputFromFile,
   getVersionInputFromPlainFile,
   getVersionInputFromTomlFile
 } from '../src/utils';
+import {isCacheFeatureAvailable} from '../src/cache-dependencies';
 
 jest.mock('@actions/cache');
 jest.mock('@actions/core');
