@@ -70160,7 +70160,7 @@ exports.getVersionInputFromTomlFile = getVersionInputFromTomlFile;
  */
 function getVersionInputFromPlainFile(versionFile) {
     core.debug(`Trying to resolve version form ${versionFile}`);
-    const version = fs_1.default.readFileSync(versionFile, 'utf8');
+    const version = fs_1.default.readFileSync(versionFile, 'utf8').trim();
     core.info(`Resolved ${versionFile} as ${version}`);
     return [version];
 }
