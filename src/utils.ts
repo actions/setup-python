@@ -251,7 +251,7 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
  */
 export function getVersionInputFromPlainFile(versionFile: string): string[] {
   core.debug(`Trying to resolve version form ${versionFile}`);
-  const version = fs.readFileSync(versionFile, 'utf8');
+  const version = fs.readFileSync(versionFile, 'utf8').trim();
   core.info(`Resolved ${versionFile} as ${version}`);
   return [version];
 }
