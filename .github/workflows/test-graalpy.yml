@@ -92,6 +92,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup GraalPy and check latest
         uses: ./
+        id: graalpy
         with:
           python-version: 'graalpy-23.x'
           check-latest: true
@@ -109,8 +110,7 @@ jobs:
 
       - name: Assert expected binaries (or symlinks) are present
         run: |
-          EXECUTABLE="graalpy-23.0"
-          EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "graalpy-X.Y" -> "graalpyX.Y" to match executable name
-          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          EXECUTABLE='${{ steps.graalpy.outputs.python-version }}'
+          EXECUTABLE="${EXECUTABLE%.*}"
           ${EXECUTABLE} --version
         shell: bash
