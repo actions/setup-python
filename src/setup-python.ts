@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as finder from './find-python';
 import * as finderPyPy from './find-pypy';
+import * as finderGraalPy from './find-graalpy';
 import * as path from 'path';
 import * as os from 'os';
 import fs from 'fs';
@@ -15,6 +16,10 @@ import {
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
+}
+
+function isGraalPyVersion(versionSpec: string) {
+  return versionSpec.startsWith('graalpy');
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
@@ -106,6 +111,16 @@ async function run() {
           core.info(
             `Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`
           );
+        } else if (isGraalPyVersion(version)) {
+          const installed = await finderGraalPy.findGraalPyVersion(
+            version,
+            arch,
+            updateEnvironment,
+            checkLatest,
+            allowPreReleases
+          );
+          pythonVersion = `${installed}`;
+          core.info(`Successfully set up GraalPy ${installed}`);
         } else {
           if (version.startsWith('2')) {
             core.warning(

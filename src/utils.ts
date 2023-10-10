@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as toml from '@iarna/toml';
 import * as exec from '@actions/exec';
+import * as ifm from '@actions/http-client/interfaces';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
@@ -27,6 +28,16 @@ export interface IPyPyManifestRelease {
   stable: boolean;
   latest_pypy: boolean;
   files: IPyPyManifestAsset[];
+}
+
+export interface IGraalPyManifestAsset {
+  name: string;
+  browser_download_url: string;
+}
+
+export interface IGraalPyManifestRelease {
+  tag_name: string;
+  assets: IGraalPyManifestAsset[];
 }
 
 /** create Symlinks for downloaded PyPy
@@ -265,4 +276,35 @@ export function getVersionInputFromFile(versionFile: string): string[] {
   } else {
     return getVersionInputFromPlainFile(versionFile);
   }
+}
+
+/**
+ * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
+ *  - On Linux and macOS, the Python interpreter is in 'bin'.
+ *  - On Windows, it is in the installation root.
+ */
+export function getBinaryDirectory(installDir: string) {
+  return IS_WINDOWS ? installDir : path.join(installDir, 'bin');
+}
+
+/**
+ * Extract next page URL from a HTTP response "link" header. Such headers are used in GitHub APIs.
+ */
+export function getNextPageUrl<T>(response: ifm.ITypedResponse<T>) {
+  const responseHeaders = <ifm.IHeaders>response.headers;
+  const linkHeader = responseHeaders.link;
+  if (typeof linkHeader === 'string') {
+    for (const link of linkHeader.split(/\s*,\s*/)) {
+      const match = link.match(/<([^>]+)>(.*)/);
+      if (match) {
+        const url = match[1];
+        for (const param of match[2].split(/\s*;\s*/)) {
+          if (param.match(/rel="?next"?/)) {
+            return url;
+          }
+        }
+      }
+    }
+  }
+  return null;
 }

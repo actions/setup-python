@@ -11,7 +11,8 @@ import {
   isCacheFeatureAvailable,
   getVersionInputFromFile,
   getVersionInputFromPlainFile,
-  getVersionInputFromTomlFile
+  getVersionInputFromTomlFile,
+  getNextPageUrl
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -135,4 +136,26 @@ describe('Version from file test', () => {
       expect(_fn(pythonVersionFilePath)).toEqual([]);
     }
   );
+});
+
+describe('getNextPageUrl', () => {
+  it('GitHub API pagination next page is parsed correctly', () => {
+    function generateResponse(link: string) {
+      return {
+        statusCode: 200,
+        result: null,
+        headers: {
+          link: link
+        }
+      };
+    }
+    const page1Links =
+      '<https://api.github.com/repositories/129883600/releases?page=2>; rel="next", <https://api.github.com/repositories/129883600/releases?page=3>; rel="last"';
+    expect(getNextPageUrl(generateResponse(page1Links))).toStrictEqual(
+      'https://api.github.com/repositories/129883600/releases?page=2'
+    );
+    const page2Links =
+      '<https://api.github.com/repositories/129883600/releases?page=1>; rel="prev", <https://api.github.com/repositories/129883600/releases?page=1>; rel="first"';
+    expect(getNextPageUrl(generateResponse(page2Links))).toBeNull();
+  });
 });

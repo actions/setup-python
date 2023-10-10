@@ -13,7 +13,8 @@ import {
   IPyPyManifestRelease,
   createSymlinkInFolder,
   isNightlyKeyword,
-  writeExactPyPyVersionFile
+  writeExactPyPyVersionFile,
+  getBinaryDirectory
 } from './utils';
 
 export async function installPyPy(
@@ -94,7 +95,7 @@ export async function installPyPy(
 
     writeExactPyPyVersionFile(installDir, resolvedPyPyVersion);
 
-    const binaryPath = getPyPyBinaryPath(installDir);
+    const binaryPath = getBinaryDirectory(installDir);
     await createPyPySymlink(binaryPath, resolvedPythonVersion);
     await installPip(binaryPath);
 
@@ -235,15 +236,6 @@ export function findRelease(
     resolvedPythonVersion: foundRelease.python_version,
     resolvedPyPyVersion: foundRelease.pypy_version.trim()
   };
-}
-
-/** Get PyPy binary location from the tool of installation directory
- *  - On Linux and macOS, the Python interpreter is in 'bin'.
- *  - On Windows, it is in the installation root.
- */
-export function getPyPyBinaryPath(installDir: string) {
-  const _binDir = path.join(installDir, 'bin');
-  return IS_WINDOWS ? installDir : _binDir;
 }
 
 export function pypyVersionToSemantic(versionSpec: string) {

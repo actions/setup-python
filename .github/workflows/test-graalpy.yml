@@ -1,0 +1,116 @@
+name: Validate GraalPy e2e
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  setup-graalpy:
+    name: Setup GraalPy ${{ matrix.graalpy }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
+        graalpy:
+          - 'graalpy-23.0'
+          - 'graalpy-22.3'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: setup-python ${{ matrix.graalpy }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version: ${{ matrix.graalpy }}
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
+      - name: GraalPy and Python version
+        run: python --version
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+      - name: Assert GraalPy is running
+        run: |
+          import platform
+          assert platform.python_implementation().lower() == "graalvm"
+        shell: python
+
+      - name: Assert expected binaries (or symlinks) are present
+        run: |
+          EXECUTABLE=${{ matrix.graalpy }}
+          EXECUTABLE=${EXECUTABLE/graalpy-/graalpy}  # remove the first '-' in "graalpy-X.Y" -> "graalpyX.Y" to match executable name
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          ${EXECUTABLE} --version
+        shell: bash
+
+  setup-graalpy-noenv:
+    name: Setup GraalPy ${{ matrix.graalpy }} ${{ matrix.os }} (noenv)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
+        graalpy: ['graalpy23.0', 'graalpy22.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: setup-python ${{ matrix.graalpy }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version: ${{ matrix.graalpy }}
+          update-environment: false
+
+      - name: GraalPy and Python version
+        run: ${{ steps.setup-python.outputs.python-path }} --version
+
+      - name: Run simple code
+        run: ${{ steps.setup-python.outputs.python-path }} -c 'import math; print(math.factorial(5))'
+
+  check-latest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup GraalPy and check latest
+        uses: ./
+        with:
+          python-version: 'graalpy-23.x'
+          check-latest: true
+      - name: GraalPy and Python version
+        run: python --version
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+      - name: Assert GraalPy is running
+        run: |
+          import platform
+          assert platform.python_implementation().lower() == "graalvm"
+        shell: python
+
+      - name: Assert expected binaries (or symlinks) are present
+        run: |
+          EXECUTABLE="graalpy-23.0"
+          EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "graalpy-X.Y" -> "graalpyX.Y" to match executable name
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          ${EXECUTABLE} --version
+        shell: bash
