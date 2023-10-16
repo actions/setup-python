@@ -70224,7 +70224,7 @@ function run() {
                     }
                     else {
                         if (version.startsWith('2')) {
-                            core.warning('The support for python 2.7 will be removed on June 19. Related issue: https://github.com/actions/setup-python/issues/672');
+                            core.warning('The support for python 2.7 was removed on June 19, 2023. Related issue: https://github.com/actions/setup-python/issues/672');
                         }
                         const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
                         pythonVersion = installed.version;
