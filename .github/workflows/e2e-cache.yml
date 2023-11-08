@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
         uses: ./
         with:
@@ -41,7 +41,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -77,7 +77,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.8']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install poetry
         run: pipx install poetry
       - name: Init pyproject.toml
@@ -99,7 +99,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.7-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
         uses: ./
         with:
@@ -118,7 +118,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
         id: cache-pipenv
         uses: ./
