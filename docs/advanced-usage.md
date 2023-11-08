@@ -30,7 +30,7 @@ If there is a specific version of Python that you need and you don't want to wor
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.7.5' 
@@ -44,7 +44,7 @@ You can specify **only a major and minor version** if you are okay with the most
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.7' 
@@ -58,7 +58,7 @@ You can specify the version with **prerelease tag** to download and set up an ac
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.12.0-alpha.1'
@@ -69,7 +69,7 @@ It's also possible to use **x.y-dev syntax** to download and set up the latest p
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.12-dev'
@@ -82,7 +82,7 @@ You can also use several types of ranges that are specified in [semver](https://
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '>=3.9 <3.10'
@@ -93,7 +93,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.12.0-alpha - 3.12.0'
@@ -104,7 +104,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.x'
@@ -117,7 +117,7 @@ The version of PyPy should be specified in the format `pypy<python_version>[-v<p
 The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy version will be used in this case.
 
 ```
-pypy3.8 or pypy-3.8 # the latest available version of PyPy that supports Python 3.8
+pypy3.9 or pypy-3.9 # the latest available version of PyPy that supports Python 3.9
 pypy2.7 or pypy-2.7 # the latest available version of PyPy that supports Python 2.7
 pypy3.7-v7.3.3 or pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
 pypy3.7-v7.x or pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
@@ -137,7 +137,7 @@ jobs:
         - 'pypy3.7' # the latest available version of PyPy that supports Python 3.7
         - 'pypy3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
@@ -155,7 +155,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: |
@@ -172,7 +172,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: |
@@ -189,7 +189,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: |
@@ -211,10 +211,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.x', '3.x', 'pypy2.7', 'pypy3.7', 'pypy3.8' ]
+        python-version: [ '2.x', '3.x', 'pypy2.7', 'pypy3.8', 'pypy3.9' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -232,14 +232,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10', 'pypy2.7', 'pypy3.8']
+        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10', 'pypy2.7', 'pypy3.9']
         exclude:
           - os: macos-latest
             python-version: '3.8'
           - os: windows-latest
             python-version: '3.6'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -256,7 +256,7 @@ jobs:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version-file: '.python-version' # Read python version from a file .python-version
@@ -265,7 +265,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version-file: 'pyproject.toml' # Read python version from a file pyproject.toml
@@ -280,7 +280,7 @@ If `check-latest` is set to `true`, the action first checks if the cached versio
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
   - uses: actions/setup-python@v4
     with:
       python-version: '3.7'
@@ -295,7 +295,7 @@ steps:
 **Caching pipenv dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -308,7 +308,7 @@ steps:
 **Caching poetry dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - name: Install poetry
   run: pipx install poetry
 - uses: actions/setup-python@v4
@@ -322,7 +322,7 @@ steps:
 **Using a list of file paths to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -337,7 +337,7 @@ steps:
 **Using wildcard patterns to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.9'
@@ -349,7 +349,7 @@ steps:
 **Using a list of wildcard patterns to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.10'
@@ -364,7 +364,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 - uses: actions/setup-python@v4
   with:
     python-version: '3.11'
@@ -387,7 +387,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       id: cp310
       with:
@@ -404,7 +404,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       id: cp310
       with:
@@ -420,7 +420,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       id: cp310
       with:
@@ -451,7 +451,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
 ```yaml
  steps:
-   - uses: actions/checkout@v3
+   - uses: actions/checkout@v4
    - uses: actions/setup-python@v4
      id: cp310
      with:
@@ -611,7 +611,7 @@ jobs:
         python_version: ["3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python_version }}"
