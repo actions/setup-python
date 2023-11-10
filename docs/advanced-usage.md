@@ -293,7 +293,8 @@ steps:
 
 ## Caching packages
 
-**Caching pipenv dependencies:**
+### Caching pipenv dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -306,7 +307,8 @@ steps:
 - run: pipenv install
 ```
 
-**Caching poetry dependencies:**
+### Caching poetry dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -320,7 +322,8 @@ steps:
 - run: poetry run pytest
 ```
 
-**Using a list of file paths to cache dependencies**
+### Using a list of file paths to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -335,7 +338,9 @@ steps:
   run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
-**Using wildcard patterns to cache dependencies**
+
+### Using wildcard patterns to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -347,7 +352,8 @@ steps:
 - run: pip install -r subdirectory/requirements-dev.txt
 ```
 
-**Using a list of wildcard patterns to cache dependencies**
+### Using a list of wildcard patterns to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -361,7 +367,7 @@ steps:
 - run: pip install -e . -r subdirectory/requirements-dev.txt
 ```
 
-**Caching projects that use setup.py:**
+### Caching projects that use setup.py (or pyproject.toml)
 
 ```yaml
 steps:
