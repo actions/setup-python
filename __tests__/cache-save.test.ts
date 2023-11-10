@@ -34,8 +34,8 @@ describe('run', () => {
 
   beforeEach(() => {
     process.env['RUNNER_OS'] = process.env['RUNNER_OS'] ?? 'linux';
-    for(const key in process.env) {
-      if(key.startsWith('INPUT_')) {
+    for (const key in process.env) {
+      if (key.startsWith('INPUT_')) {
         delete process.env[key];
       }
     }
@@ -249,6 +249,18 @@ describe('run', () => {
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith();
       expect(saveCacheSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not save the cache when requested not to', async () => {
+      setInput('cache', 'pip');
+      setInput('cache-save', 'false');
+      setInput('python-version', '3.10.0');
+      await run();
+      expect(infoSpy).toHaveBeenCalledWith(
+        'Not saving cache since `cache-save` is false'
+      );
+      expect(saveCacheSpy).not.toHaveBeenCalled();
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
   });

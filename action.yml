@@ -20,6 +20,9 @@ inputs:
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
   cache-dependency-path:
     description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
+  cache-save:
+    description: "Set this option if you want the action to save the cache after the run. Defaults to true. It can be useful to set this to false if you have e.g. optional dependencies that only some workflows require, and they should not be cached."
+    default: true
   update-environment:
     description: "Set this option if you want the action to update environment variables."
     default: true
