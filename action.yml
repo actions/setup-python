@@ -34,7 +34,7 @@ outputs:
   python-path:
     description: "The absolute path to the Python or PyPy executable."
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/setup/index.js'
   post: 'dist/cache-save/index.js'
   post-if: success()
