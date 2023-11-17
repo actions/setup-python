@@ -1,17 +1,16 @@
 ---
-name: "@azure/core-lro"
-version: 2.5.4
+name: undici
+version: 5.27.2
 type: npm
-summary: Isomorphic client library for supporting long-running operations in node.js
-  and browser.
-homepage: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-lro/README.md
+summary: An HTTP/1.1 client, written from scratch for Node.js
+homepage: https://undici.nodejs.org
 license: mit
 licenses:
 - sources: LICENSE
   text: |
-    The MIT License (MIT)
+    MIT License
 
-    Copyright (c) 2020 Microsoft
+    Copyright (c) Matteo Collina and Undici contributors
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -30,4 +29,6 @@ licenses:
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+- sources: README.md
+  text: MIT
 notices: []

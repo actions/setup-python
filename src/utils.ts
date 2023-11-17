@@ -6,7 +6,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as toml from '@iarna/toml';
 import * as exec from '@actions/exec';
-import * as ifm from '@actions/http-client/interfaces';
+import * as ifm from '@actions/http-client/lib/interfaces';
+
+import * as http from 'http';
 
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
@@ -290,8 +292,8 @@ export function getBinaryDirectory(installDir: string) {
 /**
  * Extract next page URL from a HTTP response "link" header. Such headers are used in GitHub APIs.
  */
-export function getNextPageUrl<T>(response: ifm.ITypedResponse<T>) {
-  const responseHeaders = <ifm.IHeaders>response.headers;
+export function getNextPageUrl<T>(response: ifm.TypedResponse<T>) {
+  const responseHeaders = <http.OutgoingHttpHeaders>response.headers;
   const linkHeader = responseHeaders.link;
   if (typeof linkHeader === 'string') {
     for (const link of linkHeader.split(/\s*,\s*/)) {

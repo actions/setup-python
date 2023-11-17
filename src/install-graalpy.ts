@@ -4,9 +4,11 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as httpm from '@actions/http-client';
-import * as ifm from '@actions/http-client/interfaces';
+import * as ifm from '@actions/http-client/lib/interfaces';
 import * as exec from '@actions/exec';
+
 import fs from 'fs';
+import * as http from 'http';
 
 import {
   IS_WINDOWS,
@@ -108,7 +110,7 @@ export async function installGraalPy(
 export async function getAvailableGraalPyVersions() {
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
 
-  const headers: ifm.IHeaders = {};
+  const headers: http.OutgoingHttpHeaders = {};
   if (AUTH) {
     headers.authorization = AUTH;
   }
@@ -117,7 +119,7 @@ export async function getAvailableGraalPyVersions() {
     'https://api.github.com/repos/oracle/graalpython/releases';
   const result: IGraalPyManifestRelease[] = [];
   do {
-    const response: ifm.ITypedResponse<IGraalPyManifestRelease[]> =
+    const response: ifm.TypedResponse<IGraalPyManifestRelease[]> =
       await http.getJson(url, headers);
     if (!response.result) {
       throw new Error(

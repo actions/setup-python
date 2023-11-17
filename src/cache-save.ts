@@ -4,11 +4,15 @@ import * as cache from '@actions/cache';
 import fs from 'fs';
 import {State} from './cache-distributions/cache-distributor';
 
-export async function run() {
+export async function run(earlyExit?: boolean) {
   try {
     const cache = core.getInput('cache');
     if (cache) {
       await saveCache(cache);
+
+      if (earlyExit) {
+        process.exit(0);
+      }
     }
   } catch (error) {
     const err = error as Error;
@@ -76,4 +80,4 @@ function isCacheDirectoryExists(cacheDirectory: string[]) {
   return result;
 }
 
-run();
+run(true);
