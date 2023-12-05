@@ -11,9 +11,10 @@
     - [Outputs](advanced-usage.md#outputs)
     - [Environment variables](advanced-usage.md#environment-variables)
     - [Using update-environment flag](advanced-usage.md#using-update-environment-flag)
-- [Available versions of Python and PyPy](advanced-usage.md#available-versions-of-python-and-pypy)
+- [Available versions of Python and PyPy](advanced-usage.md#available-versions-of-python-pypy-and-graalpy)
     - [Python](advanced-usage.md#python)
     - [PyPy](advanced-usage.md#pypy)
+    - [GraalPy](advanced-usage.md#graalpy)
 - [Hosted tool cache](advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self-hosted runner](advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
     - [Windows](advanced-usage.md#windows)
@@ -459,7 +460,7 @@ Such a requirement on side-effect could be because you don't want your composite
        update-environment: false
    - run: ${{ steps.cp310.outputs.python-path }} my_script.py
 ```
-## Available versions of Python and PyPy
+## Available versions of Python, PyPy and GraalPy
 ### Python
 
 `setup-python` is able to configure **Python** from two sources:
@@ -489,6 +490,11 @@ Such a requirement on side-effect could be because you don't want your composite
   - All available versions that we can download are listed in [versions.json](https://downloads.python.org/pypy/versions.json) file.
   - PyPy < 7.3.3 are not available to install on-flight.
   - If some versions are not available, you can open an issue in https://foss.heptapod.net/pypy/pypy/
+
+### GraalPy
+
+ `setup-python` is able to download GraalPy versions from the [official GraalPy repository](https://github.com/oracle/graalpython).
+  - All available versions that we can download are listed in [releases](https://github.com/oracle/graalpython/releases).
 
 ## Hosted tool cache
 
