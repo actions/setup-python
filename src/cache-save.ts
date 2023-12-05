@@ -4,6 +4,9 @@ import * as cache from '@actions/cache';
 import fs from 'fs';
 import {State} from './cache-distributions/cache-distributor';
 
+// Added early exit to resolve issue with slow post action step:
+// - https://github.com/actions/setup-node/issues/878
+// https://github.com/actions/cache/pull/1217 
 export async function run(earlyExit?: boolean) {
   try {
     const cache = core.getInput('cache');

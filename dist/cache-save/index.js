@@ -80467,6 +80467,9 @@ const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const cache_distributor_1 = __nccwpck_require__(8953);
+// Added early exit to resolve issue with slow post action step:
+// - https://github.com/actions/setup-node/issues/878
+// https://github.com/actions/cache/pull/1217 
 function run(earlyExit) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
