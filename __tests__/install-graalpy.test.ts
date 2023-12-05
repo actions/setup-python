@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import {HttpClient} from '@actions/http-client';
-import * as ifm from '@actions/http-client/interfaces';
+import * as ifm from '@actions/http-client/lib/interfaces';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import * as core from '@actions/core';
@@ -169,7 +169,7 @@ describeSkipOnWindows('installGraalPy', () => {
 
     spyHttpClient = jest.spyOn(HttpClient.prototype, 'getJson');
     spyHttpClient.mockImplementation(
-      async (): Promise<ifm.ITypedResponse<IGraalPyManifestRelease[]>> => {
+      async (): Promise<ifm.TypedResponse<IGraalPyManifestRelease[]>> => {
         const result = JSON.stringify(manifestData);
         return {
           statusCode: 200,

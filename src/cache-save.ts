@@ -4,11 +4,18 @@ import * as cache from '@actions/cache';
 import fs from 'fs';
 import {State} from './cache-distributions/cache-distributor';
 
-export async function run() {
+// Added early exit to resolve issue with slow post action step:
+// - https://github.com/actions/setup-node/issues/878
+// https://github.com/actions/cache/pull/1217
+export async function run(earlyExit?: boolean) {
   try {
     const cache = core.getInput('cache');
     if (cache) {
       await saveCache(cache);
+
+      if (earlyExit) {
+        process.exit(0);
+      }
     }
   } catch (error) {
     const err = error as Error;
@@ -76,4 +83,4 @@ function isCacheDirectoryExists(cacheDirectory: string[]) {
   return result;
 }
 
-run();
+run(true);
