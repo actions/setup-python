@@ -53,6 +53,7 @@ function resolveVersionInputFromDefaultFile(): string[] {
 function resolveVersionInput() {
   let versions = core.getMultilineInput('python-version');
   const versionFile = core.getInput('python-version-file');
+  const versionStrategy = core.getInput('python-version-strategy');
 
   if (versions.length) {
     if (versionFile) {
@@ -72,6 +73,9 @@ function resolveVersionInput() {
       versions = resolveVersionInputFromDefaultFile();
     }
   }
+
+  if(versionStrategy == "approximate")
+    versions.map(v => v.replace(">=", "~").replace("^", "~"));
 
   return versions;
 }
