@@ -19,7 +19,7 @@ See [action.yml](action.yml)
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.10' 
 - run: python my_script.py
@@ -29,7 +29,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4 
+- uses: actions/setup-python@v5 
   with:
     python-version: 'pypy3.9' 
 - run: python my_script.py
@@ -39,7 +39,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4 
+- uses: actions/setup-python@v5 
   with:
     python-version: 'graalpy-22.3' 
 - run: python my_script.py
@@ -74,7 +74,7 @@ The action defaults to searching for a dependency file (`requirements.txt` or `p
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.9'
     cache: 'pip' # caching pip dependencies

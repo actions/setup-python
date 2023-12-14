@@ -32,7 +32,7 @@ If there is a specific version of Python that you need and you don't want to wor
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.7.5' 
 - run: python my_script.py
@@ -46,7 +46,7 @@ You can specify **only a major and minor version** if you are okay with the most
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.7' 
 - run: python my_script.py
@@ -60,7 +60,7 @@ You can specify the version with **prerelease tag** to download and set up an ac
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.12.0-alpha.1'
 - run: python my_script.py
@@ -71,7 +71,7 @@ It's also possible to use **x.y-dev syntax** to download and set up the latest p
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.12-dev'
 - run: python my_script.py
@@ -84,7 +84,7 @@ You can also use several types of ranges that are specified in [semver](https://
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '>=3.9 <3.10'
 - run: python my_script.py
@@ -95,7 +95,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.12.0-alpha - 3.12.0'
 - run: python my_script.py
@@ -106,7 +106,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.x'
 - run: python my_script.py
@@ -139,7 +139,7 @@ jobs:
         - 'pypy3.7-v7.3.3' # Python 3.7 and PyPy 7.3.3
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - run: python my_script.py
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: |
             3.8
@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: |
             pypy-3.7-v7.3.x
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: |
             3.8
@@ -217,7 +217,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -242,7 +242,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -258,7 +258,7 @@ jobs:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version-file: '.python-version' # Read python version from a file .python-version
 - run: python my_script.py
@@ -267,7 +267,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version-file: 'pyproject.toml' # Read python version from a file pyproject.toml
 - run: python my_script.py
@@ -282,7 +282,7 @@ If `check-latest` is set to `true`, the action first checks if the cached versio
 ```yaml
 steps:
   - uses: actions/checkout@v4
-  - uses: actions/setup-python@v4
+  - uses: actions/setup-python@v5
     with:
       python-version: '3.7'
       check-latest: true
@@ -297,7 +297,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -312,7 +312,7 @@ steps:
 - uses: actions/checkout@v4
 - name: Install poetry
   run: pipx install poetry
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.9'
     cache: 'poetry'
@@ -324,7 +324,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.9'
     cache: 'pipenv'
@@ -339,7 +339,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.9'
     cache: 'pip'
@@ -351,7 +351,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.10'
     cache: 'pip'
@@ -366,7 +366,7 @@ steps:
 ```yaml
 steps:
 - uses: actions/checkout@v4
-- uses: actions/setup-python@v4
+- uses: actions/setup-python@v5
   with:
     python-version: '3.11'
     cache: 'pip'
@@ -389,7 +389,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       id: cp310
       with:
         python-version: "3.8.0 - 3.10.0"
@@ -406,7 +406,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       id: cp310
       with:
         python-version: "3.10"
@@ -422,7 +422,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       id: cp310
       with:
         python-version: "3.8.0"
@@ -453,7 +453,7 @@ Such a requirement on side-effect could be because you don't want your composite
 ```yaml
  steps:
    - uses: actions/checkout@v4
-   - uses: actions/setup-python@v4
+   - uses: actions/setup-python@v5
      id: cp310
      with:
        python-version: '3.10'
@@ -586,7 +586,7 @@ Here are the steps you need to follow to avoid the rate limit:
 
 ```yml
 - name: Set up Python
-  uses: actions/setup-python@v4
+  uses: actions/setup-python@v5
   with:
     python-version: 3.8
     token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
@@ -618,7 +618,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python_version }}"
           allow-prereleases: true
