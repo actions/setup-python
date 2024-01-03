@@ -269,13 +269,28 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
 }
 
 /**
- * Python version extracted from a plain text file.
+ * Python versions extracted from a plain text file.
+ * - Resolves multiple versions from multiple lines.
+ * - Handles pyenv-virtualenv pointers (e.g. `3.10/envs/virtualenv`).
+ * - Ignores empty lines and lines starting with `#`
+ * - Trims whitespace.
  */
-export function getVersionInputFromPlainFile(versionFile: string): string[] {
-  core.debug(`Trying to resolve version form ${versionFile}`);
-  const version = fs.readFileSync(versionFile, 'utf8').trim();
-  core.info(`Resolved ${versionFile} as ${version}`);
-  return [version];
+export function getVersionsInputFromPlainFile(versionFile: string): string[] {
+  core.debug(`Trying to resolve versions form ${versionFile}`);
+  const content = fs.readFileSync(versionFile, 'utf8').trim();
+  const lines = content.split(/\r\n|\r|\n/);
+  const versions = lines
+    .map(line => {
+      if (line.startsWith('#') || line.trim() === '') {
+        return undefined;
+      }
+      let version: string = line.trim();
+      version = version.split('/')[0];
+      return version;
+    })
+    .filter(version => version !== undefined) as string[];
+  core.info(`Resolved ${versionFile} as ${versions.join(', ')}`);
+  return versions;
 }
 
 /**
@@ -319,7 +334,7 @@ export function getVersionInputFromFile(versionFile: string): string[] {
   } else if (versionFile.match('.tool-versions')) {
     return getVersionInputFromToolVersions(versionFile);
   } else {
-    return getVersionInputFromPlainFile(versionFile);
+    return getVersionsInputFromPlainFile(versionFile);
   }
 }
 
