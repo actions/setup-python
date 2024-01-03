@@ -228,7 +228,7 @@ function extractValue(obj: any, keys: string[]): string | undefined {
  * If none is present, returns an empty list.
  */
 export function getVersionInputFromTomlFile(versionFile: string): string[] {
-  core.debug(`Trying to resolve version form ${versionFile}`);
+  core.debug(`Trying to resolve version from ${versionFile}`);
 
   let pyprojectFile = fs.readFileSync(versionFile, 'utf8');
   // Normalize the line endings in the pyprojectFile
@@ -276,7 +276,7 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
  * - Trims whitespace.
  */
 export function getVersionsInputFromPlainFile(versionFile: string): string[] {
-  core.debug(`Trying to resolve versions form ${versionFile}`);
+  core.debug(`Trying to resolve versions from ${versionFile}`);
   const content = fs.readFileSync(versionFile, 'utf8').trim();
   const lines = content.split(/\r\n|\r|\n/);
   const versions = lines
