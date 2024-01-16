@@ -93,7 +93,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Check latest version](docs/advanced-usage.md#check-latest-version)
 - [Caching packages](docs/advanced-usage.md#caching-packages)
 - [Outputs and environment variables](docs/advanced-usage.md#outputs-and-environment-variables)
-- [Available versions of Python and PyPy](advanced-usage.md#available-versions-of-python-pypy-and-graalpy)
+- [Available versions of Python, PyPy and GraalPy](docs/advanced-usage.md#available-versions-of-python-pypy-and-graalpy)
 - [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
