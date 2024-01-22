@@ -1,0 +1,45 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: tuesday
+    open-pull-requests-limit: 20 # default is 5
+    ignore:
+      # Because this is so dependent on the remote server we use
+      - dependency-name: '@elastic/elasticsearch'
+      # Because whatever we have needs to match what @primer/react also uses
+      - dependency-name: 'styled-components'
+      - dependency-name: '*'
+        update-types:
+          ['version-update:semver-patch', 'version-update:semver-minor']
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: wednesday
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          ['version-update:semver-patch', 'version-update:semver-minor']
+
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: thursday
+    ignore:
+      - dependency-name: 'node'
+  
+  - package-ecosystem: 'pip'
+    directory: "/__tests__/data/requirements-linux.txt"
+    schedule:
+      interval: weekly
+       day: Monday
