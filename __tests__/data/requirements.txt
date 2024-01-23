@@ -32,7 +32,7 @@ pefile==2021.9.3; python_full_version >= '3.6.0'
 
 pillow==7.2
 
-pygments==2.6.1
+pygments==2.15.0
 
 pyinstaller==3.6
 
