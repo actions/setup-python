@@ -2,7 +2,7 @@
 - [Using the python-version input](advanced-usage.md#using-the-python-version-input)
     - [Specifying a Python version](advanced-usage.md#specifying-a-python-version)
     - [Specifying a PyPy version](advanced-usage.md#specifying-a-pypy-version)
-    - [Specifying multiple Python and PyPy versions](advanced-usage.md#specifying-multiple-python/pypy-version)
+    - [Specifying multiple Python/PyPy versions](advanced-usage.md#specifying-multiple-pythonpypy-versions)
     - [Matrix Testing](advanced-usage.md#matrix-testing)
 - [Using the python-version-file input](advanced-usage.md#using-the-python-version-file-input)
 - [Check latest version](advanced-usage.md#check-latest-version)
@@ -146,7 +146,7 @@ jobs:
 ```
 More details on PyPy syntax can be found in the [Available versions of PyPy](#pypy) section.
 
-### Specifying multiple Python/PyPy version
+### Specifying multiple Python/PyPy versions
 The python-version input can get multiple python/pypy versions. The last specified version will be used as a default one. 
 
 Download and set up multiple Python versions:
