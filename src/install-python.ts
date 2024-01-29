@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
+import * as httpm from '@actions/http-client';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX} from './utils';
 
@@ -31,7 +32,19 @@ export async function findReleaseFromManifest(
   return foundRelease;
 }
 
-export function getManifest(): Promise<tc.IToolRelease[]> {
+export async function getManifest(): Promise<tc.IToolRelease[]> {
+  try {
+    return await getManifestFromRepo();
+  } catch (err) {
+    core.debug('Fetching the manifest via the API failed.');
+    if (err instanceof Error) {
+      core.debug(err.message);
+    }
+  }
+  return await getManifestFromURL();
+}
+
+export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
   core.debug(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
@@ -41,6 +54,17 @@ export function getManifest(): Promise<tc.IToolRelease[]> {
     AUTH,
     MANIFEST_REPO_BRANCH
   );
+}
+
+export async function getManifestFromURL(): Promise<tc.IToolRelease[]> {
+  core.debug('Falling back to fetching the manifest using raw URL.');
+
+  const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
+  const response = await http.getJson<tc.IToolRelease[]>(MANIFEST_URL);
+  if (!response.result) {
+    throw new Error(`Unable to get manifest from ${MANIFEST_URL}`);
+  }
+  return response.result;
 }
 
 async function installPython(workingDirectory: string) {
