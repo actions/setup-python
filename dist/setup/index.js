@@ -9877,11 +9877,12 @@ function extractZipWin(file, dest) {
             yield exec_1.exec(`"${pwshPath}"`, args);
         }
         else {
+            //attempt to use pwsh with ExtractToDirectory, if this fails attempt Expand-Archive
             const powershellCommand = [
                 `$ErrorActionPreference = 'Stop' ;`,
                 `try { Add-Type -AssemblyName System.IO.Compression.FileSystem } catch { } ;`,
-                `if ((Get-Command -Name Expand-Archive -Module Microsoft.PowerShell.Archive -ErrorAction Ignore)) { Expand-Archive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force }`,
-                `else {[System.IO.Compression.ZipFile]::ExtractToDirectory('${escapedFile}', '${escapedDest}', $true) }`
+                `try { [System.IO.Compression.ZipFile]::ExtractToDirectory('${escapedFile}', '${escapedDest}', $true) }`,
+                `catch { if (($_.Exception.GetType().FullName -eq 'System.Management.Automation.MethodException') -or ($_.Exception.GetType().FullName -eq 'System.Management.Automation.RuntimeException') ){ Expand-Archive -LiteralPath '${escapedFile}' -DestinationPath '${escapedDest}' -Force } else { throw $_ } } ;`
             ].join(' ');
             const args = [
                 '-NoLogo',
