@@ -319,7 +319,8 @@ function createHttpClient() {
     return new http_client_1.HttpClient('actions/cache', [bearerCredentialHandler], getRequestOptions());
 }
 function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false) {
-    const components = paths;
+    // don't pass changes upstream
+    const components = paths.slice();
     // Add compression method to cache version to restore
     // compressed cache as per compression method
     if (compressionMethod) {
@@ -608,26 +609,21 @@ function resolvePaths(patterns) {
             implicitDescendants: false
         });
         try {
-            for (var _e = true, _f = __asyncValues(globber.globGenerator()), _g; _g = yield _f.next(), _a = _g.done, !_a;) {
+            for (var _e = true, _f = __asyncValues(globber.globGenerator()), _g; _g = yield _f.next(), _a = _g.done, !_a; _e = true) {
                 _c = _g.value;
                 _e = false;
-                try {
-                    const file = _c;
-                    const relativeFile = path
-                        .relative(workspace, file)
-                        .replace(new RegExp(`\\${path.sep}`, 'g'), '/');
-                    core.debug(`Matched: ${relativeFile}`);
-                    // Paths are made relative so the tar entries are all relative to the root of the workspace.
-                    if (relativeFile === '') {
-                        // path.relative returns empty string if workspace and file are equal
-                        paths.push('.');
-                    }
-                    else {
-                        paths.push(`${relativeFile}`);
-                    }
+                const file = _c;
+                const relativeFile = path
+                    .relative(workspace, file)
+                    .replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+                core.debug(`Matched: ${relativeFile}`);
+                // Paths are made relative so the tar entries are all relative to the root of the workspace.
+                if (relativeFile === '') {
+                    // path.relative returns empty string if workspace and file are equal
+                    paths.push('.');
                 }
-                finally {
-                    _e = true;
+                else {
+                    paths.push(`${relativeFile}`);
                 }
             }
         }
@@ -711,7 +707,10 @@ function assertDefined(name, value) {
 exports.assertDefined = assertDefined;
 function isGhes() {
     const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
-    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+    const hostname = ghUrl.hostname.trimEnd().toUpperCase();
+    const isGitHubHost = hostname === 'GITHUB.COM';
+    const isGheHost = hostname.endsWith('.GHE.COM') || hostname.endsWith('.GHE.LOCALHOST');
+    return !isGitHubHost && !isGheHost;
 }
 exports.isGhes = isGhes;
 //# sourceMappingURL=cacheUtils.js.map
@@ -729,7 +728,7 @@ var CacheFilename;
 (function (CacheFilename) {
     CacheFilename["Gzip"] = "cache.tgz";
     CacheFilename["Zstd"] = "cache.tzst";
-})(CacheFilename = exports.CacheFilename || (exports.CacheFilename = {}));
+})(CacheFilename || (exports.CacheFilename = CacheFilename = {}));
 var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod["Gzip"] = "gzip";
@@ -737,12 +736,12 @@ var CompressionMethod;
     // This enum is for earlier version of zstd that does not have --long support
     CompressionMethod["ZstdWithoutLong"] = "zstd-without-long";
     CompressionMethod["Zstd"] = "zstd";
-})(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
+})(CompressionMethod || (exports.CompressionMethod = CompressionMethod = {}));
 var ArchiveToolType;
 (function (ArchiveToolType) {
     ArchiveToolType["GNU"] = "gnu";
     ArchiveToolType["BSD"] = "bsd";
-})(ArchiveToolType = exports.ArchiveToolType || (exports.ArchiveToolType = {}));
+})(ArchiveToolType || (exports.ArchiveToolType = ArchiveToolType = {}));
 // The default number of retry attempts.
 exports.DefaultRetryAttempts = 2;
 // The default delay in milliseconds between retry attempts.
@@ -8551,7 +8550,7 @@ class HttpClient {
         if (this._keepAlive && useProxy) {
             agent = this._proxyAgent;
         }
-        if (this._keepAlive && !useProxy) {
+        if (!useProxy) {
             agent = this._agent;
         }
         // if agent is already assigned use that agent.
@@ -8583,15 +8582,11 @@ class HttpClient {
             agent = tunnelAgent(agentOptions);
             this._proxyAgent = agent;
         }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
             const options = { keepAlive: this._keepAlive, maxSockets };
             agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
             this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
         }
         if (usingSsl && this._ignoreSslError) {
             // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
@@ -57734,35 +57729,43 @@ const coerce = (version, options) => {
 
   let match = null
   if (!options.rtl) {
-    match = version.match(re[t.COERCE])
+    match = version.match(options.includePrerelease ? re[t.COERCEFULL] : re[t.COERCE])
   } else {
     // Find the right-most coercible string that does not share
     // a terminus with a more left-ward coercible string.
     // Eg, '1.2.3.4' wants to coerce '2.3.4', not '3.4' or '4'
+    // With includePrerelease option set, '1.2.3.4-rc' wants to coerce '2.3.4-rc', not '2.3.4'
     //
     // Walk through the string checking with a /g regexp
     // Manually set the index so as to pick up overlapping matches.
     // Stop when we get a match that ends at the string end, since no
     // coercible string can be more right-ward without the same terminus.
+    const coerceRtlRegex = options.includePrerelease ? re[t.COERCERTLFULL] : re[t.COERCERTL]
     let next
-    while ((next = re[t.COERCERTL].exec(version)) &&
+    while ((next = coerceRtlRegex.exec(version)) &&
         (!match || match.index + match[0].length !== version.length)
     ) {
       if (!match ||
             next.index + next[0].length !== match.index + match[0].length) {
         match = next
       }
-      re[t.COERCERTL].lastIndex = next.index + next[1].length + next[2].length
+      coerceRtlRegex.lastIndex = next.index + next[1].length + next[2].length
     }
     // leave it in a clean state
-    re[t.COERCERTL].lastIndex = -1
+    coerceRtlRegex.lastIndex = -1
   }
 
   if (match === null) {
     return null
   }
 
-  return parse(`${match[2]}.${match[3] || '0'}.${match[4] || '0'}`, options)
+  const major = match[2]
+  const minor = match[3] || '0'
+  const patch = match[4] || '0'
+  const prerelease = options.includePrerelease && match[5] ? `-${match[5]}` : ''
+  const build = options.includePrerelease && match[6] ? `+${match[6]}` : ''
+
+  return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options)
 }
 module.exports = coerce
 
@@ -58454,12 +58457,17 @@ createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`)
 
 // Coercion.
 // Extract anything that could conceivably be a part of a valid semver
-createToken('COERCE', `${'(^|[^\\d])' +
+createToken('COERCEPLAIN', `${'(^|[^\\d])' +
               '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
               `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`)
+createToken('COERCE', `${src[t.COERCEPLAIN]}(?:$|[^\\d])`)
+createToken('COERCEFULL', src[t.COERCEPLAIN] +
+              `(?:${src[t.PRERELEASE]})?` +
+              `(?:${src[t.BUILD]})?` +
               `(?:$|[^\\d])`)
 createToken('COERCERTL', src[t.COERCE], true)
+createToken('COERCERTLFULL', src[t.COERCEFULL], true)
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
@@ -90352,8 +90360,8 @@ class PoetryCache extends cache_distributor_1.default {
         this.poetryProjects = poetryProjects;
     }
     getCacheGlobalDirectories() {
-        var _a, e_1, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, e_1, _b, _c;
             // Same virtualenvs path may appear for different projects, hence we use a Set
             const paths = new Set();
             const globber = yield glob.create(this.patterns);
@@ -90796,8 +90804,8 @@ function binDir(installDir) {
     }
 }
 function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         let manifest = null;
         const desugaredVersionSpec = desugarDevVersion(version);
         let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
@@ -91570,8 +91578,8 @@ function resolveVersionInput() {
     return versions;
 }
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         if (utils_1.IS_MAC) {
             process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
         }
