@@ -30,7 +30,7 @@ jobs:
           - 'pypy-3.7-v7.3.x'
           - 'pypy-3.7-v7.x'
           - 'pypy-2.7-v7.3.4rc1'
-          - 'pypy-3.7-nightly'
+          - 'pypy-3.8-nightly'
           - 'pypy3.8-v7.3.7'
 
     steps:
