@@ -597,6 +597,16 @@ Requests should now be authenticated. To verify that you are getting the higher 
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
 
+### Other no access solutions
+You can internally host a copy of [`actions/python-versions`](https://github.com/actions/python-versions) and manually point actions/setup-python to your internal endpoint with `github_api_url` and `github_raw_url`
+```yml
+- name: Set up Python
+  uses: actions/setup-python@v5
+  with:
+    python-version: 3.8
+    github_api_url: api.github.YOUR_COMPANY.com
+    github_raw_url: raw.github.YOUR_COMPANY.com
+```
 
 ## Allow pre-releases
 
