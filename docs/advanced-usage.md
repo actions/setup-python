@@ -594,6 +594,14 @@ Here are the steps you need to follow to avoid the rate limit:
 
 Requests should now be authenticated. To verify that you are getting the higher rate limit, you can call GitHub's [rate limit API](https://docs.github.com/en/rest/rate-limit) from within your workflow ([example](https://github.com/actions/setup-python/pull/443#issuecomment-1206776401)).
 
+**Fallback Mechanism - Leverage the Raw API:**
+
+In addition to using a Personal Access Token (PAT), the action now leverages the [raw API](https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json) to retrieve the version-manifest.This approach does not impose a rate limit and hence facilitates unrestricted consumption without the need for a token.
+
+This is particularly beneficial for GHES runners, which often share the same IP due to Network Address Translation (NAT), to avoid the quick exhaustion of the unauthenticated rate limit.
+
+
+
 ### No access to github.com
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
 
