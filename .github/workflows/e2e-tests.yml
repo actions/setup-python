@@ -93,3 +93,7 @@ jobs:
           python-version: '<3.11'
       - name: Verify <3.11
         run: python __tests__/verify-python.py 3.10
+      - name: Test Raw Endpoint Access
+        run: |
+          curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
+        shell: bash

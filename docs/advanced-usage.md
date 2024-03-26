@@ -572,29 +572,10 @@ One quick way to grant access is to change the user and group of `/Users/runner/
 
 ### Avoiding rate limit issues
 
-`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then you will start to see rate-limit errors during downloading that look like this: 
-
-    ##[error]API rate limit exceeded for YOUR_IP. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)
-
-To get a higher rate limit, you can [generate a personal access token (PAT) on github.com](https://github.com/settings/tokens/new) and pass it as the `token` input for the action. It is important to understand that this needs to be a token from github.com and _not_ from your GHES instance. If you or your colleagues do not yet have a github.com account, you might need to create one.
-
-Here are the steps you need to follow to avoid the rate limit:
-
-1. Create a PAT on any github.com account by using [this link](https://github.com/settings/tokens/new) after logging into github.com (not your Enterprise instance).  This PAT does _not_ need any rights, so make sure all the boxes are unchecked.
-2. Store this PAT in the repository / organization where you run your workflow, e.g. as `GH_GITHUB_COM_TOKEN`. You can do this by navigating to your repository -> **Settings** -> **Secrets** -> **Actions** -> **New repository secret**.
-3. To use this functionality, you need to use any version newer than `v4.3`. Also, change _python-version_ as needed.
-
-```yml
-- name: Set up Python
-  uses: actions/setup-python@v5
-  with:
-    python-version: 3.8
-    token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
-```
-
-Requests should now be authenticated. To verify that you are getting the higher rate limit, you can call GitHub's [rate limit API](https://docs.github.com/en/rest/rate-limit) from within your workflow ([example](https://github.com/actions/setup-python/pull/443#issuecomment-1206776401)).
+`setup-python` comes pre-installed on the appliance with GHES if Actions is enabled. When dynamically downloading Python distributions, `setup-python` downloads distributions from [`actions/python-versions`](https://github.com/actions/python-versions) on github.com (outside of the appliance). These calls to `actions/python-versions` are by default made via unauthenticated requests, which are limited to [60 requests per hour per IP](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting). If more requests are made within the time frame, then the action leverages the `raw API` to retrieve the version-manifest. This approach does not impose a rate limit and hence facilitates unrestricted consumption. This is particularly beneficial for GHES runners, which often share the same IP due to Network Address Translation (NAT), to avoid the quick exhaustion of the unauthenticated rate limit.
 
 ### No access to github.com
+
 If the runner is not able to access github.com, any Python versions requested during a workflow run must come from the runner's tool cache. See "[Setting up the tool cache on self-hosted runners without internet access](https://docs.github.com/en/enterprise-server/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access)" for more information.
 
 
