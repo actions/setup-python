@@ -91388,11 +91388,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installCpythonFromRelease = exports.getManifest = exports.findReleaseFromManifest = exports.MANIFEST_URL = void 0;
+exports.installCpythonFromRelease = exports.getManifestFromURL = exports.getManifestFromRepo = exports.getManifest = exports.findReleaseFromManifest = exports.MANIFEST_URL = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
 const exec = __importStar(__nccwpck_require__(1514));
+const httpm = __importStar(__nccwpck_require__(6255));
 const utils_1 = __nccwpck_require__(1314);
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -91411,10 +91412,37 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
 function getManifest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            return yield getManifestFromRepo();
+        }
+        catch (err) {
+            core.debug('Fetching the manifest via the API failed.');
+            if (err instanceof Error) {
+                core.debug(err.message);
+            }
+        }
+        return yield getManifestFromURL();
+    });
+}
+exports.getManifest = getManifest;
+function getManifestFromRepo() {
     core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
-exports.getManifest = getManifest;
+exports.getManifestFromRepo = getManifestFromRepo;
+function getManifestFromURL() {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug('Falling back to fetching the manifest using raw URL.');
+        const http = new httpm.HttpClient('tool-cache');
+        const response = yield http.getJson(exports.MANIFEST_URL);
+        if (!response.result) {
+            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
+        }
+        return response.result;
+    });
+}
+exports.getManifestFromURL = getManifestFromURL;
 function installPython(workingDirectory) {
     return __awaiter(this, void 0, void 0, function* () {
         const options = {
