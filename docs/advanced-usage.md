@@ -293,7 +293,8 @@ steps:
 
 ## Caching packages
 
-**Caching pipenv dependencies:**
+### Caching pipenv dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -306,7 +307,8 @@ steps:
 - run: pipenv install
 ```
 
-**Caching poetry dependencies:**
+### Caching poetry dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -320,7 +322,8 @@ steps:
 - run: poetry run pytest
 ```
 
-**Using a list of file paths to cache dependencies**
+### Using a list of file paths to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -335,7 +338,9 @@ steps:
   run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 - run: pipenv install
 ```
-**Using wildcard patterns to cache dependencies**
+
+### Using wildcard patterns to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -347,7 +352,8 @@ steps:
 - run: pip install -r subdirectory/requirements-dev.txt
 ```
 
-**Using a list of wildcard patterns to cache dependencies**
+### Using a list of wildcard patterns to cache dependencies
+
 ```yaml
 steps:
 - uses: actions/checkout@v4
@@ -361,7 +367,7 @@ steps:
 - run: pip install -e . -r subdirectory/requirements-dev.txt
 ```
 
-**Caching projects that use setup.py:**
+### Caching projects that use setup.py (or pyproject.toml)
 
 ```yaml
 steps:
@@ -374,6 +380,42 @@ steps:
 - run: pip install -e .
   # Or pip install -e '.[test]' to install test dependencies
 ```
+
+### Skipping cache saving
+
+For some scenarios, it may be useful to only save a given subset of dependencies,
+but restore more of them for other workflows. For instance, there may be a heavy
+`extras` dependency that you do not need your entire test matrix to download, but
+you want to download and test it separately without it being saved in the cache
+archive for all runs.
+
+To achieve this, you can use `cache-save: false` on the run that uses the heavy
+dependency.
+
+
+```yaml
+test:
+  steps:
+  - uses: actions/checkout@v4
+  - uses: actions/setup-python@v4
+    with:
+      python-version: '3.11'
+      cache: 'pip'
+      cache-dependency-path: pyproject.toml
+  - run: pip install -e .
+
+test-heavy-extra:
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+        with:
+        python-version: '3.11'
+        cache: 'pip'
+        cache-dependency-path: pyproject.toml
+        cache-save: false
+    - run: pip install -e '.[heavy-extra]'
+```
+
 
 # Outputs and environment variables
 
