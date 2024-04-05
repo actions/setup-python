@@ -167,11 +167,9 @@ async function getMacOSInfo() {
 }
 
 export async function getLinuxInfo() {
-  const {stdout} = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
-    silent: true
-  });
+  const pyprojectFile = fs.readFileSync('/etc/os-release').toString();
 
-  const [osName, osVersion] = stdout.trim().split('\n');
+  const [osName, osVersion] = pyprojectFile.match(/ID="?(.+)"?/gm);
 
   core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
 
