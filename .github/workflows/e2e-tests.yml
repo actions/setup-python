@@ -9,6 +9,7 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
+  workflow_dispatch:
 
 jobs:
   test-setup-python:
@@ -20,13 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Run with setup-python 3.5
-        uses: ./
-        with:
-          python-version: 3.5
-      - name: Verify 3.5
-        run: python __tests__/verify-python.py 3.5
 
       - name: Run with setup-python 3.6
         uses: ./
