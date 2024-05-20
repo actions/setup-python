@@ -313,9 +313,15 @@ steps:
 - uses: actions/setup-python@v5
   with:
     python-version: '3.9'
-    cache: 'poetry'
 - name: Install poetry
   run: python -m pip install poetry
+- name: Cache Poetry dependencies
+  uses: actions/cache@v3
+  with:
+    path: ~/.cache/pypoetry
+    key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+    restore-keys: |
+     ${{ runner.os }}-poetry-
 - run: poetry install
 - run: poetry run pytest
 ```
