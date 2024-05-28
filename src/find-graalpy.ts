@@ -1,11 +1,6 @@
 import * as path from 'path';
 import * as graalpyInstall from './install-graalpy';
-import {
-  IS_WINDOWS,
-  validateVersion,
-  IGraalPyManifestRelease,
-  getBinaryDirectory
-} from './utils';
+import {IS_WINDOWS, validateVersion, IGraalPyManifestRelease} from './utils';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';
@@ -62,11 +57,8 @@ export async function findGraalPyVersion(
   const pipDir = IS_WINDOWS ? 'Scripts' : 'bin';
   const _binDir = path.join(installDir, pipDir);
   const binaryExtension = IS_WINDOWS ? '.exe' : '';
-  const pythonPath = path.join(
-    IS_WINDOWS ? installDir : _binDir,
-    `python${binaryExtension}`
-  );
-  const pythonLocation = getBinaryDirectory(installDir);
+  const pythonPath = path.join(_binDir, `python${binaryExtension}`);
+  const pythonLocation = path.join(installDir, 'bin');
   if (updateEnvironment) {
     core.exportVariable('pythonLocation', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
