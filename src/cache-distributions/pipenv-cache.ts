@@ -32,7 +32,7 @@ class PipenvCache extends CacheDistributor {
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.patterns);
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${process.arch}-${this.pythonVersion}-${this.packageManager}-${hash}`;
     const restoreKey = undefined;
     return {
       primaryKey,
