@@ -25,13 +25,6 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
-        include:
-          - os: windows-latest
-            python: 3.5.4
-          - os: ubuntu-20.04
-            python: 3.6.7
-          - os: ubuntu-20.04
-            python: 3.7.5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,13 +63,6 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
-        include:
-          - os: windows-latest
-            python: 3.5.4
-          - os: ubuntu-20.04
-            python: 3.6.7
-          - os: ubuntu-20.04
-            python: 3.7.5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,13 +104,6 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
-        include:
-          - os: windows-latest
-            python: 3.5.4
-          - os: ubuntu-20.04
-            python: 3.6.7
-          - os: ubuntu-20.04
-            python: 3.7.5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -164,13 +143,6 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
-        include:
-          - os: windows-latest
-            python: 3.5.4
-          - os: ubuntu-20.04
-            python: 3.6.7
-          - os: ubuntu-20.04
-            python: 3.7.5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -215,13 +187,6 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
-        include:
-          - os: windows-latest
-            python: 3.5.4
-          - os: ubuntu-20.04
-            python: 3.6.7
-          - os: ubuntu-20.04
-            python: 3.7.5
     steps:
       - name: Checkout
         uses: actions/checkout@v4

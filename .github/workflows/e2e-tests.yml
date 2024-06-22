@@ -22,40 +22,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run with setup-python 3.6
-        uses: ./
-        with:
-          python-version: 3.6
-      - name: Verify 3.6
-        run: python __tests__/verify-python.py 3.6
-
-      - name: Run with setup-python 3.7
-        uses: ./
-        with:
-          python-version: 3.7
-      - name: Verify 3.7
-        run: python __tests__/verify-python.py 3.7
-
       - name: Run with setup-python 3.8
         uses: ./
         with:
           python-version: 3.8
       - name: Verify 3.8
         run: python __tests__/verify-python.py 3.8
-
-      - name: Run with setup-python 3.7.5
-        uses: ./
-        with:
-          python-version: 3.7.5
-      - name: Verify 3.7.5
-        run: python __tests__/verify-python.py 3.7.5
-
-      - name: Run with setup-python 3.6.7
-        uses: ./
-        with:
-          python-version: 3.6.7
-      - name: Verify 3.6.7
-        run: python __tests__/verify-python.py 3.6.7
 
       - name: Run with setup-python 3.8.1
         uses: ./
