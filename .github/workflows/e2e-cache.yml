@@ -10,6 +10,7 @@ on:
       - releases/*
     paths-ignore:
       - '**.md'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -75,7 +76,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.8']
+        python-version: ['3.9', 'pypy-3.9']
     steps:
       - uses: actions/checkout@v4
       - name: Install poetry
@@ -91,13 +92,13 @@ jobs:
         run: poetry install
 
   python-pip-dependencies-caching-path:
-    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }}, caching path)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.7-v7.x']
+        python-version: ['3.9', 'pypy-3.9-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -110,7 +111,7 @@ jobs:
         run: pip install numpy pandas requests
 
   python-pipenv-dependencies-caching-path:
-    name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }}, caching path)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
