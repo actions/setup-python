@@ -281,7 +281,7 @@ export function getVersionInputFromFile(versionFile: string): string[] {
 }
 
 /**
- * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
+ * Get the directory containing interpreter binary from installation directory of PyPy
  *  - On Linux and macOS, the Python interpreter is in 'bin'.
  *  - On Windows, it is in the installation root.
  */
