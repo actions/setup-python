@@ -22,7 +22,7 @@ jobs:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         check-latest: [false, true]
-        os: [macos-11, macos-12, macos-13, macos-14, windows-2019, windows-2022, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, setup-actions-ubuntu-arm64-2-core, setup-actions-windows-arm64-4-core]
+        os: [macos-12, macos-13, macos-14, windows-2019, windows-2022, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, setup-actions-ubuntu-arm64-2-core, setup-actions-windows-arm64-4-core]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python ${{ matrix.check-latest && 'and check latest' || '' }}
