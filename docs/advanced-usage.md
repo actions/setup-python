@@ -319,7 +319,7 @@ steps:
 - run: poetry install
 - run: poetry run pytest
 ```
-Note: "poetry install" uses the Python version from the runner if "setup-python" version doesn't match "pyproject.toml"
+>**Note:** If the setup-python version doesn't match the version specified in pyproject.toml, poetry install will use the runner's Python version.
 
 **Using a list of file paths to cache dependencies**
 ```yaml
