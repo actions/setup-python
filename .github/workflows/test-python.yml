@@ -21,16 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
         exclude:
           - os: ubuntu-22.04
-            python: 3.5.4
-          - os: ubuntu-22.04
-            python: 3.6.7
-          - os: ubuntu-22.04
-            python: 3.7.5
-          - os: windows-latest
-            python: 3.8.15
+            python: 3.8.10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,16 +59,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
         exclude:
           - os: ubuntu-22.04
-            python: 3.5.4
-          - os: ubuntu-22.04
-            python: 3.6.7
-          - os: ubuntu-22.04
-            python: 3.7.5
-          - os: windows-latest
-            python: 3.8.15
+            python: 3.8.10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -112,16 +100,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
         exclude:
           - os: ubuntu-22.04
-            python: 3.5.4
-          - os: ubuntu-22.04
-            python: 3.6.7
-          - os: ubuntu-22.04
-            python: 3.7.5
-          - os: windows-latest
-            python: 3.8.15
+            python: 3.8.10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -157,16 +139,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13, '==3.10.10']
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, '==3.12.3']
         exclude:
           - os: ubuntu-22.04
-            python: 3.5.4
-          - os: ubuntu-22.04
-            python: 3.6.7
-          - os: ubuntu-22.04
-            python: 3.7.5
-          - os: windows-latest
-            python: 3.8.15
+            python: 3.8.10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -207,16 +183,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
         exclude:
           - os: ubuntu-22.04
-            python: 3.5.4
-          - os: ubuntu-22.04
-            python: 3.6.7
-          - os: ubuntu-22.04
-            python: 3.7.5
-          - os: windows-latest
-            python: 3.8.15
+            python: 3.8.10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -251,21 +221,21 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-pre-release-version-from-manifest:
-    name: Setup 3.9.0-beta.4 ${{ matrix.os }}
+    name: Setup 3.13.0-alpha.6 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04]
+        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.9.0-beta.4
+      - name: setup-python 3.13.0-alpha.6
         id: setup-python
         uses: ./
         with:
-          python-version: '3.9.0-beta.4'
+          python-version: '3.13.0-alpha.6'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -274,8 +244,8 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python 3.9.0b4" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.9.0b4"
+          if ("Python 3.13.0a6" -ne "$pythonVersion"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.13.0a6"
             exit 1
           }
           $pythonVersion
@@ -285,7 +255,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-dev-version:
-    name: Setup 3.9-dev ${{ matrix.os }}
+    name: Setup 3.13-dev ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -295,25 +265,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.9-dev
+      - name: setup-python 3.13-dev
         id: setup-python
         uses: ./
         with:
-          python-version: '3.9-dev'
+          python-version: '3.13-dev'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
         shell: bash
 
       - name: Validate version
-        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.9.') }}
+        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.13.') }}
         shell: bash
 
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-prerelease-version:
-    name: Setup 3.12 ${{ matrix.os }}
+    name: Setup 3.13 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -323,11 +293,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.12
+      - name: setup-python 3.13
         id: setup-python
         uses: ./
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           allow-prereleases: true
 
       - name: Check python-path
@@ -335,7 +305,7 @@ jobs:
         shell: bash
 
       - name: Validate version
-        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.12.') }}
+        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.13.') }}
         shell: bash
 
       - name: Run simple code
@@ -348,7 +318,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: ['3.7', '3.8', '3.9', '3.10']
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -372,7 +342,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -402,16 +372,17 @@ jobs:
         uses: ./
         with:
           python-version: |
-            3.7
             3.8
             3.9
             3.10
+            3.11
+            3.12
           check-latest: true
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.10"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.10"
+          if ("$pythonVersion" -NotMatch "3.12"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.12"
             exit 1
           }
           $pythonVersion

@@ -9,6 +9,7 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
+  workflow_dispatch:
 
 jobs:
   test-setup-python:
@@ -21,27 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run with setup-python 3.5
-        uses: ./
-        with:
-          python-version: 3.5
-      - name: Verify 3.5
-        run: python __tests__/verify-python.py 3.5
-
-      - name: Run with setup-python 3.6
-        uses: ./
-        with:
-          python-version: 3.6
-      - name: Verify 3.6
-        run: python __tests__/verify-python.py 3.6
-
-      - name: Run with setup-python 3.7
-        uses: ./
-        with:
-          python-version: 3.7
-      - name: Verify 3.7
-        run: python __tests__/verify-python.py 3.7
-
       - name: Run with setup-python 3.8
         uses: ./
         with:
@@ -49,26 +29,40 @@ jobs:
       - name: Verify 3.8
         run: python __tests__/verify-python.py 3.8
 
-      - name: Run with setup-python 3.7.5
+      - name: Run with setup-python 3.8.10
         uses: ./
         with:
-          python-version: 3.7.5
-      - name: Verify 3.7.5
-        run: python __tests__/verify-python.py 3.7.5
+          python-version: 3.8.10
+      - name: Verify 3.8.10
+        run: python __tests__/verify-python.py 3.8.10
 
-      - name: Run with setup-python 3.6.7
+      - name: Run with setup-python 3.9.13
         uses: ./
         with:
-          python-version: 3.6.7
-      - name: Verify 3.6.7
-        run: python __tests__/verify-python.py 3.6.7
+          python-version: 3.9.13
+      - name: Verify 3.9.13
+        run: python __tests__/verify-python.py 3.9.13
 
-      - name: Run with setup-python 3.8.1
+      - name: Run with setup-python 3.9.13
         uses: ./
         with:
-          python-version: 3.8.1
-      - name: Verify 3.8.1
-        run: python __tests__/verify-python.py 3.8.1
+          python-version: 3.10.11
+      - name: Verify 3.10.11
+        run: python __tests__/verify-python.py 3.10.11
+
+      - name: Run with setup-python 3.11.9
+        uses: ./
+        with:
+          python-version: 3.11.9
+      - name: Verify 3.11.9
+        run: python __tests__/verify-python.py 3.11.9
+
+      - name: Run with setup-python 3.12.4
+        uses: ./
+        with:
+          python-version: 3.12.4
+      - name: Verify 3.12.4
+        run: python __tests__/verify-python.py 3.12.4
 
       - name: Run with setup-python 3.10
         id: cp310
@@ -93,3 +87,7 @@ jobs:
           python-version: '<3.11'
       - name: Verify <3.11
         run: python __tests__/verify-python.py 3.10
+      - name: Test Raw Endpoint Access
+        run: |
+          curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
+        shell: bash
