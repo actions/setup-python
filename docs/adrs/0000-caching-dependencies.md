@@ -18,9 +18,7 @@ Integration of caching functionality into `actions/setup-python` action will bri
 
 We will add support for Pip and Pipenv dependency caching.
 
-We won't pursue the goal to provide wide customization of caching in the scope of `actions/setup-python` action. The purpose of this integration is to cover ~90% of basic use-cases. 
-
-The actions/setup-python action does not provide customization of caching based on specific dependencies installed within each job. If different dependencies are installed across jobs the cache from the first job will be used in the second job. To manage this aspect, users should create separate caches for jobs with different requirements. If users need flexible customization, we will advise them to use `actions/cache` directly.
+We won't pursue the goal to provide wide customization of caching in the scope of `actions/setup-python` action. The purpose of this integration is to cover ~90% of basic use-cases. The action does not support dependency-specific caching for each job. If different dependencies are installed across jobs the cache from the first job will be used in the second job. To manage this aspect, users should create separate caches for jobs with different requirements. If users need flexible customization, we will advise them to use `actions/cache` directly.
 
 ## Decision
 
