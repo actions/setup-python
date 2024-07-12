@@ -121,15 +121,11 @@ export async function useCpythonVersion(
     core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
 
     if (IS_LINUX) {
-      const libPath = process.env.LD_LIBRARY_PATH
-        ? `:${process.env.LD_LIBRARY_PATH}`
-        : '';
       const pyLibPath = path.join(installDir, 'lib');
-
-      if (!libPath.split(':').includes(pyLibPath)) {
-        core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
-      }
+      ensurePathInEnvVar('LIBRARY_PATH', pyLibPath);
+      ensurePathInEnvVar('LD_LIBRARY_PATH', pyLibPath);
     }
+
     core.addPath(installDir);
     core.addPath(_binDir);
 
@@ -157,6 +153,17 @@ export async function useCpythonVersion(
   core.setOutput('python-path', pythonPath);
 
   return {impl: 'CPython', version: installed};
+}
+
+/** Ensure a folder is present in a colon-separated env-var */
+function ensurePathInEnvVar(envVarName: string, extraPath: string) {
+  const currentPath = process.env[envVarName]
+    ? `:${process.env[envVarName]}`
+    : '';
+
+  if (!currentPath.split(':').includes(extraPath)) {
+    core.exportVariable(envVarName, extraPath + currentPath);
+  }
 }
 
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
