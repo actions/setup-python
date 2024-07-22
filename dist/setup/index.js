@@ -46726,7 +46726,7 @@ function makeParserClass (Parser) {
       let target = this.ctx
       let finalKey = kv.key.pop()
       for (let kw of kv.key) {
-        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
+        if (hasKey(target, kw) && !isTable(target[kw])) {
           throw this.error(new TomlError("Can't redefine existing key"))
         }
         target = target[kw] = target[kw] || Table()
@@ -46734,6 +46734,7 @@ function makeParserClass (Parser) {
       if (hasKey(target, finalKey)) {
         throw this.error(new TomlError("Can't redefine existing key"))
       }
+      target[_declared] = true
       // unbox our numbers
       if (isInteger(kv.value) || isFloat(kv.value)) {
         target[finalKey] = kv.value.valueOf()
@@ -46791,6 +46792,8 @@ function makeParserClass (Parser) {
       do {
         if (this.char === Parser.END || this.char === CTRL_J) {
           return this.return()
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
+          throw this.errorControlCharIn('comments')
         }
       } while (this.nextChar())
     }
@@ -47004,7 +47007,7 @@ function makeParserClass (Parser) {
         } else if (this.atEndOfLine()) {
           throw this.error(new TomlError('Unterminated string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47033,7 +47036,7 @@ function makeParserClass (Parser) {
         } else if (this.char === Parser.END) {
           throw this.error(new TomlError('Unterminated multi-line string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47049,10 +47052,26 @@ function makeParserClass (Parser) {
     }
     parseLiteralMultiEnd2 () {
       if (this.char === CHAR_APOS) {
-        return this.return()
+        return this.next(this.parseLiteralMultiEnd3)
       } else {
         this.state.buf += "''"
         return this.goto(this.parseLiteralMultiStringContent)
+      }
+    }
+    parseLiteralMultiEnd3 () {
+      if (this.char === CHAR_APOS) {
+        this.state.buf += "'"
+        return this.next(this.parseLiteralMultiEnd4)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseLiteralMultiEnd4 () {
+      if (this.char === CHAR_APOS) {
+        this.state.buf += "'"
+        return this.return()
+      } else {
+        return this.returnNow()
       }
     }
 
@@ -47073,7 +47092,7 @@ function makeParserClass (Parser) {
         } else if (this.atEndOfLine()) {
           throw this.error(new TomlError('Unterminated string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47108,20 +47127,20 @@ function makeParserClass (Parser) {
         } else if (this.char === Parser.END) {
           throw this.error(new TomlError('Unterminated multi-line string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
       } while (this.nextChar())
     }
-    errorControlCharInString () {
+    errorControlCharIn (type) {
       let displayCode = '\\u00'
       if (this.char < 16) {
         displayCode += '0'
       }
       displayCode += this.char.toString(16)
 
-      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in strings, use ${displayCode} instead`))
+      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in ${type}, use ${displayCode} instead`))
     }
     recordMultiEscapeReplacement (replacement) {
       this.state.buf += replacement
@@ -47137,10 +47156,26 @@ function makeParserClass (Parser) {
     }
     parseMultiEnd2 () {
       if (this.char === CHAR_QUOT) {
-        return this.return()
+        return this.next(this.parseMultiEnd3)
       } else {
         this.state.buf += '""'
         return this.goto(this.parseMultiStringContent)
+      }
+    }
+    parseMultiEnd3 () {
+      if (this.char === CHAR_QUOT) {
+        this.state.buf += '"'
+        return this.next(this.parseMultiEnd4)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseMultiEnd4 () {
+      if (this.char === CHAR_QUOT) {
+        this.state.buf += '"'
+        return this.return()
+      } else {
+        return this.returnNow()
       }
     }
     parseMultiEscape () {
@@ -47704,13 +47739,7 @@ function makeParserClass (Parser) {
       }
     }
     recordInlineListValue (value) {
-      if (this.state.resultArr) {
-        const listType = this.state.resultArr[_contentType]
-        const valueType = tomlType(value)
-        if (listType !== valueType) {
-          throw this.error(new TomlError(`Inline lists must be a single type, not a mix of ${listType} and ${valueType}`))
-        }
-      } else {
+      if (!this.state.resultArr) {
         this.state.resultArr = InlineList(tomlType(value))
       }
       if (isFloat(value) || isInteger(value)) {
@@ -47773,11 +47802,24 @@ function makeParserClass (Parser) {
       } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
         throw this.error(new TomlError('Unterminated inline array'))
       } else if (this.char === CHAR_COMMA) {
-        return this.next(this.parseInlineTable)
+        return this.next(this.parseInlineTablePostComma)
       } else if (this.char === CHAR_RCUB) {
         return this.goto(this.parseInlineTable)
       } else {
         throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
+      }
+    }
+    parseInlineTablePostComma () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
+        throw this.error(new TomlError('Unterminated inline array'))
+      } else if (this.char === CHAR_COMMA) {
+        throw this.error(new TomlError('Empty elements in inline tables are not permitted'))
+      } else if (this.char === CHAR_RCUB) {
+        throw this.error(new TomlError('Trailing commas in inline tables are not permitted'))
+      } else {
+        return this.goto(this.parseInlineTable)
       }
     }
   }
@@ -48017,10 +48059,6 @@ function typeError (type) {
   return new Error('Can only stringify objects, not ' + type)
 }
 
-function arrayOneTypeError () {
-  return new Error("Array values can't have mixed types")
-}
-
 function getInlineKeys (obj) {
   return Object.keys(obj).filter(key => isInline(obj[key]))
 }
@@ -48042,12 +48080,12 @@ function toJSON (obj) {
 
 function stringifyObject (prefix, indent, obj) {
   obj = toJSON(obj)
-  var inlineKeys
-  var complexKeys
+  let inlineKeys
+  let complexKeys
   inlineKeys = getInlineKeys(obj)
   complexKeys = getComplexKeys(obj)
-  var result = []
-  var inlineIndent = indent || ''
+  const result = []
+  const inlineIndent = indent || ''
   inlineKeys.forEach(key => {
     var type = tomlType(obj[key])
     if (type !== 'undefined' && type !== 'null') {
@@ -48055,7 +48093,7 @@ function stringifyObject (prefix, indent, obj) {
     }
   })
   if (result.length > 0) result.push('')
-  var complexIndent = prefix && inlineKeys.length > 0 ? indent + '  ' : ''
+  const complexIndent = prefix && inlineKeys.length > 0 ? indent + '  ' : ''
   complexKeys.forEach(key => {
     result.push(stringifyComplex(prefix, complexIndent, key, obj[key]))
   })
@@ -48107,7 +48145,7 @@ function tomlType (value) {
 }
 
 function stringifyKey (key) {
-  var keyStr = String(key)
+  const keyStr = String(key)
   if (/^[-A-Za-z0-9_]+$/.test(keyStr)) {
     return keyStr
   } else {
@@ -48203,9 +48241,7 @@ function stringifyFloat (value) {
   } else if (Object.is(value, -0)) {
     return '-0.0'
   }
-  var chunks = String(value).split('.')
-  var int = chunks[0]
-  var dec = chunks[1] || 0
+  const [int, dec] = String(value).split('.')
   return stringifyInteger(int) + '.' + dec
 }
 
@@ -48217,29 +48253,10 @@ function stringifyDatetime (value) {
   return value.toISOString()
 }
 
-function isNumber (type) {
-  return type === 'float' || type === 'integer'
-}
-function arrayType (values) {
-  var contentType = tomlType(values[0])
-  if (values.every(_ => tomlType(_) === contentType)) return contentType
-  // mixed integer/float, emit as floats
-  if (values.every(_ => isNumber(tomlType(_)))) return 'float'
-  return 'mixed'
-}
-function validateArray (values) {
-  const type = arrayType(values)
-  if (type === 'mixed') {
-    throw arrayOneTypeError()
-  }
-  return type
-}
-
 function stringifyInlineArray (values) {
   values = toJSON(values)
-  const type = validateArray(values)
-  var result = '['
-  var stringified = values.map(_ => stringifyInline(_, type))
+  let result = '['
+  const stringified = values.map(_ => stringifyInline(_))
   if (stringified.join(', ').length > 60 || /\n/.test(stringified)) {
     result += '\n  ' + stringified.join(',\n  ') + '\n'
   } else {
@@ -48250,7 +48267,7 @@ function stringifyInlineArray (values) {
 
 function stringifyInlineTable (value) {
   value = toJSON(value)
-  var result = []
+  const result = []
   Object.keys(value).forEach(key => {
     result.push(stringifyKey(key) + ' = ' + stringifyAnyInline(value[key], false))
   })
@@ -48258,7 +48275,7 @@ function stringifyInlineTable (value) {
 }
 
 function stringifyComplex (prefix, indent, key, value) {
-  var valueType = tomlType(value)
+  const valueType = tomlType(value)
   /* istanbul ignore else */
   if (valueType === 'array') {
     return stringifyArrayOfTables(prefix, indent, key, value)
@@ -48271,12 +48288,11 @@ function stringifyComplex (prefix, indent, key, value) {
 
 function stringifyArrayOfTables (prefix, indent, key, values) {
   values = toJSON(values)
-  validateArray(values)
-  var firstValueType = tomlType(values[0])
+  const firstValueType = tomlType(values[0])
   /* istanbul ignore if */
   if (firstValueType !== 'table') throw typeError(firstValueType)
-  var fullKey = prefix + stringifyKey(key)
-  var result = ''
+  const fullKey = prefix + stringifyKey(key)
+  let result = ''
   values.forEach(table => {
     if (result.length > 0) result += '\n'
     result += indent + '[[' + fullKey + ']]\n'
@@ -48286,8 +48302,8 @@ function stringifyArrayOfTables (prefix, indent, key, values) {
 }
 
 function stringifyComplexTable (prefix, indent, key, value) {
-  var fullKey = prefix + stringifyKey(key)
-  var result = ''
+  const fullKey = prefix + stringifyKey(key)
+  let result = ''
   if (getInlineKeys(value).length > 0) {
     result += indent + '[' + fullKey + ']\n'
   }
