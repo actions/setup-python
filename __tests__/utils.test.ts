@@ -177,7 +177,8 @@ describe('getDownloadFileName', () => {
   it('should return the correct path on Windows', () => {
     if (IS_WINDOWS) {
       process.env['RUNNER_TEMP'] = tempDir;
-      const downloadUrl = 'https://example.com/file.zip';
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-win32-x64.zip';
       const expectedPath = path.join(
         process.env.RUNNER_TEMP,
         path.basename(downloadUrl)
@@ -188,7 +189,8 @@ describe('getDownloadFileName', () => {
 
   it('should return undefined on non-Windows', () => {
     if (!IS_WINDOWS) {
-      const downloadUrl = 'https://example.com/file.tar.gz';
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-linux-x64.tar.gz';
       expect(getDownloadFileName(downloadUrl)).toBeUndefined();
     }
   });
