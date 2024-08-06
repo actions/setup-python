@@ -12,7 +12,9 @@ import {
   getVersionInputFromFile,
   getVersionInputFromPlainFile,
   getVersionInputFromTomlFile,
-  getNextPageUrl
+  getNextPageUrl,
+  IS_WINDOWS,
+  getDownloadFileName
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -157,5 +159,39 @@ describe('getNextPageUrl', () => {
     const page2Links =
       '<https://api.github.com/repositories/129883600/releases?page=1>; rel="prev", <https://api.github.com/repositories/129883600/releases?page=1>; rel="first"';
     expect(getNextPageUrl(generateResponse(page2Links))).toBeNull();
+  });
+});
+
+describe('getDownloadFileName', () => {
+  const originalEnv = process.env;
+  const tempDir = path.join(__dirname, 'runner', 'temp');
+
+  beforeEach(() => {
+    process.env = {...originalEnv};
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('should return the correct path on Windows', () => {
+    if (IS_WINDOWS) {
+      process.env['RUNNER_TEMP'] = tempDir;
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-win32-x64.zip';
+      const expectedPath = path.join(
+        process.env.RUNNER_TEMP,
+        path.basename(downloadUrl)
+      );
+      expect(getDownloadFileName(downloadUrl)).toBe(expectedPath);
+    }
+  });
+
+  it('should return undefined on non-Windows', () => {
+    if (!IS_WINDOWS) {
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-linux-x64.tar.gz';
+      expect(getDownloadFileName(downloadUrl)).toBeUndefined();
+    }
   });
 });
