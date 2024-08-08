@@ -186,15 +186,15 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
         if (process.platform === 'linux' && packageManager === 'pip') {
           expect(infoSpy).toHaveBeenCalledWith(
-            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-20.04-Ubuntu-python-${pythonVersion}-${packageManager}-${fileHash}`
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-20.04-Ubuntu-python-${pythonVersion}-${packageManager}-${fileHash}`
           );
         } else if (packageManager === 'poetry') {
           expect(infoSpy).toHaveBeenCalledWith(
-            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-v2-${fileHash}`
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-python-${pythonVersion}-${packageManager}-v2-${fileHash}`
           );
         } else {
           expect(infoSpy).toHaveBeenCalledWith(
-            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-python-${pythonVersion}-${packageManager}-${fileHash}`
+            `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-python-${pythonVersion}-${packageManager}-${fileHash}`
           );
         }
       },
