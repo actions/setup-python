@@ -183,8 +183,10 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
             cachePaths
           );
         }
-        
-        const restoredKeys = restoreCacheSpy.mock.results.map(result => result.value);
+
+        const restoredKeys = restoreCacheSpy.mock.results.map(
+          result => result.value
+        );
 
         restoredKeys.forEach(restoredKey => {
           if (restoredKey) {
@@ -202,7 +204,9 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
               );
             }
           } else {
-            expect(infoSpy).toHaveBeenCalledWith(`${packageManager} cache is not found`);
+            expect(infoSpy).toHaveBeenCalledWith(
+              `${packageManager} cache is not found`
+            );
           }
         });
       },
