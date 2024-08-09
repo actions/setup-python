@@ -310,3 +310,17 @@ export function getNextPageUrl<T>(response: ifm.TypedResponse<T>) {
   }
   return null;
 }
+
+/**
+ * Add temporary fix for Windows
+ * On Windows, it is necessary to retain the .zip extension for proper extraction.
+ * because the tc.extractZip() failure due to tc.downloadTool() not adding .zip extension.
+ * Related issue: https://github.com/actions/toolkit/issues/1179
+ * Related issue: https://github.com/actions/setup-python/issues/819
+ */
+export function getDownloadFileName(downloadUrl: string): string | undefined {
+  const tempDir = process.env.RUNNER_TEMP || '.';
+  return IS_WINDOWS
+    ? path.join(tempDir, path.basename(downloadUrl))
+    : undefined;
+}

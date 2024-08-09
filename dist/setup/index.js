@@ -90423,12 +90423,12 @@ class PipCache extends cache_distributor_1.default {
             let restoreKey = '';
             if (utils_1.IS_LINUX) {
                 const osInfo = yield (0, utils_1.getLinuxInfo)();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             else {
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             return {
                 primaryKey,
@@ -90514,7 +90514,7 @@ class PipenvCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -90627,7 +90627,7 @@ class PoetryCache extends cache_distributor_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
             // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -91441,7 +91441,8 @@ function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases,
         const downloadUrl = `${foundAsset.download_url}`;
         core.info(`Downloading PyPy from "${downloadUrl}" ...`);
         try {
-            const pypyPath = yield tc.downloadTool(downloadUrl);
+            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+            const pypyPath = yield tc.downloadTool(downloadUrl, fileName);
             core.info('Extracting downloaded archive...');
             if (utils_1.IS_WINDOWS) {
                 downloadDir = yield tc.extractZip(pypyPath);
@@ -91703,7 +91704,8 @@ function installCpythonFromRelease(release) {
         core.info(`Download from "${downloadUrl}"`);
         let pythonPath = '';
         try {
-            pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
+            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+            pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
             core.info('Extract downloaded archive');
             let pythonExtractedFolder;
             if (utils_1.IS_WINDOWS) {
@@ -91938,7 +91940,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -92198,6 +92200,20 @@ function getNextPageUrl(response) {
     return null;
 }
 exports.getNextPageUrl = getNextPageUrl;
+/**
+ * Add temporary fix for Windows
+ * On Windows, it is necessary to retain the .zip extension for proper extraction.
+ * because the tc.extractZip() failure due to tc.downloadTool() not adding .zip extension.
+ * Related issue: https://github.com/actions/toolkit/issues/1179
+ * Related issue: https://github.com/actions/setup-python/issues/819
+ */
+function getDownloadFileName(downloadUrl) {
+    const tempDir = process.env.RUNNER_TEMP || '.';
+    return exports.IS_WINDOWS
+        ? path.join(tempDir, path.basename(downloadUrl))
+        : undefined;
+}
+exports.getDownloadFileName = getDownloadFileName;
 
 
 /***/ }),
