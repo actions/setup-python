@@ -5,8 +5,9 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.13"
 flake8 = "^4.0.1"
+pyinstaller = "5.13.1"  
 
 [tool.poetry.dev-dependencies]
 
