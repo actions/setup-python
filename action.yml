@@ -26,6 +26,10 @@ inputs:
   allow-prereleases:
     description: "When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython."
     default: false
+  ignore-platform-version:
+    description: "Ignore the platform version to allow usage on Debian"
+    default: false
+    required: false
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."

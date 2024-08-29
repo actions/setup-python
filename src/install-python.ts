@@ -34,7 +34,18 @@ export async function findReleaseFromManifest(
 
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    return await getManifestFromRepo();
+    const manifest = await getManifestFromRepo();
+
+    if (core.getInput('ignore-platform-version')) {
+      // Display each tool
+      manifest.forEach(tool => {
+        tool.files.forEach(f => {
+          f.platform_version = undefined;
+        });
+      });
+    }
+
+    return manifest;
   } catch (err) {
     core.debug('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
