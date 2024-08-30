@@ -71732,7 +71732,10 @@ function getManifest() {
                 // Display each tool
                 manifest.forEach(tool => {
                     tool.files.forEach(f => {
-                        f.platform_version = undefined;
+                        if (f.platform_version === core.getInput('ignore-platform-version') ||
+                            'all' === core.getInput('ignore-platform-version')) {
+                            f.platform_version = undefined;
+                        }
                     });
                 });
             }
