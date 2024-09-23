@@ -91637,8 +91637,10 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!manifest) {
             manifest = yield getManifest();
+            core.debug('manifest :>> ' + JSON.stringify(manifest));
         }
         const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
+        core.debug(`Found release: ${JSON.stringify(foundRelease)}`);
         return foundRelease;
     });
 }
@@ -91646,7 +91648,10 @@ exports.findReleaseFromManifest = findReleaseFromManifest;
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield getManifestFromRepo();
+            const manifestFromRepo = yield getManifestFromRepo();
+            core.debug('Successfully fetched the manifest from the repo.');
+            core.debug(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
+            return manifestFromRepo;
         }
         catch (err) {
             core.debug('Fetching the manifest via the API failed.');
@@ -91654,7 +91659,10 @@ function getManifest() {
                 core.debug(err.message);
             }
         }
-        return yield getManifestFromURL();
+        const manifestFromURL = yield getManifestFromURL();
+        core.debug('Successfully fetched the manifest from the URL.');
+        core.debug(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
+        return manifestFromURL;
     });
 }
 exports.getManifest = getManifest;
