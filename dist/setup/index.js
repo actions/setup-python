@@ -91637,10 +91637,10 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!manifest) {
             manifest = yield getManifest();
-            core.debug('manifest :>> ' + JSON.stringify(manifest));
+            core.info('manifest :>> ' + JSON.stringify(manifest));
         }
         const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
-        core.debug(`Found release: ${JSON.stringify(foundRelease)}`);
+        core.info(`Found release: ${JSON.stringify(foundRelease)}`);
         return foundRelease;
     });
 }
@@ -91649,25 +91649,25 @@ function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const manifestFromRepo = yield getManifestFromRepo();
-            core.debug('Successfully fetched the manifest from the repo.');
-            core.debug(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
+            core.info('Successfully fetched the manifest from the repo.');
+            core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
             return manifestFromRepo;
         }
         catch (err) {
-            core.debug('Fetching the manifest via the API failed.');
+            core.info('Fetching the manifest via the API failed.');
             if (err instanceof Error) {
-                core.debug(err.message);
+                core.info(err.message);
             }
         }
         const manifestFromURL = yield getManifestFromURL();
-        core.debug('Successfully fetched the manifest from the URL.');
-        core.debug(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
+        core.info('Successfully fetched the manifest from the URL.');
+        core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
         return manifestFromURL;
     });
 }
 exports.getManifest = getManifest;
 function getManifestFromRepo() {
-    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
+    core.info(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
 exports.getManifestFromRepo = getManifestFromRepo;

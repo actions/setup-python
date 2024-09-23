@@ -20,7 +20,7 @@ export async function findReleaseFromManifest(
 ): Promise<tc.IToolRelease | undefined> {
   if (!manifest) {
     manifest = await getManifest();
-    core.debug('manifest :>> ' + JSON.stringify(manifest));
+    core.info('manifest :>> ' + JSON.stringify(manifest));
   }
 
   const foundRelease = await tc.findFromManifest(
@@ -29,30 +29,30 @@ export async function findReleaseFromManifest(
     manifest,
     architecture
   );
-  core.debug(`Found release: ${JSON.stringify(foundRelease)}`);
+  core.info(`Found release: ${JSON.stringify(foundRelease)}`);
   return foundRelease;
 }
 
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
     const manifestFromRepo = await getManifestFromRepo();
-    core.debug('Successfully fetched the manifest from the repo.');
-    core.debug(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
+    core.info('Successfully fetched the manifest from the repo.');
+    core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
     return manifestFromRepo;
   } catch (err) {
-    core.debug('Fetching the manifest via the API failed.');
+    core.info('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
-      core.debug(err.message);
+      core.info(err.message);
     }
   }
   const manifestFromURL = await getManifestFromURL();
-  core.debug('Successfully fetched the manifest from the URL.');
-  core.debug(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
+  core.info('Successfully fetched the manifest from the URL.');
+  core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
   return manifestFromURL;
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
-  core.debug(
+  core.info(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
