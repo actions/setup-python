@@ -91648,11 +91648,11 @@ exports.findReleaseFromManifest = findReleaseFromManifest;
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const manifestFromRepo = yield getManifestFromRepo();
+            // const manifestFromRepo = await getManifestFromRepo();
+            const manifestFromRepo = null;
             core.info('Successfully fetched the manifest from the repo.');
             core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
-            if (!Array.isArray(manifestFromRepo) ||
-                !manifestFromRepo.every(isValidManifestEntry)) {
+            if (!Array.isArray(manifestFromRepo)) {
                 throw new Error('Invalid response');
             }
             return manifestFromRepo;
