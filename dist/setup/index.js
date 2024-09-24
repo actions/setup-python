@@ -91651,6 +91651,10 @@ function getManifest() {
             const manifestFromRepo = yield getManifestFromRepo();
             core.info('Successfully fetched the manifest from the repo.');
             core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
+            if (!Array.isArray(manifestFromRepo) ||
+                !manifestFromRepo.every(isValidManifestEntry)) {
+                throw new Error('Invalid response');
+            }
             return manifestFromRepo;
         }
         catch (err) {
@@ -91659,13 +91663,38 @@ function getManifest() {
                 core.info(err.message);
             }
         }
-        const manifestFromURL = yield getManifestFromURL();
-        core.info('Successfully fetched the manifest from the URL.');
-        core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
-        return manifestFromURL;
+        try {
+            const manifestFromURL = yield getManifestFromURL();
+            core.info('Successfully fetched the manifest from the URL.');
+            core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
+            return manifestFromURL;
+        }
+        catch (err) {
+            core.info('Fetching the manifest from the URL failed.');
+            if (err instanceof Error) {
+                core.info(err.message);
+            }
+            // Rethrow the error or return a default value
+            throw new Error('Failed to fetch the manifest from both the repo and the URL.');
+        }
     });
 }
 exports.getManifest = getManifest;
+function isValidManifestEntry(entry) {
+    return (typeof entry.version === 'string' &&
+        typeof entry.stable === 'boolean' &&
+        typeof entry.release_url === 'string' &&
+        Array.isArray(entry.files) &&
+        entry.files.every(isValidFileEntry));
+}
+function isValidFileEntry(file) {
+    return (typeof file.filename === 'string' &&
+        typeof file.arch === 'string' &&
+        typeof file.platform === 'string' &&
+        (typeof file.platform_version === 'string' ||
+            file.platform_version === undefined) &&
+        typeof file.download_url === 'string');
+}
 function getManifestFromRepo() {
     core.info(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);

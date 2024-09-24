@@ -9,7 +9,7 @@ import * as tc from '@actions/tool-cache';
 jest.mock('@actions/http-client');
 jest.mock('@actions/tool-cache');
 
-const mockManifest = [{version: '1.0.0'}];
+const mockManifest = [{version: '3.12.0'}];
 
 describe('getManifest', () => {
   it('should return manifest from repo', async () => {

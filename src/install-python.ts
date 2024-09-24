@@ -38,6 +38,12 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
     const manifestFromRepo = await getManifestFromRepo();
     core.info('Successfully fetched the manifest from the repo.');
     core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
+    if (
+      !Array.isArray(manifestFromRepo) ||
+      !manifestFromRepo.every(isValidManifestEntry)
+    ) {
+      throw new Error('Invalid response');
+    }
     return manifestFromRepo;
   } catch (err) {
     core.info('Fetching the manifest via the API failed.');
@@ -45,10 +51,42 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
       core.info(err.message);
     }
   }
-  const manifestFromURL = await getManifestFromURL();
-  core.info('Successfully fetched the manifest from the URL.');
-  core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
-  return manifestFromURL;
+  try {
+    const manifestFromURL = await getManifestFromURL();
+    core.info('Successfully fetched the manifest from the URL.');
+    core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
+    return manifestFromURL;
+  } catch (err) {
+    core.info('Fetching the manifest from the URL failed.');
+    if (err instanceof Error) {
+      core.info(err.message);
+    }
+    // Rethrow the error or return a default value
+    throw new Error(
+      'Failed to fetch the manifest from both the repo and the URL.'
+    );
+  }
+}
+
+function isValidManifestEntry(entry: any): boolean {
+  return (
+    typeof entry.version === 'string' &&
+    typeof entry.stable === 'boolean' &&
+    typeof entry.release_url === 'string' &&
+    Array.isArray(entry.files) &&
+    entry.files.every(isValidFileEntry)
+  );
+}
+
+function isValidFileEntry(file: any): boolean {
+  return (
+    typeof file.filename === 'string' &&
+    typeof file.arch === 'string' &&
+    typeof file.platform === 'string' &&
+    (typeof file.platform_version === 'string' ||
+      file.platform_version === undefined) &&
+    typeof file.download_url === 'string'
+  );
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
