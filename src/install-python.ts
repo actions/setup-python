@@ -35,11 +35,22 @@ export async function findReleaseFromManifest(
 
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    // const manifestFromRepo = await getManifestFromRepo();
-    const manifestFromRepo = null;
+    //const manifestFromRepo = await getManifestFromRepo();
+    const manifestFromRepo = {
+      sha: '5418fd77743bd877e972056787b3ee67a5725566',
+      node_id:
+        'MDQ6QmxvYjI1MDA3NzkzMzo1NDE4ZmQ3Nzc0M2JkODc3ZTk3MjA1Njc4N2IzZWU2N2E1NzI1NTY2',
+      size: 296984,
+      url: 'https://api.github.com/repos/actions/python-versions/git/blobs/5418fd77743bd877e972056787b3ee67a5725566',
+      content: 'fasfWfasdkjnflaknc@fakjsdhfjlakjlkfj',
+      encoding: 'base64'
+    };
     core.info('Successfully fetched the manifest from the repo.');
     core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
-    if (!Array.isArray(manifestFromRepo)) {
+    if (
+      !Array.isArray(manifestFromRepo) ||
+      !manifestFromRepo.every(isValidManifestEntry)
+    ) {
       throw new Error('Invalid response');
     }
     return manifestFromRepo;
