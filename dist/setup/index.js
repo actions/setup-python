@@ -91639,7 +91639,6 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
             manifest = yield getManifest();
         }
         const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
-        core.info(`Found release: ${JSON.stringify(foundRelease)}`);
         return foundRelease;
     });
 }
@@ -91649,7 +91648,6 @@ function getManifest() {
         try {
             const manifestFromRepo = yield getManifestFromRepo();
             core.info('Successfully fetched the manifest from the repo.');
-            core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
             validateManifest(manifestFromRepo);
             return manifestFromRepo;
         }
@@ -91659,7 +91657,6 @@ function getManifest() {
         try {
             const manifestFromURL = yield getManifestFromURL();
             core.info('Successfully fetched the manifest from the URL.');
-            core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
             return manifestFromURL;
         }
         catch (err) {

@@ -28,7 +28,6 @@ export async function findReleaseFromManifest(
     manifest,
     architecture
   );
-  core.info(`Found release: ${JSON.stringify(foundRelease)}`);
   return foundRelease;
 }
 
@@ -36,7 +35,6 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
     const manifestFromRepo = await getManifestFromRepo();
     core.info('Successfully fetched the manifest from the repo.');
-    core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
     validateManifest(manifestFromRepo);
     return manifestFromRepo;
   } catch (err) {
@@ -45,7 +43,6 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
     const manifestFromURL = await getManifestFromURL();
     core.info('Successfully fetched the manifest from the URL.');
-    core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
     return manifestFromURL;
   } catch (err) {
     logError('Fetching the manifest via the URL failed.', err);
