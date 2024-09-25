@@ -20,7 +20,6 @@ export async function findReleaseFromManifest(
 ): Promise<tc.IToolRelease | undefined> {
   if (!manifest) {
     manifest = await getManifest();
-    core.info('manifest :>> ' + JSON.stringify(manifest));
   }
 
   const foundRelease = await tc.findFromManifest(
@@ -35,30 +34,13 @@ export async function findReleaseFromManifest(
 
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    //const manifestFromRepo = await getManifestFromRepo();
-    const manifestFromRepo = {
-      sha: '5418fd77743bd877e972056787b3ee67a5725566',
-      node_id:
-        'MDQ6QmxvYjI1MDA3NzkzMzo1NDE4ZmQ3Nzc0M2JkODc3ZTk3MjA1Njc4N2IzZWU2N2E1NzI1NTY2',
-      size: 296984,
-      url: 'https://api.github.com/repos/actions/python-versions/git/blobs/5418fd77743bd877e972056787b3ee67a5725566',
-      content: 'fasfWfasdkjnflaknc@fakjsdhfjlakjlkfj',
-      encoding: 'base64'
-    };
+    const manifestFromRepo = await getManifestFromRepo();
     core.info('Successfully fetched the manifest from the repo.');
     core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
-    if (
-      !Array.isArray(manifestFromRepo) ||
-      !manifestFromRepo.every(isValidManifestEntry)
-    ) {
-      throw new Error('Invalid response');
-    }
+    validateManifest(manifestFromRepo);
     return manifestFromRepo;
   } catch (err) {
-    core.info('Fetching the manifest via the API failed.');
-    if (err instanceof Error) {
-      core.info(err.message);
-    }
+    logError('Fetching the manifest via the API failed.', err);
   }
   try {
     const manifestFromURL = await getManifestFromURL();
@@ -66,14 +48,17 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
     core.info(`Manifest from URL: ${JSON.stringify(manifestFromURL)}`);
     return manifestFromURL;
   } catch (err) {
-    core.info('Fetching the manifest from the URL failed.');
-    if (err instanceof Error) {
-      core.info(err.message);
-    }
+    logError('Fetching the manifest via the URL failed.', err);
     // Rethrow the error or return a default value
     throw new Error(
       'Failed to fetch the manifest from both the repo and the URL.'
     );
+  }
+}
+
+function validateManifest(manifest: any): void {
+  if (!Array.isArray(manifest) || !manifest.every(isValidManifestEntry)) {
+    throw new Error('Invalid manifest response');
   }
 }
 
@@ -139,32 +124,30 @@ async function installPython(workingDirectory: string) {
     }
   };
 
-  if (IS_WINDOWS) {
-    await exec.exec('powershell', ['./setup.ps1'], options);
-  } else {
-    await exec.exec('bash', ['./setup.sh'], options);
-  }
+  const script = IS_WINDOWS ? 'powershell ./setup.ps1' : 'bash ./setup.sh';
+  await exec.exec(script, [], options);
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
-  let pythonPath = '';
   try {
     const fileName = getDownloadFileName(downloadUrl);
-    pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
+    const pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
     core.info('Extract downloaded archive');
-    let pythonExtractedFolder;
-    if (IS_WINDOWS) {
-      pythonExtractedFolder = await tc.extractZip(pythonPath);
-    } else {
-      pythonExtractedFolder = await tc.extractTar(pythonPath);
-    }
+    const pythonExtractedFolder = IS_WINDOWS
+      ? await tc.extractZip(pythonPath)
+      : await tc.extractTar(pythonPath);
 
     core.info('Execute installation script');
     await installPython(pythonExtractedFolder);
   } catch (err) {
+    handleDownloadError(err);
+    throw err;
+  }
+
+  function handleDownloadError(err: any): void {
     if (err instanceof tc.HTTPError) {
       // Rate limit?
       if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
@@ -178,6 +161,12 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
         core.debug(err.stack);
       }
     }
-    throw err;
+  }
+}
+
+function logError(message: string, err: any): void {
+  core.info(message);
+  if (err instanceof Error) {
+    core.info(err.message);
   }
 }

@@ -9,7 +9,25 @@ import * as tc from '@actions/tool-cache';
 jest.mock('@actions/http-client');
 jest.mock('@actions/tool-cache');
 
-const mockManifest = [{version: '3.12.0'}];
+const mockManifest = [
+  {
+    version: '3.9.0',
+    stable: true,
+    release_url: 'https://example.com/release-url',
+    files: [
+      {
+        filename: 'python-3.9.0-macosx10.9.pkg',
+        arch: 'x64',
+        platform: 'darwin',
+        download_url: 'https://example.com/download-url'
+      }
+    ]
+  }
+];
+
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
 describe('getManifest', () => {
   it('should return manifest from repo', async () => {

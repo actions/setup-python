@@ -91637,7 +91637,6 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!manifest) {
             manifest = yield getManifest();
-            core.info('manifest :>> ' + JSON.stringify(manifest));
         }
         const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
         core.info(`Found release: ${JSON.stringify(foundRelease)}`);
@@ -91648,28 +91647,14 @@ exports.findReleaseFromManifest = findReleaseFromManifest;
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            //const manifestFromRepo = await getManifestFromRepo();
-            const manifestFromRepo = {
-                sha: '5418fd77743bd877e972056787b3ee67a5725566',
-                node_id: 'MDQ6QmxvYjI1MDA3NzkzMzo1NDE4ZmQ3Nzc0M2JkODc3ZTk3MjA1Njc4N2IzZWU2N2E1NzI1NTY2',
-                size: 296984,
-                url: 'https://api.github.com/repos/actions/python-versions/git/blobs/5418fd77743bd877e972056787b3ee67a5725566',
-                content: 'fasfWfasdkjnflaknc@fakjsdhfjlakjlkfj',
-                encoding: 'base64'
-            };
+            const manifestFromRepo = yield getManifestFromRepo();
             core.info('Successfully fetched the manifest from the repo.');
             core.info(`Manifest from repo: ${JSON.stringify(manifestFromRepo)}`);
-            if (!Array.isArray(manifestFromRepo) ||
-                !manifestFromRepo.every(isValidManifestEntry)) {
-                throw new Error('Invalid response');
-            }
+            validateManifest(manifestFromRepo);
             return manifestFromRepo;
         }
         catch (err) {
-            core.info('Fetching the manifest via the API failed.');
-            if (err instanceof Error) {
-                core.info(err.message);
-            }
+            logError('Fetching the manifest via the API failed.', err);
         }
         try {
             const manifestFromURL = yield getManifestFromURL();
@@ -91678,16 +91663,18 @@ function getManifest() {
             return manifestFromURL;
         }
         catch (err) {
-            core.info('Fetching the manifest from the URL failed.');
-            if (err instanceof Error) {
-                core.info(err.message);
-            }
+            logError('Fetching the manifest via the URL failed.', err);
             // Rethrow the error or return a default value
             throw new Error('Failed to fetch the manifest from both the repo and the URL.');
         }
     });
 }
 exports.getManifest = getManifest;
+function validateManifest(manifest) {
+    if (!Array.isArray(manifest) || !manifest.every(isValidManifestEntry)) {
+        throw new Error('Invalid manifest response');
+    }
+}
 function isValidManifestEntry(entry) {
     return (typeof entry.version === 'string' &&
         typeof entry.stable === 'boolean' &&
@@ -91735,34 +91722,29 @@ function installPython(workingDirectory) {
                 }
             }
         };
-        if (utils_1.IS_WINDOWS) {
-            yield exec.exec('powershell', ['./setup.ps1'], options);
-        }
-        else {
-            yield exec.exec('bash', ['./setup.sh'], options);
-        }
+        const script = utils_1.IS_WINDOWS ? 'powershell ./setup.ps1' : 'bash ./setup.sh';
+        yield exec.exec(script, [], options);
     });
 }
 function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
         const downloadUrl = release.files[0].download_url;
         core.info(`Download from "${downloadUrl}"`);
-        let pythonPath = '';
         try {
             const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
-            pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
+            const pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
             core.info('Extract downloaded archive');
-            let pythonExtractedFolder;
-            if (utils_1.IS_WINDOWS) {
-                pythonExtractedFolder = yield tc.extractZip(pythonPath);
-            }
-            else {
-                pythonExtractedFolder = yield tc.extractTar(pythonPath);
-            }
+            const pythonExtractedFolder = utils_1.IS_WINDOWS
+                ? yield tc.extractZip(pythonPath)
+                : yield tc.extractTar(pythonPath);
             core.info('Execute installation script');
             yield installPython(pythonExtractedFolder);
         }
         catch (err) {
+            handleDownloadError(err);
+            throw err;
+        }
+        function handleDownloadError(err) {
             if (err instanceof tc.HTTPError) {
                 // Rate limit?
                 if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
@@ -91775,11 +91757,16 @@ function installCpythonFromRelease(release) {
                     core.debug(err.stack);
                 }
             }
-            throw err;
         }
     });
 }
 exports.installCpythonFromRelease = installCpythonFromRelease;
+function logError(message, err) {
+    core.info(message);
+    if (err instanceof Error) {
+        core.info(err.message);
+    }
+}
 
 
 /***/ }),
