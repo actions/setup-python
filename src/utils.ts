@@ -196,6 +196,10 @@ export async function getOSInfo() {
   }
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string' || value instanceof String;
+}
+
 /**
  * Extract a value from an object by following the keys path provided.
  * If the value is present, it is returned. Otherwise undefined is returned.
@@ -205,8 +209,10 @@ function extractValue(obj: any, keys: string[]): string | undefined {
     const value = obj[keys[0]];
     if (keys.length > 1 && value !== undefined) {
       return extractValue(value, keys.slice(1));
-    } else {
+    } else if (isString(value)) {
       return value;
+    } else {
+      return;
     }
   } else {
     return;
@@ -229,19 +235,29 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
   pyprojectFile = pyprojectFile.replace(/\r\n/g, '\n');
 
   const pyprojectConfig = toml.parse(pyprojectFile);
-  let keys = [];
+
+  let keyPaths = [];
 
   if ('project' in pyprojectConfig) {
     // standard project metadata (PEP 621)
-    keys = ['project', 'requires-python'];
+    keyPaths = [['project', 'requires-python']];
   } else {
-    // python poetry
-    keys = ['tool', 'poetry', 'dependencies', 'python'];
+    keyPaths = [
+      // python poetry
+      ['tool', 'poetry', 'dependencies', 'python'],
+      // mise
+      ['tools', 'python'],
+      ['tools', 'python', 'version']
+    ];
   }
+
   const versions = [];
-  const version = extractValue(pyprojectConfig, keys);
-  if (version !== undefined) {
-    versions.push(version);
+
+  for (const keys of keyPaths) {
+    const value = extractValue(pyprojectConfig, keys);
+    if (value !== undefined) {
+      versions.push(value);
+    }
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);
