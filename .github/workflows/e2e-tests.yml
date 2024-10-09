@@ -17,24 +17,18 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        operating-system: [ubuntu-20.04, windows-latest]
+        operating-system:
+          [ubuntu-latest, windows-latest, macos-latest, macos-13]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run with setup-python 3.8
+      - name: Run with setup-python 3.12
         uses: ./
         with:
-          python-version: 3.8
-      - name: Verify 3.8
-        run: python __tests__/verify-python.py 3.8
-
-      - name: Run with setup-python 3.8.10
-        uses: ./
-        with:
-          python-version: 3.8.10
-      - name: Verify 3.8.10
-        run: python __tests__/verify-python.py 3.8.10
+          python-version: 3.12
+      - name: Verify 3.12
+        run: python __tests__/verify-python.py 3.12
 
       - name: Run with setup-python 3.9.13
         uses: ./
@@ -43,7 +37,7 @@ jobs:
       - name: Verify 3.9.13
         run: python __tests__/verify-python.py 3.9.13
 
-      - name: Run with setup-python 3.9.13
+      - name: Run with setup-python 3.10.11
         uses: ./
         with:
           python-version: 3.10.11
@@ -64,29 +58,29 @@ jobs:
       - name: Verify 3.12.4
         run: python __tests__/verify-python.py 3.12.4
 
-      - name: Run with setup-python 3.10
+      - name: Run with setup-python 3.10.11
         id: cp310
         uses: ./
         with:
-          python-version: '3.10'
-      - name: Verify 3.10
-        run: python __tests__/verify-python.py 3.10
-      - name: Run python-path sample 3.10
+          python-version: '3.10.11'
+      - name: Verify 3.10.11
+        run: python __tests__/verify-python.py 3.10.11
+      - name: Run python-path sample 3.10.11
         run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
 
-      - name: Run with setup-python ==3.8
+      - name: Run with setup-python ==3.12
         uses: ./
         with:
-          python-version: '==3.8'
-      - name: Verify ==3.8
-        run: python __tests__/verify-python.py 3.8
+          python-version: '==3.12'
+      - name: Verify ==3.12
+        run: python __tests__/verify-python.py 3.12
 
-      - name: Run with setup-python <3.11
+      - name: Run with setup-python <3.13
         uses: ./
         with:
-          python-version: '<3.11'
-      - name: Verify <3.11
-        run: python __tests__/verify-python.py 3.10
+          python-version: '<3.13'
+      - name: Verify <3.13
+        run: python __tests__/verify-python.py 3.12
       - name: Test Raw Endpoint Access
         run: |
           curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
