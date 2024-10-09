@@ -30,7 +30,7 @@ pdf2image==1.12.1
 
 pefile==2021.9.3; python_full_version >= '3.6.0'
 
-pillow==7.2
+pillow>=10.2.0
 
 pygments==2.6.1
 
