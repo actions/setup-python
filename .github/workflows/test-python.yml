@@ -206,7 +206,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-pre-release-version-from-manifest:
-    name: Setup 3.13.0-alpha.6 ${{ matrix.os }}
+    name: Setup 3.13.0-beta.1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -216,11 +216,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.13.0-alpha.6
+      - name: setup-python 3.13.0-beta.1
         id: setup-python
         uses: ./
         with:
-          python-version: '3.13.0-alpha.6'
+          python-version: '3.13.0-beta.1'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -229,7 +229,7 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python 3.13.0a6" -ne "$pythonVersion"){
+          if ("Python 3.13.0b1" -ne "$pythonVersion"){
             Write-Host "The current version is $pythonVersion; expected version is 3.13.0a6"
             exit 1
           }
