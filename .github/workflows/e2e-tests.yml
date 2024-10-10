@@ -58,15 +58,15 @@ jobs:
       - name: Verify 3.12.4
         run: python __tests__/verify-python.py 3.12.4
 
-      - name: Run with setup-python 3.12
-        id: cp312
+      - name: Run with setup-python 3.11.9
+        id: cp311
         uses: ./
         with:
-          python-version: '3.12'
-      - name: Verify 3.12
-        run: python __tests__/verify-python.py 3.12
-      - name: Run python-path sample 3.12
-        run: pipx run --python '${{ steps.cp312.outputs.python-path }}' nox --version
+          python-version: '3.11.9'
+      - name: Verify 3.11.9
+        run: python __tests__/verify-python.py 3.11.9
+      - name: Run python-path sample 3.11.9
+        run: pipx run --python '${{ steps.cp311.outputs.python-path }}' nox --version
 
       - name: Run with setup-python ==3.12
         uses: ./
