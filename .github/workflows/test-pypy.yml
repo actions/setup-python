@@ -20,7 +20,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
         pypy:
           - 'pypy-2.7'
           - 'pypy-3.10'

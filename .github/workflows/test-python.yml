@@ -20,8 +20,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,8 +63,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,8 +109,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -129,8 +153,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3']
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -170,8 +202,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -211,7 +251,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -302,8 +350,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python: ['3.11', '3.12']
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: ['3.11', '3.12', '3.13']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -326,8 +382,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python-version: ['3.11', '3.12']
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python-version: ['3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -350,7 +414,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -359,12 +431,13 @@ jobs:
           python-version: |
             3.11
             3.12
+            3.13
           check-latest: true
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.12"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.12"
+          if ("$pythonVersion" -NotMatch "3.13"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.13"
             exit 1
           }
           $pythonVersion

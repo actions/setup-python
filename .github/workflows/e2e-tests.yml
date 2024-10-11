@@ -18,17 +18,17 @@ jobs:
     strategy:
       matrix:
         operating-system:
-          [ubuntu-latest, windows-latest, macos-latest, macos-13]
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-24.04,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Run with setup-python 3.12
-        uses: ./
-        with:
-          python-version: 3.12
-      - name: Verify 3.12
-        run: python __tests__/verify-python.py 3.12
 
       - name: Run with setup-python 3.9.13
         uses: ./
@@ -51,12 +51,19 @@ jobs:
       - name: Verify 3.11.9
         run: python __tests__/verify-python.py 3.11.9
 
-      - name: Run with setup-python 3.12.4
+      - name: Run with setup-python 3.12.7
         uses: ./
         with:
-          python-version: 3.12.4
-      - name: Verify 3.12.4
-        run: python __tests__/verify-python.py 3.12.4
+          python-version: 3.12.7
+      - name: Verify 3.12.7
+        run: python __tests__/verify-python.py 3.12.7
+
+      - name: Run with setup-python 3.13.0
+        uses: ./
+        with:
+          python-version: 3.13.0
+      - name: Verify 3.13.0
+        run: python __tests__/verify-python.py 3.13.0
 
       - name: Run with setup-python 3.11.9
         id: cp311
@@ -68,12 +75,12 @@ jobs:
       - name: Run python-path sample 3.11.9
         run: pipx run --python '${{ steps.cp311.outputs.python-path }}' nox --version
 
-      - name: Run with setup-python ==3.12
+      - name: Run with setup-python ==3.13
         uses: ./
         with:
-          python-version: '==3.12'
-      - name: Verify ==3.12
-        run: python __tests__/verify-python.py 3.12
+          python-version: '==3.13'
+      - name: Verify ==3.13
+        run: python __tests__/verify-python.py 3.13
 
       - name: Run with setup-python <3.13
         uses: ./
