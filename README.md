@@ -21,7 +21,7 @@ steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.10' 
+    python-version: '3.12' 
 - run: python my_script.py
 ```
 
@@ -31,7 +31,7 @@ steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5 
   with:
-    python-version: 'pypy3.9' 
+    python-version: 'pypy3.10' 
 - run: python my_script.py
 ```
 
@@ -41,7 +41,7 @@ steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5 
   with:
-    python-version: 'graalpy-22.3' 
+    python-version: 'graalpy-24.0' 
 - run: python my_script.py
 ```
 
@@ -76,7 +76,7 @@ steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.9'
+    python-version: '3.12'
     cache: 'pip' # caching pip dependencies
 - run: pip install -r requirements.txt
 ```
