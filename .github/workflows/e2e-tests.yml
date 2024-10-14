@@ -12,6 +12,41 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-setup-python-older:
+    name: Test setup-python old versions
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-latest,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python: [3.8.10, 3.8.18]
+        exclude:
+          - os: ubuntu-22.04
+            python: '3.8.10'
+          - os: ubuntu-latest
+            python: '3.8.10'
+          - os: macos-latest
+            python: '3.8.18'
+          - os: windows-latest
+            python: '3.8.18'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run with setup-python ${{ matrix.python }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Verify ${{ matrix.python }}
+        run: python __tests__/verify-python.py ${{ matrix.python }}
   test-setup-python:
     name: Test setup-python
     runs-on: ${{ matrix.operating-system }}
@@ -21,7 +56,7 @@ jobs:
           [
             ubuntu-20.04,
             ubuntu-22.04,
-            ubuntu-24.04,
+            ubuntu-latest,
             windows-latest,
             macos-latest,
             macos-13
@@ -65,15 +100,15 @@ jobs:
       - name: Verify 3.13.0
         run: python __tests__/verify-python.py 3.13.0
 
-      - name: Run with setup-python 3.11.9
-        id: cp311
+      - name: Run with setup-python 3.13
+        id: cp313
         uses: ./
         with:
-          python-version: '3.11.9'
-      - name: Verify 3.11.9
-        run: python __tests__/verify-python.py 3.11.9
-      - name: Run python-path sample 3.11.9
-        run: pipx run --python '${{ steps.cp311.outputs.python-path }}' nox --version
+          python-version: '3.13'
+      - name: Verify 3.13
+        run: python __tests__/verify-python.py 3.13
+      - name: Run python-path sample 3.13
+        run: pipx run --python '${{ steps.cp313.outputs.python-path }}' nox --version
 
       - name: Run with setup-python ==3.13
         uses: ./
