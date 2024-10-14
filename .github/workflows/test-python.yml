@@ -474,15 +474,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          [
-            ubuntu-20.04,
-            ubuntu-22.04,
-            ubuntu-latest,
-            windows-latest,
-            macos-latest,
-            macos-13
-          ]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13, ubuntu-20.04, ubuntu-22.04]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -495,7 +487,7 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.12"){
+          if ("$pythonVersion" -NotMatch "3.13"){
             Write-Host "The current version is $pythonVersion; expected version is 3.12"
             exit 1
           }
