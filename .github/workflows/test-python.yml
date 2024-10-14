@@ -496,7 +496,7 @@ jobs:
         run: |
           $pythonVersion = (python --version)
           if ("$pythonVersion" -NotMatch "3.13"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.12"
+            Write-Host "The current version is $pythonVersion; expected version is 3.13"
             exit 1
           }
           $pythonVersion
