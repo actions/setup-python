@@ -41,7 +41,7 @@ async function saveCache(packageManager: string) {
     throw new Error(
       `The cache folder path(s) for the package manager "${packageManager}" were retrieved but do not exist on the disk. The following paths were checked: ${cachePaths.join(
         ', '
-      )}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`
+      )}. No cache paths were identified for "${packageManager}" with the cached paths. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`
     );
   }
 
