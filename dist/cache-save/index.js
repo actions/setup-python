@@ -81041,7 +81041,7 @@ class CacheDistributor {
                         .split('\n')
                         .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
                     : this.cacheDependencyPath.split('\n').join(',');
-                throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository. No cache paths were identified for ${this.packageManager} with cache-dependency-path = ${this.cacheDependencyPath}. This likely indicates no dependencies to cache. Consider removing the cache step if it's not needed`);
+                throw new Error(`The cache folder path(s) for the package manager "${this.packageManager}" were retrieved but do not exist on the disk. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`);
             }
             const cachePath = yield this.getCacheGlobalDirectories();
             core.saveState(State.CACHE_PATHS, cachePath);
@@ -81165,7 +81165,7 @@ function saveCache(packageManager) {
         const cachePaths = JSON.parse(cachePathState);
         core.debug(`paths for caching are ${cachePaths.join(', ')}`);
         if (!isCacheDirectoryExists(cachePaths)) {
-            throw new Error(`No file in ${process.cwd()} matched to [${cachePaths.join(', ')}], make sure you have checked out the target repository. No cache paths were identified for ${packageManager} with cache-dependency-path. This likely indicates no dependencies to cache. Consider removing the cache step if it's not needed.`);
+            throw new Error(`The cache folder path(s) for the package manager "${packageManager}" were retrieved but do not exist on the disk. The following paths were checked: ${cachePaths.join(', ')}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`);
         }
         const primaryKey = core.getState(cache_distributor_1.State.STATE_CACHE_PRIMARY_KEY);
         const matchedKey = core.getState(cache_distributor_1.State.CACHE_MATCHED_KEY);

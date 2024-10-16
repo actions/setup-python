@@ -228,9 +228,7 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         );
 
         await expect(cacheDistributor.restoreCache()).rejects.toThrow(
-          `No file in ${process.cwd()} matched to [${cacheDependencyPath
-            .split('\n')
-            .join(',')}], make sure you have checked out the target repository`
+          `The cache folder path(s) for the package manager "pipenv" were retrieved but do not exist on the disk. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`
         );
       }
     );
