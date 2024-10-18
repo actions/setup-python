@@ -197,18 +197,17 @@ describe('getDownloadFileName', () => {
   });
 });
 
-
 describe('isGhes', () => {
   const pristineEnv = process.env;
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = { ...pristineEnv };
+    process.env = {...pristineEnv};
   });
 
   afterAll(() => {
     process.env = pristineEnv;
-  });  
+  });
 
   it('returns false when the GITHUB_SERVER_URL environment variable is not defined', async () => {
     delete process.env['GITHUB_SERVER_URL'];
