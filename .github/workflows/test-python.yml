@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
@@ -59,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
@@ -100,7 +100,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
@@ -139,7 +139,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, '==3.12.3']
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.0]
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
@@ -183,7 +183,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3]
+        python: [3.8.10, 3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
         exclude:
           - os: ubuntu-22.04
             python: 3.8.10
@@ -254,63 +254,6 @@ jobs:
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
-  setup-dev-version:
-    name: Setup 3.13-dev ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: setup-python 3.13-dev
-        id: setup-python
-        uses: ./
-        with:
-          python-version: '3.13-dev'
-
-      - name: Check python-path
-        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
-        shell: bash
-
-      - name: Validate version
-        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.13.') }}
-        shell: bash
-
-      - name: Run simple code
-        run: python -c 'import math; print(math.factorial(5))'
-
-  setup-prerelease-version:
-    name: Setup 3.13 ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: setup-python 3.13
-        id: setup-python
-        uses: ./
-        with:
-          python-version: '3.13'
-          allow-prereleases: true
-
-      - name: Check python-path
-        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
-        shell: bash
-
-      - name: Validate version
-        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.13.') }}
-        shell: bash
-
-      - name: Run simple code
-        run: python -c 'import math; print(math.factorial(5))'
-
   setup-versions-noenv:
     name: Setup ${{ matrix.python }} ${{ matrix.os }} (noenv)
     runs-on: ${{ matrix.os }}
@@ -318,7 +261,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -342,7 +285,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -377,12 +320,13 @@ jobs:
             3.10
             3.11
             3.12
+            3.13
           check-latest: true
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.12"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.12"
+          if ("$pythonVersion" -NotMatch "3.13"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.13"
             exit 1
           }
           $pythonVersion
