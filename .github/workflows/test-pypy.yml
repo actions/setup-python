@@ -20,7 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-latest]
+        os:
+          [macos-latest, windows-latest, ubuntu-20.04, ubuntu-latest, macos-13]
         pypy:
           - 'pypy-2.7'
           - 'pypy-3.10'
@@ -74,7 +75,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-latest]
+        os:
+          [macos-latest, windows-latest, ubuntu-20.04, ubuntu-latest, macos-13]
         pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly']
 
     steps:
@@ -99,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
     steps:
       - uses: actions/checkout@v4
       - name: Setup PyPy and check latest
@@ -132,7 +134,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
     steps:
       - uses: actions/checkout@v4
       - name: Setup PyPy and check latest
