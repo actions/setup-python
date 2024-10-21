@@ -15,6 +15,7 @@ describe('restore-cache', () => {
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
   const poetryLockHash =
     'f24ea1ad73968e6c8d80c16a093ade72d9332c433aeef979a0dd943e6a99b2ab';
+  const uvLockHash = 'efe9f18aef431b3f1dbe13bee790b00095e74fb19aa5ced5ace96d063f03258d';
   const poetryConfigOutput = `
 cache-dir = "/Users/patrick/Library/Caches/pypoetry"
 experimental.new-installer = false
@@ -153,6 +154,13 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
           path.join(__dirname, 'data', 'inner', '.venv'),
           path.join(__dirname, 'data', '.venv')
         ]
+      ],
+      [
+        'uv',
+        '3.12.0',
+        '__tests__/data/**/pyproject.toml',
+        uvLockHash,
+        undefined,
       ]
     ])(
       'restored dependencies for %s by primaryKey',
@@ -187,6 +195,10 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
         const restoredKeys = restoreCacheSpy.mock.results.map(
           result => result.value
         );
+
+        if(!restoredKeys.length) {
+          throw new Error("No restored keys found, this probably means there's something wrong with the test");
+        }
 
         restoredKeys.forEach(restoredKey => {
           if (restoredKey) {
