@@ -64,6 +64,13 @@ jobs:
       - name: Verify 3.12.4
         run: python __tests__/verify-python.py 3.12.4
 
+      - name: Run with setup-python 3.13.0
+        uses: ./
+        with:
+          python-version: 3.13.0
+      - name: Verify 3.13.0
+        run: python __tests__/verify-python.py 3.13.0
+
       - name: Run with setup-python 3.10
         id: cp310
         uses: ./
