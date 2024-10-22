@@ -11,10 +11,21 @@ export async function run(earlyExit?: boolean) {
   try {
     const cache = core.getInput('cache');
     if (cache) {
-      await saveCache(cache);
-
-      if (earlyExit) {
-        process.exit(0);
+      let shouldSave = true;
+      try {
+        shouldSave = core.getBooleanInput('cache-save', {required: false});
+      } catch (e) {
+        // If we fail to parse the input, assume it's
+        // > "Input does not meet YAML 1.2 "core schema" specification."
+        // and assume it's the `true` default.
+      }
+      if (shouldSave) {
+        await saveCache(cache);
+        if (earlyExit) {
+          process.exit(0);
+        }
+      } else {
+        core.info('Not saving cache since `cache-save` is false');
       }
     }
   } catch (error) {
