@@ -20,6 +20,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-20.04, ubuntu-latest]
         graalpy:
+          - 'graalpy-24.0'
           - 'graalpy-23.0'
           - 'graalpy-22.3'
 
@@ -88,14 +89,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - name: Setup GraalPy and check latest
         uses: ./
         id: graalpy
         with:
-          python-version: 'graalpy-23.x'
+          python-version: 'graalpy-24.x'
           check-latest: true
       - name: GraalPy and Python version
         run: python --version
