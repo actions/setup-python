@@ -18,10 +18,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest, macos-13]
         graalpy:
-          - 'graalpy-23.0'
           - 'graalpy-22.3'
+          - 'graalpy-23.0'
+          - 'graalpy-23.1'
+          - 'graalpy-24.1'
 
     steps:
       - name: Checkout
@@ -63,8 +65,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
-        graalpy: ['graalpy23.0', 'graalpy22.3']
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest, macos-13]
+        graalpy: ['graalpy22.3', 'graalpy23.0', 'graalpy23.1', 'graalpy24.1']
 
     steps:
       - name: Checkout
@@ -88,14 +90,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, macos-13]
     steps:
       - uses: actions/checkout@v4
       - name: Setup GraalPy and check latest
         uses: ./
         id: graalpy
         with:
-          python-version: 'graalpy-23.x'
+          python-version: 'graalpy-24.x'
           check-latest: true
       - name: GraalPy and Python version
         run: python --version
