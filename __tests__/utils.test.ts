@@ -130,6 +130,18 @@ describe('Version from file test', () => {
     }
   );
   it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
+    'Version from poetry with explicit main group pyproject.toml test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'pyproject.toml';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '>=3.7.0';
+      const pythonVersionFileContent = `[tool.poetry.group.main.dependencies]\npython = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+  it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
     'Version undefined',
     async _fn => {
       await io.mkdirP(tempDir);
