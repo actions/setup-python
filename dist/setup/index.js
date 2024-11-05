@@ -46726,7 +46726,7 @@ function makeParserClass (Parser) {
       let target = this.ctx
       let finalKey = kv.key.pop()
       for (let kw of kv.key) {
-        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
+        if (hasKey(target, kw) && !isTable(target[kw])) {
           throw this.error(new TomlError("Can't redefine existing key"))
         }
         target = target[kw] = target[kw] || Table()
@@ -46734,6 +46734,7 @@ function makeParserClass (Parser) {
       if (hasKey(target, finalKey)) {
         throw this.error(new TomlError("Can't redefine existing key"))
       }
+      target[_declared] = true
       // unbox our numbers
       if (isInteger(kv.value) || isFloat(kv.value)) {
         target[finalKey] = kv.value.valueOf()
@@ -46791,6 +46792,8 @@ function makeParserClass (Parser) {
       do {
         if (this.char === Parser.END || this.char === CTRL_J) {
           return this.return()
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
+          throw this.errorControlCharIn('comments')
         }
       } while (this.nextChar())
     }
@@ -47004,7 +47007,7 @@ function makeParserClass (Parser) {
         } else if (this.atEndOfLine()) {
           throw this.error(new TomlError('Unterminated string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47033,7 +47036,7 @@ function makeParserClass (Parser) {
         } else if (this.char === Parser.END) {
           throw this.error(new TomlError('Unterminated multi-line string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47049,10 +47052,26 @@ function makeParserClass (Parser) {
     }
     parseLiteralMultiEnd2 () {
       if (this.char === CHAR_APOS) {
-        return this.return()
+        return this.next(this.parseLiteralMultiEnd3)
       } else {
         this.state.buf += "''"
         return this.goto(this.parseLiteralMultiStringContent)
+      }
+    }
+    parseLiteralMultiEnd3 () {
+      if (this.char === CHAR_APOS) {
+        this.state.buf += "'"
+        return this.next(this.parseLiteralMultiEnd4)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseLiteralMultiEnd4 () {
+      if (this.char === CHAR_APOS) {
+        this.state.buf += "'"
+        return this.return()
+      } else {
+        return this.returnNow()
       }
     }
 
@@ -47073,7 +47092,7 @@ function makeParserClass (Parser) {
         } else if (this.atEndOfLine()) {
           throw this.error(new TomlError('Unterminated string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
@@ -47108,20 +47127,20 @@ function makeParserClass (Parser) {
         } else if (this.char === Parser.END) {
           throw this.error(new TomlError('Unterminated multi-line string'))
         } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
+          throw this.errorControlCharIn('strings')
         } else {
           this.consume()
         }
       } while (this.nextChar())
     }
-    errorControlCharInString () {
+    errorControlCharIn (type) {
       let displayCode = '\\u00'
       if (this.char < 16) {
         displayCode += '0'
       }
       displayCode += this.char.toString(16)
 
-      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in strings, use ${displayCode} instead`))
+      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in ${type}, use ${displayCode} instead`))
     }
     recordMultiEscapeReplacement (replacement) {
       this.state.buf += replacement
@@ -47137,10 +47156,26 @@ function makeParserClass (Parser) {
     }
     parseMultiEnd2 () {
       if (this.char === CHAR_QUOT) {
-        return this.return()
+        return this.next(this.parseMultiEnd3)
       } else {
         this.state.buf += '""'
         return this.goto(this.parseMultiStringContent)
+      }
+    }
+    parseMultiEnd3 () {
+      if (this.char === CHAR_QUOT) {
+        this.state.buf += '"'
+        return this.next(this.parseMultiEnd4)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseMultiEnd4 () {
+      if (this.char === CHAR_QUOT) {
+        this.state.buf += '"'
+        return this.return()
+      } else {
+        return this.returnNow()
       }
     }
     parseMultiEscape () {
@@ -47704,13 +47739,7 @@ function makeParserClass (Parser) {
       }
     }
     recordInlineListValue (value) {
-      if (this.state.resultArr) {
-        const listType = this.state.resultArr[_contentType]
-        const valueType = tomlType(value)
-        if (listType !== valueType) {
-          throw this.error(new TomlError(`Inline lists must be a single type, not a mix of ${listType} and ${valueType}`))
-        }
-      } else {
+      if (!this.state.resultArr) {
         this.state.resultArr = InlineList(tomlType(value))
       }
       if (isFloat(value) || isInteger(value)) {
@@ -47773,11 +47802,24 @@ function makeParserClass (Parser) {
       } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
         throw this.error(new TomlError('Unterminated inline array'))
       } else if (this.char === CHAR_COMMA) {
-        return this.next(this.parseInlineTable)
+        return this.next(this.parseInlineTablePostComma)
       } else if (this.char === CHAR_RCUB) {
         return this.goto(this.parseInlineTable)
       } else {
         throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
+      }
+    }
+    parseInlineTablePostComma () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
+        throw this.error(new TomlError('Unterminated inline array'))
+      } else if (this.char === CHAR_COMMA) {
+        throw this.error(new TomlError('Empty elements in inline tables are not permitted'))
+      } else if (this.char === CHAR_RCUB) {
+        throw this.error(new TomlError('Trailing commas in inline tables are not permitted'))
+      } else {
+        return this.goto(this.parseInlineTable)
       }
     }
   }
@@ -48017,10 +48059,6 @@ function typeError (type) {
   return new Error('Can only stringify objects, not ' + type)
 }
 
-function arrayOneTypeError () {
-  return new Error("Array values can't have mixed types")
-}
-
 function getInlineKeys (obj) {
   return Object.keys(obj).filter(key => isInline(obj[key]))
 }
@@ -48042,12 +48080,12 @@ function toJSON (obj) {
 
 function stringifyObject (prefix, indent, obj) {
   obj = toJSON(obj)
-  var inlineKeys
-  var complexKeys
+  let inlineKeys
+  let complexKeys
   inlineKeys = getInlineKeys(obj)
   complexKeys = getComplexKeys(obj)
-  var result = []
-  var inlineIndent = indent || ''
+  const result = []
+  const inlineIndent = indent || ''
   inlineKeys.forEach(key => {
     var type = tomlType(obj[key])
     if (type !== 'undefined' && type !== 'null') {
@@ -48055,7 +48093,7 @@ function stringifyObject (prefix, indent, obj) {
     }
   })
   if (result.length > 0) result.push('')
-  var complexIndent = prefix && inlineKeys.length > 0 ? indent + '  ' : ''
+  const complexIndent = prefix && inlineKeys.length > 0 ? indent + '  ' : ''
   complexKeys.forEach(key => {
     result.push(stringifyComplex(prefix, complexIndent, key, obj[key]))
   })
@@ -48107,7 +48145,7 @@ function tomlType (value) {
 }
 
 function stringifyKey (key) {
-  var keyStr = String(key)
+  const keyStr = String(key)
   if (/^[-A-Za-z0-9_]+$/.test(keyStr)) {
     return keyStr
   } else {
@@ -48203,9 +48241,7 @@ function stringifyFloat (value) {
   } else if (Object.is(value, -0)) {
     return '-0.0'
   }
-  var chunks = String(value).split('.')
-  var int = chunks[0]
-  var dec = chunks[1] || 0
+  const [int, dec] = String(value).split('.')
   return stringifyInteger(int) + '.' + dec
 }
 
@@ -48217,29 +48253,10 @@ function stringifyDatetime (value) {
   return value.toISOString()
 }
 
-function isNumber (type) {
-  return type === 'float' || type === 'integer'
-}
-function arrayType (values) {
-  var contentType = tomlType(values[0])
-  if (values.every(_ => tomlType(_) === contentType)) return contentType
-  // mixed integer/float, emit as floats
-  if (values.every(_ => isNumber(tomlType(_)))) return 'float'
-  return 'mixed'
-}
-function validateArray (values) {
-  const type = arrayType(values)
-  if (type === 'mixed') {
-    throw arrayOneTypeError()
-  }
-  return type
-}
-
 function stringifyInlineArray (values) {
   values = toJSON(values)
-  const type = validateArray(values)
-  var result = '['
-  var stringified = values.map(_ => stringifyInline(_, type))
+  let result = '['
+  const stringified = values.map(_ => stringifyInline(_))
   if (stringified.join(', ').length > 60 || /\n/.test(stringified)) {
     result += '\n  ' + stringified.join(',\n  ') + '\n'
   } else {
@@ -48250,7 +48267,7 @@ function stringifyInlineArray (values) {
 
 function stringifyInlineTable (value) {
   value = toJSON(value)
-  var result = []
+  const result = []
   Object.keys(value).forEach(key => {
     result.push(stringifyKey(key) + ' = ' + stringifyAnyInline(value[key], false))
   })
@@ -48258,7 +48275,7 @@ function stringifyInlineTable (value) {
 }
 
 function stringifyComplex (prefix, indent, key, value) {
-  var valueType = tomlType(value)
+  const valueType = tomlType(value)
   /* istanbul ignore else */
   if (valueType === 'array') {
     return stringifyArrayOfTables(prefix, indent, key, value)
@@ -48271,12 +48288,11 @@ function stringifyComplex (prefix, indent, key, value) {
 
 function stringifyArrayOfTables (prefix, indent, key, values) {
   values = toJSON(values)
-  validateArray(values)
-  var firstValueType = tomlType(values[0])
+  const firstValueType = tomlType(values[0])
   /* istanbul ignore if */
   if (firstValueType !== 'table') throw typeError(firstValueType)
-  var fullKey = prefix + stringifyKey(key)
-  var result = ''
+  const fullKey = prefix + stringifyKey(key)
+  let result = ''
   values.forEach(table => {
     if (result.length > 0) result += '\n'
     result += indent + '[[' + fullKey + ']]\n'
@@ -48286,8 +48302,8 @@ function stringifyArrayOfTables (prefix, indent, key, values) {
 }
 
 function stringifyComplexTable (prefix, indent, key, value) {
-  var fullKey = prefix + stringifyKey(key)
-  var result = ''
+  const fullKey = prefix + stringifyKey(key)
+  let result = ''
   if (getInlineKeys(value).length > 0) {
     result += indent + '[' + fullKey + ']\n'
   }
@@ -67152,6 +67168,132 @@ module.exports = buildConnector
 
 /***/ }),
 
+/***/ 4462:
+/***/ ((module) => {
+
+"use strict";
+
+
+/** @type {Record<string, string | undefined>} */
+const headerNameLowerCasedRecord = {}
+
+// https://developer.mozilla.org/docs/Web/HTTP/Headers
+const wellknownHeaderNames = [
+  'Accept',
+  'Accept-Encoding',
+  'Accept-Language',
+  'Accept-Ranges',
+  'Access-Control-Allow-Credentials',
+  'Access-Control-Allow-Headers',
+  'Access-Control-Allow-Methods',
+  'Access-Control-Allow-Origin',
+  'Access-Control-Expose-Headers',
+  'Access-Control-Max-Age',
+  'Access-Control-Request-Headers',
+  'Access-Control-Request-Method',
+  'Age',
+  'Allow',
+  'Alt-Svc',
+  'Alt-Used',
+  'Authorization',
+  'Cache-Control',
+  'Clear-Site-Data',
+  'Connection',
+  'Content-Disposition',
+  'Content-Encoding',
+  'Content-Language',
+  'Content-Length',
+  'Content-Location',
+  'Content-Range',
+  'Content-Security-Policy',
+  'Content-Security-Policy-Report-Only',
+  'Content-Type',
+  'Cookie',
+  'Cross-Origin-Embedder-Policy',
+  'Cross-Origin-Opener-Policy',
+  'Cross-Origin-Resource-Policy',
+  'Date',
+  'Device-Memory',
+  'Downlink',
+  'ECT',
+  'ETag',
+  'Expect',
+  'Expect-CT',
+  'Expires',
+  'Forwarded',
+  'From',
+  'Host',
+  'If-Match',
+  'If-Modified-Since',
+  'If-None-Match',
+  'If-Range',
+  'If-Unmodified-Since',
+  'Keep-Alive',
+  'Last-Modified',
+  'Link',
+  'Location',
+  'Max-Forwards',
+  'Origin',
+  'Permissions-Policy',
+  'Pragma',
+  'Proxy-Authenticate',
+  'Proxy-Authorization',
+  'RTT',
+  'Range',
+  'Referer',
+  'Referrer-Policy',
+  'Refresh',
+  'Retry-After',
+  'Sec-WebSocket-Accept',
+  'Sec-WebSocket-Extensions',
+  'Sec-WebSocket-Key',
+  'Sec-WebSocket-Protocol',
+  'Sec-WebSocket-Version',
+  'Server',
+  'Server-Timing',
+  'Service-Worker-Allowed',
+  'Service-Worker-Navigation-Preload',
+  'Set-Cookie',
+  'SourceMap',
+  'Strict-Transport-Security',
+  'Supports-Loading-Mode',
+  'TE',
+  'Timing-Allow-Origin',
+  'Trailer',
+  'Transfer-Encoding',
+  'Upgrade',
+  'Upgrade-Insecure-Requests',
+  'User-Agent',
+  'Vary',
+  'Via',
+  'WWW-Authenticate',
+  'X-Content-Type-Options',
+  'X-DNS-Prefetch-Control',
+  'X-Frame-Options',
+  'X-Permitted-Cross-Domain-Policies',
+  'X-Powered-By',
+  'X-Requested-With',
+  'X-XSS-Protection'
+]
+
+for (let i = 0; i < wellknownHeaderNames.length; ++i) {
+  const key = wellknownHeaderNames[i]
+  const lowerCasedKey = key.toLowerCase()
+  headerNameLowerCasedRecord[key] = headerNameLowerCasedRecord[lowerCasedKey] =
+    lowerCasedKey
+}
+
+// Note: object prototypes should not be able to be referenced. e.g. `Object#hasOwnProperty`.
+Object.setPrototypeOf(headerNameLowerCasedRecord, null)
+
+module.exports = {
+  wellknownHeaderNames,
+  headerNameLowerCasedRecord
+}
+
+
+/***/ }),
+
 /***/ 8045:
 /***/ ((module) => {
 
@@ -67982,6 +68124,7 @@ const { InvalidArgumentError } = __nccwpck_require__(8045)
 const { Blob } = __nccwpck_require__(4300)
 const nodeUtil = __nccwpck_require__(3837)
 const { stringify } = __nccwpck_require__(3477)
+const { headerNameLowerCasedRecord } = __nccwpck_require__(4462)
 
 const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(v => Number(v))
 
@@ -68189,6 +68332,15 @@ const KEEPALIVE_TIMEOUT_EXPR = /timeout=(\d+)/
 function parseKeepAliveTimeout (val) {
   const m = val.toString().match(KEEPALIVE_TIMEOUT_EXPR)
   return m ? parseInt(m[1], 10) * 1000 : null
+}
+
+/**
+ * Retrieves a header name and returns its lowercase value.
+ * @param {string | Buffer} value Header name
+ * @returns {string}
+ */
+function headerNameToString (value) {
+  return headerNameLowerCasedRecord[value] || value.toLowerCase()
 }
 
 function parseHeaders (headers, obj = {}) {
@@ -68462,6 +68614,7 @@ module.exports = {
   isIterable,
   isAsyncIterable,
   isDestroyed,
+  headerNameToString,
   parseRawHeaders,
   parseHeaders,
   parseKeepAliveTimeout,
@@ -75109,14 +75262,18 @@ const { isBlobLike, toUSVString, ReadableStreamFrom } = __nccwpck_require__(3983
 const assert = __nccwpck_require__(9491)
 const { isUint8Array } = __nccwpck_require__(9830)
 
+let supportedHashes = []
+
 // https://nodejs.org/api/crypto.html#determining-if-crypto-support-is-unavailable
 /** @type {import('crypto')|undefined} */
 let crypto
 
 try {
   crypto = __nccwpck_require__(6113)
+  const possibleRelevantHashes = ['sha256', 'sha384', 'sha512']
+  supportedHashes = crypto.getHashes().filter((hash) => possibleRelevantHashes.includes(hash))
+/* c8 ignore next 3 */
 } catch {
-
 }
 
 function responseURL (response) {
@@ -75644,66 +75801,56 @@ function bytesMatch (bytes, metadataList) {
     return true
   }
 
-  // 3. If parsedMetadata is the empty set, return true.
+  // 3. If response is not eligible for integrity validation, return false.
+  // TODO
+
+  // 4. If parsedMetadata is the empty set, return true.
   if (parsedMetadata.length === 0) {
     return true
   }
 
-  // 4. Let metadata be the result of getting the strongest
+  // 5. Let metadata be the result of getting the strongest
   //    metadata from parsedMetadata.
-  const list = parsedMetadata.sort((c, d) => d.algo.localeCompare(c.algo))
-  // get the strongest algorithm
-  const strongest = list[0].algo
-  // get all entries that use the strongest algorithm; ignore weaker
-  const metadata = list.filter((item) => item.algo === strongest)
+  const strongest = getStrongestMetadata(parsedMetadata)
+  const metadata = filterMetadataListByAlgorithm(parsedMetadata, strongest)
 
-  // 5. For each item in metadata:
+  // 6. For each item in metadata:
   for (const item of metadata) {
     // 1. Let algorithm be the alg component of item.
     const algorithm = item.algo
 
     // 2. Let expectedValue be the val component of item.
-    let expectedValue = item.hash
+    const expectedValue = item.hash
 
     // See https://github.com/web-platform-tests/wpt/commit/e4c5cc7a5e48093220528dfdd1c4012dc3837a0e
     // "be liberal with padding". This is annoying, and it's not even in the spec.
 
-    if (expectedValue.endsWith('==')) {
-      expectedValue = expectedValue.slice(0, -2)
-    }
-
     // 3. Let actualValue be the result of applying algorithm to bytes.
     let actualValue = crypto.createHash(algorithm).update(bytes).digest('base64')
 
-    if (actualValue.endsWith('==')) {
-      actualValue = actualValue.slice(0, -2)
+    if (actualValue[actualValue.length - 1] === '=') {
+      if (actualValue[actualValue.length - 2] === '=') {
+        actualValue = actualValue.slice(0, -2)
+      } else {
+        actualValue = actualValue.slice(0, -1)
+      }
     }
 
     // 4. If actualValue is a case-sensitive match for expectedValue,
     //    return true.
-    if (actualValue === expectedValue) {
-      return true
-    }
-
-    let actualBase64URL = crypto.createHash(algorithm).update(bytes).digest('base64url')
-
-    if (actualBase64URL.endsWith('==')) {
-      actualBase64URL = actualBase64URL.slice(0, -2)
-    }
-
-    if (actualBase64URL === expectedValue) {
+    if (compareBase64Mixed(actualValue, expectedValue)) {
       return true
     }
   }
 
-  // 6. Return false.
+  // 7. Return false.
   return false
 }
 
 // https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-with-options
 // https://www.w3.org/TR/CSP2/#source-list-syntax
 // https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1
-const parseHashWithOptions = /((?<algo>sha256|sha384|sha512)-(?<hash>[A-z0-9+/]{1}.*={0,2}))( +[\x21-\x7e]?)?/i
+const parseHashWithOptions = /(?<algo>sha256|sha384|sha512)-((?<hash>[A-Za-z0-9+/]+|[A-Za-z0-9_-]+)={0,2}(?:\s|$)( +[!-~]*)?)?/i
 
 /**
  * @see https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata
@@ -75717,8 +75864,6 @@ function parseMetadata (metadata) {
   // 2. Let empty be equal to true.
   let empty = true
 
-  const supportedHashes = crypto.getHashes()
-
   // 3. For each token returned by splitting metadata on spaces:
   for (const token of metadata.split(' ')) {
     // 1. Set empty to false.
@@ -75728,7 +75873,11 @@ function parseMetadata (metadata) {
     const parsedToken = parseHashWithOptions.exec(token)
 
     // 3. If token does not parse, continue to the next token.
-    if (parsedToken === null || parsedToken.groups === undefined) {
+    if (
+      parsedToken === null ||
+      parsedToken.groups === undefined ||
+      parsedToken.groups.algo === undefined
+    ) {
       // Note: Chromium blocks the request at this point, but Firefox
       // gives a warning that an invalid integrity was given. The
       // correct behavior is to ignore these, and subsequently not
@@ -75737,11 +75886,11 @@ function parseMetadata (metadata) {
     }
 
     // 4. Let algorithm be the hash-algo component of token.
-    const algorithm = parsedToken.groups.algo
+    const algorithm = parsedToken.groups.algo.toLowerCase()
 
     // 5. If algorithm is a hash function recognized by the user
     //    agent, add the parsed token to result.
-    if (supportedHashes.includes(algorithm.toLowerCase())) {
+    if (supportedHashes.includes(algorithm)) {
       result.push(parsedToken.groups)
     }
   }
@@ -75752,6 +75901,82 @@ function parseMetadata (metadata) {
   }
 
   return result
+}
+
+/**
+ * @param {{ algo: 'sha256' | 'sha384' | 'sha512' }[]} metadataList
+ */
+function getStrongestMetadata (metadataList) {
+  // Let algorithm be the algo component of the first item in metadataList.
+  // Can be sha256
+  let algorithm = metadataList[0].algo
+  // If the algorithm is sha512, then it is the strongest
+  // and we can return immediately
+  if (algorithm[3] === '5') {
+    return algorithm
+  }
+
+  for (let i = 1; i < metadataList.length; ++i) {
+    const metadata = metadataList[i]
+    // If the algorithm is sha512, then it is the strongest
+    // and we can break the loop immediately
+    if (metadata.algo[3] === '5') {
+      algorithm = 'sha512'
+      break
+    // If the algorithm is sha384, then a potential sha256 or sha384 is ignored
+    } else if (algorithm[3] === '3') {
+      continue
+    // algorithm is sha256, check if algorithm is sha384 and if so, set it as
+    // the strongest
+    } else if (metadata.algo[3] === '3') {
+      algorithm = 'sha384'
+    }
+  }
+  return algorithm
+}
+
+function filterMetadataListByAlgorithm (metadataList, algorithm) {
+  if (metadataList.length === 1) {
+    return metadataList
+  }
+
+  let pos = 0
+  for (let i = 0; i < metadataList.length; ++i) {
+    if (metadataList[i].algo === algorithm) {
+      metadataList[pos++] = metadataList[i]
+    }
+  }
+
+  metadataList.length = pos
+
+  return metadataList
+}
+
+/**
+ * Compares two base64 strings, allowing for base64url
+ * in the second string.
+ *
+* @param {string} actualValue always base64
+ * @param {string} expectedValue base64 or base64url
+ * @returns {boolean}
+ */
+function compareBase64Mixed (actualValue, expectedValue) {
+  if (actualValue.length !== expectedValue.length) {
+    return false
+  }
+  for (let i = 0; i < actualValue.length; ++i) {
+    if (actualValue[i] !== expectedValue[i]) {
+      if (
+        (actualValue[i] === '+' && expectedValue[i] === '-') ||
+        (actualValue[i] === '/' && expectedValue[i] === '_')
+      ) {
+        continue
+      }
+      return false
+    }
+  }
+
+  return true
 }
 
 // https://w3c.github.io/webappsec-upgrade-insecure-requests/#upgrade-request
@@ -76169,7 +76394,8 @@ module.exports = {
   urlHasHttpsScheme,
   urlIsHttpHttpsScheme,
   readAllBytes,
-  normalizeMethodRecord
+  normalizeMethodRecord,
+  parseMetadata
 }
 
 
@@ -78256,12 +78482,17 @@ function parseLocation (statusCode, headers) {
 
 // https://tools.ietf.org/html/rfc7231#section-6.4.4
 function shouldRemoveHeader (header, removeContent, unknownOrigin) {
-  return (
-    (header.length === 4 && header.toString().toLowerCase() === 'host') ||
-    (removeContent && header.toString().toLowerCase().indexOf('content-') === 0) ||
-    (unknownOrigin && header.length === 13 && header.toString().toLowerCase() === 'authorization') ||
-    (unknownOrigin && header.length === 6 && header.toString().toLowerCase() === 'cookie')
-  )
+  if (header.length === 4) {
+    return util.headerNameToString(header) === 'host'
+  }
+  if (removeContent && util.headerNameToString(header).startsWith('content-')) {
+    return true
+  }
+  if (unknownOrigin && (header.length === 13 || header.length === 6 || header.length === 19)) {
+    const name = util.headerNameToString(header)
+    return name === 'authorization' || name === 'cookie' || name === 'proxy-authorization'
+  }
+  return false
 }
 
 // https://tools.ietf.org/html/rfc7231#section-6.4
@@ -90192,12 +90423,12 @@ class PipCache extends cache_distributor_1.default {
             let restoreKey = '';
             if (utils_1.IS_LINUX) {
                 const osInfo = yield (0, utils_1.getLinuxInfo)();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             else {
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}`;
+                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
             }
             return {
                 primaryKey,
@@ -90283,7 +90514,7 @@ class PipenvCache extends cache_distributor_1.default {
     computeKeys() {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -90396,7 +90627,7 @@ class PoetryCache extends cache_distributor_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const hash = yield glob.hashFiles(this.patterns);
             // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
             const restoreKey = undefined;
             return {
                 primaryKey,
@@ -91232,7 +91463,8 @@ function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases,
         const downloadUrl = `${foundAsset.download_url}`;
         core.info(`Downloading PyPy from "${downloadUrl}" ...`);
         try {
-            const pypyPath = yield tc.downloadTool(downloadUrl);
+            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+            const pypyPath = yield tc.downloadTool(downloadUrl, fileName);
             core.info('Extracting downloaded archive...');
             if (utils_1.IS_WINDOWS) {
                 downloadDir = yield tc.extractZip(pypyPath);
@@ -91494,7 +91726,8 @@ function installCpythonFromRelease(release) {
         core.info(`Download from "${downloadUrl}"`);
         let pythonPath = '';
         try {
-            pythonPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
+            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+            pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
             core.info('Extract downloaded archive');
             let pythonExtractedFolder;
             if (utils_1.IS_WINDOWS) {
@@ -91729,7 +91962,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -91806,7 +92039,11 @@ function validatePythonVersionFormatForPyPy(version) {
 exports.validatePythonVersionFormatForPyPy = validatePythonVersionFormatForPyPy;
 function isGhes() {
     const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
-    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+    const hostname = ghUrl.hostname.trimEnd().toUpperCase();
+    const isGitHubHost = hostname === 'GITHUB.COM';
+    const isGitHubEnterpriseCloudHost = hostname.endsWith('.GHE.COM');
+    const isLocalHost = hostname.endsWith('.LOCALHOST');
+    return !isGitHubHost && !isGitHubEnterpriseCloudHost && !isLocalHost;
 }
 exports.isGhes = isGhes;
 function isCacheFeatureAvailable() {
@@ -91907,7 +92144,9 @@ function extractValue(obj, keys) {
  */
 function getVersionInputFromTomlFile(versionFile) {
     core.debug(`Trying to resolve version form ${versionFile}`);
-    const pyprojectFile = fs_1.default.readFileSync(versionFile, 'utf8');
+    let pyprojectFile = fs_1.default.readFileSync(versionFile, 'utf8');
+    // Normalize the line endings in the pyprojectFile
+    pyprojectFile = pyprojectFile.replace(/\r\n/g, '\n');
     const pyprojectConfig = toml.parse(pyprojectFile);
     let keys = [];
     if ('project' in pyprojectConfig) {
@@ -91989,6 +92228,20 @@ function getNextPageUrl(response) {
     return null;
 }
 exports.getNextPageUrl = getNextPageUrl;
+/**
+ * Add temporary fix for Windows
+ * On Windows, it is necessary to retain the .zip extension for proper extraction.
+ * because the tc.extractZip() failure due to tc.downloadTool() not adding .zip extension.
+ * Related issue: https://github.com/actions/toolkit/issues/1179
+ * Related issue: https://github.com/actions/setup-python/issues/819
+ */
+function getDownloadFileName(downloadUrl) {
+    const tempDir = process.env.RUNNER_TEMP || '.';
+    return exports.IS_WINDOWS
+        ? path.join(tempDir, path.basename(downloadUrl))
+        : undefined;
+}
+exports.getDownloadFileName = getDownloadFileName;
 
 
 /***/ }),

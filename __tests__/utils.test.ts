@@ -12,7 +12,10 @@ import {
   getVersionInputFromFile,
   getVersionInputFromPlainFile,
   getVersionInputFromTomlFile,
-  getNextPageUrl
+  getNextPageUrl,
+  isGhes,
+  IS_WINDOWS,
+  getDownloadFileName
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -157,5 +160,77 @@ describe('getNextPageUrl', () => {
     const page2Links =
       '<https://api.github.com/repositories/129883600/releases?page=1>; rel="prev", <https://api.github.com/repositories/129883600/releases?page=1>; rel="first"';
     expect(getNextPageUrl(generateResponse(page2Links))).toBeNull();
+  });
+});
+
+describe('getDownloadFileName', () => {
+  const originalEnv = process.env;
+  const tempDir = path.join(__dirname, 'runner', 'temp');
+
+  beforeEach(() => {
+    process.env = {...originalEnv};
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('should return the correct path on Windows', () => {
+    if (IS_WINDOWS) {
+      process.env['RUNNER_TEMP'] = tempDir;
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-win32-x64.zip';
+      const expectedPath = path.join(
+        process.env.RUNNER_TEMP,
+        path.basename(downloadUrl)
+      );
+      expect(getDownloadFileName(downloadUrl)).toBe(expectedPath);
+    }
+  });
+
+  it('should return undefined on non-Windows', () => {
+    if (!IS_WINDOWS) {
+      const downloadUrl =
+        'https://github.com/actions/sometool/releases/tag/1.2.3-20200402.6/sometool-1.2.3-linux-x64.tar.gz';
+      expect(getDownloadFileName(downloadUrl)).toBeUndefined();
+    }
+  });
+});
+
+describe('isGhes', () => {
+  const pristineEnv = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {...pristineEnv};
+  });
+
+  afterAll(() => {
+    process.env = pristineEnv;
+  });
+
+  it('returns false when the GITHUB_SERVER_URL environment variable is not defined', async () => {
+    delete process.env['GITHUB_SERVER_URL'];
+    expect(isGhes()).toBeFalsy();
+  });
+
+  it('returns false when the GITHUB_SERVER_URL environment variable is set to github.com', async () => {
+    process.env['GITHUB_SERVER_URL'] = 'https://github.com';
+    expect(isGhes()).toBeFalsy();
+  });
+
+  it('returns false when the GITHUB_SERVER_URL environment variable is set to a GitHub Enterprise Cloud-style URL', async () => {
+    process.env['GITHUB_SERVER_URL'] = 'https://contoso.ghe.com';
+    expect(isGhes()).toBeFalsy();
+  });
+
+  it('returns false when the GITHUB_SERVER_URL environment variable has a .localhost suffix', async () => {
+    process.env['GITHUB_SERVER_URL'] = 'https://mock-github.localhost';
+    expect(isGhes()).toBeFalsy();
+  });
+
+  it('returns true when the GITHUB_SERVER_URL environment variable is set to some other URL', async () => {
+    process.env['GITHUB_SERVER_URL'] = 'https://src.onpremise.fabrikam.com';
+    expect(isGhes()).toBeTruthy();
   });
 });

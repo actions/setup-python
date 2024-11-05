@@ -4,7 +4,7 @@ import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
-import {IS_WINDOWS, IS_LINUX} from './utils';
+import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -98,7 +98,8 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   core.info(`Download from "${downloadUrl}"`);
   let pythonPath = '';
   try {
-    pythonPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
+    const fileName = getDownloadFileName(downloadUrl);
+    pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
     core.info('Extract downloaded archive');
     let pythonExtractedFolder;
     if (IS_WINDOWS) {

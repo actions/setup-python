@@ -116,7 +116,13 @@ export function isGhes(): boolean {
   const ghUrl = new URL(
     process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   );
-  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+
+  const hostname = ghUrl.hostname.trimEnd().toUpperCase();
+  const isGitHubHost = hostname === 'GITHUB.COM';
+  const isGitHubEnterpriseCloudHost = hostname.endsWith('.GHE.COM');
+  const isLocalHost = hostname.endsWith('.LOCALHOST');
+
+  return !isGitHubHost && !isGitHubEnterpriseCloudHost && !isLocalHost;
 }
 
 export function isCacheFeatureAvailable(): boolean {
@@ -224,7 +230,10 @@ function extractValue(obj: any, keys: string[]): string | undefined {
 export function getVersionInputFromTomlFile(versionFile: string): string[] {
   core.debug(`Trying to resolve version form ${versionFile}`);
 
-  const pyprojectFile = fs.readFileSync(versionFile, 'utf8');
+  let pyprojectFile = fs.readFileSync(versionFile, 'utf8');
+  // Normalize the line endings in the pyprojectFile
+  pyprojectFile = pyprojectFile.replace(/\r\n/g, '\n');
+
   const pyprojectConfig = toml.parse(pyprojectFile);
   let keys = [];
 
@@ -309,4 +318,18 @@ export function getNextPageUrl<T>(response: ifm.TypedResponse<T>) {
     }
   }
   return null;
+}
+
+/**
+ * Add temporary fix for Windows
+ * On Windows, it is necessary to retain the .zip extension for proper extraction.
+ * because the tc.extractZip() failure due to tc.downloadTool() not adding .zip extension.
+ * Related issue: https://github.com/actions/toolkit/issues/1179
+ * Related issue: https://github.com/actions/setup-python/issues/819
+ */
+export function getDownloadFileName(downloadUrl: string): string | undefined {
+  const tempDir = process.env.RUNNER_TEMP || '.';
+  return IS_WINDOWS
+    ? path.join(tempDir, path.basename(downloadUrl))
+    : undefined;
 }

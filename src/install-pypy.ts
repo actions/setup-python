@@ -14,7 +14,8 @@ import {
   createSymlinkInFolder,
   isNightlyKeyword,
   writeExactPyPyVersionFile,
-  getBinaryDirectory
+  getBinaryDirectory,
+  getDownloadFileName
 } from './utils';
 
 export async function installPyPy(
@@ -69,7 +70,8 @@ export async function installPyPy(
   core.info(`Downloading PyPy from "${downloadUrl}" ...`);
 
   try {
-    const pypyPath = await tc.downloadTool(downloadUrl);
+    const fileName = getDownloadFileName(downloadUrl);
+    const pypyPath = await tc.downloadTool(downloadUrl, fileName);
 
     core.info('Extracting downloaded archive...');
     if (IS_WINDOWS) {
