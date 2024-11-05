@@ -91038,9 +91038,15 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         let manifest = null;
-        const desugaredVersionSpec = desugarDevVersion(version);
-        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
+        const [desugaredVersionSpec, freethreaded] = desugarFreeThreadedVersion(version);
+        const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
+        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec2, allowPreReleases);
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+        if (freethreaded) {
+            // Free threaded versions use an architecture suffix like `x64-freethreaded`
+            core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
+            architecture += freethreaded;
+        }
         if (checkLatest) {
             manifest = yield installer.getManifest();
             const resolvedVersion = (_a = (yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
@@ -91115,6 +91121,23 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
     });
 }
 exports.useCpythonVersion = useCpythonVersion;
+/* Identify freethreaded versions like, 3.13t, 3.13t-dev, 3.14.0a1t. Returns
+ * the version without the `t` and the architectures suffix, if freethreaded */
+function desugarFreeThreadedVersion(versionSpec) {
+    const prereleaseVersion = /(\d+\.\d+\.\d+)(t)((?:a|b|rc)\d*)/g;
+    if (prereleaseVersion.test(versionSpec)) {
+        return [versionSpec.replace(prereleaseVersion, '$1$3'), '-freethreaded'];
+    }
+    const majorMinor = /^(\d+\.\d+)(t)$/;
+    if (majorMinor.test(versionSpec)) {
+        return [versionSpec.replace(majorMinor, '$1'), '-freethreaded'];
+    }
+    const devVersion = /^(\d+\.\d+)(t)(-dev)$/;
+    if (devVersion.test(versionSpec)) {
+        return [versionSpec.replace(devVersion, '$1$3'), '-freethreaded'];
+    }
+    return [versionSpec, ''];
+}
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
 function desugarDevVersion(versionSpec) {
     const devVersion = /^(\d+)\.(\d+)-dev$/;
