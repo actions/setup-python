@@ -21,8 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.9-v7.x']
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        python-version: ['3.9', 'pypy-3.9-v7.x', '3.10', 'pypy-3.10-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -39,8 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.9-v7.x']
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        python-version: ['3.9', 'pypy-3.9-v7.x', '3.10', 'pypy-3.10-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -75,8 +75,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.9']
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        python-version: ['3.9', 'pypy-3.9-v7.x', '3.10', 'pypy-3.10-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Install poetry
@@ -97,8 +97,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.9-v7.x']
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        python-version: ['3.9', 'pypy-3.9-v7.x', '3.10', 'pypy-3.10-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -116,8 +116,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', 'pypy-3.9-v7.x']
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        python-version: ['3.9', 'pypy-3.9-v7.x', '3.10', 'pypy-3.10-v7.x']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
