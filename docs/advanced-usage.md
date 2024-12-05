@@ -587,7 +587,7 @@ The `allow-prereleases` flag defaults to `false`.
 If `allow-prereleases` is set to `true`, the action will allow falling back to pre-release versions of Python when a matching GA version of Python is not available.
 This allows for example to simplify reuse of `python-version` as an input of nox for pre-releases of Python by not requiring manipulation of the `3.y-dev` specifier.
 For CPython, `allow-prereleases` will only have effect for `x.y` version range (e.g. `3.12`).
-Let's say that python 3.12 is not generally available, the following workflow will fallback to the most recent pre-release of python 3.12:
+Let's say that in the past, when python 3.12 was not yet generally available, the following workflow would have fallback to the most recent pre-release of python 3.12:
 ```yaml
 jobs:
   test:
@@ -597,7 +597,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [Ubuntu, Windows, macOS]
-        python_version: ["3.11", "3.12", "3.13"]
+        python_version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
