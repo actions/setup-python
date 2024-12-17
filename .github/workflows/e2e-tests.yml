@@ -18,10 +18,19 @@ jobs:
     strategy:
       matrix:
         operating-system:
-          [ubuntu-20.04, ubuntu-22.04, windows-latest, macos-latest, macos-13]
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            ubuntu-latest,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
         python: [3.8.10, 3.8.18]
         exclude:
           - operating-system: ubuntu-22.04
+            python: '3.8.10'
+          - operating-system: ubuntu-latest
             python: '3.8.10'
           - operating-system: macos-latest
             python: '3.8.18'
@@ -44,7 +53,14 @@ jobs:
     strategy:
       matrix:
         operating-system:
-          [ubuntu-20.04, windows-latest, ubuntu-22.04, macos-latest, macos-13]
+          [
+            ubuntu-20.04,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-latest,
+            macos-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
