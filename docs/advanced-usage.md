@@ -120,7 +120,6 @@ The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy
 ```
 pypy3.10 or pypy-3.10 # the latest available version of PyPy that supports Python 3.10
 pypy3.9 or pypy-3.9 # the latest available version of PyPy that supports Python 3.9
-pypy2.7 or pypy-2.7 # the latest available version of PyPy that supports Python 2.7
 pypy3.7-v7.3.3 or pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
 pypy3.7-v7.x or pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
 pypy3.7-v7.3.3rc1 or pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
@@ -213,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.x', 'pypy2.7', 'pypy3.8', 'pypy3.9' ]
+        python-version: ['3.x', 'pypy3.8', 'pypy3.9' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v4
@@ -232,14 +231,15 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', 'pypy2.7', 'pypy3.9']
+        python-version: ['3.9', '3.10', '3.11', 'pypy3.9']
         exclude:
           - os: macos-latest
-            python-version: '3.8'
+            python-version: '3.9'
           - os: windows-latest
-            python-version: '3.8'
+            python-version: '3.9'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -247,7 +247,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
-        if: ${{ python-version != 'pypy2.7' }} # in if statements, use single-quotes (not double-quotes) in expressions to test input `python-version`
+        if: ${{ matrix.python-version != 'pypy3.9' }}  # Use single quotes in expressions for input `python-version`
         run: python --version
 ```
 
@@ -384,7 +384,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.8.0 - 3.12.0, 3.x, * ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
+Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.9.0 - 3.12.0, 3.x ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
 
 ```yaml
 jobs:
@@ -395,7 +395,7 @@ jobs:
     - uses: actions/setup-python@v5
       id: cp312
       with:
-        python-version: "3.8.0 - 3.12.0"
+        python-version: "3.9.0 - 3.12.0"
     - run: echo '${{ steps.cp312.outputs.python-version }}'
 ```
 
