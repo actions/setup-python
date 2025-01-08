@@ -8,9 +8,9 @@ import CacheDistributor from './cache-distributor';
 class PipenvCache extends CacheDistributor {
   constructor(
     private pythonVersion: string,
-    protected patterns: string = '**/Pipfile.lock'
+    protected cacheDependencyPath: string = '**/Pipfile.lock'
   ) {
-    super('pipenv', patterns);
+    super('pipenv', cacheDependencyPath);
   }
 
   protected async getCacheGlobalDirectories() {
@@ -31,7 +31,7 @@ class PipenvCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash = await glob.hashFiles(this.patterns);
+    const hash = await glob.hashFiles(this.cacheDependencyPath);
     const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
     const restoreKey = undefined;
     return {
