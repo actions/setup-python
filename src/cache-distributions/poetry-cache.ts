@@ -54,7 +54,8 @@ class PoetryCache extends CacheDistributor {
     const restoreKey = undefined;
     return {
       primaryKey,
-      restoreKey
+      restoreKey,
+      cacheDependencyPath: this.cacheDependencyPath,
     };
   }
 
