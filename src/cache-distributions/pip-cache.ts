@@ -12,12 +12,13 @@ import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 class PipCache extends CacheDistributor {
   private cacheDependencyBackupPath: string = CACHE_DEPENDENCY_BACKUP_PATH;
+  protected readonly packageManager = 'pip';
 
   constructor(
     private pythonVersion: string,
-    cacheDependencyPath = '**/requirements.txt'
+    protected readonly cacheDependencyPath = '**/requirements.txt'
   ) {
-    super('pip', cacheDependencyPath);
+    super();
   }
 
   protected async getCacheGlobalDirectories() {

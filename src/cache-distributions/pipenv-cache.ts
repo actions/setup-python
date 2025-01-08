@@ -6,11 +6,13 @@ import * as core from '@actions/core';
 import CacheDistributor from './cache-distributor';
 
 class PipenvCache extends CacheDistributor {
+  protected readonly packageManager = 'pipenv';
+
   constructor(
     private pythonVersion: string,
-    protected cacheDependencyPath: string = '**/Pipfile.lock'
+    protected readonly cacheDependencyPath: string = '**/Pipfile.lock'
   ) {
-    super('pipenv', cacheDependencyPath);
+    super();
   }
 
   protected async getCacheGlobalDirectories() {

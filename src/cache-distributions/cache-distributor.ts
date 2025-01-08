@@ -10,10 +10,8 @@ export enum State {
 
 abstract class CacheDistributor {
   protected CACHE_KEY_PREFIX = 'setup-python';
-  constructor(
-    protected packageManager: string,
-    protected cacheDependencyPath: string
-  ) {}
+  protected abstract readonly packageManager: string;
+  protected abstract readonly cacheDependencyPath: string;
 
   protected abstract getCacheGlobalDirectories(): Promise<string[]>;
   protected abstract computeKeys(): Promise<{

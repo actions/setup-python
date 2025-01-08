@@ -8,12 +8,15 @@ import CacheDistributor from './cache-distributor';
 import {logWarning} from '../utils';
 
 class PoetryCache extends CacheDistributor {
+  protected readonly packageManager = 'poetry';
+
+
   constructor(
     private pythonVersion: string,
-    protected cacheDependencyPath: string = '**/poetry.lock',
+    protected readonly cacheDependencyPath: string = '**/poetry.lock',
     protected poetryProjects: Set<string> = new Set<string>()
   ) {
-    super('poetry', cacheDependencyPath);
+    super();
   }
 
   protected async getCacheGlobalDirectories() {
