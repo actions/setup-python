@@ -38,11 +38,9 @@ export async function useCpythonVersion(
   allowPreReleases: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
-  const [desugaredVersionSpec, freethreaded] =
-    desugarFreeThreadedVersion(version);
-  const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
+  const [desugaredVersionSpec, freethreaded] = desugarVersion(version);
   let semanticVersionSpec = pythonVersionToSemantic(
-    desugaredVersionSpec2,
+    desugaredVersionSpec,
     allowPreReleases
   );
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
@@ -167,14 +165,22 @@ export async function useCpythonVersion(
   return {impl: 'CPython', version: installed};
 }
 
-/* Identify freethreaded versions like, 3.13t, 3.13t-dev, 3.14.0a1t. Returns
- * the version without the `t` and the architectures suffix, if freethreaded */
+/* Desugar free threaded and dev versions */
+export function desugarVersion(versionSpec: string) {
+  const [desugaredVersionSpec, freethreaded] =
+    desugarFreeThreadedVersion(versionSpec);
+  const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
+  return [desugaredVersionSpec2, freethreaded];
+}
+
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev, 3.14.0a1t.
+ * Returns the version without the `t` and the architectures suffix, if freethreaded */
 function desugarFreeThreadedVersion(versionSpec: string) {
   const prereleaseVersion = /(\d+\.\d+\.\d+)(t)((?:a|b|rc)\d*)/g;
   if (prereleaseVersion.test(versionSpec)) {
     return [versionSpec.replace(prereleaseVersion, '$1$3'), '-freethreaded'];
   }
-  const majorMinor = /^(\d+\.\d+)(t)$/;
+  const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
   if (majorMinor.test(versionSpec)) {
     return [versionSpec.replace(majorMinor, '$1'), '-freethreaded'];
   }

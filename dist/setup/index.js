@@ -91006,7 +91006,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pythonVersionToSemantic = exports.useCpythonVersion = void 0;
+exports.pythonVersionToSemantic = exports.desugarVersion = exports.useCpythonVersion = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const utils_1 = __nccwpck_require__(1314);
@@ -91038,9 +91038,8 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         let manifest = null;
-        const [desugaredVersionSpec, freethreaded] = desugarFreeThreadedVersion(version);
-        const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
-        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec2, allowPreReleases);
+        const [desugaredVersionSpec, freethreaded] = desugarVersion(version);
+        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
         if (freethreaded) {
             // Free threaded versions use an architecture suffix like `x64-freethreaded`
@@ -91121,14 +91120,21 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
     });
 }
 exports.useCpythonVersion = useCpythonVersion;
-/* Identify freethreaded versions like, 3.13t, 3.13t-dev, 3.14.0a1t. Returns
- * the version without the `t` and the architectures suffix, if freethreaded */
+/* Desugar free threaded and dev versions */
+function desugarVersion(versionSpec) {
+    const [desugaredVersionSpec, freethreaded] = desugarFreeThreadedVersion(versionSpec);
+    const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
+    return [desugaredVersionSpec2, freethreaded];
+}
+exports.desugarVersion = desugarVersion;
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev, 3.14.0a1t.
+ * Returns the version without the `t` and the architectures suffix, if freethreaded */
 function desugarFreeThreadedVersion(versionSpec) {
     const prereleaseVersion = /(\d+\.\d+\.\d+)(t)((?:a|b|rc)\d*)/g;
     if (prereleaseVersion.test(versionSpec)) {
         return [versionSpec.replace(prereleaseVersion, '$1$3'), '-freethreaded'];
     }
-    const majorMinor = /^(\d+\.\d+)(t)$/;
+    const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
     if (majorMinor.test(versionSpec)) {
         return [versionSpec.replace(majorMinor, '$1'), '-freethreaded'];
     }
