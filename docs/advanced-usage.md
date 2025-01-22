@@ -77,6 +77,20 @@ steps:
 - run: python my_script.py
 ```
 
+Use the **t** suffix to select the [free threading](https://docs.python.org/3/howto/free-threading-python.html) version of Python.
+Free threaded Python is only available starting with the 3.13 release.
+
+```yaml
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.13t'
+- run: python my_script.py
+```
+
+Pre-release free threading versions should be specified like `3.14.0ta3` or `3.14t-dev`.
+
 You can also use several types of ranges that are specified in [semver](https://github.com/npm/node-semver#ranges), for instance:
 
 - **[ranges](https://github.com/npm/node-semver#ranges)** to download and set up the latest available version of Python satisfying a range:
