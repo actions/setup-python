@@ -99,6 +99,15 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
 - [Allow pre-releases](docs/advanced-usage.md#allow-pre-releases)
 
+## Recommended permissions
+
+When using the `setup-python` action in your GitHub Actions workflow, it is recommended to set the following permissions to ensure proper functionality:
+
+```yaml
+permissions:
+  contents: read # access to check out code and install dependencies
+```
+
 ## License
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE).
