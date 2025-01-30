@@ -77,7 +77,7 @@ steps:
 - run: python my_script.py
 ```
 
-Use the **t** suffix to select the [free threading](https://docs.python.org/3/howto/free-threading-python.html) version of Python.
+You can specify the [free threading](https://docs.python.org/3/howto/free-threading-python.html) version of Python by setting the `freethreaded` input to `true` or by using the special **t** suffix in some cases.  Pre-release free threading versions can be specified like `3.14.0a3t` or `3.14t-dev`.
 Free threaded Python is only available starting with the 3.13 release.
 
 ```yaml
@@ -89,7 +89,17 @@ steps:
 - run: python my_script.py
 ```
 
-Pre-release free threading versions should be specified like `3.14.0ta3` or `3.14t-dev`.
+Note that the **t** suffix is not `semver` syntax. If you wish to specify a range, you must use the `freethreaded` input instead of the `t` suffix.
+
+```yaml
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: '>=3.13'
+    freethreaded: true
+- run: python my_script.py
+```
 
 You can also use several types of ranges that are specified in [semver](https://github.com/npm/node-semver#ranges), for instance:
 

@@ -35,20 +35,26 @@ export async function useCpythonVersion(
   architecture: string,
   updateEnvironment: boolean,
   checkLatest: boolean,
-  allowPreReleases: boolean
+  allowPreReleases: boolean,
+  freethreaded: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
-  const [desugaredVersionSpec, freethreaded] = desugarVersion(version);
+  const {version: desugaredVersionSpec, freethreaded: versionFreethreaded} =
+    desugarVersion(version);
   let semanticVersionSpec = pythonVersionToSemantic(
     desugaredVersionSpec,
     allowPreReleases
   );
+  if (versionFreethreaded) {
+    // Use the freethreaded version if it was specified in the input, e.g., 3.13t
+    freethreaded = true;
+  }
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
 
   if (freethreaded) {
     // Free threaded versions use an architecture suffix like `x64-freethreaded`
     core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
-    architecture += freethreaded;
+    architecture += '-freethreaded';
   }
 
   if (checkLatest) {
@@ -167,28 +173,33 @@ export async function useCpythonVersion(
 
 /* Desugar free threaded and dev versions */
 export function desugarVersion(versionSpec: string) {
-  const [desugaredVersionSpec, freethreaded] =
-    desugarFreeThreadedVersion(versionSpec);
-  const desugaredVersionSpec2 = desugarDevVersion(desugaredVersionSpec);
-  return [desugaredVersionSpec2, freethreaded];
+  const {version, freethreaded} = desugarFreeThreadedVersion(versionSpec);
+  return {version: desugarDevVersion(version), freethreaded};
 }
 
 /* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev, 3.14.0a1t.
  * Returns the version without the `t` and the architectures suffix, if freethreaded */
 function desugarFreeThreadedVersion(versionSpec: string) {
-  const prereleaseVersion = /(\d+\.\d+\.\d+)(t)((?:a|b|rc)\d*)/g;
+  // e.g., 3.14.0a1t -> 3.14.0a1
+  const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)(t)/g;
   if (prereleaseVersion.test(versionSpec)) {
-    return [versionSpec.replace(prereleaseVersion, '$1$3'), '-freethreaded'];
+    return {
+      version: versionSpec.replace(prereleaseVersion, '$1$2'),
+      freethreaded: true
+    };
   }
   const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
   if (majorMinor.test(versionSpec)) {
-    return [versionSpec.replace(majorMinor, '$1'), '-freethreaded'];
+    return {version: versionSpec.replace(majorMinor, '$1'), freethreaded: true};
   }
   const devVersion = /^(\d+\.\d+)(t)(-dev)$/;
   if (devVersion.test(versionSpec)) {
-    return [versionSpec.replace(devVersion, '$1$3'), '-freethreaded'];
+    return {
+      version: versionSpec.replace(devVersion, '$1$3'),
+      freethreaded: true
+    };
   }
-  return [versionSpec, ''];
+  return {version: versionSpec, freethreaded: false};
 }
 
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
@@ -212,7 +223,7 @@ interface InstalledVersion {
 
 /**
  * Python's prelease versions look like `3.7.0b2`.
- * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-b2`.
+ * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-beta.2`.
  * If the version spec contains prerelease versions, we need to convert them to the semantic version equivalent.
  *
  * For easier use of the action, we also map 'x.y' to allow pre-release before 'x.y.0' release if allowPreReleases is true
@@ -221,9 +232,16 @@ export function pythonVersionToSemantic(
   versionSpec: string,
   allowPreReleases: boolean
 ) {
-  const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)/g;
+  const preleaseMap: {[key: string]: string} = {
+    a: 'alpha',
+    b: 'beta',
+    rc: 'rc'
+  };
+  const prereleaseVersion = /(\d+\.\d+\.\d+)(a|b|rc)(\d+)/g;
+  let result = versionSpec.replace(prereleaseVersion, (_, p1, p2, p3) => {
+    return `${p1}-${preleaseMap[p2]}.${p3}`;
+  });
   const majorMinor = /^(\d+)\.(\d+)$/;
-  let result = versionSpec.replace(prereleaseVersion, '$1-$2');
   if (allowPreReleases) {
     result = result.replace(majorMinor, '~$1.$2.0-0');
   }
