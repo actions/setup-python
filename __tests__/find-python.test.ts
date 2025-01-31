@@ -31,7 +31,7 @@ describe('pythonVersions', () => {
     ['3.14.0rc1t', {version: '3.14.0-rc.1', freethreaded: true}]
   ])('%s -> %s', (input, expected) => {
     const {version, freethreaded} = desugarVersion(input);
-    let semanticVersionSpec = pythonVersionToSemantic(version, false);
+    const semanticVersionSpec = pythonVersionToSemantic(version, false);
     expect({version: semanticVersionSpec, freethreaded}).toEqual(expected);
   });
 
@@ -48,7 +48,7 @@ describe('pythonVersions', () => {
     ['3.14.0rc1t', {version: '3.14.0-rc.1', freethreaded: true}]
   ])('%s (allowPreReleases=true) -> %s', (input, expected) => {
     const {version, freethreaded} = desugarVersion(input);
-    let semanticVersionSpec = pythonVersionToSemantic(version, true);
+    const semanticVersionSpec = pythonVersionToSemantic(version, true);
     expect({version: semanticVersionSpec, freethreaded}).toEqual(expected);
   });
 });
