@@ -91118,7 +91118,12 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         }
         const installed = versionFromPath(installDir);
-        core.setOutput('python-version', installed);
+        let pythonVersion = installed;
+        if (freethreaded) {
+            // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+            pythonVersion += 't';
+        }
+        core.setOutput('python-version', pythonVersion);
         core.setOutput('python-path', pythonPath);
         return { impl: 'CPython', version: installed };
     });

@@ -165,7 +165,12 @@ export async function useCpythonVersion(
   }
 
   const installed = versionFromPath(installDir);
-  core.setOutput('python-version', installed);
+  let pythonVersion = installed;
+  if (freethreaded) {
+    // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+    pythonVersion += 't';
+  }
+  core.setOutput('python-version', pythonVersion);
   core.setOutput('python-path', pythonPath);
 
   return {impl: 'CPython', version: installed};
