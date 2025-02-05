@@ -98799,11 +98799,13 @@ exports.getCacheDistributor = exports.PackageManagers = void 0;
 const pip_cache_1 = __importDefault(__nccwpck_require__(5546));
 const pipenv_cache_1 = __importDefault(__nccwpck_require__(238));
 const poetry_cache_1 = __importDefault(__nccwpck_require__(1993));
+const uv_cache_1 = __importDefault(__nccwpck_require__(8795));
 var PackageManagers;
 (function (PackageManagers) {
     PackageManagers["Pip"] = "pip";
     PackageManagers["Pipenv"] = "pipenv";
     PackageManagers["Poetry"] = "poetry";
+    PackageManagers["Uv"] = "uv";
 })(PackageManagers || (exports.PackageManagers = PackageManagers = {}));
 function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath) {
     switch (packageManager) {
@@ -98813,6 +98815,8 @@ function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath)
             return new pipenv_cache_1.default(pythonVersion, cacheDependencyPath);
         case PackageManagers.Poetry:
             return new poetry_cache_1.default(pythonVersion, cacheDependencyPath);
+        case PackageManagers.Uv:
+            return new uv_cache_1.default(pythonVersion, cacheDependencyPath);
         default:
             throw new Error(`Caching for '${packageManager}' is not supported`);
     }
@@ -99185,6 +99189,88 @@ class PoetryCache extends cache_distributor_1.default {
     }
 }
 exports["default"] = PoetryCache;
+
+
+/***/ }),
+
+/***/ 8795:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const glob = __importStar(__nccwpck_require__(8090));
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const cache_distributor_1 = __importDefault(__nccwpck_require__(8953));
+class UvCache extends cache_distributor_1.default {
+    constructor(pythonVersion, patterns = '**/requirements.txt') {
+        super('uv', patterns);
+        this.pythonVersion = pythonVersion;
+        this.patterns = patterns;
+    }
+    getCacheGlobalDirectories() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            if (process.platform === 'win32') {
+                // `LOCALAPPDATA` should always be defined,
+                // but we can't just join `undefined`
+                // into the path in case it's not.
+                return [
+                    path.join((_a = process.env['LOCALAPPDATA']) !== null && _a !== void 0 ? _a : os.homedir(), 'uv', 'cache')
+                ];
+            }
+            return [path.join(os.homedir(), '.cache/uv')];
+        });
+    }
+    computeKeys() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const hash = yield glob.hashFiles(this.patterns);
+            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            const restoreKey = undefined;
+            return {
+                primaryKey,
+                restoreKey
+            };
+        });
+    }
+}
+exports["default"] = UvCache;
 
 
 /***/ }),

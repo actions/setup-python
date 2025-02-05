@@ -13,6 +13,7 @@ describe('run', () => {
     '2d0ff7f46b0e120e3d3294db65768b474934242637b9899b873e6283dfd16d7c';
   const poetryLockHash =
     '571bf984f8d210e6a97f854e479fdd4a2b5af67b5fdac109ec337a0ea16e7836';
+  const uvLockHash = 'TODO'; // TODO: what should be the correct value?
 
   // core spy
   let infoSpy: jest.SpyInstance;
@@ -194,6 +195,34 @@ describe('run', () => {
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith(
         `Cache hit occurred on the primary key ${poetryLockHash}, not saving cache.`
+      );
+      expect(saveCacheSpy).toHaveBeenCalled();
+      expect(infoSpy).toHaveBeenLastCalledWith(
+        `Cache saved with the key: ${requirementsHash}`
+      );
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('saves cache from uv', async () => {
+      inputs['cache'] = 'uv';
+      inputs['python-version'] = '3.12.0';
+      getStateSpy.mockImplementation((name: string) => {
+        if (name === State.CACHE_MATCHED_KEY) {
+          console.log(name);
+          return uvLockHash;
+        } else if (name === State.CACHE_PATHS) {
+          return JSON.stringify([__dirname]);
+        } else {
+          return requirementsHash;
+        }
+      });
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(getStateSpy).toHaveBeenCalledTimes(3);
+      expect(infoSpy).not.toHaveBeenCalledWith(
+        `Cache hit occurred on the primary key ${uvLockHash}, not saving cache.`
       );
       expect(saveCacheSpy).toHaveBeenCalled();
       expect(infoSpy).toHaveBeenLastCalledWith(
