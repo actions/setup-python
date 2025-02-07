@@ -12021,7 +12021,11 @@ function getManifestFromRepo(owner, repo, auth, branch = 'master') {
                 core.debug('Invalid json');
             }
         }
-        return releases;
+        if (!releases.hasOwnProperty('documentation_url')){
+            return releases;
+          }else{
+            throw new Error ('github API rate limiting response in JSON format')
+          }
     });
 }
 exports.getManifestFromRepo = getManifestFromRepo;
