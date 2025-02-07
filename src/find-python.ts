@@ -134,20 +134,38 @@ export async function useCpythonVersion(
     core.addPath(_binDir);
 
     if (IS_WINDOWS) {
-      // Add --user directory
-      // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-      // So if `findLocalTool` succeeded above, we must have a conformant `installDir`
+      // Get Python version from the installDir path
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
-
-      const userScriptsDir = path.join(
-        process.env['APPDATA'] || '',
-        'Python',
-        `Python${major}${minor}`,
-        'Scripts'
-      );
-      core.addPath(userScriptsDir);
+  
+      if (major >= 3 && (major > 3 || minor >= 10)) {
+        
+        const arch = architecture === 'x64' ? '64' : '32';
+  
+        const userScriptsDir = path.join(
+          process.env['APPDATA'] || '',
+          'Python',
+          `Python${major}${minor}-${arch}`, // Add architecture-specific folder (e.g., Python310-64 or Python310-32)
+          'Scripts'
+        );
+        
+        // Add the dynamically constructed path to the environment PATH variable
+        core.addPath(userScriptsDir);
+        core.debug(`Updated PATH with architecture-specific path: ${userScriptsDir}`);
+      } else {
+        // For Python < 3.10, add the default path without architecture-specific folder as per the official installer path
+        const userScriptsDir = path.join(
+          process.env['APPDATA'] || '',
+          'Python',
+          `Python${major}${minor}`, 
+          'Scripts'
+        );
+        
+        // Add the default path to the environment PATH variable
+        core.addPath(userScriptsDir);
+        core.debug(`Updated PATH for Python < 3.10: ${userScriptsDir}`);
+      }
     }
     // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
   }
