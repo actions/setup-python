@@ -26,6 +26,9 @@ inputs:
   allow-prereleases:
     description: "When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython."
     default: false
+  freethreaded:
+    description: "When 'true', use the freethreaded version of Python."
+    default: false
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
