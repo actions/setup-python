@@ -91135,17 +91135,9 @@ function desugarVersion(versionSpec) {
     return { version: desugarDevVersion(version), freethreaded };
 }
 exports.desugarVersion = desugarVersion;
-/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev, 3.14.0a1t.
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev.
  * Returns the version without the `t` and the architectures suffix, if freethreaded */
 function desugarFreeThreadedVersion(versionSpec) {
-    // e.g., 3.14.0a1t -> 3.14.0a1
-    const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)(t)/g;
-    if (prereleaseVersion.test(versionSpec)) {
-        return {
-            version: versionSpec.replace(prereleaseVersion, '$1$2'),
-            freethreaded: true
-        };
-    }
     const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
     if (majorMinor.test(versionSpec)) {
         return { version: versionSpec.replace(majorMinor, '$1'), freethreaded: true };
@@ -91172,22 +91164,15 @@ function versionFromPath(installDir) {
 }
 /**
  * Python's prelease versions look like `3.7.0b2`.
- * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-beta.2`.
+ * This is the one part of Python versioning that does not look like semantic versioning, which specifies `3.7.0-b2`.
  * If the version spec contains prerelease versions, we need to convert them to the semantic version equivalent.
  *
  * For easier use of the action, we also map 'x.y' to allow pre-release before 'x.y.0' release if allowPreReleases is true
  */
 function pythonVersionToSemantic(versionSpec, allowPreReleases) {
-    const preleaseMap = {
-        a: 'alpha',
-        b: 'beta',
-        rc: 'rc'
-    };
-    const prereleaseVersion = /(\d+\.\d+\.\d+)(a|b|rc)(\d+)/g;
-    let result = versionSpec.replace(prereleaseVersion, (_, p1, p2, p3) => {
-        return `${p1}-${preleaseMap[p2]}.${p3}`;
-    });
+    const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc)\d*)/g;
     const majorMinor = /^(\d+)\.(\d+)$/;
+    let result = versionSpec.replace(prereleaseVersion, '$1-$2');
     if (allowPreReleases) {
         result = result.replace(majorMinor, '~$1.$2.0-0');
     }
