@@ -91125,7 +91125,7 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
         }
         core.setOutput('python-version', pythonVersion);
         core.setOutput('python-path', pythonPath);
-        return { impl: 'CPython', version: installed };
+        return { impl: 'CPython', version: pythonVersion };
     });
 }
 exports.useCpythonVersion = useCpythonVersion;

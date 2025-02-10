@@ -173,7 +173,7 @@ export async function useCpythonVersion(
   core.setOutput('python-version', pythonVersion);
   core.setOutput('python-path', pythonPath);
 
-  return {impl: 'CPython', version: installed};
+  return {impl: 'CPython', version: pythonVersion};
 }
 
 /* Desugar free threaded and dev versions */
