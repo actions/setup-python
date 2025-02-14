@@ -91073,12 +91073,16 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
         }
         if (!installDir) {
             const osInfo = yield (0, utils_1.getOSInfo)();
-            throw new Error([
+            const msg = [
                 `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
                     ? `${osInfo.osName} ${osInfo.osVersion}`
-                    : 'this operating system'}.`,
-                `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
-            ].join(os.EOL));
+                    : 'this operating system'}.`
+            ];
+            if (freethreaded) {
+                msg.push(`Free threaded versions are only available for Python 3.13.0 and later.`);
+            }
+            msg.push(`The list of all available versions can be found here: ${installer.MANIFEST_URL}`);
+            throw new Error(msg.join(os.EOL));
         }
         const _binDir = binDir(installDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
