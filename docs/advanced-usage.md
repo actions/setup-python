@@ -77,7 +77,8 @@ steps:
 - run: python my_script.py
 ```
 
-You can specify the [free threading](https://docs.python.org/3/howto/free-threading-python.html) version of Python by setting the `freethreaded` input to `true` or by using the special **t** suffix in some cases.  Pre-release free threading versions can be specified like `3.14t-dev`.
+You can specify the [free threading](https://docs.python.org/3/howto/free-threading-python.html) version of Python by setting the `freethreaded` input to `true` or by using the special **t** suffix in some cases.
+You can use the **t** suffix when specifying the major and minor version (e.g., `3.13t`), with a patch version (e.g., `3.13.1t`), or with the **x.y-dev syntax** (e.g., `3.14t-dev`).
 Free threaded Python is only available starting with the 3.13 release.
 
 ```yaml
