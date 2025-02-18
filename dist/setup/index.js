@@ -99615,14 +99615,12 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
                     'Scripts');
                     // Add the dynamically constructed path to the environment PATH variable
                     core.addPath(userScriptsDir);
-                    core.debug(`Updated PATH with architecture-specific path: ${userScriptsDir}`);
                 }
                 else {
                     // For Python < 3.10, add the default path without architecture-specific folder as per the official installer path
                     const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}`, 'Scripts');
                     // Add the default path to the environment PATH variable
                     core.addPath(userScriptsDir);
-                    core.debug(`Updated PATH for Python < 3.10: ${userScriptsDir}`);
                 }
             }
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
