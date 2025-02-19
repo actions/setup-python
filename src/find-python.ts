@@ -145,13 +145,13 @@ export async function useCpythonVersion(
         // Check for x32 or x86 and append the '-32' suffix
         // Check for x32 or x86 and append the '-32' suffix
         if (architecture === 'x32' || architecture === 'x86') {
-          arch = `32`; // Always add '-32' for both x32 and x86 architectures
+          arch = `-32`; // Always add '-32' for both x32 and x86 architectures
         }
 
         const userScriptsDir = path.join(
           process.env['APPDATA'] || '',
           'Python',
-          `Python${major}${minor}-${arch}`, // Add architecture-specific folder (e.g., Python310-64 or Python310-32)
+          `Python${major}${minor}${arch}`, // Add architecture-specific folder (e.g., Python310-64 or Python310-32)
           'Scripts'
         );
 
