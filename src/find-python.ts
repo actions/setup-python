@@ -141,13 +141,31 @@ export async function useCpythonVersion(
       const major = semver.major(version);
       const minor = semver.minor(version);
 
-      const userScriptsDir = path.join(
-        process.env['APPDATA'] || '',
-        'Python',
-        `Python${major}${minor}`,
-        'Scripts'
-      );
-      core.addPath(userScriptsDir);
+      if (
+        architecture === 'x86' &&
+        (major > 3 || (major === 3 && minor >= 10))
+      ) {
+        // For Python >= 3.10 and architecture= 'x86', add the architecture-specific folder to the path
+        const arch = '32';
+
+        const userScriptsDir = path.join(
+          process.env['APPDATA'] || '',
+          'Python',
+          `Python${major}${minor}-${arch}`,
+          'Scripts'
+        );
+        core.addPath(userScriptsDir);
+      } else {
+        const userScriptsDir = path.join(
+          process.env['APPDATA'] || '',
+          'Python',
+          `Python${major}${minor}`,
+          'Scripts'
+        );
+
+        // Add the default path to the environment PATH variable
+        core.addPath(userScriptsDir);
+      }
     }
     // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
   }
