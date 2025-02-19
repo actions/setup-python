@@ -89,7 +89,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --no-root
 
   python-pip-dependencies-caching-path:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }}, caching path)

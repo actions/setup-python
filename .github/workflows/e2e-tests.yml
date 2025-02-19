@@ -12,39 +12,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-setup-python-older:
-    name: Test setup-python old versions
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      matrix:
-        operating-system:
-          [ubuntu-20.04, ubuntu-22.04, windows-latest, macos-latest, macos-13]
-        python: [3.8.10, 3.8.18]
-        exclude:
-          - operating-system: ubuntu-22.04
-            python: '3.8.10'
-          - operating-system: macos-latest
-            python: '3.8.18'
-          - operating-system: windows-latest
-            python: '3.8.18'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run with setup-python ${{ matrix.python }}
-        id: setup-python
-        uses: ./
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Verify ${{ matrix.python }}
-        run: python __tests__/verify-python.py ${{ matrix.python }}
   test-setup-python:
     name: Test setup-python
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
         operating-system:
-          [ubuntu-20.04, windows-latest, ubuntu-22.04, macos-latest, macos-13]
+          [
+            ubuntu-20.04,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-latest,
+            macos-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
