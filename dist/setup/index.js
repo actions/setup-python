@@ -99609,7 +99609,7 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
                 const version = path.basename(path.dirname(installDir));
                 const major = semver.major(version);
                 const minor = semver.minor(version);
-                if (parseFloat(version) >= 3.10 && architecture !== 'x64') {
+                if ((major > 3 || (major === 3 && minor >= 10)) && architecture !== 'x64') {
                     // For Python >= 3.10 and architecture!= 'x64', add the architecture-specific folder to the path
                     const arch = architecture === '32';
                     const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}-${arch}`, // Add architecture-specific folder (e.g., Python310-64 or Python310-32)

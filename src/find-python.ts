@@ -139,7 +139,7 @@ export async function useCpythonVersion(
       const major = semver.major(version);
       const minor = semver.minor(version);
 
-      if (parseFloat(version) >= 3.10 && architecture !== 'x64') {
+      if ((major > 3 || (major === 3 && minor >= 10)) && architecture !== 'x64') {
         // For Python >= 3.10 and architecture!= 'x64', add the architecture-specific folder to the path
         const arch = architecture === '32';
 
