@@ -139,19 +139,17 @@ export async function useCpythonVersion(
       const major = semver.major(version);
       const minor = semver.minor(version);
 
-      if (major > 3 || (major === 3 && minor >= 10)) {
+      if (
+        architecture === 'x86' &&
+        (major > 3 || (major === 3 && minor >= 10))
+      ) {
         // For Python >= 3.10 and architecture!= 'x64', add the architecture-specific folder to the path
-        let arch = '';
-        
-        // Check for x32 or x86 and append the '-32' suffix
-        if (architecture === 'x32' || architecture === 'x86') {
-          arch = `-32`; // Always add '-32' for both x32 and x86 architectures
-        }
+        let arch = '32';
 
         const userScriptsDir = path.join(
           process.env['APPDATA'] || '',
           'Python',
-          `Python${major}${minor}${arch}`, // Add architecture-specific folder (e.g., Python310 or Python310-32)
+          `Python${major}${minor}-${arch}`, // Add architecture-specific folder (e.g., Python310 or Python310-32)
           'Scripts'
         );
 
@@ -159,6 +157,7 @@ export async function useCpythonVersion(
         core.addPath(userScriptsDir);
       } else {
         // For Python < 3.10, add the default path without architecture-specific folder as per the official installer path
+
         const userScriptsDir = path.join(
           process.env['APPDATA'] || '',
           'Python',
