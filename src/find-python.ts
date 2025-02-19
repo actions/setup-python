@@ -139,8 +139,9 @@ export async function useCpythonVersion(
       const major = semver.major(version);
       const minor = semver.minor(version);
 
-      if (major >= 3 && (major > 3 || minor >= 10)) {
-        const arch = architecture === 'x64' ? '64' : '32';
+      if (parseFloat(version) >= 3.10 && architecture !== 'x64') {
+        // For Python >= 3.10 and architecture!= 'x64', add the architecture-specific folder to the path
+        const arch = architecture === '32';
 
         const userScriptsDir = path.join(
           process.env['APPDATA'] || '',
