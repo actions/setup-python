@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import * as finder from '../src/find-graalpy';
-import {IGraalPyManifestRelease, IS_WINDOWS} from '../src/utils';
+import {IGraalPyManifestRelease} from '../src/utils';
 
 import manifestData from './data/graalpy.json';
 
@@ -18,9 +18,6 @@ const architecture = 'x64';
 
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
-
-/* GraalPy doesn't have a windows release yet */
-const describeSkipOnWindows = IS_WINDOWS ? describe.skip : describe;
 
 describe('parseGraalPyVersion', () => {
   it.each([
@@ -108,7 +105,7 @@ describe('findGraalPyToolCache', () => {
   });
 });
 
-describeSkipOnWindows('findGraalPyVersion', () => {
+describe('findGraalPyVersion', () => {
   let getBooleanInputSpy: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
@@ -358,13 +355,13 @@ describeSkipOnWindows('findGraalPyVersion', () => {
   it('found and install successfully, pre-release fallback', async () => {
     spyCacheDir = jest.spyOn(tc, 'cacheDir');
     spyCacheDir.mockImplementation(() =>
-      path.join(toolDir, 'GraalPy', '23.1', architecture)
+      path.join(toolDir, 'GraalPy', '24.1', architecture)
     );
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
     await expect(
       finder.findGraalPyVersion(
-        'graalpy23.1',
+        'graalpy24.1',
         architecture,
         false,
         false,
@@ -372,7 +369,7 @@ describeSkipOnWindows('findGraalPyVersion', () => {
       )
     ).rejects.toThrow();
     await expect(
-      finder.findGraalPyVersion('graalpy23.1', architecture, false, false, true)
-    ).resolves.toEqual('23.1.0-a.1');
+      finder.findGraalPyVersion('graalpy24.1', architecture, false, false, true)
+    ).resolves.toEqual('24.1.0-ea.9');
   });
 });
