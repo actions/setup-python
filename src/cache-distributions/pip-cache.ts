@@ -21,24 +21,24 @@ class PipCache extends CacheDistributor {
   }
 
   protected async getCacheGlobalDirectories() {
-    let exitCode = 1;
+    let exitCode = 0;
     let stdout = '';
     let stderr = '';
 
     // Add temporary fix for Windows
-    // On windows it is necessary to execute through an exec
-    // because the getExecOutput gives a non zero code or writes to stderr for pip 22.0.2,
+    // On Windows, it is necessary to execute through an exec
+    // because the getExecOutput gives a non-zero code or writes to stderr for pip 22.0.2,
     // or spawn must be started with the shell option enabled for getExecOutput
     // Related issue: https://github.com/actions/setup-python/issues/328
     if (IS_WINDOWS) {
       const execPromisify = utils.promisify(child_process.exec);
-      ({stdout: stdout, stderr: stderr} = await execPromisify('pip cache dir'));
+      try {
+        ({stdout, stderr} = await execPromisify('pip cache dir'));
+      } catch (err) {
+        exitCode = 1;
+      }
     } else {
-      ({
-        stdout: stdout,
-        stderr: stderr,
-        exitCode: exitCode
-      } = await exec.getExecOutput('pip cache dir'));
+      ({stdout, stderr, exitCode} = await exec.getExecOutput('pip cache dir'));
     }
 
     if (exitCode && stderr) {
