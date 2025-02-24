@@ -279,11 +279,50 @@ export function getVersionInputFromPlainFile(versionFile: string): string[] {
 }
 
 /**
- * Python version extracted from a plain or TOML file.
+ * Python version extracted from a .tool-versions file.
+ */
+export function getVersionInputFromToolVersions(versionFile: string): string[] {
+  if (!fs.existsSync(versionFile)) {
+    core.warning(`File ${versionFile} does not exist.`);
+    return [];
+  }
+
+  try {
+    const fileContents = fs.readFileSync(versionFile, 'utf8');
+    const lines = fileContents.split('\n');
+    const versions: string[] = [];
+
+    for (const line of lines) {
+      // Skip commented lines
+      if (line.trim().startsWith('#')) {
+        continue;
+      }
+      const match = line.match(
+        /^\s*python\s*v?(?<version>[^\s]+(?:\s*[-<>=!]+[^\s]+)*)\s*(-\s([^\s].*))?\s*$/
+      );
+      if (match) {
+        return [match.groups?.version.trim() || ''];
+      }
+    }
+
+    if (versions.length === 0) {
+      core.warning(`No Python version found in ${versionFile}`);
+    }
+
+    return versions;
+  } catch (error) {
+    core.error(`Error reading ${versionFile}: ${(error as Error).message}`);
+    return [];
+  }
+}
+/**
+ * Python version extracted from a plain, .tool-versions or TOML file.
  */
 export function getVersionInputFromFile(versionFile: string): string[] {
   if (versionFile.endsWith('.toml')) {
     return getVersionInputFromTomlFile(versionFile);
+  } else if (versionFile.match('.tool-versions')) {
+    return getVersionInputFromToolVersions(versionFile);
   } else {
     return getVersionInputFromPlainFile(versionFile);
   }

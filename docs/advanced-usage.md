@@ -253,9 +253,9 @@ jobs:
 
 ## Using the `python-version-file` input
 
-`setup-python` action can read the Python or PyPy version from a version file. `python-version-file` input is used to specify the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with an error.
+`setup-python` action can read Python or PyPy version from a version file. `python-version-file` input is used for specifying the path to the version file. If the file that was supplied to `python-version-file` input doesn't exist, the action will fail with error.
 
->In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority.
+>In case both `python-version` and `python-version-file` inputs are supplied, the `python-version-file` input will be ignored due to its lower priority. The .tool-versions file supports version specifications in accordance with asdf standards, adhering to Semantic Versioning ([semver](https://semver.org)).
 
 ```yaml
 steps:
@@ -272,6 +272,15 @@ steps:
 - uses: actions/setup-python@v5
   with:
     python-version-file: 'pyproject.toml' # Read python version from a file pyproject.toml
+- run: python my_script.py
+```
+
+```yaml
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version-file: '.tool-versions' # Read python version from a file .tool-versions
 - run: python my_script.py
 ```
 
