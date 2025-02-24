@@ -33,7 +33,7 @@
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^2.0.1",
     "@iarna/toml": "^3.0.0",
-    "semver": "^7.6.0"
+    "semver": "^7.7.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
