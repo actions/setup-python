@@ -1,5 +1,6 @@
 ---
-name: "Setup Python"
+- name: Setup Python
+  uses: actions/setup-python@v5.4.0
 description: "Set up a specific version of Python and add the command-line tools to the PATH."
 author: "GitHub"
 inputs:
