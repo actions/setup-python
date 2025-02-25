@@ -98907,6 +98907,9 @@ class PipCache extends cache_distributor_1.default {
                     ({ stdout, stderr } = yield execPromisify('pip cache dir'));
                 }
                 catch (err) {
+                    // Pip outputs warnings to stderr (e.g., --no-python-version-warning flag deprecation warning), causing false failure detection
+                    // Related issue: https://github.com/actions/setup-python/issues/1034
+                    // If an error occurs, set exitCode to 1 to indicate failure
                     exitCode = 1;
                 }
             }
