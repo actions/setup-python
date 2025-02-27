@@ -297,9 +297,7 @@ export function getVersionInputFromToolVersions(versionFile: string): string[] {
       if (line.trim().startsWith('#')) {
         continue;
       }
-      const match = line.match(
-        /^\s*python\s*v?(?<version>[^\s]+(?:\s*[-<>=!]+[^\s]+)*)\s*(-\s([^\s].*))?\s*$/
-      );
+      const match = line.match(/^\s*python\s*v?\s*(?<version>[^\s]+)\s*$/);
       if (match) {
         return [match.groups?.version.trim() || ''];
       }
