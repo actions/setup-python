@@ -8,10 +8,30 @@ import * as tc from '@actions/tool-cache';
 
 jest.mock('@actions/http-client');
 jest.mock('@actions/tool-cache');
+jest.mock('@actions/tool-cache', () => ({
+  getManifestFromRepo: jest.fn()
+}));
 
-const mockManifest = [{version: '1.0.0'}];
+const mockManifest = [
+  {
+    version: '1.0.0',
+    stable: true,
+    files: [
+      {
+        filename: 'tool-v1.0.0-linux-x64.tar.gz',
+        platform: 'linux',
+        arch: 'x64',
+        download_url: 'https://example.com/tool-v1.0.0-linux-x64.tar.gz'
+      }
+    ]
+  }
+];
 
 describe('getManifest', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('should return manifest from repo', async () => {
     (tc.getManifestFromRepo as jest.Mock).mockResolvedValue(mockManifest);
     const manifest = await getManifest();
