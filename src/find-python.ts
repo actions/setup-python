@@ -35,15 +35,27 @@ export async function useCpythonVersion(
   architecture: string,
   updateEnvironment: boolean,
   checkLatest: boolean,
-  allowPreReleases: boolean
+  allowPreReleases: boolean,
+  freethreaded: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
-  const desugaredVersionSpec = desugarDevVersion(version);
+  const {version: desugaredVersionSpec, freethreaded: versionFreethreaded} =
+    desugarVersion(version);
   let semanticVersionSpec = pythonVersionToSemantic(
     desugaredVersionSpec,
     allowPreReleases
   );
+  if (versionFreethreaded) {
+    // Use the freethreaded version if it was specified in the input, e.g., 3.13t
+    freethreaded = true;
+  }
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+
+  if (freethreaded) {
+    // Free threaded versions use an architecture suffix like `x64-freethreaded`
+    core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
+    architecture += '-freethreaded';
+  }
 
   if (checkLatest) {
     manifest = await installer.getManifest();
@@ -90,16 +102,22 @@ export async function useCpythonVersion(
 
   if (!installDir) {
     const osInfo = await getOSInfo();
-    throw new Error(
-      [
-        `The version '${version}' with architecture '${architecture}' was not found for ${
-          osInfo
-            ? `${osInfo.osName} ${osInfo.osVersion}`
-            : 'this operating system'
-        }.`,
-        `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
-      ].join(os.EOL)
+    const msg = [
+      `The version '${version}' with architecture '${architecture}' was not found for ${
+        osInfo
+          ? `${osInfo.osName} ${osInfo.osVersion}`
+          : 'this operating system'
+      }.`
+    ];
+    if (freethreaded) {
+      msg.push(
+        `Free threaded versions are only available for Python 3.13.0 and later.`
+      );
+    }
+    msg.push(
+      `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
     );
+    throw new Error(msg.join(os.EOL));
   }
 
   const _binDir = binDir(installDir);
@@ -195,10 +213,38 @@ export async function useCpythonVersion(
   }
 
   const installed = versionFromPath(installDir);
-  core.setOutput('python-version', installed);
+  let pythonVersion = installed;
+  if (freethreaded) {
+    // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+    pythonVersion += 't';
+  }
+  core.setOutput('python-version', pythonVersion);
   core.setOutput('python-path', pythonPath);
 
-  return {impl: 'CPython', version: installed};
+  return {impl: 'CPython', version: pythonVersion};
+}
+
+/* Desugar free threaded and dev versions */
+export function desugarVersion(versionSpec: string) {
+  const {version, freethreaded} = desugarFreeThreadedVersion(versionSpec);
+  return {version: desugarDevVersion(version), freethreaded};
+}
+
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev.
+ * Returns the version without the `t` and the architectures suffix, if freethreaded */
+function desugarFreeThreadedVersion(versionSpec: string) {
+  const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
+  if (majorMinor.test(versionSpec)) {
+    return {version: versionSpec.replace(majorMinor, '$1'), freethreaded: true};
+  }
+  const devVersion = /^(\d+\.\d+)(t)(-dev)$/;
+  if (devVersion.test(versionSpec)) {
+    return {
+      version: versionSpec.replace(devVersion, '$1$3'),
+      freethreaded: true
+    };
+  }
+  return {version: versionSpec, freethreaded: false};
 }
 
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
