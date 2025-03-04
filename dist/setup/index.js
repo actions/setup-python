@@ -99514,7 +99514,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pythonVersionToSemantic = exports.useCpythonVersion = void 0;
+exports.pythonVersionToSemantic = exports.desugarVersion = exports.useCpythonVersion = void 0;
 const os = __importStar(__nccwpck_require__(857));
 const path = __importStar(__nccwpck_require__(6928));
 const utils_1 = __nccwpck_require__(1798);
@@ -99542,13 +99542,22 @@ function binDir(installDir) {
         return path.join(installDir, 'bin');
     }
 }
-function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases) {
+function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases, freethreaded) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         let manifest = null;
-        const desugaredVersionSpec = desugarDevVersion(version);
+        const { version: desugaredVersionSpec, freethreaded: versionFreethreaded } = desugarVersion(version);
         let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
+        if (versionFreethreaded) {
+            // Use the freethreaded version if it was specified in the input, e.g., 3.13t
+            freethreaded = true;
+        }
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+        if (freethreaded) {
+            // Free threaded versions use an architecture suffix like `x64-freethreaded`
+            core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
+            architecture += '-freethreaded';
+        }
         if (checkLatest) {
             manifest = yield installer.getManifest();
             const resolvedVersion = (_a = (yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
@@ -99572,12 +99581,16 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
         }
         if (!installDir) {
             const osInfo = yield (0, utils_1.getOSInfo)();
-            throw new Error([
+            const msg = [
                 `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
                     ? `${osInfo.osName} ${osInfo.osVersion}`
-                    : 'this operating system'}.`,
-                `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
-            ].join(os.EOL));
+                    : 'this operating system'}.`
+            ];
+            if (freethreaded) {
+                msg.push(`Free threaded versions are only available for Python 3.13.0 and later.`);
+            }
+            msg.push(`The list of all available versions can be found here: ${installer.MANIFEST_URL}`);
+            throw new Error(msg.join(os.EOL));
         }
         const _binDir = binDir(installDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
@@ -99617,12 +99630,39 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         }
         const installed = versionFromPath(installDir);
-        core.setOutput('python-version', installed);
+        let pythonVersion = installed;
+        if (freethreaded) {
+            // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+            pythonVersion += 't';
+        }
+        core.setOutput('python-version', pythonVersion);
         core.setOutput('python-path', pythonPath);
-        return { impl: 'CPython', version: installed };
+        return { impl: 'CPython', version: pythonVersion };
     });
 }
 exports.useCpythonVersion = useCpythonVersion;
+/* Desugar free threaded and dev versions */
+function desugarVersion(versionSpec) {
+    const { version, freethreaded } = desugarFreeThreadedVersion(versionSpec);
+    return { version: desugarDevVersion(version), freethreaded };
+}
+exports.desugarVersion = desugarVersion;
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev.
+ * Returns the version without the `t` and the architectures suffix, if freethreaded */
+function desugarFreeThreadedVersion(versionSpec) {
+    const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
+    if (majorMinor.test(versionSpec)) {
+        return { version: versionSpec.replace(majorMinor, '$1'), freethreaded: true };
+    }
+    const devVersion = /^(\d+\.\d+)(t)(-dev)$/;
+    if (devVersion.test(versionSpec)) {
+        return {
+            version: versionSpec.replace(devVersion, '$1$3'),
+            freethreaded: true
+        };
+    }
+    return { version: versionSpec, freethreaded: false };
+}
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
 function desugarDevVersion(versionSpec) {
     const devVersion = /^(\d+)\.(\d+)-dev$/;
@@ -100390,6 +100430,7 @@ function run() {
             const versions = resolveVersionInput();
             const checkLatest = core.getBooleanInput('check-latest');
             const allowPreReleases = core.getBooleanInput('allow-prereleases');
+            const freethreaded = core.getBooleanInput('freethreaded');
             if (versions.length) {
                 let pythonVersion = '';
                 const arch = core.getInput('architecture') || os.arch();
@@ -100410,7 +100451,7 @@ function run() {
                         if (version.startsWith('2')) {
                             core.warning('The support for python 2.7 was removed on June 19, 2023. Related issue: https://github.com/actions/setup-python/issues/672');
                         }
-                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
+                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases, freethreaded);
                         pythonVersion = installed.version;
                         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                     }
