@@ -28,24 +28,60 @@ export async function findReleaseFromManifest(
     manifest,
     architecture
   );
-
   return foundRelease;
 }
 
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    return await getManifestFromRepo();
+    const manifestFromRepo = await getManifestFromRepo();
+    core.info('Successfully fetched the manifest from the repo.');
+    validateManifest(manifestFromRepo);
+    return manifestFromRepo;
   } catch (err) {
-    core.debug('Fetching the manifest via the API failed.');
-    if (err instanceof Error) {
-      core.debug(err.message);
-    }
+    logError('Fetching the manifest via the API failed.', err);
   }
-  return await getManifestFromURL();
+  try {
+    const manifestFromURL = await getManifestFromURL();
+    core.info('Successfully fetched the manifest from the URL.');
+    return manifestFromURL;
+  } catch (err) {
+    logError('Fetching the manifest via the URL failed.', err);
+    // Rethrow the error or return a default value
+    throw new Error(
+      'Failed to fetch the manifest from both the repo and the URL.'
+    );
+  }
+}
+
+function validateManifest(manifest: any): void {
+  if (!Array.isArray(manifest) || !manifest.every(isValidManifestEntry)) {
+    throw new Error('Invalid manifest response');
+  }
+}
+
+function isValidManifestEntry(entry: any): boolean {
+  return (
+    typeof entry.version === 'string' &&
+    typeof entry.stable === 'boolean' &&
+    typeof entry.release_url === 'string' &&
+    Array.isArray(entry.files) &&
+    entry.files.every(isValidFileEntry)
+  );
+}
+
+function isValidFileEntry(file: any): boolean {
+  return (
+    typeof file.filename === 'string' &&
+    typeof file.arch === 'string' &&
+    typeof file.platform === 'string' &&
+    (typeof file.platform_version === 'string' ||
+      file.platform_version === undefined) &&
+    typeof file.download_url === 'string'
+  );
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
-  core.debug(
+  core.info(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
@@ -85,32 +121,30 @@ async function installPython(workingDirectory: string) {
     }
   };
 
-  if (IS_WINDOWS) {
-    await exec.exec('powershell', ['./setup.ps1'], options);
-  } else {
-    await exec.exec('bash', ['./setup.sh'], options);
-  }
+  const script = IS_WINDOWS ? 'powershell ./setup.ps1' : 'bash ./setup.sh';
+  await exec.exec(script, [], options);
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
-  let pythonPath = '';
   try {
     const fileName = getDownloadFileName(downloadUrl);
-    pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
+    const pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
     core.info('Extract downloaded archive');
-    let pythonExtractedFolder;
-    if (IS_WINDOWS) {
-      pythonExtractedFolder = await tc.extractZip(pythonPath);
-    } else {
-      pythonExtractedFolder = await tc.extractTar(pythonPath);
-    }
+    const pythonExtractedFolder = IS_WINDOWS
+      ? await tc.extractZip(pythonPath)
+      : await tc.extractTar(pythonPath);
 
     core.info('Execute installation script');
     await installPython(pythonExtractedFolder);
   } catch (err) {
+    handleDownloadError(err);
+    throw err;
+  }
+
+  function handleDownloadError(err: any): void {
     if (err instanceof tc.HTTPError) {
       // Rate limit?
       if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
@@ -124,6 +158,12 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
         core.debug(err.stack);
       }
     }
-    throw err;
+  }
+}
+
+function logError(message: string, err: any): void {
+  core.info(message);
+  if (err instanceof Error) {
+    core.info(err.message);
   }
 }
