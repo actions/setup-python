@@ -99260,8 +99260,8 @@ function findGraalPyVersion(versionSpec, architecture, updateEnvironment, checkL
         const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
         const _binDir = path.join(installDir, pipDir);
         const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        const pythonLocation = (0, utils_1.getBinaryDirectory)(installDir);
+        const pythonPath = path.join(_binDir, `python${binaryExtension}`);
+        const pythonLocation = path.join(installDir, 'bin');
         if (updateEnvironment) {
             core.exportVariable('pythonLocation', installDir);
             // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
@@ -99773,7 +99773,12 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
         try {
             const graalpyPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
             core.info('Extracting downloaded archive...');
-            downloadDir = yield tc.extractTar(graalpyPath);
+            if (utils_1.IS_WINDOWS) {
+                downloadDir = yield tc.extractZip(graalpyPath);
+            }
+            else {
+                downloadDir = yield tc.extractTar(graalpyPath);
+            }
             // root folder in archive can have unpredictable name so just take the first folder
             // downloadDir is unique folder under TEMP and can't contain any other folders
             const archiveName = fs_1.default.readdirSync(downloadDir)[0];
@@ -99782,7 +99787,7 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
             if (!(0, utils_1.isNightlyKeyword)(resolvedGraalPyVersion)) {
                 installDir = yield tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
             }
-            const binaryPath = (0, utils_1.getBinaryDirectory)(installDir);
+            const binaryPath = path.join(installDir, 'bin');
             yield createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
             yield installPip(binaryPath);
             return { installDir, resolvedGraalPyVersion };
@@ -99813,8 +99818,24 @@ function getAvailableGraalPyVersions() {
         if (AUTH) {
             headers.authorization = AUTH;
         }
+        /*
+        Get releases first.
+        */
         let url = 'https://api.github.com/repos/oracle/graalpython/releases';
         const result = [];
+        do {
+            const response = yield http.getJson(url, headers);
+            if (!response.result) {
+                throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+            }
+            result.push(...response.result);
+            url = (0, utils_1.getNextPageUrl)(response);
+        } while (url);
+        /*
+        Add pre-release builds.
+        */
+        url =
+            'https://api.github.com/repos/graalvm/graal-languages-ea-builds/releases';
         do {
             const response = yield http.getJson(url, headers);
             if (!response.result) {
@@ -99848,7 +99869,7 @@ function installPip(pythonLocation) {
     });
 }
 function graalPyTagToVersion(tag) {
-    const versionPattern = /.*-(\d+\.\d+\.\d+(?:\.\d+)?)((?:a|b|rc))?(\d*)?/;
+    const versionPattern = /.*-(\d+\.\d+\.\d+(?:\.\d+)?)(?:-((?:ea|a|b|rc))\.0*(\d*))?/;
     const match = tag.match(versionPattern);
     if (match && match[2]) {
         return `${match[1]}-${match[2]}.${match[3]}`;
@@ -99902,8 +99923,9 @@ exports.toGraalPyArchitecture = toGraalPyArchitecture;
 function findAsset(item, architecture, platform) {
     const graalpyArch = toGraalPyArchitecture(architecture);
     const graalpyPlatform = toGraalPyPlatform(platform);
+    const graalpyExt = platform == 'win32' ? 'zip' : 'tar.gz';
     const found = item.assets.filter(file => file.name.startsWith('graalpy') &&
-        file.name.endsWith(`-${graalpyPlatform}-${graalpyArch}.tar.gz`));
+        file.name.endsWith(`-${graalpyPlatform}-${graalpyArch}.${graalpyExt}`));
     /*
     In the future there could be more variants of GraalPy for a single release. Pick the shortest name, that one is the most likely to be the primary variant.
     */
@@ -100730,7 +100752,7 @@ function getVersionInputFromFile(versionFile) {
 }
 exports.getVersionInputFromFile = getVersionInputFromFile;
 /**
- * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
+ * Get the directory containing interpreter binary from installation directory of PyPy
  *  - On Linux and macOS, the Python interpreter is in 'bin'.
  *  - On Windows, it is in the installation root.
  */
