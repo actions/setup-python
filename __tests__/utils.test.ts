@@ -15,7 +15,8 @@ import {
   getNextPageUrl,
   isGhes,
   IS_WINDOWS,
-  getDownloadFileName
+  getDownloadFileName,
+  getVersionInputFromToolVersions
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -137,6 +138,82 @@ describe('Version from file test', () => {
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
       fs.writeFileSync(pythonVersionFilePath, ``);
       expect(_fn(pythonVersionFilePath)).toEqual([]);
+    }
+  );
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.9.10\nnodejs 16';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.9.10']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with comment',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = '# python 3.8\npython 3.9';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.9']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with whitespace',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = '  python   3.10  ';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.10']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with v prefix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python v3.9.10';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.9.10']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with v prefix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python pypy3.10-7.3.14';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['pypy3.10-7.3.14']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with v prefix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.14.0a5t';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.14.0a5t']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with v prefix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.14t-dev';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.14t-dev']);
     }
   );
 });
