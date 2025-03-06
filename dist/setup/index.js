@@ -100729,7 +100729,6 @@ function getVersionInputFromToolVersions(versionFile) {
     try {
         const fileContents = fs_1.default.readFileSync(versionFile, 'utf8');
         const lines = fileContents.split('\n');
-        const versions = [];
         for (const line of lines) {
             // Skip commented lines
             if (line.trim().startsWith('#')) {
@@ -100740,10 +100739,8 @@ function getVersionInputFromToolVersions(versionFile) {
                 return [((_a = match.groups) === null || _a === void 0 ? void 0 : _a.version.trim()) || ''];
             }
         }
-        if (versions.length === 0) {
-            core.warning(`No Python version found in ${versionFile}`);
-        }
-        return versions;
+        core.warning(`No Python version found in ${versionFile}`);
+        return [];
     }
     catch (error) {
         core.error(`Error reading ${versionFile}: ${error.message}`);
