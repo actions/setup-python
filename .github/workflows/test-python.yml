@@ -245,6 +245,36 @@ jobs:
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
+  setup-versions-from-.tool-versions-file:
+  name: Setup ${{ matrix.python }} ${{ matrix.os }} .tool-versions file
+  runs-on: ${{ matrix.os }}
+  strategy:
+  fail-fast: false
+  matrix:
+    os:
+      [
+        macos-latest,
+        windows-latest,
+        ubuntu-20.04,
+        ubuntu-22.04,
+        macos-13,
+        ubuntu-latest
+      ]
+    python: [3.13.0, 3.14-dev, pypy3.7-v7.3.3, graalpy-24.1.2]
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: build-tool-versions-file ${{ matrix.python }}
+    run: |
+      echo "python ${{ matrix.python }}" > .tool-versions
+
+  - name: setup-python using .tool-versions ${{ matrix.python }}
+    id: setup-python-tool-versions
+    uses: ./
+    with:
+      python-version-file: .tool-versions
+      
   setup-pre-release-version-from-manifest:
     name: Setup 3.14.0-alpha.1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
