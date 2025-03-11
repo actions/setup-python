@@ -260,7 +260,10 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.13.0, 3.14-dev, pypy3.7-v7.3.3, graalpy-24.1.2]
+        python: [3.13.0, 3.14-dev, pypy3.11-7.3.18, graalpy-24.1.2]
+        exclude:
+          - os: windows-latest
+            python: graalpy-24.1.2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
