@@ -245,7 +245,7 @@ jobs:
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
-  setup-versions-from-.tool-versions-file:
+  setup-versions-from-tool-versions-file:
     name: Setup ${{ matrix.python }} ${{ matrix.os }} .tool-versions file
     runs-on: ${{ matrix.os }}
     strategy:
