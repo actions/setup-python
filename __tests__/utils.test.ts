@@ -196,7 +196,7 @@ describe('Version from file test', () => {
   );
 
   it.each([getVersionInputFromToolVersions])(
-    'Version from .tool-versions with alpha Releases ',
+    'Version from .tool-versions with alpha Releases',
     async _fn => {
       const toolVersionFileName = '.tool-versions';
       const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
