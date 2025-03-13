@@ -100726,9 +100726,13 @@ function getVersionInputFromTomlFile(versionFile) {
         // standard project metadata (PEP 621)
         keys = ['project', 'requires-python'];
     }
-    else {
+    else if ('tool' in pyprojectConfig) {
         // python poetry
         keys = ['tool', 'poetry', 'dependencies', 'python'];
+    }
+    else if ('tools' in pyprojectConfig) {
+        // mise
+        keys = ['tools', 'python'];
     }
     const versions = [];
     const version = extractValue(pyprojectConfig, keys);

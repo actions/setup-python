@@ -278,6 +278,41 @@ jobs:
         with:
           python-version-file: .tool-versions
 
+setup-versions-from-mise-toml-file:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} mise.toml file
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-20.04,
+            ubuntu-22.04,
+            macos-13,
+            ubuntu-latest
+          ]
+        python: [3.13.0, 3.14.0, 3.15.0]
+        exclude:
+          - os: windows-latest
+            python: graalpy-24.1.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: build-mise-toml-file ${{ matrix.python }}
+        run: |
+          echo '[tools]
+            python = "${{ matrix.python }}"
+          ' > mise.toml
+
+      - name: setup-python using mise.toml ${{ matrix.python }}
+        id: setup-python-mise-toml
+        uses: ./
+        with:
+          python-version-file: mise.toml
+
   setup-pre-release-version-from-manifest:
     name: Setup 3.14.0-alpha.1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

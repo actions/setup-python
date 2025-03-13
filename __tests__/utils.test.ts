@@ -216,6 +216,18 @@ describe('Version from file test', () => {
       expect(_fn(toolVersionFilePath)).toEqual(['3.14t-dev']);
     }
   );
+
+  it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
+    'Version from mise.toml',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const filePath = path.join(tempDir, 'mise.toml');
+      const pythonVersion = '3.8.0';
+      const fileContent = `[tools]\npython = "${pythonVersion}"`;
+      fs.writeFileSync(filePath, fileContent);
+      expect(_fn(filePath)).toEqual([pythonVersion]);
+    }
+  );
 });
 
 describe('getNextPageUrl', () => {
