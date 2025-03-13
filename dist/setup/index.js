@@ -100535,7 +100535,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromToolVersions = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
@@ -100759,11 +100759,45 @@ function getVersionInputFromPlainFile(versionFile) {
 }
 exports.getVersionInputFromPlainFile = getVersionInputFromPlainFile;
 /**
- * Python version extracted from a plain or TOML file.
+ * Python version extracted from a .tool-versions file.
+ */
+function getVersionInputFromToolVersions(versionFile) {
+    var _a;
+    if (!fs_1.default.existsSync(versionFile)) {
+        core.warning(`File ${versionFile} does not exist.`);
+        return [];
+    }
+    try {
+        const fileContents = fs_1.default.readFileSync(versionFile, 'utf8');
+        const lines = fileContents.split('\n');
+        for (const line of lines) {
+            // Skip commented lines
+            if (line.trim().startsWith('#')) {
+                continue;
+            }
+            const match = line.match(/^\s*python\s*v?\s*(?<version>[^\s]+)\s*$/);
+            if (match) {
+                return [((_a = match.groups) === null || _a === void 0 ? void 0 : _a.version.trim()) || ''];
+            }
+        }
+        core.warning(`No Python version found in ${versionFile}`);
+        return [];
+    }
+    catch (error) {
+        core.error(`Error reading ${versionFile}: ${error.message}`);
+        return [];
+    }
+}
+exports.getVersionInputFromToolVersions = getVersionInputFromToolVersions;
+/**
+ * Python version extracted from a plain, .tool-versions or TOML file.
  */
 function getVersionInputFromFile(versionFile) {
     if (versionFile.endsWith('.toml')) {
         return getVersionInputFromTomlFile(versionFile);
+    }
+    else if (versionFile.match('.tool-versions')) {
+        return getVersionInputFromToolVersions(versionFile);
     }
     else {
         return getVersionInputFromPlainFile(versionFile);
