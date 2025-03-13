@@ -185,7 +185,7 @@ describe('Version from file test', () => {
   );
 
   it.each([getVersionInputFromToolVersions])(
-    'Version from .tool-versions with v prefix',
+    'Version from .tool-versions with pypy version',
     async _fn => {
       const toolVersionFileName = '.tool-versions';
       const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
@@ -196,7 +196,7 @@ describe('Version from file test', () => {
   );
 
   it.each([getVersionInputFromToolVersions])(
-    'Version from .tool-versions with v prefix',
+    'Version from .tool-versions with alpha Releases ',
     async _fn => {
       const toolVersionFileName = '.tool-versions';
       const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
@@ -207,7 +207,7 @@ describe('Version from file test', () => {
   );
 
   it.each([getVersionInputFromToolVersions])(
-    'Version from .tool-versions with v prefix',
+    'Version from .tool-versions with dev suffix',
     async _fn => {
       const toolVersionFileName = '.tool-versions';
       const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
