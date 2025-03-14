@@ -47,8 +47,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -93,8 +94,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -137,8 +139,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -335,8 +338,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -557,8 +561,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "${{ matrix.python-version }}"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python-version }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -586,8 +591,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.13"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.13"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
