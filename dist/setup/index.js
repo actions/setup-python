@@ -100240,20 +100240,49 @@ exports.findReleaseFromManifest = findReleaseFromManifest;
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield getManifestFromRepo();
+            const manifestFromRepo = yield getManifestFromRepo();
+            core.info('Successfully fetched the manifest from the repo.');
+            validateManifest(manifestFromRepo);
+            return manifestFromRepo;
         }
         catch (err) {
-            core.debug('Fetching the manifest via the API failed.');
-            if (err instanceof Error) {
-                core.debug(err.message);
-            }
+            logError('Fetching the manifest via the API failed.', err);
         }
-        return yield getManifestFromURL();
+        try {
+            const manifestFromURL = yield getManifestFromURL();
+            core.info('Successfully fetched the manifest from the URL.');
+            return manifestFromURL;
+        }
+        catch (err) {
+            logError('Fetching the manifest via the URL failed.', err);
+            // Rethrow the error or return a default value
+            throw new Error('Failed to fetch the manifest from both the repo and the URL.');
+        }
     });
 }
 exports.getManifest = getManifest;
+function validateManifest(manifest) {
+    if (!Array.isArray(manifest) || !manifest.every(isValidManifestEntry)) {
+        throw new Error('Invalid manifest response');
+    }
+}
+function isValidManifestEntry(entry) {
+    return (typeof entry.version === 'string' &&
+        typeof entry.stable === 'boolean' &&
+        typeof entry.release_url === 'string' &&
+        Array.isArray(entry.files) &&
+        entry.files.every(isValidFileEntry));
+}
+function isValidFileEntry(file) {
+    return (typeof file.filename === 'string' &&
+        typeof file.arch === 'string' &&
+        typeof file.platform === 'string' &&
+        (typeof file.platform_version === 'string' ||
+            file.platform_version === undefined) &&
+        typeof file.download_url === 'string');
+}
 function getManifestFromRepo() {
-    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
+    core.info(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
 exports.getManifestFromRepo = getManifestFromRepo;
@@ -100284,34 +100313,29 @@ function installPython(workingDirectory) {
                 }
             }
         };
-        if (utils_1.IS_WINDOWS) {
-            yield exec.exec('powershell', ['./setup.ps1'], options);
-        }
-        else {
-            yield exec.exec('bash', ['./setup.sh'], options);
-        }
+        const script = utils_1.IS_WINDOWS ? 'powershell ./setup.ps1' : 'bash ./setup.sh';
+        yield exec.exec(script, [], options);
     });
 }
 function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
         const downloadUrl = release.files[0].download_url;
         core.info(`Download from "${downloadUrl}"`);
-        let pythonPath = '';
         try {
             const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
-            pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
+            const pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
             core.info('Extract downloaded archive');
-            let pythonExtractedFolder;
-            if (utils_1.IS_WINDOWS) {
-                pythonExtractedFolder = yield tc.extractZip(pythonPath);
-            }
-            else {
-                pythonExtractedFolder = yield tc.extractTar(pythonPath);
-            }
+            const pythonExtractedFolder = utils_1.IS_WINDOWS
+                ? yield tc.extractZip(pythonPath)
+                : yield tc.extractTar(pythonPath);
             core.info('Execute installation script');
             yield installPython(pythonExtractedFolder);
         }
         catch (err) {
+            handleDownloadError(err);
+            throw err;
+        }
+        function handleDownloadError(err) {
             if (err instanceof tc.HTTPError) {
                 // Rate limit?
                 if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
@@ -100324,11 +100348,16 @@ function installCpythonFromRelease(release) {
                     core.debug(err.stack);
                 }
             }
-            throw err;
         }
     });
 }
 exports.installCpythonFromRelease = installCpythonFromRelease;
+function logError(message, err) {
+    core.info(message);
+    if (err instanceof Error) {
+        core.info(err.message);
+    }
+}
 
 
 /***/ }),
