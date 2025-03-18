@@ -34,6 +34,7 @@ jobs:
           - 'pypy-2.7-v7.3.12rc1'
           - 'pypy-3.10-nightly'
           - 'pypy3.10-v7.3.17'
+          - 'pypy3.11-v7.3.19'
 
     steps:
       - name: Checkout
@@ -86,7 +87,7 @@ jobs:
           - ubuntu-24.04
           - ubuntu-22.04-arm
           - ubuntu-24.04-arm
-        pypy: ['pypy-2.7', 'pypy-3.10']
+        pypy: ['pypy-2.7', 'pypy-3.10', 'pypy-3.11']
 
     steps:
       - name: Checkout
@@ -130,7 +131,7 @@ jobs:
       matrix:
         os:
           [macos-latest, windows-latest, ubuntu-20.04, ubuntu-latest, macos-13]
-        pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly']
+        pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly', 'pypy3.11']
 
     steps:
       - name: Checkout
@@ -160,7 +161,7 @@ jobs:
       - name: Setup PyPy and check latest
         uses: ./
         with:
-          python-version: 'pypy-3.10-v7.3.x'
+          python-version: 'pypy-3.11-v7.3.x'
           check-latest: true
       - name: PyPy and Python version
         run: python --version
@@ -176,7 +177,7 @@ jobs:
 
       - name: Assert expected binaries (or symlinks) are present
         run: |
-          EXECUTABLE="pypy-3.10-v7.3.x"
+          EXECUTABLE="pypy-3.11-v7.3.x"
           EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
           EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
           ${EXECUTABLE} --version
@@ -194,6 +195,7 @@ jobs:
         uses: ./
         with:
           python-version: |
+            pypy-3.11-v7.3.x
             pypy-3.10-v7.3.x
             pypy3.9
           check-latest: true
@@ -211,7 +213,7 @@ jobs:
 
       - name: Assert expected binaries (or symlinks) are present
         run: |
-          EXECUTABLE="pypy-3.10-v7.3.x"
+          EXECUTABLE="pypy-3.11-v7.3.x"
           EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
           EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
           ${EXECUTABLE} --version

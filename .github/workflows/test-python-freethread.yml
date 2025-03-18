@@ -1,4 +1,4 @@
-name: Validate Python e2e
+name: Validate Python e2e freethread
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
+        python: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,8 +47,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -72,7 +73,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
+        python: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,8 +94,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -118,7 +120,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
+        python: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -137,8 +139,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -162,7 +165,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.2]
+        python: [3.13.0, 3.13.1, 3.13.2]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -178,6 +181,7 @@ jobs:
         uses: ./
         with:
           python-version-file: pyproject.toml
+          freethreaded: true
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -211,7 +215,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
+        python: [3.13.0, 3.13.1, 3.13.2]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -260,10 +264,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.2, 3.14-dev]
-        exclude:
-          - os: windows-latest
-            python: graalpy-24.1.2
+        python: [3.13.0t, 3.13.1t, 3.13.2t, 3.14t-dev]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -302,6 +303,7 @@ jobs:
         uses: ./
         with:
           python-version: '3.14.0-alpha.6'
+          freethreaded: true
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -321,7 +323,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-dev-version:
-    name: Setup 3.14-dev ${{ matrix.os }}
+    name: Setup 3.14t-dev ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -331,11 +333,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.14-dev
+      - name: setup-python 3.14t-dev
         id: setup-python
         uses: ./
         with:
-          python-version: '3.14-dev'
+          python-version: '3.14t-dev'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -349,7 +351,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-prerelease-version:
-    name: Setup 3.14 ${{ matrix.os }}
+    name: Setup 3.14t ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -359,11 +361,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.14
+      - name: setup-python 3.14t
         id: setup-python
         uses: ./
         with:
-          python-version: '3.14'
+          python-version: '3.14t'
           allow-prereleases: true
 
       - name: Check python-path
@@ -392,7 +394,7 @@ jobs:
             macos-13,
             ubuntu-latest
           ]
-        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -416,7 +418,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: [3.13t]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
@@ -427,8 +429,9 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "${{ matrix.python-version }}"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python-version }}"
+          $expectedVersion = "${{ matrix.python-version }}".TrimEnd('t')
+          if ("$pythonVersion" -NotMatch $expectedVersion){
+            Write-Host "The current version is $pythonVersion; expected version is $expectedVersion"
             exit 1
           }
           $pythonVersion
@@ -446,11 +449,7 @@ jobs:
         uses: ./
         with:
           python-version: |
-            3.9
-            3.10
-            3.11
-            3.12
-            3.13
+            3.13t
           check-latest: true
       - name: Validate version
         run: |
