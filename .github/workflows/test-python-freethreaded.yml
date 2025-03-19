@@ -429,4 +429,4 @@ jobs:
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
         shell: bash
       - name: Validate GIL
-        run: python ./__tests__/verify-freethread.py
+        run: python ./__tests__/verify-freethreaded.py
