@@ -26,8 +26,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -69,8 +71,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -115,8 +119,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -159,8 +165,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.2]
     steps:
@@ -208,8 +216,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -257,8 +267,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.2, 3.14-dev]
         exclude:
@@ -290,8 +302,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
     steps:
       - name: Checkout
@@ -326,7 +340,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -354,7 +377,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-13
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -389,8 +421,10 @@ jobs:
             windows-latest,
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             macos-13,
-            ubuntu-latest
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
@@ -415,7 +449,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-13
+          ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
@@ -439,7 +482,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-13
+          ]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest

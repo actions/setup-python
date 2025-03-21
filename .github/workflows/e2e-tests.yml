@@ -22,7 +22,9 @@ jobs:
             ubuntu-20.04,
             windows-latest,
             ubuntu-22.04,
+            ubuntu-22.04-arm,
             ubuntu-latest,
+            ubuntu-24.04-arm,
             macos-latest,
             macos-13
           ]
