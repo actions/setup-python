@@ -99613,17 +99613,28 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
                     (major > 3 || (major === 3 && minor >= 10))) {
                     // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
                     const arch = '32'; // Only for x86 architecture
-                    const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}-${arch}`, 'Scripts');
-                    core.addPath(userScriptsDir);
+                    const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}-${arch}`, 'Scripts');
+                    core.addPath(pythonPath);
                 }
                 else {
                     // For Python >= 3.10 and architecture 'x64', or other versions, use the default user path
-                    const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}`, 'Scripts');
-                    core.addPath(userScriptsDir);
+                    const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}`, 'Scripts');
+                    core.addPath(pythonPath);
                 }
-                // Dynamically handle case for Python314t
-                const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}t`, 'Scripts');
-                core.addPath(pythonPath);
+                if (architecture === 'x86' &&
+                    (major > 3 || (major === 3 && minor >= 10))) {
+                    // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
+                    const arch = '32'; // Only for x86 architecture
+                    // Dynamically handle case for Python314t
+                    const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}t--${arch}`, 'Scripts');
+                    core.addPath(pythonPath);
+                }
+                else {
+                    // For Python >= 3.10 and architecture 'x64', or other versions, use the default user path
+                    // Dynamically handle case for Python314t
+                    const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}t`, 'Scripts');
+                    core.addPath(pythonPath);
+                }
             }
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         }
