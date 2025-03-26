@@ -141,7 +141,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-
             ubuntu-22.04,
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
@@ -176,7 +175,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-
             ubuntu-22.04,
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
@@ -219,7 +217,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-
             ubuntu-22.04,
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
