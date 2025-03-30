@@ -169,7 +169,7 @@ function restoreCacheV1(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // Supress all non-validation cache related errors because caching should be optional
+                // Suppress all non-validation cache related errors because caching should be optional
                 core.warning(`Failed to restore: ${error.message}`);
             }
         }
@@ -247,7 +247,7 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // Supress all non-validation cache related errors because caching should be optional
+                // Suppress all non-validation cache related errors because caching should be optional
                 core.warning(`Failed to restore: ${error.message}`);
             }
         }
@@ -1529,7 +1529,7 @@ function getGnuTarPathOnWindows() {
 exports.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
 function assertDefined(name, value) {
     if (value === undefined) {
-        throw Error(`Expected ${name} but value was undefiend`);
+        throw Error(`Expected ${name} but value was undefined`);
     }
     return value;
 }
@@ -2619,7 +2619,7 @@ function getTarArgs(tarPath, compressionMethod, type, archivePath = '') {
         const cacheFileName = utils.getCacheFileName(compressionMethod);
         const tarFile = 'cache.tar';
         const workingDirectory = getWorkingDirectory();
-        // Speficic args for BSD tar on windows for workaround
+        // Specific args for BSD tar on windows for workaround
         const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD &&
             compressionMethod !== constants_1.CompressionMethod.Gzip &&
             IS_WINDOWS;
@@ -3017,7 +3017,7 @@ const core = __importStar(__nccwpck_require__(7484));
  * @param copy the original upload options
  */
 function getUploadOptions(copy) {
-    // Defaults if not overriden
+    // Defaults if not overridden
     const result = {
         useAzureSdk: false,
         uploadConcurrency: 4,
@@ -4336,7 +4336,7 @@ tok('GTLT')
 src[t.GTLT] = '((?:<|>)?=?)'
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Note that "x.x" is a valid xRange identifier, meaning "any version"
 // Only the first item is strictly required.
 tok('XRANGEIDENTIFIERLOOSE')
 src[t.XRANGEIDENTIFIERLOOSE] = src[t.NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
@@ -5705,7 +5705,7 @@ function outside (version, range, hilo, options) {
       throw new TypeError('Must provide a hilo val of "<" or ">"')
   }
 
-  // If it satisifes the range it is not outside
+  // If it satisfies the range it is not outside
   if (satisfies(version, range, options)) {
     return false
   }
@@ -6699,7 +6699,7 @@ class Summary {
     /**
      * If the summary buffer is empty
      *
-     * @returns {boolen} true if the buffer is empty
+     * @returns {boolean} true if the buffer is empty
      */
     isEmptyBuffer() {
         return this._buffer.length === 0;
@@ -6788,10 +6788,10 @@ class Summary {
         return this.addRaw(element).addEOL();
     }
     /**
-     * Adds a collapsable HTML details element to the summary buffer
+     * Adds a collapsible HTML details element to the summary buffer
      *
      * @param {string} label text for the closed state
-     * @param {string} content collapsable content
+     * @param {string} content collapsible content
      *
      * @returns {Summary} summary instance
      */
@@ -11074,7 +11074,7 @@ function isExplicitVersion(versionSpec) {
 }
 exports.isExplicitVersion = isExplicitVersion;
 /**
- * Get the highest satisfiying semantic version in `versions` which satisfies `versionSpec`
+ * Get the highest satisfying semantic version in `versions` which satisfies `versionSpec`
  *
  * @param versions        array of versions to evaluate
  * @param versionSpec     semantic version spec to satisfy
@@ -11310,7 +11310,7 @@ tok('GTLT')
 src[t.GTLT] = '((?:<|>)?=?)'
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Note that "x.x" is a valid xRange identifier, meaning "any version"
 // Only the first item is strictly required.
 tok('XRANGEIDENTIFIERLOOSE')
 src[t.XRANGEIDENTIFIERLOOSE] = src[t.NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
@@ -12679,7 +12679,7 @@ function outside (version, range, hilo, options) {
       throw new TypeError('Must provide a hilo val of "<" or ">"')
   }
 
-  // If it satisifes the range it is not outside
+  // If it satisfies the range it is not outside
   if (satisfies(version, range, options)) {
     return false
   }
@@ -13204,7 +13204,7 @@ function isSASCredential(credential) {
 function isTokenCredential(credential) {
     // Check for an object with a 'getToken' function and possibly with
     // a 'signRequest' function.  We do this check to make sure that
-    // a ServiceClientCredentials implementor (like TokenClientCredentials
+    // a ServiceClientCredentials implementer (like TokenClientCredentials
     // in ms-rest-nodeauth) doesn't get mistaken for a TokenCredential if
     // it doesn't actually implement TokenCredential also.
     const castCredential = credential;
@@ -14798,7 +14798,7 @@ class WebResource {
             if (typeof queryParameters !== "object") {
                 throw new Error(`options.queryParameters must be of type object. It should be a JSON object ` +
                     `of "query-parameter-name" as the key and the "query-parameter-value" as the value. ` +
-                    `The "query-parameter-value" may be fo type "string" or an "object" of the form { value: "query-parameter-value", skipUrlEncoding: true }.`);
+                    `The "query-parameter-value" may be of type "string" or an "object" of the form { value: "query-parameter-value", skipUrlEncoding: true }.`);
             }
             // append question mark if it is not present in the url
             if (this.url && this.url.indexOf("?") === -1) {
@@ -18724,7 +18724,7 @@ util.inherits(FormData, CombinedStream);
  * and file uploads to other web applications.
  *
  * @constructor
- * @param {Object} options - Properties to be added/overriden for FormData and CombinedStream
+ * @param {Object} options - Properties to be added/overridden for FormData and CombinedStream
  */
 function FormData(options) {
   if (!(this instanceof FormData)) {
@@ -19173,11 +19173,11 @@ FormData.prototype.submit = function(params, cb) {
     if (cb) {
       var onResponse;
 
-      var callback = function (error, responce) {
+      var callback = function (error, response) {
         request.removeListener('error', callback);
         request.removeListener('response', onResponse);
 
-        return cb.call(this, error, responce);
+        return cb.call(this, error, response);
       };
 
       onResponse = callback.bind(this, null);
@@ -35548,7 +35548,7 @@ const PathStylePorts = [
  *   SDK will encode it to "http://account.blob.core.windows.net/con/b%253A" and send to server. A blob named "b%3A" will be created.
  *
  * But this strategy will make it not possible to create a blob with "?" in it's name. Because when customer URL string is
- * "http://account.blob.core.windows.net/con/blob?name", the "?name" will be treated as URL paramter instead of blob name.
+ * "http://account.blob.core.windows.net/con/blob?name", the "?name" will be treated as URL parameter instead of blob name.
  * If customer URL string is "http://account.blob.core.windows.net/con/blob%3Fname", a blob named "blob%3Fname" will be created.
  * V2 SDK doesn't have this issue because it doesn't allow customer pass in a full URL, it accepts a separate blob name and encodeURIComponent for it.
  * We cannot accept a SDK cannot create a blob name with "?". So we implement strategy two:
@@ -36019,7 +36019,7 @@ function toBlobTags(tags) {
     return res;
 }
 /**
- * Covert BlobTags to Tags type.
+ * Convert BlobTags to Tags type.
  *
  * @param tags -
  */
@@ -37298,7 +37298,7 @@ class BlobSASPermissions {
          */
         this.deleteVersion = false;
         /**
-         * Specfies Tag access granted.
+         * Specifies Tag access granted.
          */
         this.tag = false;
         /**
@@ -37495,7 +37495,7 @@ class ContainerSASPermissions {
          */
         this.list = false;
         /**
-         * Specfies Tag access granted.
+         * Specifies Tag access granted.
          */
         this.tag = false;
         /**
@@ -41683,7 +41683,7 @@ class BlobClient extends StorageClient {
      * Sets tags on the underlying blob.
      * A blob can have up to 10 tags. Tag keys must be between 1 and 128 characters.  Tag values must be between 0 and 256 characters.
      * Valid tag key and value characters include lower and upper case letters, digits (0-9),
-     * space (' '), plus ('+'), minus ('-'), period ('.'), foward slash ('/'), colon (':'), equals ('='), and underscore ('_').
+     * space (' '), plus ('+'), minus ('-'), period ('.'), forward slash ('/'), colon (':'), equals ('='), and underscore ('_').
      *
      * @param tags -
      * @param options -
@@ -44045,7 +44045,7 @@ class BatchResponseParser {
             // The response will contain the Content-ID header for each corresponding subrequest response to use for tracking.
             // The Content-IDs are set to a valid index in the subrequests we sent. In the status code 202 path, we could expect it
             // to be 1-1 mapping from the [0, subRequests.size) to the Content-IDs returned. If not, we simply don't return that
-            // unexpected subResponse in the parsed reponse and we can always look it up in the raw response for debugging purpose.
+            // unexpected subResponse in the parsed response and we can always look it up in the raw response for debugging purpose.
             if (contentId !== NOT_FOUND &&
                 Number.isInteger(contentId) &&
                 contentId >= 0 &&
@@ -45847,7 +45847,7 @@ class AccountSASPermissions {
          */
         this.process = false;
         /**
-         * Specfies Tag access granted.
+         * Specifies Tag access granted.
          */
         this.tag = false;
         /**
@@ -47702,7 +47702,7 @@ function makeParserClass (Parser) {
       return this.goto(this.parseWhitespaceToEOL)
     }
 
-    /* ASSSIGNMENT expression, key = value possibly inside an inline table */
+    /* ASSIGNMENT expression, key = value possibly inside an inline table */
     parseAssign () {
       return this.callNow(this.parseKeyword, this.recordAssignKeyword)
     }
@@ -53585,7 +53585,7 @@ class BinaryReader {
                 }
                 break;
             default:
-                throw new Error("cant skip wire type " + wireType);
+                throw new Error("can't skip wire type " + wireType);
         }
         this.assertBounds();
         return this.buf.subarray(start, this.pos);
@@ -60725,7 +60725,7 @@ function fetch(url, opts) {
 				} catch (err) {
 					// error here can only be invalid URL in Location: header
 					// do not throw when options.redirect == manual
-					// let the user extract the errorneous redirect URL
+					// let the user extract the erroneous redirect URL
 					if (request.redirect !== 'manual') {
 						reject(new FetchError(`uri requested responds with an invalid redirect URL: ${location}`, 'invalid-redirect'));
 						finalize();
@@ -61650,7 +61650,7 @@ exports.AbortError = AbortError;
     var parent = parser.tags[parser.tags.length - 1] || parser
     var tag = parser.tag = { name: parser.tagName, attributes: {} }
 
-    // will be overridden if tag contails an xmlns="foo" or xmlns:foo="bar"
+    // will be overridden if tag contains an xmlns="foo" or xmlns:foo="bar"
     if (parser.opt.xmlns) {
       tag.ns = parent.ns
     }
@@ -64345,7 +64345,7 @@ createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`)
 createToken('GTLT', '((?:<|>)?=?)')
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Note that "x.x" is a valid xRange identifier, meaning "any version"
 // Only the first item is strictly required.
 createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`)
 createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`)
@@ -69939,7 +69939,7 @@ class Client extends DispatcherBase {
     }
 
     if (maxConcurrentStreams != null && (typeof maxConcurrentStreams !== 'number' || maxConcurrentStreams < 1)) {
-      throw new InvalidArgumentError('maxConcurrentStreams must be a possitive integer, greater than 0')
+      throw new InvalidArgumentError('maxConcurrentStreams must be a positive integer, greater than 0')
     }
 
     if (typeof connect !== 'function') {
@@ -69986,7 +69986,7 @@ class Client extends DispatcherBase {
       ? null
       : {
         // streams: null, // Fixed queue of streams - For future support of `push`
-          openStreams: 0, // Keep track of them to decide wether or not unref the session
+          openStreams: 0, // Keep track of them to decide whether or not unref the session
           maxConcurrentStreams: maxConcurrentStreams != null ? maxConcurrentStreams : 100 // Max peerConcurrentStreams for a Node h2 server
         }
     this[kHost] = `${this[kUrl].hostname}${this[kUrl].port ? `:${this[kUrl].port}` : ''}`
@@ -71182,7 +71182,7 @@ function write (client, request) {
   // Sending a payload body on a request that does not
   // expect it can cause undefined behavior on some
   // servers and corrupt connection state. Do not
-  // re-use the connection for further requests.
+  // reuse the connection for further requests.
 
   const expectsPayload = (
     method === 'PUT' ||
@@ -71396,7 +71396,7 @@ function writeH2 (client, session, request) {
   }
 
   // https://tools.ietf.org/html/rfc7540#section-8.3
-  // :path and :scheme headers must be omited when sending CONNECT
+  // :path and :scheme headers must be omitted when sending CONNECT
 
   headers[HTTP2_HEADER_PATH] = path
   headers[HTTP2_HEADER_SCHEME] = 'https'
@@ -71408,7 +71408,7 @@ function writeH2 (client, session, request) {
   // Sending a payload body on a request that does not
   // expect it can cause undefined behavior on some
   // servers and corrupt connection state. Do not
-  // re-use the connection for further requests.
+  // reuse the connection for further requests.
 
   const expectsPayload = (
     method === 'PUT' ||
@@ -71523,7 +71523,7 @@ function writeH2 (client, session, request) {
   // })
 
   // stream.on('push', headers => {
-  //   // TODO(HTTP/2): Suppor push
+  //   // TODO(HTTP/2): Support push
   // })
 
   // stream.on('trailers', headers => {
@@ -72880,10 +72880,10 @@ const { InvalidArgumentError, ConnectTimeoutError } = __nccwpck_require__(8707)
 
 let tls // include tls conditionally since it is not always available
 
-// TODO: session re-use does not wait for the first
+// TODO: session reuse does not wait for the first
 // connection to resolve the session and might therefore
 // resolve the same servername multiple times even when
-// re-use is enabled.
+// reuse is enabled.
 
 let SessionCache
 // FIXME: remove workaround when the Node bug is fixed
@@ -74339,7 +74339,7 @@ function validateHandler (handler, method, upgrade) {
 }
 
 // A body is disturbed if it has been read from and it cannot
-// be re-used without losing state or data.
+// be reused without losing state or data.
 function isDisturbed (body) {
   return !!(body && (
     stream.isDisturbed
@@ -74893,7 +74893,7 @@ function extractBody (object, keepalive = false) {
 
     // Set action to this step: run the multipart/form-data
     // encoding algorithm, with object’s entry list and UTF-8.
-    // - This ensures that the body is immutable and can't be changed afterwords
+    // - This ensures that the body is immutable and can't be changed afterwards
     // - That the content-length is calculated in advance.
     // - And that all parts are pre-encoded and ready to be sent.
 
@@ -76090,7 +76090,7 @@ function serializeAMimeType (mimeType) {
     // 4. If value does not solely contain HTTP token code
     //    points or value is the empty string, then:
     if (!HTTP_TOKEN_CODEPOINTS.test(value)) {
-      // 1. Precede each occurence of U+0022 (") or
+      // 1. Precede each occurrence of U+0022 (") or
       //    U+005C (\) in value with U+005C (\).
       value = value.replace(/(\\|")/g, '\\$1')
 
@@ -84269,7 +84269,7 @@ class RedirectHandler {
       !ArrayBuffer.isView(this.opts.body) &&
       util.isIterable(this.opts.body)
     ) {
-      // TODO: Should we allow re-using iterable if !this.opts.idempotent
+      // TODO: Should we allow reusing iterable if !this.opts.idempotent
       // or through some other flag?
       this.opts.body = new BodyAsyncIterable(this.opts.body)
     }
@@ -84337,8 +84337,8 @@ class RedirectHandler {
 
         For status 300, which is "Multiple Choices", the spec mentions both generating a Location
         response header AND a response body with the other possible location to follow.
-        Since the spec explicitily chooses not to specify a format for such body and leave it to
-        servers and browsers implementors, we ignore the body as there is no specified way to eventually parse it.
+        Since the spec explicitly chooses not to specify a format for such body and leave it to
+        servers and browsers implementers, we ignore the body as there is no specified way to eventually parse it.
       */
     } else {
       return this.handler.onData(chunk)
@@ -84353,7 +84353,7 @@ class RedirectHandler {
         TLDR: undici always ignores 3xx response trailers as they are not expected in case of redirections
         and neither are useful if present.
 
-        See comment on onData method above for more detailed informations.
+        See comment on onData method above for more detailed information.
       */
 
       this.location = null
