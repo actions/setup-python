@@ -53,27 +53,25 @@ function isIToolRelease(obj: any): obj is IToolRelease {
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
     const repoManifest = await getManifestFromRepo();
-    core.debug(`Received repo manifest: ${JSON.stringify(repoManifest)}`);
 
     if (
       Array.isArray(repoManifest) &&
       repoManifest.length &&
       repoManifest.every(isIToolRelease)
     ) {
-      core.debug('Repo manifest is valid and contains IToolRelease items.');
       return repoManifest;
     } else {
-      core.debug(
-        'Repo manifest is invalid or does not contain IToolRelease items.'
+      throw new Error(
+        'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
       );
     }
   } catch (err) {
-    core.debug('Fetching the manifest via the API failed.');
+    core.error('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
       core.debug(`Error message: ${err.message}`);
       core.debug(`Error stack: ${err.stack}`);
     } else {
-      core.debug(
+      core.error(
         'Error is not an instance of Error. It might be something else.'
       );
     }
@@ -82,7 +80,7 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
-  core.debug(
+  core.info(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
@@ -94,12 +92,14 @@ export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
 }
 
 export async function getManifestFromURL(): Promise<tc.IToolRelease[]> {
-  core.debug('Falling back to fetching the manifest using raw URL.');
+  core.info('Falling back to fetching the manifest using raw URL.');
 
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
   const response = await http.getJson<tc.IToolRelease[]>(MANIFEST_URL);
   if (!response.result) {
-    throw new Error(`Unable to get manifest from ${MANIFEST_URL}`);
+    throw new Error(
+      `Unable to get manifest from ${MANIFEST_URL}. HTTP status: ${response.statusCode}`
+    );
   }
   return response.result;
 }
@@ -130,6 +130,9 @@ async function installPython(workingDirectory: string) {
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
+  if (!release.files || release.files.length === 0) {
+    throw new Error('No files found in the release to download.');
+  }
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
@@ -151,11 +154,11 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     if (err instanceof tc.HTTPError) {
       // Rate limit?
       if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
-        core.info(
+        core.error(
           `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
         );
       } else {
-        core.info(err.message);
+        core.error(err.message);
       }
       if (err.stack) {
         core.debug(err.stack);
