@@ -97461,15 +97461,40 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     });
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
+function isIToolRelease(obj) {
+    return (typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj.version === 'string' &&
+        typeof obj.stable === 'boolean' &&
+        Array.isArray(obj.files) &&
+        obj.files.every((file) => typeof file.filename === 'string' &&
+            typeof file.platform === 'string' &&
+            typeof file.arch === 'string' &&
+            typeof file.download_url === 'string'));
+}
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield getManifestFromRepo();
+            const repoManifest = yield getManifestFromRepo();
+            core.debug(`Received repo manifest: ${JSON.stringify(repoManifest)}`);
+            if (Array.isArray(repoManifest) &&
+                repoManifest.length &&
+                repoManifest.every(isIToolRelease)) {
+                core.debug('Repo manifest is valid and contains IToolRelease items.');
+                return repoManifest;
+            }
+            else {
+                core.debug('Repo manifest is invalid or does not contain IToolRelease items.');
+            }
         }
         catch (err) {
             core.debug('Fetching the manifest via the API failed.');
             if (err instanceof Error) {
-                core.debug(err.message);
+                core.debug(`Error message: ${err.message}`);
+                core.debug(`Error stack: ${err.stack}`);
+            }
+            else {
+                core.debug('Error is not an instance of Error. It might be something else.');
             }
         }
         return yield getManifestFromURL();

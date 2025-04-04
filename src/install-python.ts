@@ -5,6 +5,7 @@ import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
+import {IToolRelease} from '@actions/tool-cache';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -32,13 +33,49 @@ export async function findReleaseFromManifest(
   return foundRelease;
 }
 
+function isIToolRelease(obj: any): obj is IToolRelease {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.version === 'string' &&
+    typeof obj.stable === 'boolean' &&
+    Array.isArray(obj.files) &&
+    obj.files.every(
+      (file: any) =>
+        typeof file.filename === 'string' &&
+        typeof file.platform === 'string' &&
+        typeof file.arch === 'string' &&
+        typeof file.download_url === 'string'
+    )
+  );
+}
+
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    return await getManifestFromRepo();
+    const repoManifest = await getManifestFromRepo();
+    core.debug(`Received repo manifest: ${JSON.stringify(repoManifest)}`);
+
+    if (
+      Array.isArray(repoManifest) &&
+      repoManifest.length &&
+      repoManifest.every(isIToolRelease)
+    ) {
+      core.debug('Repo manifest is valid and contains IToolRelease items.');
+      return repoManifest;
+    } else {
+      core.debug(
+        'Repo manifest is invalid or does not contain IToolRelease items.'
+      );
+    }
   } catch (err) {
     core.debug('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
-      core.debug(err.message);
+      core.debug(`Error message: ${err.message}`);
+      core.debug(`Error stack: ${err.stack}`);
+    } else {
+      core.debug(
+        'Error is not an instance of Error. It might be something else.'
+      );
     }
   }
   return await getManifestFromURL();
