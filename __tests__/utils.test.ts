@@ -123,7 +123,8 @@ describe('Version from file test', () => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'python-version.file';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersionFileContent = '3.10/envs/virtualenv\r# 3.9\n3.8\r\n3.7\r\n 3.6 \r\n';
+      const pythonVersionFileContent =
+        '3.10/envs/virtualenv\r# 3.9\n3.8\r\n3.7\r\n 3.6 \r\n';
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual(['3.10', '3.8', '3.7', '3.6']);
     }
