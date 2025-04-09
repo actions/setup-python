@@ -97481,18 +97481,16 @@ function getManifest() {
                 repoManifest.every(isIToolRelease)) {
                 return repoManifest;
             }
-            else {
-                throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
-            }
+            throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
         }
         catch (err) {
-            core.error('Fetching the manifest via the API failed.');
+            core.error('Failed to fetch the manifest from the repository API.');
             if (err instanceof Error) {
-                core.debug(`Error message: ${err.message}`);
+                core.error(`Error message: ${err.message}`);
                 core.debug(`Error stack: ${err.stack}`);
             }
             else {
-                core.error('Error is not an instance of Error. It might be something else.');
+                core.error('An unexpected error occurred while fetching the manifest.');
             }
         }
         return yield getManifestFromURL();
@@ -97564,8 +97562,11 @@ function installCpythonFromRelease(release) {
         catch (err) {
             if (err instanceof tc.HTTPError) {
                 // Rate limit?
-                if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
-                    core.error(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                if (err.httpStatusCode === 403) {
+                    core.error(`Received HTTP status code 403 (Forbidden). This usually indicates that the request is not authorized. Please check your credentials or permissions.`);
+                }
+                else if (err.httpStatusCode === 429) {
+                    core.error(`Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`);
                 }
                 else {
                     core.error(err.message);
