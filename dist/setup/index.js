@@ -97566,7 +97566,7 @@ function installCpythonFromRelease(release) {
                     core.error(`Received HTTP status code 403 (Forbidden). This usually indicates that the request is not authorized. Please check your credentials or permissions.`);
                 }
                 else if (err.httpStatusCode === 429) {
-                    core.error(`Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`);
+                    core.info(`Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`);
                 }
                 else {
                     core.error(err.message);
