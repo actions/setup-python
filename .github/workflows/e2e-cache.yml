@@ -20,8 +20,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
         python-version: ['3.9', 'pypy-3.7-v7.x']
+        exclude:
+          - os: macos-13
+            python-version: 'pypy-3.7-v7.x'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -96,8 +99,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
         python-version: ['3.9', 'pypy-3.7-v7.x']
+        exclude:
+          - os: macos-13
+            python-version: 'pypy-3.7-v7.x'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python

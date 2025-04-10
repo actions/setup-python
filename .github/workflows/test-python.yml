@@ -20,11 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
-          - os: ubuntu-22.04
-            python: 3.5.4
           - os: ubuntu-22.04
             python: 3.6.7
           - os: ubuntu-22.04
@@ -64,11 +62,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
-          - os: ubuntu-22.04
-            python: 3.5.4
           - os: ubuntu-22.04
             python: 3.6.7
           - os: ubuntu-22.04
@@ -111,11 +107,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
-          - os: ubuntu-22.04
-            python: 3.5.4
           - os: ubuntu-22.04
             python: 3.6.7
           - os: ubuntu-22.04
@@ -156,11 +150,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13, '==3.10.10']
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        python: [3.6.7, 3.7.5, 3.8.15, 3.9.13, '==3.10.10']
         exclude:
-          - os: ubuntu-22.04
-            python: 3.5.4
           - os: ubuntu-22.04
             python: 3.6.7
           - os: ubuntu-22.04
@@ -206,11 +198,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
-        python: [3.5.4, 3.6.7, 3.7.5, 3.8.15, 3.9.13]
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
-          - os: ubuntu-22.04
-            python: 3.5.4
           - os: ubuntu-22.04
             python: 3.6.7
           - os: ubuntu-22.04
@@ -256,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04]
+        os: [macos-13, windows-latest, ubuntu-20.04]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -347,7 +337,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
         python: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: Checkout
@@ -395,7 +385,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python and check latest
