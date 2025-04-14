@@ -146,28 +146,22 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     await installPython(pythonExtractedFolder);
   } catch (err) {
     if (err instanceof tc.HTTPError) {
-      const statusCode = err.httpStatusCode;
-
-      if (statusCode === 429) {
-        // Too Many Requests - usually temporary and can be retried
-        core.info(
-          `Received HTTP status code ${statusCode}. This usually indicates the rate limit has been exceeded. Consider retrying after some time.`
-        );
-      } else if (statusCode === 403) {
-        // Forbidden - likely a permanent issue
+      // Rate limit?
+      if (err.httpStatusCode === 403) {
         core.error(
-          `Received HTTP status code ${statusCode}. Access is forbidden. Please check your credentials or permissions.`
+          `Received HTTP status code 403 (Forbidden). This usually indicates that the request is not authorized. Please check your credentials or permissions.`
+        );
+      } else if (err.httpStatusCode === 429) {
+        core.info(
+          `Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`
         );
       } else {
-        // Other HTTP errors
-        core.info(`Received HTTP error ${statusCode}: ${err.message}`);
+        core.info(err.message);
       }
-
       if (err.stack) {
-        core.debug(`Stack trace: ${err.stack}`);
+        core.debug(err.stack);
       }
     }
-
     throw err;
   }
 }
