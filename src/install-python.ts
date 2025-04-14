@@ -64,9 +64,9 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
       'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
     );
   } catch (err) {
-    core.error('Failed to fetch the manifest from the repository API.');
+    core.debug('Failed to fetch the manifest from the repository API.');
     if (err instanceof Error) {
-      core.error(`Error message: ${err.message}`);
+      core.debug(`Error message: ${err.message}`);
       core.debug(`Error stack: ${err.stack}`);
     } else {
       core.error('An unexpected error occurred while fetching the manifest.');
