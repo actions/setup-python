@@ -124,7 +124,6 @@ async function installPython(workingDirectory: string) {
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
-
   if (!release.files || release.files.length === 0) {
     throw new Error('No files found in the release to download.');
   }
@@ -147,18 +146,28 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     await installPython(pythonExtractedFolder);
   } catch (err) {
     if (err instanceof tc.HTTPError) {
-      // Rate limit?
-      if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
+      const statusCode = err.httpStatusCode;
+
+      if (statusCode === 429) {
+        // Too Many Requests - usually temporary and can be retried
         core.info(
-          `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
+          `Received HTTP status code ${statusCode}. This usually indicates the rate limit has been exceeded. Consider retrying after some time.`
+        );
+      } else if (statusCode === 403) {
+        // Forbidden - likely a permanent issue
+        core.error(
+          `Received HTTP status code ${statusCode}. Access is forbidden. Please check your credentials or permissions.`
         );
       } else {
-        core.info(err.message);
+        // Other HTTP errors
+        core.info(`Received HTTP error ${statusCode}: ${err.message}`);
       }
+
       if (err.stack) {
-        core.debug(err.stack);
+        core.debug(`Stack trace: ${err.stack}`);
       }
     }
+
     throw err;
   }
 }

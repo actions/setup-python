@@ -97562,21 +97562,20 @@ function installCpythonFromRelease(release) {
         catch (err) {
             if (err instanceof tc.HTTPError) {
                 const statusCode = err.httpStatusCode;
-                if (statusCode === 403 || statusCode === 429) {
-                    const rateLimitMessage = `HTTP ${statusCode} - Rate limit likely exceeded. This is typically due to too many requests or insufficient permissions.`;
-                    core.info(rateLimitMessage);
-                    if (err.stack) {
-                        core.debug(err.stack);
-                    }
-                    throw new Error(rateLimitMessage);
+                if (statusCode === 429) {
+                    // Too Many Requests - usually temporary and can be retried
+                    core.info(`Received HTTP status code ${statusCode}. This usually indicates the rate limit has been exceeded. Consider retrying after some time.`);
+                }
+                else if (statusCode === 403) {
+                    // Forbidden - likely a permanent issue
+                    core.error(`Received HTTP status code ${statusCode}. Access is forbidden. Please check your credentials or permissions.`);
                 }
                 else {
-                    const genericErrorMessage = `HTTP ${statusCode} - ${err.message}`;
-                    core.error(genericErrorMessage);
-                    if (err.stack) {
-                        core.debug(err.stack);
-                    }
-                    throw new Error(genericErrorMessage);
+                    // Other HTTP errors
+                    core.info(`Received HTTP error ${statusCode}: ${err.message}`);
+                }
+                if (err.stack) {
+                    core.debug(`Stack trace: ${err.stack}`);
                 }
             }
             throw err;
