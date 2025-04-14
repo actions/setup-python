@@ -62,10 +62,9 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
       'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
     );
   } catch (err) {
-    core.debug('Failed to fetch the manifest from the repository API.');
+    core.debug('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
-      core.debug(`Error message: ${err.message}`);
-      core.debug(`Error stack: ${err.stack}`);
+      core.debug(err.message);
     } else {
       core.error('An unexpected error occurred while fetching the manifest.');
     }
@@ -74,7 +73,7 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
-  core.info(
+  core.debug(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
@@ -86,14 +85,12 @@ export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
 }
 
 export async function getManifestFromURL(): Promise<tc.IToolRelease[]> {
-  core.info('Falling back to fetching the manifest using raw URL.');
+  core.debug('Falling back to fetching the manifest using raw URL.');
 
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
   const response = await http.getJson<tc.IToolRelease[]>(MANIFEST_URL);
   if (!response.result) {
-    throw new Error(
-      `Unable to get manifest from ${MANIFEST_URL}. HTTP status: ${response.statusCode}`
-    );
+    throw new Error(`Unable to get manifest from ${MANIFEST_URL}`);
   }
   return response.result;
 }
@@ -149,17 +146,17 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
       // Rate limit?
       if (err.httpStatusCode === 403) {
         core.error(
-          `Received HTTP status code 403 (Forbidden). This usually indicates that the request is not authorized. Please check your credentials or permissions.`
+          `Received HTTP status code 403. This indicates a permission issue or restricted access.`
         );
       } else if (err.httpStatusCode === 429) {
         core.info(
-          `Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`
+          `Received HTTP status code 429.  This usually indicates the rate limit has been exceeded`
         );
       } else {
         core.info(err.message);
       }
       if (err.stack) {
-        core.info(err.stack);
+        core.debug(err.stack);
       }
     }
     throw err;

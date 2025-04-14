@@ -97484,10 +97484,9 @@ function getManifest() {
             throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
         }
         catch (err) {
-            core.debug('Failed to fetch the manifest from the repository API.');
+            core.debug('Fetching the manifest via the API failed.');
             if (err instanceof Error) {
-                core.debug(`Error message: ${err.message}`);
-                core.debug(`Error stack: ${err.stack}`);
+                core.debug(err.message);
             }
             else {
                 core.error('An unexpected error occurred while fetching the manifest.');
@@ -97498,17 +97497,17 @@ function getManifest() {
 }
 exports.getManifest = getManifest;
 function getManifestFromRepo() {
-    core.info(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
+    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
 exports.getManifestFromRepo = getManifestFromRepo;
 function getManifestFromURL() {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info('Falling back to fetching the manifest using raw URL.');
+        core.debug('Falling back to fetching the manifest using raw URL.');
         const http = new httpm.HttpClient('tool-cache');
         const response = yield http.getJson(exports.MANIFEST_URL);
         if (!response.result) {
-            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}. HTTP status: ${response.statusCode}`);
+            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
         }
         return response.result;
     });
@@ -97563,16 +97562,16 @@ function installCpythonFromRelease(release) {
             if (err instanceof tc.HTTPError) {
                 // Rate limit?
                 if (err.httpStatusCode === 403) {
-                    core.error(`Received HTTP status code 403 (Forbidden). This usually indicates that the request is not authorized. Please check your credentials or permissions.`);
+                    core.error(`Received HTTP status code 403. This indicates a permission issue or restricted access.`);
                 }
                 else if (err.httpStatusCode === 429) {
-                    core.info(`Received HTTP status code 429 (Too Many Requests). This usually indicates that the rate limit has been exceeded. Please wait and try again later.`);
+                    core.info(`Received HTTP status code 429.  This usually indicates the rate limit has been exceeded`);
                 }
                 else {
                     core.info(err.message);
                 }
                 if (err.stack) {
-                    core.info(err.stack);
+                    core.debug(err.stack);
                 }
             }
             throw err;
