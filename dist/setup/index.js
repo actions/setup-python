@@ -97572,7 +97572,7 @@ function installCpythonFromRelease(release) {
                     core.info(err.message);
                 }
                 if (err.stack) {
-                    core.debug(err.stack);
+                    core.info(err.stack);
                 }
             }
             throw err;
