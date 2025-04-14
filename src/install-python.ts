@@ -5,6 +5,7 @@ import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
+import {IToolRelease} from '@actions/tool-cache';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -31,21 +32,49 @@ export async function findReleaseFromManifest(
 
   return foundRelease;
 }
-
+function isIToolRelease(obj: any): obj is IToolRelease {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.version === 'string' &&
+    typeof obj.stable === 'boolean' &&
+    Array.isArray(obj.files) &&
+    obj.files.every(
+      (file: any) =>
+        typeof file.filename === 'string' &&
+        typeof file.platform === 'string' &&
+        typeof file.arch === 'string' &&
+        typeof file.download_url === 'string'
+    )
+  );
+}
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    return await getManifestFromRepo();
+    const repoManifest = await getManifestFromRepo();
+    if (
+      Array.isArray(repoManifest) &&
+      repoManifest.length &&
+      repoManifest.every(isIToolRelease)
+    ) {
+      return repoManifest;
+    }
+    throw new Error(
+      'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
+    );
   } catch (err) {
-    core.debug('Fetching the manifest via the API failed.');
+    core.debug('Failed to fetch the manifest from the repository API.');
     if (err instanceof Error) {
-      core.debug(err.message);
+      core.debug(`Error message: ${err.message}`);
+      core.debug(`Error stack: ${err.stack}`);
+    } else {
+      core.error('An unexpected error occurred while fetching the manifest.');
     }
   }
   return await getManifestFromURL();
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
-  core.debug(
+  core.info(
     `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
   );
   return tc.getManifestFromRepo(
@@ -57,12 +86,14 @@ export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
 }
 
 export async function getManifestFromURL(): Promise<tc.IToolRelease[]> {
-  core.debug('Falling back to fetching the manifest using raw URL.');
+  core.info('Falling back to fetching the manifest using raw URL.');
 
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
   const response = await http.getJson<tc.IToolRelease[]>(MANIFEST_URL);
   if (!response.result) {
-    throw new Error(`Unable to get manifest from ${MANIFEST_URL}`);
+    throw new Error(
+      `Unable to get manifest from ${MANIFEST_URL}. HTTP status: ${response.statusCode}`
+    );
   }
   return response.result;
 }
@@ -93,6 +124,10 @@ async function installPython(workingDirectory: string) {
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
+
+  if (!release.files || release.files.length === 0) {
+    throw new Error('No files found in the release to download.');
+  }
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);

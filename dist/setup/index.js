@@ -97461,15 +97461,36 @@ function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     });
 }
 exports.findReleaseFromManifest = findReleaseFromManifest;
+function isIToolRelease(obj) {
+    return (typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj.version === 'string' &&
+        typeof obj.stable === 'boolean' &&
+        Array.isArray(obj.files) &&
+        obj.files.every((file) => typeof file.filename === 'string' &&
+            typeof file.platform === 'string' &&
+            typeof file.arch === 'string' &&
+            typeof file.download_url === 'string'));
+}
 function getManifest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield getManifestFromRepo();
+            const repoManifest = yield getManifestFromRepo();
+            if (Array.isArray(repoManifest) &&
+                repoManifest.length &&
+                repoManifest.every(isIToolRelease)) {
+                return repoManifest;
+            }
+            throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
         }
         catch (err) {
-            core.debug('Fetching the manifest via the API failed.');
+            core.debug('Failed to fetch the manifest from the repository API.');
             if (err instanceof Error) {
-                core.debug(err.message);
+                core.debug(`Error message: ${err.message}`);
+                core.debug(`Error stack: ${err.stack}`);
+            }
+            else {
+                core.error('An unexpected error occurred while fetching the manifest.');
             }
         }
         return yield getManifestFromURL();
@@ -97477,17 +97498,17 @@ function getManifest() {
 }
 exports.getManifest = getManifest;
 function getManifestFromRepo() {
-    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
+    core.info(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
 exports.getManifestFromRepo = getManifestFromRepo;
 function getManifestFromURL() {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug('Falling back to fetching the manifest using raw URL.');
+        core.info('Falling back to fetching the manifest using raw URL.');
         const http = new httpm.HttpClient('tool-cache');
         const response = yield http.getJson(exports.MANIFEST_URL);
         if (!response.result) {
-            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
+            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}. HTTP status: ${response.statusCode}`);
         }
         return response.result;
     });
@@ -97518,6 +97539,9 @@ function installPython(workingDirectory) {
 }
 function installCpythonFromRelease(release) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!release.files || release.files.length === 0) {
+            throw new Error('No files found in the release to download.');
+        }
         const downloadUrl = release.files[0].download_url;
         core.info(`Download from "${downloadUrl}"`);
         let pythonPath = '';
@@ -97537,15 +97561,22 @@ function installCpythonFromRelease(release) {
         }
         catch (err) {
             if (err instanceof tc.HTTPError) {
-                // Rate limit?
-                if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
-                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
+                const statusCode = err.httpStatusCode;
+                if (statusCode === 403 || statusCode === 429) {
+                    const rateLimitMessage = `HTTP ${statusCode} - Rate limit likely exceeded. This is typically due to too many requests or insufficient permissions.`;
+                    core.info(rateLimitMessage);
+                    if (err.stack) {
+                        core.debug(err.stack);
+                    }
+                    throw new Error(rateLimitMessage);
                 }
                 else {
-                    core.info(err.message);
-                }
-                if (err.stack) {
-                    core.debug(err.stack);
+                    const genericErrorMessage = `HTTP ${statusCode} - ${err.message}`;
+                    core.error(genericErrorMessage);
+                    if (err.stack) {
+                        core.debug(err.stack);
+                    }
+                    throw new Error(genericErrorMessage);
                 }
             }
             throw err;
