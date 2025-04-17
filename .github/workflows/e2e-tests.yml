@@ -71,4 +71,4 @@ jobs:
         with:
           python-version: '<3.11'
       - name: Verify <3.11
-        run: python __tests__/verify-python.py 3.10.4
+        run: python __tests__/verify-python.py 3.10
