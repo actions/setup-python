@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
+        os: [macos-latest, ubuntu-22.04, ubuntu-latest]
         graalpy:
           - 'graalpy-23.0'
           - 'graalpy-22.3'
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, ubuntu-latest]
+        os: [macos-latest, ubuntu-22.04, ubuntu-latest]
         graalpy: ['graalpy23.0', 'graalpy22.3']
 
     steps:
