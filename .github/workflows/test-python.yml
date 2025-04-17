@@ -251,11 +251,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: setup-python 3.9.0-beta.4
+      - name: setup-python 3.11.0-beta.4
         id: setup-python
         uses: ./
         with:
-          python-version: '3.9.0-beta.4'
+          python-version: '3.11.0-beta.4'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
