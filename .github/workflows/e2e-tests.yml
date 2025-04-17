@@ -45,10 +45,6 @@ jobs:
           - os: windows-latest
             python: 3.10.4
           - os: ubuntu-22.04
-            python: '3.8.12'
-          - os: windows-latest
-            python: '3.8.12'
-          - os: ubuntu-22.04
             python: '<3.11'
             verify-version: '3.10'
           - os: windows-latest
