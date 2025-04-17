@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
           - os: ubuntu-22.04
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
           - os: ubuntu-22.04
@@ -107,7 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
           - os: ubuntu-22.04
@@ -150,7 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: [3.6.7, 3.7.5, 3.8.15, 3.9.13, '==3.10.10']
         exclude:
           - os: ubuntu-22.04
@@ -198,7 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: [3.6.7, 3.7.5, 3.8.15, 3.9.13]
         exclude:
           - os: ubuntu-22.04
@@ -246,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
