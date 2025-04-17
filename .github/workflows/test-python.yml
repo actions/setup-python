@@ -241,7 +241,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-pre-release-version-from-manifest:
-    name: Setup 3.9.0-beta.4 ${{ matrix.os }}
+    name: Setup 3.11.0-beta.4 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -337,7 +337,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         python: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: Checkout

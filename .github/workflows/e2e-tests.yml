@@ -21,13 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run with setup-python 3.6
-        uses: ./
-        with:
-          python-version: 3.6
-      - name: Verify 3.6
-        run: python __tests__/verify-python.py 3.6
-
       - name: Run with setup-python 3.7
         uses: ./
         with:
