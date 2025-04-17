@@ -13,62 +13,59 @@ on:
 jobs:
   test-setup-python:
     name: Test setup-python
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        operating-system: [ubuntu-22.04, windows-latest]
+        include:
+          # ubuntu-only
+          - os: ubuntu-22.04
+            python: 3.7.13
+          - os: ubuntu-22.04
+            python: 3.8.12
+
+          # windows-only
+          - os: windows-latest
+            python: 3.7.5
+          - os: windows-latest
+            python: 3.6.7
+          - os: windows-latest
+            python: 3.8.1
+
+          # both platforms
+          - os: ubuntu-22.04
+            python: 3.7
+          - os: windows-latest
+            python: 3.7
+          - os: ubuntu-22.04
+            python: 3.8
+          - os: windows-latest
+            python: 3.8
+          - os: ubuntu-22.04
+            python: 3.10.4
+          - os: windows-latest
+            python: 3.10.4
+          - os: ubuntu-22.04
+            python: '==3.8.12'
+          - os: windows-latest
+            python: '==3.8.12'
+          - os: ubuntu-22.04
+            python: '<3.11'
+          - os: windows-latest
+            python: '<3.11'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run with setup-python 3.7
+      - name: Setup Python ${{ matrix.python }}
+        id: setup
         uses: ./
         with:
-          python-version: 3.7
-      - name: Verify 3.7
-        run: python __tests__/verify-python.py 3.7
+          python-version: ${{ matrix.python }}
 
-      - name: Run with setup-python 3.8
-        uses: ./
-        with:
-          python-version: 3.8
-      - name: Verify 3.8
-        run: python __tests__/verify-python.py 3.8
+      - name: Verify Python ${{ matrix.python }}
+        run: python __tests__/verify-python.py ${{ matrix.python }}
 
-      - name: Run with setup-python 3.7.13
-        uses: ./
-        with:
-          python-version: 3.7.13
-      - name: Verify 3.7.13
-        run: python __tests__/verify-python.py 3.7.13
-
-      - name: Run with setup-python 3.8.12
-        uses: ./
-        with:
-          python-version: 3.8.12
-      - name: Verify 3.8.12
-        run: python __tests__/verify-python.py 3.8.12
-
-      - name: Run with setup-python 3.10.4
-        id: cp310
-        uses: ./
-        with:
-          python-version: '3.10.4'
-      - name: Verify 3.10
-        run: python __tests__/verify-python.py 3.10.4
-      - name: Run python-path sample 3.10.4
-        run: pipx run --python '${{ steps.cp310.outputs.python-path }}' nox --version
-
-      - name: Run with setup-python ==3.8
-        uses: ./
-        with:
-          python-version: '==3.8.12'
-      - name: Verify ==3.8.12
-        run: python __tests__/verify-python.py 3.8.12
-
-      - name: Run with setup-python <3.11
-        uses: ./
-        with:
-          python-version: '<3.11'
-      - name: Verify <3.11
-        run: python __tests__/verify-python.py 3.10
+      - name: Run python-path sample
+        if: ${{ matrix.python == '3.10.4' }}
+        run: pipx run --python '${{ steps.setup.outputs.python-path }}' nox --version
