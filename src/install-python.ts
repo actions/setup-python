@@ -5,6 +5,7 @@ import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
+import {IToolRelease} from '@actions/tool-cache';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -31,14 +32,41 @@ export async function findReleaseFromManifest(
 
   return foundRelease;
 }
-
+function isIToolRelease(obj: any): obj is IToolRelease {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.version === 'string' &&
+    typeof obj.stable === 'boolean' &&
+    Array.isArray(obj.files) &&
+    obj.files.every(
+      (file: any) =>
+        typeof file.filename === 'string' &&
+        typeof file.platform === 'string' &&
+        typeof file.arch === 'string' &&
+        typeof file.download_url === 'string'
+    )
+  );
+}
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    return await getManifestFromRepo();
+    const repoManifest = await getManifestFromRepo();
+    if (
+      Array.isArray(repoManifest) &&
+      repoManifest.length &&
+      repoManifest.every(isIToolRelease)
+    ) {
+      return repoManifest;
+    }
+    throw new Error(
+      'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
+    );
   } catch (err) {
     core.debug('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
       core.debug(err.message);
+    } else {
+      core.error('An unexpected error occurred while fetching the manifest.');
     }
   }
   return await getManifestFromURL();
@@ -93,6 +121,9 @@ async function installPython(workingDirectory: string) {
 }
 
 export async function installCpythonFromRelease(release: tc.IToolRelease) {
+  if (!release.files || release.files.length === 0) {
+    throw new Error('No files found in the release to download.');
+  }
   const downloadUrl = release.files[0].download_url;
 
   core.info(`Download from "${downloadUrl}"`);
@@ -113,9 +144,13 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   } catch (err) {
     if (err instanceof tc.HTTPError) {
       // Rate limit?
-      if (err.httpStatusCode === 403 || err.httpStatusCode === 429) {
+      if (err.httpStatusCode === 403) {
+        core.error(
+          `Received HTTP status code 403. This indicates a permission issue or restricted access.`
+        );
+      } else if (err.httpStatusCode === 429) {
         core.info(
-          `Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`
+          `Received HTTP status code 429.  This usually indicates the rate limit has been exceeded`
         );
       } else {
         core.info(err.message);
