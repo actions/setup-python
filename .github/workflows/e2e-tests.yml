@@ -66,7 +66,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Verify Python ${{ matrix.python }}
-        run: python __tests__/verify-python.py ${{ matrix.python }}
+        run: python __tests__/verify-python.py ${{ matrix.verify-version || matrix.python }}
 
       - name: Run python-path sample
         if: ${{ matrix.python == '3.10.4' }}
