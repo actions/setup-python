@@ -13,22 +13,22 @@ on:
 jobs:
   test-setup-python:
     name: Test setup-python
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-latest]
+        operating-system: [ubuntu-22.04, windows-latest]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Run with setup-python 3.6
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         uses: ./
         with:
           python-version: 3.6
       - name: Verify 3.6
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         run: python __tests__/verify-python.py 3.6
 
       - name: Run with setup-python 3.7
@@ -46,48 +46,48 @@ jobs:
         run: python __tests__/verify-python.py 3.8
 
       - name: Run with setup-python 3.7.5
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         uses: ./
         with:
           python-version: 3.7.5
       - name: Verify 3.7.5
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         run: python __tests__/verify-python.py 3.7.5
 
       - name: Run with setup-python 3.6.7
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         uses: ./
         with:
           python-version: 3.6.7
       - name: Verify 3.6.7
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         run: python __tests__/verify-python.py 3.6.7
 
       - name: Run with setup-python 3.8.1
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         uses: ./
         with:
           python-version: 3.8.1
       - name: Verify 3.8.1
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.operating-system == 'windows-latest' }}
         run: python __tests__/verify-python.py 3.8.1
 
       - name: Run with setup-python 3.7.13
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.operating-system == 'ubuntu-22.04' }}
         uses: ./
         with:
           python-version: 3.7.13
       - name: Verify 3.7.13
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.operating-system == 'ubuntu-22.04' }}
         run: python __tests__/verify-python.py 3.7.13
 
       - name: Run with setup-python 3.8.12
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.operating-system == 'ubuntu-22.04' }}
         uses: ./
         with:
           python-version: 3.8.12
       - name: Verify 3.8.12
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.operating-system == 'ubuntu-22.04' }}
         run: python __tests__/verify-python.py 3.8.12
 
       - name: Run with setup-python 3.10
