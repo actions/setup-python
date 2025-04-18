@@ -97729,7 +97729,14 @@ function run() {
                 }
             }
             else {
-                core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
+                const trueValue = ['true', 'True', 'TRUE'];
+                const pythonVersionRequired = process.env['PYTHON_VERSION_REQUIRED'] || '';
+                if (!trueValue.includes(pythonVersionRequired)) {
+                    core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
+                }
+                else {
+                    throw new Error(`The python-version input is required.`);
+                }
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
