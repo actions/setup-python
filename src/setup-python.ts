@@ -154,7 +154,7 @@ async function run() {
         );
       } else {
         throw new Error(
-          `The python-version input is required.`
+          'The `python-version` input is required.'
         );
       }
     }

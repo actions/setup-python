@@ -97735,7 +97735,7 @@ function run() {
                     core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
                 }
                 else {
-                    throw new Error(`The python-version input is required.`);
+                    throw new Error('The `python-version` input is required.');
                 }
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
