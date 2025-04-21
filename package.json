@@ -33,12 +33,12 @@
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^2.0.1",
     "@iarna/toml": "^3.0.0",
-    "semver": "^7.6.0"
+    "semver": "^7.7.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.25",
-    "@types/semver": "^7.5.8",
+    "@types/semver": "^7.7.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vercel/ncc": "^0.38.3",
