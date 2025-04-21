@@ -97011,6 +97011,7 @@ const httpm = __importStar(__nccwpck_require__(4844));
 const exec = __importStar(__nccwpck_require__(5236));
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const utils_1 = __nccwpck_require__(1798);
+const io_util_1 = __nccwpck_require__(5207);
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
@@ -97039,6 +97040,8 @@ function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases
             const graalpyPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
             core.info('Extracting downloaded archive...');
             downloadDir = yield tc.extractTar(graalpyPath);
+            core.info('Deleting downloaded archive...');
+            yield (0, io_util_1.rm)(graalpyPath);
             // root folder in archive can have unpredictable name so just take the first folder
             // downloadDir is unique folder under TEMP and can't contain any other folders
             const archiveName = fs_1.default.readdirSync(downloadDir)[0];
@@ -97231,6 +97234,7 @@ const httpm = __importStar(__nccwpck_require__(4844));
 const exec = __importStar(__nccwpck_require__(5236));
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const utils_1 = __nccwpck_require__(1798);
+const io_util_1 = __nccwpck_require__(5207);
 function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases, releases) {
     return __awaiter(this, void 0, void 0, function* () {
         let downloadDir;
@@ -97263,6 +97267,8 @@ function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases,
             else {
                 downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
             }
+            core.info('Deleting downloaded archive...');
+            yield (0, io_util_1.rm)(pypyPath);
             // root folder in archive can have unpredictable name so just take the first folder
             // downloadDir is unique folder under TEMP and can't contain any other folders
             const archiveName = fs_1.default.readdirSync(downloadDir)[0];
@@ -97444,6 +97450,7 @@ const core = __importStar(__nccwpck_require__(7484));
 const tc = __importStar(__nccwpck_require__(3472));
 const exec = __importStar(__nccwpck_require__(5236));
 const httpm = __importStar(__nccwpck_require__(4844));
+const io_util_1 = __nccwpck_require__(5207);
 const utils_1 = __nccwpck_require__(1798);
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -97555,6 +97562,8 @@ function installCpythonFromRelease(release) {
             else {
                 pythonExtractedFolder = yield tc.extractTar(pythonPath);
             }
+            core.info('Delete downloaded archive');
+            yield (0, io_util_1.rm)(pythonPath);
             core.info('Execute installation script');
             yield installPython(pythonExtractedFolder);
         }
