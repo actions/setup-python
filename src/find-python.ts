@@ -152,60 +152,38 @@ export async function useCpythonVersion(
     core.addPath(_binDir);
 
     if (IS_WINDOWS) {
-      // Add --user directory
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
 
-      if (
-        architecture === 'x86' &&
-        (major > 3 || (major === 3 && minor >= 10))
-      ) {
-        // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
-        const arch = '32'; // Only for x86 architecture
+      if (major > 3 || (major === 3 && minor >= 10)) {
+        // Handle Python >= 3.10
+        const isFreeThreaded = core.getBooleanInput('freethreaded');
+        const arch = architecture === 'x86' ? '-32' : '';
+
+        const baseName = `Python${major}${minor}${
+          isFreeThreaded ? 't' : ''
+        }${arch}`;
 
         const pythonPath = path.join(
           process.env['APPDATA'] || '',
           'Python',
-          `Python${major}${minor}-${arch}`,
+          baseName,
           'Scripts'
         );
+
         core.addPath(pythonPath);
       } else {
-        // For Python >= 3.10 and architecture 'x64', or other versions, use the default user path
-        const pythonPath = path.join(
-          process.env['APPDATA'] || '',
-          'Python',
-          `Python${major}${minor}`,
-          'Scripts'
-        );
-        core.addPath(pythonPath);
-      }
+        // Handle Python < 3.10
+        const baseName = `Python${major}${minor}`;
 
-      if (
-        architecture === 'x86' &&
-        (major > 3 || (major === 3 && minor >= 10))
-      ) {
-        // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
-        const arch = '32'; // Only for x86 architecture
+        const pythonPath = path.join(
+          process.env['APPDATA'] || '',
+          'Python',
+          baseName,
+          'Scripts'
+        );
 
-        // Dynamically handle case for Python314t
-        const pythonPath = path.join(
-          process.env['APPDATA'] || '',
-          'Python',
-          `Python${major}${minor}t--${arch}`,
-          'Scripts'
-        );
-        core.addPath(pythonPath);
-      } else {
-        // For Python >= 3.10 and architecture 'x64', or other versions, use the default user path
-        // Dynamically handle case for Python314t
-        const pythonPath = path.join(
-          process.env['APPDATA'] || '',
-          'Python',
-          `Python${major}${minor}t`,
-          'Scripts'
-        );
         core.addPath(pythonPath);
       }
     }
