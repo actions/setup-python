@@ -24,7 +24,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -62,7 +61,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -103,7 +101,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -142,7 +139,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -184,7 +180,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -226,7 +221,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -258,7 +252,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -371,7 +364,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,
@@ -461,7 +453,6 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-13,

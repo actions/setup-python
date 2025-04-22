@@ -175,7 +175,9 @@ export async function useCpythonVersion(
         core.addPath(pythonPath);
       } else {
         // Handle Python < 3.10
-        const baseName = `Python${major}${minor}`;
+        const isFreeThreaded = core.getBooleanInput('freethreaded');
+        const suffix = isFreeThreaded ? 't' : '';
+        const baseName = `Python${major}${minor}${suffix}`;
 
         const pythonPath = path.join(
           process.env['APPDATA'] || '',
