@@ -19,7 +19,6 @@ jobs:
       matrix:
         operating-system:
           [
-            ubuntu-20.04,
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
