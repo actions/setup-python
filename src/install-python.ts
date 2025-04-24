@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
+import {rm} from '@actions/io/lib/io-util';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
 import {IToolRelease} from '@actions/tool-cache';
@@ -138,6 +139,9 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     } else {
       pythonExtractedFolder = await tc.extractTar(pythonPath);
     }
+
+    core.info('Delete downloaded archive');
+    await rm(pythonPath);
 
     core.info('Execute installation script');
     await installPython(pythonExtractedFolder);
