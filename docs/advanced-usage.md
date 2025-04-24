@@ -138,6 +138,16 @@ steps:
 ```
 Please refer to the [Advanced range syntax section](https://github.com/npm/node-semver#advanced-range-syntax) of the [semver](https://github.com/npm/node-semver) to check other available range syntaxes.
 
+If you want to make an error when unspecified, set `PYTHON_VERSION_REQUIRED: true` to env.
+```yaml
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  env:
+    PYTHON_VERSION_REQUIRED: true
+  # the action fail with error.
+```
+
 ### Specifying a PyPy version
 The version of PyPy should be specified in the format `pypy<python_version>[-v<pypy_version>]` or `pypy-<python_version>[-v<pypy_version>]`.
 The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy version will be used in this case.
