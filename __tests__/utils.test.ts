@@ -12,6 +12,7 @@ import {
   getVersionInputFromFile,
   getVersionInputFromPlainFile,
   getVersionInputFromTomlFile,
+  getVersionInputFromPipfileFile,
   getNextPageUrl,
   isGhes,
   IS_WINDOWS,
@@ -214,6 +215,44 @@ describe('Version from file test', () => {
       const toolVersionContent = 'python 3.14t-dev';
       fs.writeFileSync(toolVersionFilePath, toolVersionContent);
       expect(_fn(toolVersionFilePath)).toEqual(['3.14t-dev']);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Version from python_version in Pipfile',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '3.7';
+      const pythonVersionFileContent = `[requires]\npython_version = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Version from python_full_version in Pipfile',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '3.7.0';
+      const pythonVersionFileContent = `[requires]\npython_full_version = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Pipfile undefined version',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent = ``;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([]);
     }
   );
 });
