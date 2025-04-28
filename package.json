@@ -31,7 +31,7 @@
     "@actions/glob": "^0.5.0",
     "@actions/http-client": "^2.2.3",
     "@actions/io": "^1.0.2",
-    "@actions/tool-cache": "^2.0.1",
+    "@actions/tool-cache": "^2.0.2",
     "@iarna/toml": "^3.0.0",
     "semver": "^7.7.1"
   },
