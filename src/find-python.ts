@@ -153,6 +153,8 @@ export async function useCpythonVersion(
 
     if (IS_WINDOWS) {
       // Add --user directory
+      // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
+      // So if `findLocalTool` succeeded above, we must have a conformant `installDir`// Add --user directory
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
@@ -172,7 +174,6 @@ export async function useCpythonVersion(
         );
         core.addPath(userScriptsDir);
       } else {
-        // For Python >= 3.10 and architecture 'x64', or other versions, use the default user path
         const userScriptsDir = path.join(
           process.env['APPDATA'] || '',
           'Python',
@@ -182,7 +183,7 @@ export async function useCpythonVersion(
         core.addPath(userScriptsDir);
       }
 
-      // Dynamically handle case for Python314t
+      //  for free-freethreaded versions, add the freethreaded scripts directory
       const pythonPath = path.join(
         process.env['APPDATA'] || '',
         'Python',
