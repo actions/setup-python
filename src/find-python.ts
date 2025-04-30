@@ -152,45 +152,31 @@ export async function useCpythonVersion(
     core.addPath(_binDir);
 
     if (IS_WINDOWS) {
-      // Add --user directory
-      // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-      // So if `findLocalTool` succeeded above, we must have a conformant `installDir`// Add --user directory
+      // Extract version details
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
-
+      const basePath = process.env['APPDATA'] || '';
+      let versionSuffix = `${major}${minor}`;
+      // Append '-32' for x86 architecture if Python version is >= 3.10
       if (
         architecture === 'x86' &&
         (major > 3 || (major === 3 && minor >= 10))
       ) {
-        // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
-        const arch = '32'; // Only for x86 architecture
-
-        const userScriptsDir = path.join(
-          process.env['APPDATA'] || '',
-          'Python',
-          `Python${major}${minor}-${arch}`,
-          'Scripts'
-        );
-        core.addPath(userScriptsDir);
-      } else {
-        const userScriptsDir = path.join(
-          process.env['APPDATA'] || '',
-          'Python',
-          `Python${major}${minor}`,
-          'Scripts'
-        );
-        core.addPath(userScriptsDir);
+        versionSuffix += '-32';
       }
-
-      //  for free-freethreaded versions, add the freethreaded scripts directory
-      const pythonPath = path.join(
-        process.env['APPDATA'] || '',
+      // Append 't' for freethreaded builds
+      if (freethreaded) {
+        versionSuffix += 't';
+      }
+      // Add user Scripts path
+      const userScriptsDir = path.join(
+        basePath,
         'Python',
-        `Python${major}${minor}t`,
+        `Python${versionSuffix}`,
         'Scripts'
       );
-      core.addPath(pythonPath);
+      core.addPath(userScriptsDir);
     }
     // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
   }

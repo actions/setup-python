@@ -96883,26 +96883,24 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             core.addPath(installDir);
             core.addPath(_binDir);
             if (utils_1.IS_WINDOWS) {
-                // Add --user directory
-                // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-                // So if `findLocalTool` succeeded above, we must have a conformant `installDir`// Add --user directory
+                // Extract version details
                 const version = path.basename(path.dirname(installDir));
                 const major = semver.major(version);
                 const minor = semver.minor(version);
+                const basePath = process.env['APPDATA'] || '';
+                let versionSuffix = `${major}${minor}`;
+                // Append '-32' for x86 architecture if Python version is >= 3.10
                 if (architecture === 'x86' &&
                     (major > 3 || (major === 3 && minor >= 10))) {
-                    // For Python >= 3.10 and architecture='x86', add the architecture-specific folder to the path
-                    const arch = '32'; // Only for x86 architecture
-                    const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}-${arch}`, 'Scripts');
-                    core.addPath(userScriptsDir);
+                    versionSuffix += '-32';
                 }
-                else {
-                    const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}`, 'Scripts');
-                    core.addPath(userScriptsDir);
+                // Append 't' for freethreaded builds
+                if (freethreaded) {
+                    versionSuffix += 't';
                 }
-                //  for free-freethreaded versions, add the freethreaded scripts directory
-                const pythonPath = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}t`, 'Scripts');
-                core.addPath(pythonPath);
+                // Add user Scripts path
+                const userScriptsDir = path.join(basePath, 'Python', `Python${versionSuffix}`, 'Scripts');
+                core.addPath(userScriptsDir);
             }
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
         }
