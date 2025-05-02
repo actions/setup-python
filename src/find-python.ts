@@ -168,6 +168,9 @@ export async function useCpythonVersion(
       // Append 't' for freethreaded builds
       if (freethreaded) {
         versionSuffix += 't';
+        if (architecture === 'x86-freethreaded') {
+          versionSuffix += '-32';
+        }
       }
       // Add user Scripts path
       const userScriptsDir = path.join(
