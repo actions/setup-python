@@ -96894,11 +96894,17 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
                     (major > 3 || (major === 3 && minor >= 10))) {
                     versionSuffix += '-32';
                 }
+                else if (architecture === 'arm64') {
+                    versionSuffix += '-arm64';
+                }
                 // Append 't' for freethreaded builds
                 if (freethreaded) {
                     versionSuffix += 't';
                     if (architecture === 'x86-freethreaded') {
                         versionSuffix += '-32';
+                    }
+                    else if (architecture === 'arm64-freethreaded') {
+                        versionSuffix += '-arm64';
                     }
                 }
                 // Add user Scripts path
