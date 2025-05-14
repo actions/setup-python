@@ -10,7 +10,7 @@ import {
   validatePythonVersionFormatForPyPy,
   isCacheFeatureAvailable,
   getVersionInputFromFile,
-  getVersionInputFromPlainFile,
+  getVersionsInputFromPlainFile,
   getVersionInputFromTomlFile,
   getNextPageUrl,
   isGhes,
@@ -95,15 +95,43 @@ const tempDir = path.join(
 );
 
 describe('Version from file test', () => {
-  it.each([getVersionInputFromPlainFile, getVersionInputFromFile])(
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
     'Version from plain file test',
     async _fn => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'python-version.file';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersionFileContent = '3.7';
+      const pythonVersionFileContent = '3.9';
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersionFileContent]);
+    }
+  );
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
+    'Versions from multiline plain file test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'python-version.file';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent = '3.10\r\n3.9';
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual(['3.10', '3.9']);
+    }
+  );
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
+    'Version from complex plain file test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'python-version.file';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent =
+        '3.13/envs/virtualenv\r# 3.12\n3.11\r\n3.10\r\n 3.9 \r\n';
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([
+        '3.13',
+        '3.11',
+        '3.10',
+        '3.9'
+      ]);
     }
   );
   it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
