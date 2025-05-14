@@ -97622,7 +97622,7 @@ function cacheDependencies(cache, pythonVersion) {
 }
 function resolveVersionInputFromDefaultFile() {
     const couples = [
-        ['.python-version', utils_1.getVersionInputFromPlainFile]
+        ['.python-version', utils_1.getVersionsInputFromPlainFile]
     ];
     for (const [versionFile, _fn] of couples) {
         (0, utils_1.logWarning)(`Neither 'python-version' nor 'python-version-file' inputs were supplied. Attempting to find '${versionFile}' file.`);
@@ -97759,7 +97759,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromToolVersions = exports.getVersionInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromToolVersions = exports.getVersionsInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
@@ -97940,7 +97940,7 @@ function extractValue(obj, keys) {
  * If none is present, returns an empty list.
  */
 function getVersionInputFromTomlFile(versionFile) {
-    core.debug(`Trying to resolve version form ${versionFile}`);
+    core.debug(`Trying to resolve version from ${versionFile}`);
     let pyprojectFile = fs_1.default.readFileSync(versionFile, 'utf8');
     // Normalize the line endings in the pyprojectFile
     pyprojectFile = pyprojectFile.replace(/\r\n/g, '\n');
@@ -97973,15 +97973,30 @@ function getVersionInputFromTomlFile(versionFile) {
 }
 exports.getVersionInputFromTomlFile = getVersionInputFromTomlFile;
 /**
- * Python version extracted from a plain text file.
+ * Python versions extracted from a plain text file.
+ * - Resolves multiple versions from multiple lines.
+ * - Handles pyenv-virtualenv pointers (e.g. `3.10/envs/virtualenv`).
+ * - Ignores empty lines and lines starting with `#`
+ * - Trims whitespace.
  */
-function getVersionInputFromPlainFile(versionFile) {
-    core.debug(`Trying to resolve version form ${versionFile}`);
-    const version = fs_1.default.readFileSync(versionFile, 'utf8').trim();
-    core.info(`Resolved ${versionFile} as ${version}`);
-    return [version];
+function getVersionsInputFromPlainFile(versionFile) {
+    core.debug(`Trying to resolve versions from ${versionFile}`);
+    const content = fs_1.default.readFileSync(versionFile, 'utf8').trim();
+    const lines = content.split(/\r\n|\r|\n/);
+    const versions = lines
+        .map(line => {
+        if (line.startsWith('#') || line.trim() === '') {
+            return undefined;
+        }
+        let version = line.trim();
+        version = version.split('/')[0];
+        return version;
+    })
+        .filter(version => version !== undefined);
+    core.info(`Resolved ${versionFile} as ${versions.join(', ')}`);
+    return versions;
 }
-exports.getVersionInputFromPlainFile = getVersionInputFromPlainFile;
+exports.getVersionsInputFromPlainFile = getVersionsInputFromPlainFile;
 /**
  * Python version extracted from a .tool-versions file.
  */
@@ -98024,7 +98039,7 @@ function getVersionInputFromFile(versionFile) {
         return getVersionInputFromToolVersions(versionFile);
     }
     else {
-        return getVersionInputFromPlainFile(versionFile);
+        return getVersionsInputFromPlainFile(versionFile);
     }
 }
 exports.getVersionInputFromFile = getVersionInputFromFile;
