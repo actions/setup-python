@@ -126,7 +126,12 @@ describe('Version from file test', () => {
       const pythonVersionFileContent =
         '3.15/envs/virtualenv\r# 3.15\n3.14\r\n3.13\r\n 3.12 \r\n';
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
-      expect(_fn(pythonVersionFilePath)).toEqual(['3.15', '3.14', '3.13', '3.12']);
+      expect(_fn(pythonVersionFilePath)).toEqual([
+        '3.15',
+        '3.14',
+        '3.13',
+        '3.12'
+      ]);
     }
   );
   it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
