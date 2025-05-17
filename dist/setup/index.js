@@ -95953,7 +95953,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
             core.addPath(pythonLocation);
             core.addPath(_binDir);
         }
-        core.setOutput('python-version', 'pypy' + resolvedPyPyVersion);
+        core.setOutput('python-version', `pypy${resolvedPythonVersion}-${resolvedPyPyVersion}`);
         core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
     });
