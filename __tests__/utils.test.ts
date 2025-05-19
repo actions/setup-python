@@ -124,13 +124,13 @@ describe('Version from file test', () => {
       const pythonVersionFileName = 'python-version.file';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
       const pythonVersionFileContent =
-        '3.15/envs/virtualenv\r# 3.15\n3.14\r\n3.13\r\n 3.12 \r\n';
+        '3.14/envs/virtualenv\r# 3.14\n3.13\r\n3.12\r\n 3.11 \r\n';
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([
-        '3.15',
         '3.14',
         '3.13',
-        '3.12'
+        '3.12',
+        '3.11'
       ]);
     }
   );
@@ -206,9 +206,9 @@ describe('Version from file test', () => {
     async _fn => {
       const toolVersionFileName = '.tool-versions';
       const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
-      const toolVersionContent = 'python v3.14.2';
+      const toolVersionContent = 'python v3.13.2';
       fs.writeFileSync(toolVersionFilePath, toolVersionContent);
-      expect(_fn(toolVersionFilePath)).toEqual(['3.14.2']);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.13.2']);
     }
   );
 
