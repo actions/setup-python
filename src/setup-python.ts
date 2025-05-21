@@ -11,7 +11,7 @@ import {
   logWarning,
   IS_MAC,
   getVersionInputFromFile,
-  getVersionInputFromPlainFile
+  getVersionsInputFromPlainFile
 } from './utils';
 
 function isPyPyVersion(versionSpec: string) {
@@ -35,7 +35,7 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 
 function resolveVersionInputFromDefaultFile(): string[] {
   const couples: [string, (versionFile: string) => string[]][] = [
-    ['.python-version', getVersionInputFromPlainFile]
+    ['.python-version', getVersionsInputFromPlainFile]
   ];
   for (const [versionFile, _fn] of couples) {
     logWarning(
