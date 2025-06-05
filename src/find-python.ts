@@ -156,6 +156,10 @@ export async function useCpythonVersion(
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
+      const freethreadedInput = core.getInput('freethreaded');
+      const freethreaded =
+        freethreadedInput === 'true' || architecture.includes('freethreaded');
+
       const basePath = process.env['APPDATA'] || '';
       let versionSuffix = `${major}${minor}`;
       // Append '-32' for x86 architecture if Python version is >= 3.10
@@ -174,6 +178,8 @@ export async function useCpythonVersion(
           versionSuffix += '-32';
         } else if (architecture === 'arm64-freethreaded') {
           versionSuffix += '-arm64';
+        } else if (architecture === 'x64-freethreaded') {
+          versionSuffix += '-64';
         }
       }
       // Add user Scripts path
