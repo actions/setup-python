@@ -96817,6 +96817,9 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             // Use the freethreaded version if it was specified in the input, e.g., 3.13t
             freethreaded = true;
         }
+        if (architecture.endsWith('-freethreaded')) {
+            throw new Error(`Invalid architecture '${architecture}'. Use 'freethreaded' flag in the python-version (e.g., '3.13.1t') or - freethreaded: true instead of specifying '-freethreaded' in the architecture`);
+        }
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
         if (freethreaded) {
             // Free threaded versions use an architecture suffix like `x64-freethreaded`
@@ -96887,8 +96890,6 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
                 const version = path.basename(path.dirname(installDir));
                 const major = semver.major(version);
                 const minor = semver.minor(version);
-                const freethreadedInput = core.getInput('freethreaded');
-                const freethreaded = freethreadedInput === 'true' || architecture.includes('freethreaded');
                 const basePath = process.env['APPDATA'] || '';
                 let versionSuffix = `${major}${minor}`;
                 // Append '-32' for x86 architecture if Python version is >= 3.10
