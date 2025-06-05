@@ -8,6 +8,7 @@ import * as installer from './install-python';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
+import * as exec from '@actions/exec';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
@@ -27,6 +28,27 @@ function binDir(installDir: string): string {
     return path.join(installDir, 'Scripts');
   } else {
     return path.join(installDir, 'bin');
+  }
+}
+
+async function installPip(pythonLocation: string) {
+  const pipVersion = core.getInput('pip-version');
+
+  // Validate pip-version format: major[.minor][.patch]
+  const versionRegex = /^\d+(\.\d+)?(\.\d+)?$/;
+  if (pipVersion && !versionRegex.test(pipVersion)) {
+    throw new Error(
+      `Invalid pip-version "${pipVersion}". Please specify a version in the format major[.minor][.patch].`
+    );
+  }
+
+  if (pipVersion) {
+    core.info(
+      `pip-version input is specified. Installing pip version ${pipVersion}`
+    );
+    await exec.exec(
+      `${pythonLocation}/python -m pip install --upgrade pip==${pipVersion} --disable-pip-version-check --no-warn-script-location`
+    );
   }
 }
 
@@ -178,6 +200,9 @@ export async function useCpythonVersion(
   }
   core.setOutput('python-version', pythonVersion);
   core.setOutput('python-path', pythonPath);
+
+  const binaryPath = IS_WINDOWS ? installDir : _binDir;
+  await installPip(binaryPath);
 
   return {impl: 'CPython', version: pythonVersion};
 }
