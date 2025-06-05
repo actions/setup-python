@@ -96818,7 +96818,7 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             freethreaded = true;
         }
         if (architecture.endsWith('-freethreaded')) {
-            throw new Error(`Invalid architecture '${architecture}'. Use 'freethreaded' flag in the python-version (e.g., '3.13.1t') or - freethreaded: true instead of specifying '-freethreaded' in the architecture`);
+            throw new Error(`Invalid architecture '${architecture}'. Use 'freethreaded' flag in the python-version (e.g., '3.13.1t') or use freethreaded: true instead of specifying '-freethreaded' in the architecture`);
         }
         core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
         if (freethreaded) {

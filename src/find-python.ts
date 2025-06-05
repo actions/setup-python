@@ -51,7 +51,7 @@ export async function useCpythonVersion(
   }
   if (architecture.endsWith('-freethreaded')) {
     throw new Error(
-      `Invalid architecture '${architecture}'. Use 'freethreaded' flag in the python-version (e.g., '3.13.1t') or - freethreaded: true instead of specifying '-freethreaded' in the architecture`
+      `Invalid architecture '${architecture}'. Use 'freethreaded' flag in the python-version (e.g., '3.13.1t') or use freethreaded: true instead of specifying '-freethreaded' in the architecture`
     );
   }
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
