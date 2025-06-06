@@ -103,7 +103,7 @@ jobs:
         os: [windows-latest, windows-11-arm]
         architecture: [x64, x86, arm64]
         freethreaded: ['false', 'true']
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13.1']
         exclude:
           - architecture: x64
             freethreaded: 'true'
