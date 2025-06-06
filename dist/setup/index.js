@@ -96164,13 +96164,32 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             core.addPath(installDir);
             core.addPath(_binDir);
             if (utils_1.IS_WINDOWS) {
-                // Add --user directory
-                // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-                // So if `findLocalTool` succeeded above, we must have a conformant `installDir`
+                // Extract version details
                 const version = path.basename(path.dirname(installDir));
                 const major = semver.major(version);
                 const minor = semver.minor(version);
-                const userScriptsDir = path.join(process.env['APPDATA'] || '', 'Python', `Python${major}${minor}`, 'Scripts');
+                const basePath = process.env['APPDATA'] || '';
+                let versionSuffix = `${major}${minor}`;
+                // Append '-32' for x86 architecture if Python version is >= 3.10
+                if (architecture === 'x86' &&
+                    (major > 3 || (major === 3 && minor >= 10))) {
+                    versionSuffix += '-32';
+                }
+                else if (architecture === 'arm64') {
+                    versionSuffix += '-arm64';
+                }
+                // Append 't' for freethreaded builds
+                if (freethreaded) {
+                    versionSuffix += 't';
+                    if (architecture === 'x86-freethreaded') {
+                        versionSuffix += '-32';
+                    }
+                    else if (architecture === 'arm64-freethreaded') {
+                        versionSuffix += '-arm64';
+                    }
+                }
+                // Add user Scripts path
+                const userScriptsDir = path.join(basePath, 'Python', `Python${versionSuffix}`, 'Scripts');
                 core.addPath(userScriptsDir);
             }
             // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
