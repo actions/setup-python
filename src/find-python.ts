@@ -160,7 +160,10 @@ export async function useCpythonVersion(
       const basePath = process.env['APPDATA'] || '';
       let versionSuffix = `${major}${minor}`;
       // Append '-32' for x86 architecture if Python version is >= 3.10
-      if (architecture === 'x86' && (major > 3 || (major === 3 && minor >= 10))){
+      if (
+        architecture === 'x86' &&
+        (major > 3 || (major === 3 && minor >= 10))
+      ) {
         versionSuffix += '-32';
       } else if (architecture === 'arm64') {
         versionSuffix += '-arm64';
