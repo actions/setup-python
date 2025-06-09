@@ -35,7 +35,7 @@ describe('cacheDependencies', () => {
     mockedCore.getInput.mockReturnValue('nested/deps.lock');
 
     // Simulate file exists by resolving access without error
-    mockedFsPromises.access.mockImplementation(async (p) => {
+    mockedFsPromises.access.mockImplementation(async p => {
       const pathStr = typeof p === 'string' ? p : p.toString();
       if (pathStr === '/github/action/nested/deps.lock') {
         return Promise.resolve();
@@ -62,11 +62,20 @@ describe('cacheDependencies', () => {
     const sourcePath = path.resolve('/github/action', 'nested/deps.lock');
     const targetPath = path.resolve('/github/workspace', 'nested/deps.lock');
 
-    expect(mockedFsPromises.access).toHaveBeenCalledWith(sourcePath, fs.constants.F_OK);
-    expect(mockedFsPromises.mkdir).toHaveBeenCalledWith(path.dirname(targetPath), {
-      recursive: true
-    });
-    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
+    expect(mockedFsPromises.access).toHaveBeenCalledWith(
+      sourcePath,
+      fs.constants.F_OK
+    );
+    expect(mockedFsPromises.mkdir).toHaveBeenCalledWith(
+      path.dirname(targetPath),
+      {
+        recursive: true
+      }
+    );
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(
+      sourcePath,
+      targetPath
+    );
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Copied ${sourcePath} to ${targetPath}`
     );
