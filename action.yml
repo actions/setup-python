@@ -29,6 +29,8 @@ inputs:
   freethreaded:
     description: "When 'true', use the freethreaded version of Python."
     default: false
+  pip-version:
+    description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."

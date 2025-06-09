@@ -249,3 +249,60 @@ jobs:
           }
       - name: Run Python Script
         run: pipenv run python test-pipenv.py
+
+  python-pip-dependencies-caching-with-pip-version:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          pip-version: '25.0.1'
+      - name: Install dependencies
+        run: pip install numpy pandas requests
+
+  python-pip-dependencies-caching-path-with-pip-version:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }}, caching path)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: __tests__/data/requirements.txt
+          pip-version: '25.0.1'
+      - name: Install dependencies
+        run: pip install numpy pandas requests
