@@ -8,11 +8,10 @@ jest.mock('fs', () => {
   const actualFs = jest.requireActual('fs');
   return {
     ...actualFs,
-    copyFileSync: jest.fn(),
-    existsSync: jest.fn(),
-    mkdirSync: jest.fn(),
     promises: {
       access: jest.fn(),
+      mkdir: jest.fn(),
+      copyFile: jest.fn(),
       writeFile: jest.fn(),
       appendFile: jest.fn()
     }
@@ -21,7 +20,7 @@ jest.mock('fs', () => {
 jest.mock('@actions/core');
 jest.mock('../src/cache-distributions/cache-factory');
 
-const mockedFs = fs as jest.Mocked<typeof fs>;
+const mockedFsPromises = fs.promises as jest.Mocked<typeof fs.promises>;
 const mockedCore = core as jest.Mocked<typeof core>;
 const mockedGetCacheDistributor = getCacheDistributor as jest.Mock;
 
@@ -35,15 +34,25 @@ describe('cacheDependencies', () => {
 
     mockedCore.getInput.mockReturnValue('nested/deps.lock');
 
-    mockedFs.existsSync.mockImplementation((p: any) => {
+    // Simulate file exists by resolving access without error
+    mockedFsPromises.access.mockImplementation(async (p) => {
       const pathStr = typeof p === 'string' ? p : p.toString();
-      if (pathStr === '/github/action/nested/deps.lock') return true;
-      if (pathStr === '/github/workspace/nested') return false; // Simulate missing dir
-      return true;
+      if (pathStr === '/github/action/nested/deps.lock') {
+        return Promise.resolve();
+      }
+      // Simulate directory doesn't exist to test mkdir
+      if (pathStr === path.dirname('/github/workspace/nested/deps.lock')) {
+        return Promise.reject(new Error('no dir'));
+      }
+      return Promise.resolve();
     });
 
-    mockedFs.copyFileSync.mockImplementation(() => undefined);
-    mockedFs.mkdirSync.mockImplementation(() => undefined);
+    // Simulate mkdir success
+    mockedFsPromises.mkdir.mockResolvedValue(undefined);
+
+    // Simulate copyFile success
+    mockedFsPromises.copyFile.mockResolvedValue(undefined);
+
     mockedGetCacheDistributor.mockReturnValue({restoreCache: mockRestoreCache});
   });
 
@@ -53,11 +62,11 @@ describe('cacheDependencies', () => {
     const sourcePath = path.resolve('/github/action', 'nested/deps.lock');
     const targetPath = path.resolve('/github/workspace', 'nested/deps.lock');
 
-    expect(mockedFs.existsSync).toHaveBeenCalledWith(sourcePath);
-    expect(mockedFs.mkdirSync).toHaveBeenCalledWith(path.dirname(targetPath), {
+    expect(mockedFsPromises.access).toHaveBeenCalledWith(sourcePath, fs.constants.F_OK);
+    expect(mockedFsPromises.mkdir).toHaveBeenCalledWith(path.dirname(targetPath), {
       recursive: true
     });
-    expect(mockedFs.copyFileSync).toHaveBeenCalledWith(sourcePath, targetPath);
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Copied ${sourcePath} to ${targetPath}`
     );
@@ -68,21 +77,21 @@ describe('cacheDependencies', () => {
   });
 
   it('warns if the dependency file does not exist', async () => {
-    mockedFs.existsSync.mockReturnValue(false);
+    // Simulate file does not exist by rejecting access
+    mockedFsPromises.access.mockRejectedValue(new Error('file not found'));
 
     await cacheDependencies('pip', '3.12');
 
     expect(mockedCore.warning).toHaveBeenCalledWith(
       expect.stringContaining('does not exist')
     );
-    expect(mockedFs.copyFileSync).not.toHaveBeenCalled();
+    expect(mockedFsPromises.copyFile).not.toHaveBeenCalled();
     expect(mockRestoreCache).toHaveBeenCalled();
   });
 
   it('warns if file copy fails', async () => {
-    mockedFs.copyFileSync.mockImplementation(() => {
-      throw new Error('copy failed');
-    });
+    // Simulate copyFile failure
+    mockedFsPromises.copyFile.mockRejectedValue(new Error('copy failed'));
 
     await cacheDependencies('pip', '3.12');
 
@@ -97,7 +106,7 @@ describe('cacheDependencies', () => {
 
     await cacheDependencies('pip', '3.12');
 
-    expect(mockedFs.copyFileSync).not.toHaveBeenCalled();
+    expect(mockedFsPromises.copyFile).not.toHaveBeenCalled();
     expect(mockedCore.warning).not.toHaveBeenCalled();
     expect(mockRestoreCache).toHaveBeenCalled();
   });

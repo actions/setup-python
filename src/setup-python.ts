@@ -21,7 +21,6 @@ function isPyPyVersion(versionSpec: string) {
 function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
 }
-
 export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
@@ -35,30 +34,34 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
     const relativePath = path.relative(actionPath, sourcePath);
     const targetPath = path.resolve(workspace, relativePath);
 
-    if (!fs.existsSync(sourcePath)) {
-      core.warning(
-        `The resolved cache-dependency-path does not exist: ${sourcePath}`
-      );
-    } else {
-      if (sourcePath !== targetPath) {
-        try {
-          const targetDir = path.dirname(targetPath);
-          if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, {recursive: true});
-          }
+    try {
+      const sourceExists = await fs.promises
+        .access(sourcePath, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
 
-          fs.copyFileSync(sourcePath, targetPath);
-          core.info(`Copied ${sourcePath} to ${targetPath}`);
-        } catch (error) {
-          core.warning(
-            `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
-          );
-        }
+      if (!sourceExists) {
+        core.warning(
+          `The resolved cache-dependency-path does not exist: ${sourcePath}`
+        );
+      } else if (sourcePath !== targetPath) {
+        const targetDir = path.dirname(targetPath);
+
+        // Create target directory if it doesn't exist
+        await fs.promises.mkdir(targetDir, {recursive: true});
+
+        // Copy file asynchronously
+        await fs.promises.copyFile(sourcePath, targetPath);
+        core.info(`Copied ${sourcePath} to ${targetPath}`);
       }
-    }
 
-    resolvedDependencyPath = path.relative(workspace, targetPath);
-    core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
+      resolvedDependencyPath = path.relative(workspace, targetPath);
+      core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
+    } catch (error) {
+      core.warning(
+        `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
+      );
+    }
   }
 
   const cacheDistributor = getCacheDistributor(
