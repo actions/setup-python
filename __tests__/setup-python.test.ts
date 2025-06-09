@@ -10,6 +10,7 @@ jest.mock('fs', () => {
     ...actualFs,
     copyFileSync: jest.fn(),
     existsSync: jest.fn(),
+    mkdirSync: jest.fn(),
     promises: {
       access: jest.fn(),
       writeFile: jest.fn(),
@@ -32,25 +33,37 @@ describe('cacheDependencies', () => {
     process.env.GITHUB_ACTION_PATH = '/github/action';
     process.env.GITHUB_WORKSPACE = '/github/workspace';
 
-    mockedCore.getInput.mockReturnValue('deps.lock');
-    mockedFs.existsSync.mockReturnValue(true);
-    mockedFs.copyFileSync.mockImplementation(() => {});
+    mockedCore.getInput.mockReturnValue('nested/deps.lock');
+
+    mockedFs.existsSync.mockImplementation((p: any) => {
+      const pathStr = typeof p === 'string' ? p : p.toString();
+      if (pathStr === '/github/action/nested/deps.lock') return true;
+      if (pathStr === '/github/workspace/nested') return false; // Simulate missing dir
+      return true;
+    });
+
+    mockedFs.copyFileSync.mockImplementation(() => undefined);
+    mockedFs.mkdirSync.mockImplementation(() => undefined);
     mockedGetCacheDistributor.mockReturnValue({restoreCache: mockRestoreCache});
   });
 
-  it('copies the dependency file and resolves the path', async () => {
+  it('copies the dependency file and resolves the path with directory structure', async () => {
     await cacheDependencies('pip', '3.12');
 
-    const sourcePath = path.resolve('/github/action', 'deps.lock');
-    const targetPath = path.resolve('/github/workspace', 'deps.lock');
+    const sourcePath = path.resolve('/github/action', 'nested/deps.lock');
+    const targetPath = path.resolve('/github/workspace', 'nested/deps.lock');
 
     expect(mockedFs.existsSync).toHaveBeenCalledWith(sourcePath);
+    expect(mockedFs.mkdirSync).toHaveBeenCalledWith(
+      path.dirname(targetPath),
+      {recursive: true}
+    );
     expect(mockedFs.copyFileSync).toHaveBeenCalledWith(sourcePath, targetPath);
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Copied ${sourcePath} to ${targetPath}`
     );
     expect(mockedCore.info).toHaveBeenCalledWith(
-      `Resolved cache-dependency-path: deps.lock`
+      `Resolved cache-dependency-path: nested/deps.lock`
     );
     expect(mockRestoreCache).toHaveBeenCalled();
   });

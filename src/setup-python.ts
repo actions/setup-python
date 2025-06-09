@@ -32,10 +32,8 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
     const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
 
     const sourcePath = path.resolve(actionPath, cacheDependencyPath);
-    const targetPath = path.resolve(
-      workspace,
-      path.basename(cacheDependencyPath)
-    );
+    const relativePath = path.relative(actionPath, sourcePath);
+    const targetPath = path.resolve(workspace, relativePath);
 
     if (!fs.existsSync(sourcePath)) {
       core.warning(
@@ -44,6 +42,11 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
     } else {
       if (sourcePath !== targetPath) {
         try {
+          const targetDir = path.dirname(targetPath);
+          if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, {recursive: true});
+          }
+
           fs.copyFileSync(sourcePath, targetPath);
           core.info(`Copied ${sourcePath} to ${targetPath}`);
         } catch (error) {

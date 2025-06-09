@@ -96929,13 +96929,18 @@ function cacheDependencies(cache, pythonVersion) {
             const actionPath = process.env.GITHUB_ACTION_PATH || '';
             const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
             const sourcePath = path.resolve(actionPath, cacheDependencyPath);
-            const targetPath = path.resolve(workspace, path.basename(cacheDependencyPath));
+            const relativePath = path.relative(actionPath, sourcePath);
+            const targetPath = path.resolve(workspace, relativePath);
             if (!fs_1.default.existsSync(sourcePath)) {
                 core.warning(`The resolved cache-dependency-path does not exist: ${sourcePath}`);
             }
             else {
                 if (sourcePath !== targetPath) {
                     try {
+                        const targetDir = path.dirname(targetPath);
+                        if (!fs_1.default.existsSync(targetDir)) {
+                            fs_1.default.mkdirSync(targetDir, { recursive: true });
+                        }
                         fs_1.default.copyFileSync(sourcePath, targetPath);
                         core.info(`Copied ${sourcePath} to ${targetPath}`);
                     }
