@@ -44,19 +44,22 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
         core.warning(
           `The resolved cache-dependency-path does not exist: ${sourcePath}`
         );
-      } else if (sourcePath !== targetPath) {
-        const targetDir = path.dirname(targetPath);
-
-        // Create target directory if it doesn't exist
-        await fs.promises.mkdir(targetDir, {recursive: true});
-
-        // Copy file asynchronously
-        await fs.promises.copyFile(sourcePath, targetPath);
-        core.info(`Copied ${sourcePath} to ${targetPath}`);
+      } else {
+        if (sourcePath !== targetPath) {
+          const targetDir = path.dirname(targetPath);
+          // Create target directory if it doesn't exist
+          await fs.promises.mkdir(targetDir, {recursive: true});
+          // Copy file asynchronously
+          await fs.promises.copyFile(sourcePath, targetPath);
+          core.info(`Copied ${sourcePath} to ${targetPath}`);
+        } else {
+          core.info(
+            `Dependency file is already inside the workspace: ${sourcePath}`
+          );
+        }
+        resolvedDependencyPath = path.relative(workspace, targetPath);
+        core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
       }
-
-      resolvedDependencyPath = path.relative(workspace, targetPath);
-      core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
     } catch (error) {
       core.warning(
         `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
@@ -64,10 +67,13 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
     }
   }
 
+  // Pass resolvedDependencyPath if available, else fallback to original input
+  const dependencyPathForCache = resolvedDependencyPath ?? cacheDependencyPath;
+
   const cacheDistributor = getCacheDistributor(
     cache,
     pythonVersion,
-    cacheDependencyPath
+    dependencyPathForCache
   );
   await cacheDistributor.restoreCache();
 }

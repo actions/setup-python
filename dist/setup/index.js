@@ -96939,22 +96939,29 @@ function cacheDependencies(cache, pythonVersion) {
                 if (!sourceExists) {
                     core.warning(`The resolved cache-dependency-path does not exist: ${sourcePath}`);
                 }
-                else if (sourcePath !== targetPath) {
-                    const targetDir = path.dirname(targetPath);
-                    // Create target directory if it doesn't exist
-                    yield fs_1.default.promises.mkdir(targetDir, { recursive: true });
-                    // Copy file asynchronously
-                    yield fs_1.default.promises.copyFile(sourcePath, targetPath);
-                    core.info(`Copied ${sourcePath} to ${targetPath}`);
+                else {
+                    if (sourcePath !== targetPath) {
+                        const targetDir = path.dirname(targetPath);
+                        // Create target directory if it doesn't exist
+                        yield fs_1.default.promises.mkdir(targetDir, { recursive: true });
+                        // Copy file asynchronously
+                        yield fs_1.default.promises.copyFile(sourcePath, targetPath);
+                        core.info(`Copied ${sourcePath} to ${targetPath}`);
+                    }
+                    else {
+                        core.info(`Dependency file is already inside the workspace: ${sourcePath}`);
+                    }
+                    resolvedDependencyPath = path.relative(workspace, targetPath);
+                    core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
                 }
-                resolvedDependencyPath = path.relative(workspace, targetPath);
-                core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
             }
             catch (error) {
                 core.warning(`Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`);
             }
         }
-        const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, cacheDependencyPath);
+        // Pass resolvedDependencyPath if available, else fallback to original input
+        const dependencyPathForCache = resolvedDependencyPath !== null && resolvedDependencyPath !== void 0 ? resolvedDependencyPath : cacheDependencyPath;
+        const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, dependencyPathForCache);
         yield cacheDistributor.restoreCache();
     });
 }

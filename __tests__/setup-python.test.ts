@@ -119,4 +119,31 @@ describe('cacheDependencies', () => {
     expect(mockedCore.warning).not.toHaveBeenCalled();
     expect(mockRestoreCache).toHaveBeenCalled();
   });
+
+  it('does not copy if dependency file is already inside the workspace but still sets resolved path', async () => {
+    // Simulate cacheDependencyPath inside workspace
+    mockedCore.getInput.mockReturnValue('deps.lock');
+
+    // Override sourcePath and targetPath to be equal
+    const actionPath = '/github/workspace'; // same path for action and workspace
+    process.env.GITHUB_ACTION_PATH = actionPath;
+    process.env.GITHUB_WORKSPACE = actionPath;
+
+    // access resolves to simulate file exists
+    mockedFsPromises.access.mockResolvedValue();
+
+    await cacheDependencies('pip', '3.12');
+
+    const sourcePath = path.resolve(actionPath, 'deps.lock');
+    const targetPath = sourcePath; // same path
+
+    expect(mockedFsPromises.copyFile).not.toHaveBeenCalled();
+    expect(mockedCore.info).toHaveBeenCalledWith(
+      `Dependency file is already inside the workspace: ${sourcePath}`
+    );
+    expect(mockedCore.info).toHaveBeenCalledWith(
+      `Resolved cache-dependency-path: deps.lock`
+    );
+    expect(mockRestoreCache).toHaveBeenCalled();
+  });
 });
