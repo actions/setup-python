@@ -21,6 +21,7 @@ function isPyPyVersion(versionSpec: string) {
 function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
 }
+
 export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
@@ -57,7 +58,10 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
             `Dependency file is already inside the workspace: ${sourcePath}`
           );
         }
-        resolvedDependencyPath = path.relative(workspace, targetPath);
+
+        resolvedDependencyPath = path
+          .relative(workspace, targetPath)
+          .replace(/\\/g, '/');
         core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
       }
     } catch (error) {

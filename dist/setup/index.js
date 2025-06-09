@@ -96951,7 +96951,9 @@ function cacheDependencies(cache, pythonVersion) {
                     else {
                         core.info(`Dependency file is already inside the workspace: ${sourcePath}`);
                     }
-                    resolvedDependencyPath = path.relative(workspace, targetPath);
+                    resolvedDependencyPath = path
+                        .relative(workspace, targetPath)
+                        .replace(/\\/g, '/');
                     core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
                 }
             }
