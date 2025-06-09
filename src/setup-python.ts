@@ -42,15 +42,13 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
         `The resolved cache-dependency-path does not exist: ${sourcePath}`
       );
     } else {
-      if (sourcePath !== targetPath) {
-        try {
-          fs.copyFileSync(sourcePath, targetPath);
-          core.info(`Copied ${sourcePath} to ${targetPath}`);
-        } catch (error) {
-          core.warning(
-            `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
-          );
-        }
+      try {
+        fs.copyFileSync(sourcePath, targetPath);
+        core.info(`Copied ${sourcePath} to ${targetPath}`);
+      } catch (error) {
+        core.warning(
+          `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
+        );
       }
     }
 

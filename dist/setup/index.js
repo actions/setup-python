@@ -96934,14 +96934,12 @@ function cacheDependencies(cache, pythonVersion) {
                 core.warning(`The resolved cache-dependency-path does not exist: ${sourcePath}`);
             }
             else {
-                if (sourcePath !== targetPath) {
-                    try {
-                        fs_1.default.copyFileSync(sourcePath, targetPath);
-                        core.info(`Copied ${sourcePath} to ${targetPath}`);
-                    }
-                    catch (error) {
-                        core.warning(`Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`);
-                    }
+                try {
+                    fs_1.default.copyFileSync(sourcePath, targetPath);
+                    core.info(`Copied ${sourcePath} to ${targetPath}`);
+                }
+                catch (error) {
+                    core.warning(`Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`);
                 }
             }
             resolvedDependencyPath = path.relative(workspace, targetPath);
