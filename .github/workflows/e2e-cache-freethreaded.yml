@@ -187,7 +187,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          pip-version: 25.0.1
+          pip-version: '25.0.1'
       - name: Install dependencies
         run: pip install numpy pandas requests
 
@@ -216,6 +216,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: __tests__/data/requirements.txt
-          pip-version: 25.0.1
+          pip-version: '25.0.1'
       - name: Install dependencies
         run: pip install numpy pandas requests
