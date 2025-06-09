@@ -96945,7 +96945,7 @@ function cacheDependencies(cache, pythonVersion) {
             resolvedDependencyPath = path.relative(workspace, targetPath);
             core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
         }
-        const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, resolvedDependencyPath);
+        const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, cacheDependencyPath);
         yield cacheDistributor.restoreCache();
     });
 }

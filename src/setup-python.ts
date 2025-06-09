@@ -59,7 +59,7 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDistributor = getCacheDistributor(
     cache,
     pythonVersion,
-    resolvedDependencyPath
+    cacheDependencyPath
   );
   await cacheDistributor.restoreCache();
 }
