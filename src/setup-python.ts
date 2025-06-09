@@ -22,9 +22,45 @@ function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
 }
 
-async function cacheDependencies(cache: string, pythonVersion: string) {
+export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
+  let resolvedDependencyPath: string | undefined = undefined;
+
+  if (cacheDependencyPath) {
+    const actionPath = process.env.GITHUB_ACTION_PATH || '';
+    const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+
+    const sourcePath = path.resolve(actionPath, cacheDependencyPath);
+    const relativePath = path.relative(actionPath, sourcePath);
+    const targetPath = path.resolve(workspace, relativePath);
+
+    if (!fs.existsSync(sourcePath)) {
+      core.warning(
+        `The resolved cache-dependency-path does not exist: ${sourcePath}`
+      );
+    } else {
+      if (sourcePath !== targetPath) {
+        try {
+          const targetDir = path.dirname(targetPath);
+          if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, {recursive: true});
+          }
+
+          fs.copyFileSync(sourcePath, targetPath);
+          core.info(`Copied ${sourcePath} to ${targetPath}`);
+        } catch (error) {
+          core.warning(
+            `Failed to copy file from ${sourcePath} to ${targetPath}: ${error}`
+          );
+        }
+      }
+    }
+
+    resolvedDependencyPath = path.relative(workspace, targetPath);
+    core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
+  }
+
   const cacheDistributor = getCacheDistributor(
     cache,
     pythonVersion,
