@@ -123,8 +123,8 @@ jobs:
 
         - name: Init verify script
           shell: pwsh
-          run: mv ./__tests__/verify_windows_install_path.ps1 .
-
+          run: Move-Item -Path ".\__tests__\verify_windows_install_path.ps1" -Destination "."
+        
 
         - name: Set up Python
           uses: ./
