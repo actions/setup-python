@@ -96,46 +96,49 @@ jobs:
         shell: bash
 
   verify-install-path:
-      name: Verify Install Path
-      runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [windows-11-arm]
-          architecture: [x86, arm64]
-          python-version: ['3.10','3.11', '3.12', '3.13.1', '3.14.0-beta.2']
-          freethreaded: ['false']
-          include:
-            - os: windows-11-arm
-              architecture: x86
-              python-version: '3.13.1'
-              freethreaded: true
-            - os: windows-11-arm
-              architecture: arm64
-              python-version: '3.13.1'
-              freethreaded: true
-            - os: windows-11-arm
-              architecture: x86
-              python-version: '3.14.0-beta.2'
-              freethreaded: true
-            - os: windows-11-arm
-              architecture: arm64
-              python-version: '3.14.0-beta.2'
-              freethreaded: true
+    name: Verify Install Path
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-11-arm]
+        architecture: [x86, arm64]
+        python-version: ['3.11', '3.12', '3.13.1', '3.14.0-beta.2']
+        freethreaded: ['false']
+        include:
+          - os: windows-11-arm
+            architecture: x86
+            python-version: '3.13.1'
+            freethreaded: true
+          - os: windows-11-arm
+            architecture: arm64
+            python-version: '3.13.1'
+            freethreaded: true
+          - os: windows-11-arm
+            architecture: x86
+            python-version: '3.14.0-beta.2'
+            freethreaded: true
+          - os: windows-11-arm
+            architecture: arm64
+            python-version: '3.14.0-beta.2'
+            freethreaded: true
+          - os: windows-latest
+            architecture: x86
+            python-version: '3.10'
+            freethreaded: false
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+      - name: Set up Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+          freethreaded: ${{ matrix.freethreaded }}
 
-        - name: Set up Python
-          uses: ./
-          with:
-            python-version: ${{ matrix.python-version }}
-            architecture: ${{ matrix.architecture }}
-            freethreaded: ${{ matrix.freethreaded }}
-
-        - name: Verify Install Path
-          shell: pwsh
-          run: python __tests__/verify-windows-install-path.py ``
-              -arch ${{ matrix.architecture }} `
-              -freethreaded ${{ matrix.freethreaded }} `
+      - name: Verify Install Path
+        shell: pwsh
+        run: python __tests__/verify-windows-install-path.py ``
+          -arch ${{ matrix.architecture }} `
+          -freethreaded ${{ matrix.freethreaded }} `
