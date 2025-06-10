@@ -119,4 +119,7 @@ jobs:
           freethreaded: ${{ matrix.freethreaded }}
 
       - name: Verify Install Path
-        run: python __tests__/verify_windows_install_path.ps1 ${{ matrix.architecture }} ${{ matrix.freethreaded }} ${{ matrix.python-version }}
+        run: |
+            cd __tests__
+            ./verify_windows_install_path.ps1 ${{ matrix.architecture }} ${{ matrix.freethreaded }} ${{ matrix.python-version }}
+          shell: pwsh
