@@ -94,36 +94,54 @@ jobs:
         run: |
           curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
         shell: bash
-  verify-windows-install-path:
-        name: Verify Install Path (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.python }}, ${{ matrix.freethreaded }})
-        runs-on: ${{ matrix.os }}
-        strategy:
-          fail-fast: false
-          matrix:
-            os: [windows-latest, windows-11-arm]
-            arch: [x64, arm64]
-            python: [3.9, 3.10, 3.11, 3.12]
-            freethreaded: [true, false]
-            exclude:
-              - os: windows-latest
-                arch: arm64
-              - os: windows-latest
-                python: 3.12
-                arch: arm64
-                freethreaded: false
-              - os: windows-11-arm
-                arch: arm64
-                python: 3.9
-                freethreaded: false
-              - os: windows-11-arm
-                arch: arm64
-                python: 3.10
-                freethreaded: false
-              - os: windows-11-arm
-                arch: x64  # prevent accidental mix
-        steps:
-          - uses: actions/checkout@v4
-          - name: Verify Windows Install Path
-            shell: pwsh
-            run: python __tests__/verify_windows_install_path.py ${{ matrix.arch }} ${{ matrix.freethreaded }}
-      
+
+  verify-install-path:
+      name: Verify Install Path
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [windows-latest, windows-11-arm]
+          architecture: [x64, x86, arm64]
+          python-version: ['3.9', '3.10', '3.11', '3.12', '3.13.1']
+          freethreaded: ['false', 'true']
+          exclude:
+            - architecture: x64
+              freethreaded: 'true'
+            - python-version: '3.9'
+              freethreaded: 'true'
+            - python-version: '3.10'
+              freethreaded: 'true'
+            - python-version: '3.11'
+              freethreaded: 'true'
+            - python-version: '3.12'
+              freethreaded: 'true'
+            - os: windows-latest
+              architecture: arm64
+              python-version: 3.12
+              freethreaded: false
+            - os: windows-11-arm
+              architecture: arm64
+              python-version: 3.9
+              freethreaded: false
+            - os: windows-11-arm
+              architecture: arm64
+              python-version: 3.10
+              freethreaded: false
+        fail-fast: false
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Set up Python
+          uses: ./
+          with:
+            python-version: ${{ matrix.python-version }}
+            architecture: ${{ matrix.architecture }}
+            freethreaded: ${{ matrix.freethreaded }}
+
+        - name: Verify Install Path
+          shell: pwsh
+          run: python __tests__/verify-windows-install-path.py ``
+              -arch ${{ matrix.architecture }} `
+              -freethreaded ${{ matrix.freethreaded }} `
