@@ -122,4 +122,4 @@ jobs:
         run: |
             cd __tests__
             ./verify_windows_install_path.ps1 ${{ matrix.architecture }} ${{ matrix.freethreaded }} ${{ matrix.python-version }}
-          shell: pwsh
+        shell: pwsh
