@@ -121,16 +121,17 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4
 
+        - name: Init verify script
+          shell: pwsh
+          run: mv ./__tests__/verify_windows_install_path.ps1 .
+
+
         - name: Set up Python
           uses: ./
           with:
             python-version: ${{ matrix.python-version }}
             architecture: ${{ matrix.architecture }}
             freethreaded: ${{ matrix.freethreaded }}
-
-        - name: Init verify script
-          shell: bash
-          run: mv ./__tests__/verify_windows_install_path.ps1 .
 
         - name: Verify Install Path
           shell: pwsh
