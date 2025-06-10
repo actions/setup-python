@@ -121,11 +121,6 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4
 
-        - name: Init verify script
-          shell: pwsh
-          run: Move-Item -Path ".\__tests__\verify_windows_install_path.ps1" -Destination "."
-        
-
         - name: Set up Python
           uses: ./
           with:
@@ -135,9 +130,8 @@ jobs:
 
         - name: Verify Install Path
           shell: pwsh
-          run: |
-            Set-Location -Path $Env:GITHUB_WORKSPACE
-            .\verify_windows_install_path.ps1 `
-              ${{ matrix.architecture }} `
-              ${{ matrix.freethreaded }} `
-              ${{ matrix.python-version }}
+          run: python __tests__/verify-windows-install-path.py `
+              -os ${{ matrix.os }} `
+              -arch ${{ matrix.architecture }} `
+              -freethreaded ${{ matrix.freethreaded }} `
+              -python-version ${{ matrix.python-version }}
