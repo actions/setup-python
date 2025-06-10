@@ -1,9 +1,7 @@
 import os
 import sys
 
-def build_expected_path(architecture, freethreaded):
-    major = 3
-    minor = 13
+def build_expected_path(architecture, freethreaded, major, minor):
     version_suffix = f"{major}{minor}"
 
     if architecture == "x86" and (major > 3 or (major == 3 and minor >= 10)):
@@ -22,14 +20,20 @@ def build_expected_path(architecture, freethreaded):
     return os.path.join(base_path, "Python", f"Python{version_suffix}", "Scripts")
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python verify_windows_install_path.py <architecture> <freethreaded>")
+    # Expecting: -arch <architecture> -freethreaded <freethreaded>
+    if len(sys.argv) != 5:
+        print("Usage: python verify-windows-install-path.py -arch <architecture> -freethreaded <freethreaded>")
         sys.exit(1)
 
-    architecture = sys.argv[1]
-    freethreaded = sys.argv[2]
+    args = dict(zip(sys.argv[1::2], sys.argv[2::2]))
+    architecture = args.get('-arch')
+    freethreaded = args.get('-freethreaded')
 
-    expected_path = build_expected_path(architecture, freethreaded)
+    # Get major and minor version from current Python
+    major = sys.version_info.major
+    minor = sys.version_info.minor
+
+    expected_path = build_expected_path(architecture, freethreaded, major, minor)
     print(f"Expected PATH entry: {expected_path}")
 
     path_env = os.getenv("PATH", "")
@@ -38,6 +42,7 @@ def main():
         sys.exit(1)
     else:
         print("Correct path present in PATH")
+        print(f"Verified path: {expected_path}")
 
 if __name__ == "__main__":
     main()
