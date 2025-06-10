@@ -104,15 +104,23 @@ jobs:
           architecture: [x86, arm64]
           python-version: ['3.11', '3.12', '3.13.1', '3.14.0-beta.2']
           freethreaded: ['false']
-          exclude:
-            - os: windows-latest
+          include:
+            - os: windows-11-arm
+              architecture: x86
+              python-version: '3.13.1'
+              freethreaded: true
+            - os: windows-11-arm
               architecture: arm64
               python-version: '3.13.1'
-              freethreaded: false
-            - os: windows-latest
+              freethreaded: true
+            - os: windows-11-arm
+              architecture: x86
+              python-version: '3.14.0-beta.2'
+              freethreaded: true
+            - os: windows-11-arm
               architecture: arm64
               python-version: '3.14.0-beta.2'
-              freethreaded: false
+              freethreaded: true
 
 
       steps:
