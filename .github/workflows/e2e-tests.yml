@@ -139,6 +139,6 @@ jobs:
 
       - name: Verify Install Path
         shell: pwsh
-        run: python __tests__/verify-windows-install-path.py `
-            -arch ${{ matrix.architecture }} `
-            -freethreaded ${{ matrix.freethreaded }}
+        run: python __tests__/verify-windows-install-path.py ``
+          -arch ${{ matrix.architecture }} `
+          -freethreaded ${{ matrix.freethreaded }} `
