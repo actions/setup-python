@@ -136,9 +136,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
           freethreaded: ${{ matrix.freethreaded }}
+
       - name: Verify Install Path
         shell: pwsh
         run: python __tests__/verify-windows-install-path.py `
-          -arch ${{ matrix.architecture }} `
-          -freethreaded ${{ matrix.freethreaded }} `
-          -version ${{ matrix.python-version }}
+          ${{ matrix.python-version }} `
+          ${{ matrix.architecture }} `
+          ${{ matrix.freethreaded }}
