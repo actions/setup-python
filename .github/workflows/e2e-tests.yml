@@ -95,7 +95,7 @@ jobs:
           curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
         shell: bash
 
- verify-install-path:
+  verify-install-path:
     name: Verify Install Path
     runs-on: ${{ matrix.os }}
     strategy:
