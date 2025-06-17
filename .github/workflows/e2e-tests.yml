@@ -139,7 +139,7 @@ jobs:
 
       - name: Verify Install Path
         shell: pwsh
-        run: python __tests__/verify-windows-install-path.py `
+        run: python ./__tests__/verify-windows-install-path.py `
           ${{ matrix.python-version }} `
           ${{ matrix.architecture }} `
           ${{ matrix.freethreaded }}
