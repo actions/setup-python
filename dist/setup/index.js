@@ -96947,14 +96947,14 @@ function cacheDependencies(cache, pythonVersion) {
                         // Copy file asynchronously
                         yield fs_1.default.promises.copyFile(sourcePath, targetPath);
                         core.info(`Copied ${sourcePath} to ${targetPath}`);
-                        resolvedDependencyPath = path
-                            .relative(workspace, targetPath)
-                            .replace(/\\/g, '/');
-                        core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
                     }
                     else {
                         core.info(`Dependency file is already inside the workspace: ${sourcePath}`);
                     }
+                    resolvedDependencyPath = path
+                        .relative(workspace, targetPath)
+                        .replace(/\\/g, '/');
+                    core.info(`Resolved cache-dependency-path: ${resolvedDependencyPath}`);
                 }
             }
             catch (error) {
