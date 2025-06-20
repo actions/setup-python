@@ -63,7 +63,7 @@ steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.14.0-alpha.1'
+    python-version: '3.14.0-beta.1'
 - run: python my_script.py
 ```
 
