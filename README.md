@@ -108,6 +108,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
 - [Allow pre-releases](docs/advanced-usage.md#allow-pre-releases)
+- [Using the pip-version input](docs/advanced-usage.md#using-the-pip-version-input)
 
 ## Recommended permissions
 

@@ -95990,6 +95990,7 @@ const semver = __importStar(__nccwpck_require__(2088));
 const installer = __importStar(__nccwpck_require__(1919));
 const core = __importStar(__nccwpck_require__(7484));
 const tc = __importStar(__nccwpck_require__(3472));
+const exec = __importStar(__nccwpck_require__(5236));
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
 // There is a separate directory for `pip install --user`.
@@ -96009,6 +96010,20 @@ function binDir(installDir) {
     else {
         return path.join(installDir, 'bin');
     }
+}
+function installPip(pythonLocation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pipVersion = core.getInput('pip-version');
+        // Validate pip-version format: major[.minor][.patch]
+        const versionRegex = /^\d+(\.\d+)?(\.\d+)?$/;
+        if (pipVersion && !versionRegex.test(pipVersion)) {
+            throw new Error(`Invalid pip-version "${pipVersion}". Please specify a version in the format major[.minor][.patch].`);
+        }
+        if (pipVersion) {
+            core.info(`pip-version input is specified. Installing pip version ${pipVersion}`);
+            yield exec.exec(`${pythonLocation}/python -m pip install --upgrade pip==${pipVersion} --disable-pip-version-check --no-warn-script-location`);
+        }
+    });
 }
 function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases, freethreaded) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -96105,6 +96120,8 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
         }
         core.setOutput('python-version', pythonVersion);
         core.setOutput('python-path', pythonPath);
+        const binaryPath = utils_1.IS_WINDOWS ? installDir : _binDir;
+        yield installPip(binaryPath);
         return { impl: 'CPython', version: pythonVersion };
     });
 }
