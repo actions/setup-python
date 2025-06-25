@@ -412,7 +412,7 @@ steps:
 - run: pip install -e .
   # Or pip install -e '.[test]' to install test dependencies
 ```
-
+Note: cache-dependency-path supports files located outside the workspace root by copying them into the workspace to enable proper caching.
 # Outputs and environment variables
 
 ## Outputs
