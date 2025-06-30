@@ -31,7 +31,7 @@ jobs:
             macos-latest,
             macos-13
           ]
-        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t, 3.13.3t]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -58,7 +58,7 @@ jobs:
             macos-latest,
             macos-13
           ]
-        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t, 3.13.3t]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -120,7 +120,7 @@ jobs:
             macos-latest,
             macos-13
           ]
-        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t, 3.13.3t]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -148,7 +148,7 @@ jobs:
             macos-latest,
             macos-13
           ]
-        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t, 3.13.3t]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
