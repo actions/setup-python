@@ -96164,6 +96164,8 @@ function useCpythonVersion(version, architecture, updateEnvironment, checkLatest
             core.addPath(installDir);
             core.addPath(_binDir);
             if (utils_1.IS_WINDOWS) {
+                // Add --user directory
+                // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
                 // Extract version details
                 const version = path.basename(path.dirname(installDir));
                 const major = semver.major(version);

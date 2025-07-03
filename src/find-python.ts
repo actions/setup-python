@@ -152,6 +152,8 @@ export async function useCpythonVersion(
     core.addPath(_binDir);
 
     if (IS_WINDOWS) {
+      // Add --user directory
+      // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
       // Extract version details
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
