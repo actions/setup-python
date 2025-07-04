@@ -96883,8 +96883,10 @@ function isGraalPyVersion(versionSpec) {
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
         let resolvedDependencyPath = undefined;
+        const overwrite = (_a = core.getBooleanInput('overwrite', { required: false })) !== null && _a !== void 0 ? _a : false;
         if (cacheDependencyPath) {
             const actionPath = process.env.GITHUB_ACTION_PATH || '';
             const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
@@ -96902,11 +96904,18 @@ function cacheDependencies(cache, pythonVersion) {
                 else {
                     if (sourcePath !== targetPath) {
                         const targetDir = path.dirname(targetPath);
-                        // Create target directory if it doesn't exist
                         yield fs_1.default.promises.mkdir(targetDir, { recursive: true });
-                        // Copy file asynchronously
-                        yield fs_1.default.promises.copyFile(sourcePath, targetPath);
-                        core.info(`Copied ${sourcePath} to ${targetPath}`);
+                        const targetExists = yield fs_1.default.promises
+                            .access(targetPath, fs_1.default.constants.F_OK)
+                            .then(() => true)
+                            .catch(() => false);
+                        if (!targetExists || overwrite) {
+                            yield fs_1.default.promises.copyFile(sourcePath, targetPath);
+                            core.info(`${targetExists ? 'Overwrote' : 'Copied'} ${sourcePath} to ${targetPath}`);
+                        }
+                        else {
+                            core.info(`Skipped copying ${sourcePath} — target already exists at ${targetPath}`);
+                        }
                     }
                     else {
                         core.info(`Dependency file is already inside the workspace: ${sourcePath}`);

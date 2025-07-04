@@ -20,6 +20,10 @@ inputs:
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
   cache-dependency-path:
     description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
+  overwrite:
+    description: Whether to overwrite existing file in workspace
+    required: false
+    default: 'false'
   update-environment:
     description: "Set this option if you want the action to update environment variables."
     default: true
@@ -29,8 +33,6 @@ inputs:
   freethreaded:
     description: "When 'true', use the freethreaded version of Python."
     default: false
-  pip-version:
-    description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
