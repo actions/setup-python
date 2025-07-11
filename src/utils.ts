@@ -360,7 +360,7 @@ export function getVersionInputFromPipfileFile(versionFile: string): string[] {
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);
-  return [extractValue(pipfileConfig, keys)] as string[];
+  return versions;
 }
 
 /**
