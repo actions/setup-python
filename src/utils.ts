@@ -332,6 +332,10 @@ export function getVersionInputFromToolVersions(versionFile: string): string[] {
 export function getVersionInputFromPipfileFile(versionFile: string): string[] {
   core.debug(`Trying to resolve version from ${versionFile}`);
 
+  if (!fs.existsSync(versionFile)) {
+    core.warning(`File ${versionFile} does not exist.`);
+    return [];
+  }
   let pipfileFile = fs.readFileSync(versionFile, 'utf8');
   // Normalize the line endings in the pipfileFile
   pipfileFile = pipfileFile.replace(/\r\n/g, '\n');
