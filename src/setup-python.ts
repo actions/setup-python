@@ -21,11 +21,12 @@ function isPyPyVersion(versionSpec: string) {
 function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
 }
-
 export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
   let resolvedDependencyPath: string | undefined = undefined;
+  const overwrite =
+    core.getBooleanInput('overwrite', {required: false}) ?? false;
 
   if (cacheDependencyPath) {
     const actionPath = process.env.GITHUB_ACTION_PATH || '';
@@ -48,11 +49,27 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
       } else {
         if (sourcePath !== targetPath) {
           const targetDir = path.dirname(targetPath);
-          // Create target directory if it doesn't exist
           await fs.promises.mkdir(targetDir, {recursive: true});
-          // Copy file asynchronously
-          await fs.promises.copyFile(sourcePath, targetPath);
-          core.info(`Copied ${sourcePath} to ${targetPath}`);
+
+          const targetExists = await fs.promises
+            .access(targetPath, fs.constants.F_OK)
+            .then(() => true)
+            .catch(() => false);
+
+          if (targetExists && !overwrite) {
+            const filename = path.basename(cacheDependencyPath);
+            core.warning(
+              `A file named '${filename}' exists in both the composite action and the workspace. The file in the workspace will be used. To avoid ambiguity, consider renaming one of the files or setting 'overwrite: true'.`
+            );
+            core.info(
+              `Skipped copying ${sourcePath} — target already exists at ${targetPath}`
+            );
+          } else {
+            await fs.promises.copyFile(sourcePath, targetPath);
+            core.info(
+              `${targetExists ? 'Overwrote' : 'Copied'} ${sourcePath} to ${targetPath}`
+            );
+          }
         } else {
           core.info(
             `Dependency file is already inside the workspace: ${sourcePath}`
@@ -81,7 +98,6 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
   );
   await cacheDistributor.restoreCache();
 }
-
 function resolveVersionInputFromDefaultFile(): string[] {
   const couples: [string, (versionFile: string) => string[]][] = [
     ['.python-version', getVersionsInputFromPlainFile]

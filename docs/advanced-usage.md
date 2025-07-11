@@ -1,3 +1,4 @@
+
 # Advanced Usage
 - [Using the python-version input](advanced-usage.md#using-the-python-version-input)
     - [Specifying a Python version](advanced-usage.md#specifying-a-python-version)
@@ -413,6 +414,7 @@ steps:
   # Or pip install -e '.[test]' to install test dependencies
 ```
 Note: cache-dependency-path supports files located outside the workspace root by copying them into the workspace to enable proper caching.
+A new input overwrite has been introduced to prevent accidental overwriting of existing files in the workspace when a composite action’s cache-dependency-path refers to common filenames like requirements.txt. By default, if a file with the same path already exists in the workspace, it will not be copied from the action unless overwrite: true is explicitly set.
 # Outputs and environment variables
 
 ## Outputs

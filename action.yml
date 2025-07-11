@@ -31,6 +31,9 @@ inputs:
     default: false
   pip-version:
     description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
+  overwrite:
+    description: "Whether to overwrite existing files in the workspace when a composite action’s cache-dependency-path points to a file with the same name (e.g., requirements.txt). Defaults to false."
+    default: 'false'
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
