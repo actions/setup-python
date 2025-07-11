@@ -56,7 +56,10 @@ describe('cacheDependencies', () => {
 
     await cacheDependencies('pip', '3.12');
 
-    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(
+      sourcePath,
+      targetPath
+    );
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Copied ${sourcePath} to ${targetPath}`
     );
@@ -68,7 +71,10 @@ describe('cacheDependencies', () => {
 
     await cacheDependencies('pip', '3.12');
 
-    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(
+      sourcePath,
+      targetPath
+    );
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Overwrote ${sourcePath} to ${targetPath}`
     );
