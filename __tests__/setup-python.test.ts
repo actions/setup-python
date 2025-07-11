@@ -27,12 +27,19 @@ const mockedGetCacheDistributor = getCacheDistributor as jest.Mock;
 describe('cacheDependencies', () => {
   const mockRestoreCache = jest.fn();
 
+  const actionPath = path.resolve('/github/action');
+  const workspacePath = path.resolve('/github/workspace');
+  const relPath = path.join('nested', 'deps.lock');
+  const sourcePath = path.resolve(actionPath, relPath);
+  const targetPath = path.resolve(workspacePath, relPath);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.GITHUB_ACTION_PATH = '/github/action';
-    process.env.GITHUB_WORKSPACE = '/github/workspace';
 
-    mockedCore.getInput.mockReturnValue('nested/deps.lock');
+    process.env.GITHUB_ACTION_PATH = actionPath;
+    process.env.GITHUB_WORKSPACE = workspacePath;
+
+    mockedCore.getInput.mockReturnValue(relPath);
     mockedCore.getBooleanInput.mockReturnValue(false);
 
     mockedGetCacheDistributor.mockReturnValue({restoreCache: mockRestoreCache});
@@ -42,21 +49,14 @@ describe('cacheDependencies', () => {
   });
 
   it('copies the file if source exists and target does not', async () => {
-    mockedFsPromises.access.mockImplementation(async filePath => {
-      if (filePath === '/github/action/nested/deps.lock')
-        return Promise.resolve(); // source
-      throw new Error('target does not exist'); // target
+    mockedFsPromises.access.mockImplementation(async p => {
+      if (p === sourcePath) return Promise.resolve();
+      throw new Error('target does not exist');
     });
 
     await cacheDependencies('pip', '3.12');
 
-    const sourcePath = '/github/action/nested/deps.lock';
-    const targetPath = '/github/workspace/nested/deps.lock';
-
-    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(
-      sourcePath,
-      targetPath
-    );
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Copied ${sourcePath} to ${targetPath}`
     );
@@ -64,17 +64,11 @@ describe('cacheDependencies', () => {
 
   it('overwrites file if target exists and overwrite is true', async () => {
     mockedCore.getBooleanInput.mockReturnValue(true);
-    mockedFsPromises.access.mockResolvedValue(); // both source and target exist
+    mockedFsPromises.access.mockResolvedValue(); // both exist
 
     await cacheDependencies('pip', '3.12');
 
-    const sourcePath = '/github/action/nested/deps.lock';
-    const targetPath = '/github/workspace/nested/deps.lock';
-
-    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(
-      sourcePath,
-      targetPath
-    );
+    expect(mockedFsPromises.copyFile).toHaveBeenCalledWith(sourcePath, targetPath);
     expect(mockedCore.info).toHaveBeenCalledWith(
       `Overwrote ${sourcePath} to ${targetPath}`
     );
@@ -82,7 +76,7 @@ describe('cacheDependencies', () => {
 
   it('skips copy if file exists and overwrite is false', async () => {
     mockedCore.getBooleanInput.mockReturnValue(false);
-    mockedFsPromises.access.mockResolvedValue(); // both source and target exist
+    mockedFsPromises.access.mockResolvedValue(); // both exist
 
     await cacheDependencies('pip', '3.12');
 
@@ -93,11 +87,9 @@ describe('cacheDependencies', () => {
   });
 
   it('logs warning if source file does not exist', async () => {
-    mockedFsPromises.access.mockImplementation(async filePath => {
-      if (filePath === '/github/action/nested/deps.lock') {
-        throw new Error('source not found');
-      }
-      return Promise.resolve(); // fallback for others
+    mockedFsPromises.access.mockImplementation(async p => {
+      if (p === sourcePath) throw new Error('not found');
+      return Promise.resolve();
     });
 
     await cacheDependencies('pip', '3.12');
@@ -109,12 +101,10 @@ describe('cacheDependencies', () => {
   });
 
   it('logs warning if copyFile fails', async () => {
-    mockedFsPromises.access.mockImplementation(async filePath => {
-      if (filePath === '/github/action/nested/deps.lock')
-        return Promise.resolve();
-      throw new Error('target does not exist');
+    mockedFsPromises.access.mockImplementation(async p => {
+      if (p === sourcePath) return Promise.resolve();
+      throw new Error('target missing');
     });
-
     mockedFsPromises.copyFile.mockRejectedValue(new Error('copy failed'));
 
     await cacheDependencies('pip', '3.12');
@@ -135,17 +125,17 @@ describe('cacheDependencies', () => {
 
   it('does not copy if source and target are the same path', async () => {
     mockedCore.getInput.mockReturnValue('deps.lock');
-    process.env.GITHUB_ACTION_PATH = '/github/workspace';
-    process.env.GITHUB_WORKSPACE = '/github/workspace';
+    const samePath = path.resolve('/github/workspace', 'deps.lock');
+    process.env.GITHUB_ACTION_PATH = workspacePath;
+    process.env.GITHUB_WORKSPACE = workspacePath;
 
     mockedFsPromises.access.mockResolvedValue();
 
     await cacheDependencies('pip', '3.12');
 
-    const sourcePath = '/github/workspace/deps.lock';
     expect(mockedFsPromises.copyFile).not.toHaveBeenCalled();
     expect(mockedCore.info).toHaveBeenCalledWith(
-      `Dependency file is already inside the workspace: ${sourcePath}`
+      `Dependency file is already inside the workspace: ${samePath}`
     );
   });
 });
