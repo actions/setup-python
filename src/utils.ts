@@ -330,7 +330,7 @@ export function getVersionInputFromToolVersions(versionFile: string): string[] {
  * Python version extracted from the Pipfile file.
  */
 export function getVersionInputFromPipfileFile(versionFile: string): string[] {
-  core.debug(`Trying to resolve version form ${versionFile}`);
+  core.debug(`Trying to resolve version from ${versionFile}`);
 
   let pipfileFile = fs.readFileSync(versionFile, 'utf8');
   // Normalize the line endings in the pipfileFile
