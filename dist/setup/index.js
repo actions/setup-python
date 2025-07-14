@@ -97340,7 +97340,11 @@ exports.getVersionInputFromToolVersions = getVersionInputFromToolVersions;
  * Python version extracted from the Pipfile file.
  */
 function getVersionInputFromPipfileFile(versionFile) {
-    core.debug(`Trying to resolve version form ${versionFile}`);
+    core.debug(`Trying to resolve version from ${versionFile}`);
+    if (!fs_1.default.existsSync(versionFile)) {
+        core.warning(`File ${versionFile} does not exist.`);
+        return [];
+    }
     let pipfileFile = fs_1.default.readFileSync(versionFile, 'utf8');
     // Normalize the line endings in the pipfileFile
     pipfileFile = pipfileFile.replace(/\r\n/g, '\n');
@@ -97363,7 +97367,7 @@ function getVersionInputFromPipfileFile(versionFile) {
         versions.push(version);
     }
     core.info(`Extracted ${versions} from ${versionFile}`);
-    return [extractValue(pipfileConfig, keys)];
+    return versions;
 }
 exports.getVersionInputFromPipfileFile = getVersionInputFromPipfileFile;
 /**
