@@ -25,8 +25,7 @@ export async function cacheDependencies(cache: string, pythonVersion: string) {
   const cacheDependencyPath =
     core.getInput('cache-dependency-path') || undefined;
   let resolvedDependencyPath: string | undefined = undefined;
-  const overwrite =
-    core.getBooleanInput('overwrite', {required: false}) ?? false;
+  const overwrite = core.getBooleanInput('overwrite', {required: false});
 
   if (cacheDependencyPath) {
     const actionPath = process.env.GITHUB_ACTION_PATH || '';
