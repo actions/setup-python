@@ -96883,10 +96883,9 @@ function isGraalPyVersion(versionSpec) {
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
         let resolvedDependencyPath = undefined;
-        const overwrite = (_a = core.getBooleanInput('overwrite', { required: false })) !== null && _a !== void 0 ? _a : false;
+        const overwrite = core.getBooleanInput('overwrite', { required: false });
         if (cacheDependencyPath) {
             const actionPath = process.env.GITHUB_ACTION_PATH || '';
             const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
