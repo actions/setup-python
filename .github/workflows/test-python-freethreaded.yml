@@ -242,6 +242,86 @@ jobs:
         with:
           python-version-file: .tool-versions
 
+  setup-versions-from-pipfile-with-python_version:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} Pipfile
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-13,
+            ubuntu-latest,
+            ubuntu-24.04-arm
+          ]
+        python: [3.13t, 3.14t-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: build-version-file ${{ matrix.python }}
+        run: |
+          echo '[requires]
+            python_version = "${{ matrix.python }}"
+          ' > Pipfile
+
+      - name: setup-python ${{ matrix.python }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version-file: Pipfile
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+  setup-versions-from-pipfile-with-python_full_version:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} .tool-versions file
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-13,
+            ubuntu-latest,
+            ubuntu-24.04-arm
+          ]
+        python: [3.13.0t, 3.13.1t, 3.13.2t, 3.14t-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: build-version-file ${{ matrix.python }}
+        run: |
+          echo '[requires]
+            python_full_version = "${{ matrix.python }}"
+          ' > Pipfile
+
+      - name: setup-python ${{ matrix.python }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version-file: Pipfile
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
   setup-pre-release-version-from-manifest:
     name: Setup 3.14.0-alpha.6 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
