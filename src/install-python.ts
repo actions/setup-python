@@ -126,7 +126,8 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
     throw new Error('No files found in the release to download.');
   }
   const downloadUrl = !PYTHON_DOWNLOAD_BASE_URL ? release.files[0].download_url : release.files[0].download_url.replace("https://github.com/", PYTHON_DOWNLOAD_BASE_URL);
-
+  core.info(`base url "${PYTHON_DOWNLOAD_BASE_URL}")
+  
   core.info(`Download from "${downloadUrl}"`);
   let pythonPath = '';
   try {
