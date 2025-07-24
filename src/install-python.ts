@@ -13,6 +13,7 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
+const PYTHON_DOWNLOAD_BASE_URL = core.getInput('python_download_base_url');
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -124,7 +125,7 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   if (!release.files || release.files.length === 0) {
     throw new Error('No files found in the release to download.');
   }
-  const downloadUrl = release.files[0].download_url;
+  const downloadUrl = !PYTHON_DOWNLOAD_BASE_URL ? release.files[0].download_url : release.files[0].download_url.replace("https://github.com/", PYTHON_DOWNLOAD_BASE_URL);
 
   core.info(`Download from "${downloadUrl}"`);
   let pythonPath = '';
