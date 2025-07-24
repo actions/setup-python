@@ -31,6 +31,8 @@ inputs:
     default: false
   pip-version:
     description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
+  python_download_base_url:
+    description: "Used to specify an alternative base URL to download the python releases instead of github.com. The Action will try to download the python releases from <python_download_base_url>/actions/python-versions/releases/<release version>/<python version tar file>
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
