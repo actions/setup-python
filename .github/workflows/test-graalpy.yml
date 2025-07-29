@@ -3,7 +3,7 @@ name: Validate GraalPy e2e
 on:
   push:
     branches:
-      - main
+      - test-macos-x64-runner
     paths-ignore:
       - '**.md'
   pull_request:
@@ -20,12 +20,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
         graalpy:
           - 'graalpy-22.3'
@@ -75,12 +70,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
         graalpy: ['graalpy22.3', 'graalpy23.0', 'graalpy23.1', 'graalpy24.1']
 
@@ -106,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13]
+        os: [macos-14-large]
     steps:
       - uses: actions/checkout@v4
       - name: Setup GraalPy and check latest

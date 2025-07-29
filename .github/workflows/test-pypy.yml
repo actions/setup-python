@@ -3,7 +3,7 @@ name: Validate PyPy e2e
 on:
   push:
     branches:
-      - main
+      - test-macos-x64-runner
     paths-ignore:
       - '**.md'
   pull_request:
@@ -22,13 +22,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
         pypy:
           - 'pypy-2.7'
@@ -85,15 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-13
-          - macos-14
-          - macos-15
-          - windows-2022
-          - windows-2025
-          - ubuntu-22.04
-          - ubuntu-24.04
-          - ubuntu-22.04-arm
-          - ubuntu-24.04-arm
+          - macos-14-large
         pypy: ['pypy-2.7', 'pypy-3.10', 'pypy-3.11']
 
     steps:
@@ -138,13 +124,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
         pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly', 'pypy3.11']
 
@@ -172,13 +152,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
     steps:
       - uses: actions/checkout@v4
@@ -214,13 +188,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
     steps:
       - uses: actions/checkout@v4

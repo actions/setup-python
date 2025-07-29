@@ -3,7 +3,7 @@ name: Validate Python e2e
 on:
   push:
     branches:
-      - main
+      - test-macos-x64-runner
     paths-ignore:
       - '**.md'
   pull_request:
@@ -22,13 +22,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -66,13 +60,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -113,13 +101,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -158,13 +140,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.2]
     steps:
@@ -208,13 +184,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
@@ -258,13 +228,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.2, 3.14-dev]
         exclude:
@@ -292,13 +256,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
     steps:
       - name: Checkout
@@ -335,13 +293,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
     steps:
       - name: Checkout
@@ -372,13 +324,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
     steps:
       - name: Checkout
@@ -410,13 +356,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-13,
-            ubuntu-latest,
-            ubuntu-24.04-arm
+            macos-14-large
           ]
         python: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
@@ -443,13 +383,7 @@ jobs:
       matrix:
         os:
           [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+            macos-14-large
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
@@ -475,14 +409,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          [
-            macos-latest,
-            windows-latest,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04-arm,
-            ubuntu-latest,
-            macos-13
+         [
+            macos-14-large
           ]
     steps:
       - uses: actions/checkout@v4

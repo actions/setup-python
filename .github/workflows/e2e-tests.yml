@@ -19,7 +19,6 @@ jobs:
       matrix:
         operating-system:
           [
-            macos-15-large,
             macos-14-large
           ]
     steps:
