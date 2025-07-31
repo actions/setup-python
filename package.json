@@ -4,6 +4,9 @@
   "private": true,
   "description": "Setup python action",
   "main": "dist/index.js",
+   "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
     "format": "prettier --no-error-on-unmatched-pattern --config ./.prettierrc.js --write \"**/*.{ts,yml,yaml}\"",
@@ -37,7 +40,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.25",
+    "@types/node": "^24.1.0",
     "@types/semver": "^7.7.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
