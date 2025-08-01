@@ -96945,7 +96945,7 @@ function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLate
             core.addPath(pythonLocation);
             core.addPath(_binDir);
         }
-        core.setOutput('python-version', 'pypy' + resolvedPyPyVersion);
+        core.setOutput('python-version', `pypy${resolvedPythonVersion}-${resolvedPyPyVersion}`);
         core.setOutput('python-path', pythonPath);
         return { resolvedPyPyVersion, resolvedPythonVersion };
     });
@@ -98137,7 +98137,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromToolVersions = exports.getVersionsInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPipfileFile = exports.getVersionInputFromToolVersions = exports.getVersionsInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
@@ -98407,7 +98407,41 @@ function getVersionInputFromToolVersions(versionFile) {
 }
 exports.getVersionInputFromToolVersions = getVersionInputFromToolVersions;
 /**
- * Python version extracted from a plain, .tool-versions or TOML file.
+ * Python version extracted from the Pipfile file.
+ */
+function getVersionInputFromPipfileFile(versionFile) {
+    core.debug(`Trying to resolve version from ${versionFile}`);
+    if (!fs_1.default.existsSync(versionFile)) {
+        core.warning(`File ${versionFile} does not exist.`);
+        return [];
+    }
+    let pipfileFile = fs_1.default.readFileSync(versionFile, 'utf8');
+    // Normalize the line endings in the pipfileFile
+    pipfileFile = pipfileFile.replace(/\r\n/g, '\n');
+    const pipfileConfig = toml.parse(pipfileFile);
+    const keys = ['requires'];
+    if (!('requires' in pipfileConfig)) {
+        core.warning(`No Python version found in ${versionFile}`);
+        return [];
+    }
+    if ('python_full_version' in pipfileConfig['requires']) {
+        // specifies a full python version
+        keys.push('python_full_version');
+    }
+    else {
+        keys.push('python_version');
+    }
+    const versions = [];
+    const version = extractValue(pipfileConfig, keys);
+    if (version !== undefined) {
+        versions.push(version);
+    }
+    core.info(`Extracted ${versions} from ${versionFile}`);
+    return versions;
+}
+exports.getVersionInputFromPipfileFile = getVersionInputFromPipfileFile;
+/**
+ * Python version extracted from a plain, .tool-versions, Pipfile or TOML file.
  */
 function getVersionInputFromFile(versionFile) {
     if (versionFile.endsWith('.toml')) {
@@ -98415,6 +98449,9 @@ function getVersionInputFromFile(versionFile) {
     }
     else if (versionFile.match('.tool-versions')) {
         return getVersionInputFromToolVersions(versionFile);
+    }
+    else if (versionFile.match('Pipfile')) {
+        return getVersionInputFromPipfileFile(versionFile);
     }
     else {
         return getVersionsInputFromPlainFile(versionFile);
