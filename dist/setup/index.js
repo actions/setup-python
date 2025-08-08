@@ -96431,24 +96431,28 @@ class PipCache extends cache_distributor_1.default {
     }
     getCacheGlobalDirectories() {
         return __awaiter(this, void 0, void 0, function* () {
-            let exitCode = 1;
+            let exitCode = 0;
             let stdout = '';
             let stderr = '';
             // Add temporary fix for Windows
-            // On windows it is necessary to execute through an exec
-            // because the getExecOutput gives a non zero code or writes to stderr for pip 22.0.2,
+            // On Windows, it is necessary to execute through an exec
+            // because the getExecOutput gives a non-zero code or writes to stderr for pip 22.0.2,
             // or spawn must be started with the shell option enabled for getExecOutput
             // Related issue: https://github.com/actions/setup-python/issues/328
             if (utils_1.IS_WINDOWS) {
                 const execPromisify = util_1.default.promisify(child_process.exec);
-                ({ stdout: stdout, stderr: stderr } = yield execPromisify('pip cache dir'));
+                try {
+                    ({ stdout, stderr } = yield execPromisify('pip cache dir'));
+                }
+                catch (err) {
+                    // Pip outputs warnings to stderr (e.g., --no-python-version-warning flag deprecation warning), causing false failure detection
+                    // Related issue: https://github.com/actions/setup-python/issues/1034
+                    // If an error occurs, set exitCode to 1 to indicate failure
+                    exitCode = 1;
+                }
             }
             else {
-                ({
-                    stdout: stdout,
-                    stderr: stderr,
-                    exitCode: exitCode
-                } = yield exec.getExecOutput('pip cache dir'));
+                ({ stdout, stderr, exitCode } = yield exec.getExecOutput('pip cache dir'));
             }
             if (exitCode && stderr) {
                 throw new Error(`Could not get cache folder path for pip package manager`);
