@@ -97855,7 +97855,7 @@ function installCpythonFromRelease(release) {
         }
         const downloadUrl = !PYTHON_DOWNLOAD_BASE_URL
             ? release.files[0].download_url
-            : release.files[0].download_url.replace('https://github.com/actions/python-versions/releases', PYTHON_DOWNLOAD_BASE_URL);
+            : release.files[0].download_url.replace('https://github.com/actions/python-versions/releases/download', PYTHON_DOWNLOAD_BASE_URL);
         core.info(`Download from "${downloadUrl}"`);
         let pythonPath = '';
         try {
