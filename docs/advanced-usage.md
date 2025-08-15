@@ -627,7 +627,7 @@ If the runner is not able to access github.com, any Python versions requested du
 
 ### Using an alternative location to download Python distributions
 
-If it is not an option for you to add the Python distributions in the runner's tool cache, another option is to have some mirror or files repository in your company network. You can define the mirror URL using the input `python_download_base_url`. The mirror must be setup in such a way that the Python distributions are available with the format `<python_download_base_url>/actions/python-versions/releases/<release version>/<python version tar file>`. For example `<python_download_base_url>/actions/python-versions/releases/download/3.10.18-15433209320/python-3.10.18-linux-22.04-x64.tar.gz`
+If it is not an option for you to add the Python distributions in the runner's tool cache, another option is to have some mirror or files repository in your company network. You can define the mirror URL using the input `python_download_base_url`. The mirror must be setup in such a way that the Python distributions are available with the format `<python_download_base_url>/<release version>/<python version tar file>`. For example `<python_download_base_url>/3.10.18-15433209320/python-3.10.18-linux-22.04-x64.tar.gz`
 
 
 
