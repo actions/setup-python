@@ -128,7 +128,7 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   const downloadUrl = !PYTHON_DOWNLOAD_BASE_URL
     ? release.files[0].download_url
     : release.files[0].download_url.replace(
-        'https://github.com/actions/python-versions/releases',
+        'https://github.com/actions/python-versions/releases/download',
         PYTHON_DOWNLOAD_BASE_URL
       );
 
