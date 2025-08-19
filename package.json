@@ -4,7 +4,7 @@
   "private": true,
   "description": "Setup python action",
   "main": "dist/index.js",
-   "engines": {
+  "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
