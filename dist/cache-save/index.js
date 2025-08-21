@@ -87884,6 +87884,7 @@ function saveCache(packageManager) {
         core.debug(`paths for caching are ${cachePaths.join(', ')}`);
         if (!isCacheDirectoryExists(cachePaths)) {
             core.warning(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`);
+            return;
         }
         const primaryKey = core.getState(cache_distributor_1.State.STATE_CACHE_PRIMARY_KEY);
         const matchedKey = core.getState(cache_distributor_1.State.CACHE_MATCHED_KEY);

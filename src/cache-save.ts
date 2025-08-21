@@ -43,6 +43,7 @@ async function saveCache(packageManager: string) {
         ', '
       )}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`
     );
+    return;
   }
 
   const primaryKey = core.getState(State.STATE_CACHE_PRIMARY_KEY);
