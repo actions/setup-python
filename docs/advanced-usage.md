@@ -481,7 +481,7 @@ jobs:
 
 These environment variables become available after setup-python action execution:
 
-| **Env. variable**      | **Description**|
+| **Env.variable**    | **Description**|
 |----------------------|-------------|
 | `pythonLocation`     | Contains the absolute path to the folder where the requested version of Python, PyPy, or GraalPy is installed. <br><br>**Executable location by implementation:** <br>• **CPython** – `$pythonLocation/bin/python` (Linux/macOS), `$pythonLocation/python.exe` (Windows) <br>• **PyPy** – `$pythonLocation/bin/python` (Linux/macOS), `$pythonLocation/python.exe` (Windows) <br>• **GraalPy** – `$pythonLocation/bin/python` (Linux/macOS) <br><br>Note: CPython versions include a symlink or copy of the Python executable at the root, while PyPy and GraalPy retain upstream directory layouts. |
 | `Python_ROOT_DIR`    | https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython |
