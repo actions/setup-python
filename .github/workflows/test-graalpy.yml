@@ -31,6 +31,7 @@ jobs:
           - 'graalpy-22.3'
           - 'graalpy-23.0'
           - 'graalpy-23.1'
+          - 'graalpy-24.0'
           - 'graalpy-24.1'
 
     steps:
@@ -106,7 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
     steps:
       - uses: actions/checkout@v5
       - name: Setup GraalPy and check latest
