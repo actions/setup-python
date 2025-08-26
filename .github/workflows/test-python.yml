@@ -605,3 +605,30 @@ jobs:
           }
           $pythonVersion
         shell: pwsh
+
+  setup-python-version-required:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-13
+          ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        id: setup-python
+        uses: ./
+        env:
+          PYTHON_VERSION_REQUIRED: true
+        continue-on-error: true
+      - name: Validate failure
+        if: steps.setup-python.outcome != 'failure'
+        run: exit 1
