@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup-python ${{ matrix.graalpy }}
         id: setup-python
@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup-python ${{ matrix.graalpy }}
         id: setup-python
@@ -108,7 +108,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup GraalPy and check latest
         uses: ./
         id: graalpy

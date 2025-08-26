@@ -29,7 +29,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Run with setup-python 3.9.13
         uses: ./
@@ -38,7 +38,7 @@ jobs:
       - name: Verify 3.9.13
         run: python __tests__/verify-python.py 3.9.13
 
-      - name: Run with setup-python 3.9.13
+      - name: Run with setup-python 3.10.11
         uses: ./
         with:
           python-version: 3.10.11
@@ -89,6 +89,7 @@ jobs:
           python-version: '<3.13'
       - name: Verify <3.13
         run: python __tests__/verify-python.py 3.12
+
       - name: Test Raw Endpoint Access
         run: |
           curl -L https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json | jq empty
