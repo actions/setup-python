@@ -18,37 +18,37 @@ See [action.yml](action.yml)
 **Python**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.13' 
+    python-version: '3.13'
 - run: python my_script.py
 ```
 
 **PyPy**
 ```yaml
 steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v5 
+- uses: actions/checkout@v5
+- uses: actions/setup-python@v5
   with:
-    python-version: 'pypy3.10' 
+    python-version: 'pypy3.10'
 - run: python my_script.py
 ```
 
 **GraalPy**
 ```yaml
 steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v5 
+- uses: actions/checkout@v5
+- uses: actions/setup-python@v5
   with:
-    python-version: 'graalpy-24.0' 
+    python-version: 'graalpy-24.0'
 - run: python my_script.py
 ```
 
 **Free threaded Python**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13t'
@@ -83,7 +83,7 @@ The action defaults to searching for a dependency file (`requirements.txt` or `p
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -106,7 +106,7 @@ See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poet
 - [Caching packages](docs/advanced-usage.md#caching-packages)
 - [Outputs and environment variables](docs/advanced-usage.md#outputs-and-environment-variables)
 - [Available versions of Python, PyPy and GraalPy](docs/advanced-usage.md#available-versions-of-python-pypy-and-graalpy)
-- [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache) 
+- [Hosted tool cache](docs/advanced-usage.md#hosted-tool-cache)
 - [Using `setup-python` with a self-hosted runner](docs/advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
 - [Using `setup-python` on GHES](docs/advanced-usage.md#using-setup-python-on-ghes)
 - [Allow pre-releases](docs/advanced-usage.md#allow-pre-releases)

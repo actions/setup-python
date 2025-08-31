@@ -15,7 +15,7 @@
     - [Python](advanced-usage.md#python)
     - [PyPy](advanced-usage.md#pypy)
     - [GraalPy](advanced-usage.md#graalpy)
-- [Hosted tool cache](advanced-usage.md#hosted-tool-cache) 
+- [Hosted tool cache](advanced-usage.md#hosted-tool-cache)
 - [Using `setup-python` with a self-hosted runner](advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
     - [Windows](advanced-usage.md#windows)
     - [Linux](advanced-usage.md#linux)
@@ -32,10 +32,10 @@ If there is a specific version of Python that you need and you don't want to wor
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.12.6' 
+    python-version: '3.12.6'
 - run: python my_script.py
 ```
 
@@ -46,10 +46,10 @@ You can specify **only a major and minor version** if you are okay with the most
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
-    python-version: '3.13' 
+    python-version: '3.13'
 - run: python my_script.py
 ```
 - There will be a single patch version already installed on each runner for every minor version of Python that is supported.
@@ -60,7 +60,7 @@ You can specify the version with **prerelease tag** to download and set up an ac
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.14.0-alpha.1'
@@ -71,7 +71,7 @@ It's also possible to use **x.y-dev syntax** to download and set up the latest p
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.14-dev'
@@ -84,7 +84,7 @@ Free threaded Python is only available starting with the 3.13 release.
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13t'
@@ -95,7 +95,7 @@ Note that the **t** suffix is not `semver` syntax. If you wish to specify a rang
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '>=3.13'
@@ -109,7 +109,7 @@ You can also use several types of ranges that are specified in [semver](https://
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '>=3.9 <3.14'
@@ -120,7 +120,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13.0-alpha - 3.13.0'
@@ -131,7 +131,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.x'
@@ -164,7 +164,7 @@ jobs:
         - 'pypy3.10' # the latest available version of PyPy that supports Python 3.10
         - 'pypy3.10-v7.3.17' # Python 3.10 and PyPy 7.3.17
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
@@ -173,7 +173,7 @@ jobs:
 More details on the syntax for PyPy can be found in the [Available versions of PyPy](#pypy) section.
 
 ### Specifying multiple Python/PyPy versions
-The python-version input can get multiple python/pypy versions. The last specified version will be used as a default one. 
+The python-version input can get multiple python/pypy versions. The last specified version will be used as a default one.
 
 Download and set up multiple Python versions:
 
@@ -182,7 +182,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       with:
         python-version: |
@@ -199,7 +199,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       with:
         python-version: |
@@ -216,7 +216,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       with:
         python-version: |
@@ -241,7 +241,7 @@ jobs:
         python-version: ['3.x', 'pypy3.8', 'pypy3.9' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -267,7 +267,7 @@ jobs:
           - os: windows-latest
             python-version: '3.9'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -285,7 +285,7 @@ jobs:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version-file: '.python-version' # Read python version from a file .python-version
@@ -294,7 +294,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version-file: 'pyproject.toml' # Read python version from a file pyproject.toml
@@ -303,7 +303,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version-file: '.tool-versions' # Read python version from a file .tool-versions
@@ -312,7 +312,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version-file: 'Pipfile' # Read python version from a file Pipfile
@@ -327,7 +327,7 @@ If `check-latest` is set to `true`, the action first checks if the cached versio
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v5
   - uses: actions/setup-python@v5
     with:
       python-version: '3.13'
@@ -342,7 +342,7 @@ steps:
 **Caching pipenv dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -355,7 +355,7 @@ steps:
 **Caching poetry dependencies:**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - name: Install poetry
   run: pipx install poetry
 - uses: actions/setup-python@v5
@@ -370,7 +370,7 @@ steps:
 **Using a list of file paths to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -385,7 +385,7 @@ steps:
 **Using wildcard patterns to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -397,7 +397,7 @@ steps:
 **Using a list of wildcard patterns to cache dependencies**
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -412,7 +412,7 @@ steps:
 
 ```yaml
 steps:
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: actions/setup-python@v5
   with:
     python-version: '3.13'
@@ -428,14 +428,14 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.9.0 - 3.12.0, 3.x ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
+Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.9.0 - 3.12.0, 3.x ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0).
 
 ```yaml
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       id: cp312
       with:
@@ -452,7 +452,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       id: cp313
       with:
@@ -468,7 +468,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-python@v5
       id: cp313
       with:
@@ -499,7 +499,7 @@ Such a requirement on side-effect could be because you don't want your composite
 
 ```yaml
  steps:
-   - uses: actions/checkout@v4
+   - uses: actions/checkout@v5
    - uses: actions/setup-python@v5
      id: cp313
      with:
@@ -599,11 +599,11 @@ One quick way to grant access is to change the user and group of the non-default
 ### macOS
 
  The Python packages for macOS that are downloaded from `actions/python-versions` are originally compiled from the source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before the use of `setup-python` on the macOS self-hosted runner:
- 
+
  - Create a directory called `/Users/runner/hostedtoolcache`
  - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access
 
-You can check the current user and group that the runner belongs to by typing `ls -l` inside the runner's root directory.        
+You can check the current user and group that the runner belongs to by typing `ls -l` inside the runner's root directory.
 The runner can be granted write access to the `/Users/runner/hostedtoolcache` directory using a few techniques:
  - The user starting the runner is the owner, and the owner has write permission
  - The user starting the runner is in the owning group, and the owning group has write permission
@@ -645,7 +645,7 @@ jobs:
         python_version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python_version }}"
@@ -660,7 +660,7 @@ The version of Pip should be specified in the format `major`, `major.minor`, or 
 
 ```yaml
       steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
