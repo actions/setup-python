@@ -16,7 +16,7 @@ This action provides the following functionality for GitHub Actions users:
 - Upgrade to node 24 in [#1164](https://github.com/actions/setup-python/pull/1164)
 Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. See [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
 
-For more detailed release notes with documntation updates and dependency upgrades, please track [release notes](https://github.com/actions/setup-python/releases/edit/v6.0.0)
+For more detailed release notes with Enhancements, Bug fixes and dependency upgrades, please track [release notes](https://github.com/actions/setup-python/releases/edit/v6.0.0)
 
 ## Basic usage
 
