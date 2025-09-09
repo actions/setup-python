@@ -15,45 +15,45 @@ on:
 permissions:
   contents: read
 jobs:
-  python-pip-dependencies-caching:
-    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            windows-latest,
-            macos-latest,
-            macos-13
-          ]
-        python-version:
-          [
-            '3.9',
-            'pypy-3.9-v7.x',
-            '3.10',
-            'pypy-3.10-v7.x',
-            '3.11',
-            'pypy-3.11-v7.x',
-            '3.12',
-            '3.13'
-          ]
-        exclude:
-          - os: windows-latest
-            python-version: pypy-3.11-v7.x
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
-        uses: ./
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: pip install numpy pandas requests
+ python-pip-dependencies-caching:
+  name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+  runs-on: ${{ matrix.os }}
+  strategy:
+    fail-fast: false
+    matrix:
+      os:
+        [
+          ubuntu-latest,
+          ubuntu-24.04-arm,
+          ubuntu-22.04,
+          ubuntu-22.04-arm,
+          windows-latest,
+          macos-latest,
+          macos-13
+        ]
+      python-version:
+        [
+          '3.9',
+          'pypy-3.9-v7.x',
+          '3.10',
+          'pypy-3.10-v7.x',
+          '3.11',
+          'pypy-3.11-v7.x',
+          '3.12',
+          '3.13'
+        ]
+
+  steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: ./
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        # Use a stable NumPy version that has prebuilt wheels for PyPy on all OSes
+        pip install "numpy<2.1" pandas requests
 
   python-pipenv-dependencies-caching:
     name: Test pipenv (Python ${{ matrix.python-version}}, ${{ matrix.os }})
