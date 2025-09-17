@@ -97951,12 +97951,8 @@ function isPyPyVersion(versionSpec) {
 function isGraalPyVersion(versionSpec) {
     return versionSpec.startsWith('graalpy');
 }
-function installPipPackages() {
+function installPipPackages(pipInstall) {
     return __awaiter(this, void 0, void 0, function* () {
-        const pipInstall = core.getInput('pip-install');
-        if (!pipInstall) {
-            return;
-        }
         core.info(`Installing pip packages: ${pipInstall}`);
         try {
             const installArgs = pipInstall.trim().split(/\s+/);
@@ -97964,7 +97960,7 @@ function installPipPackages() {
             core.info('Successfully installed pip packages');
         }
         catch (error) {
-            core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
+            core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
         }
     });
 }
@@ -98056,7 +98052,10 @@ function run() {
                 if (cache && (0, utils_1.isCacheFeatureAvailable)()) {
                     yield cacheDependencies(cache, pythonVersion);
                 }
-                yield installPipPackages();
+                const pipInstall = core.getInput('pip-install');
+                if (pipInstall) {
+                    yield installPipPackages(pipInstall);
+                }
             }
             else {
                 core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');

@@ -23,21 +23,15 @@ function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
 }
 
-async function installPipPackages() {
-  const pipInstall = core.getInput('pip-install');
-
-  if (!pipInstall) {
-    return;
-  }
+async function installPipPackages(pipInstall: string) {
   core.info(`Installing pip packages: ${pipInstall}`);
-
   try {
     const installArgs = pipInstall.trim().split(/\s+/);
     await exec('python', ['-m', 'pip', 'install', ...installArgs]);
     core.info('Successfully installed pip packages');
   } catch (error) {
     core.setFailed(
-      `Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`
+      `Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`
     );
   }
 }
@@ -165,7 +159,10 @@ async function run() {
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
-      await installPipPackages();
+      const pipInstall = core.getInput('pip-install');
+      if (pipInstall) {
+        await installPipPackages(pipInstall);
+      }
     } else {
       core.warning(
         'The `python-version` input is not set.  The version of Python currently in `PATH` will be used.'
