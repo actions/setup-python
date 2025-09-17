@@ -681,9 +681,9 @@ The `pip-install` input allows you to install dependencies as part of the Python
 
 ```yaml
       steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
           pip-install: -r requirements.txt

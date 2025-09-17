@@ -238,7 +238,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup Python
         uses: ./
         with:
@@ -264,7 +264,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup Python
         uses: ./
         with:
