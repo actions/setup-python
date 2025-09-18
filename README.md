@@ -11,6 +11,13 @@ This action provides the following functionality for GitHub Actions users:
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
 
+## Breaking changes in V6
+
+- Upgraded action from node20 to node24
+  > Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. See [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
+
+For more details,  see the full release notes on the [releases page](https://github.com/actions/setup-python/releases/tag/v6.0.0)
+
 ## Basic usage
 
 See [action.yml](action.yml)

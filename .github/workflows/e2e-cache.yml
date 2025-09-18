@@ -45,6 +45,9 @@ jobs:
         exclude:
           - os: windows-latest
             python-version: pypy-3.11-v7.x
+          - os: macos-latest
+            python-version: pypy-3.9-v7.x
+
     steps:
       - uses: actions/checkout@v5
       - name: Setup Python
@@ -183,6 +186,8 @@ jobs:
         exclude:
           - os: windows-latest
             python-version: pypy-3.11-v7.x
+          - os: macos-latest
+            python-version: pypy-3.9-v7.x
     steps:
       - uses: actions/checkout@v5
       - name: Setup Python
