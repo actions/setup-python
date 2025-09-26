@@ -23,6 +23,7 @@
 - [Using `setup-python` on GHES](advanced-usage.md#using-setup-python-on-ghes)
 - [Allow pre-releases](advanced-usage.md#allow-pre-releases)
 - [Using the pip-version input](advanced-usage.md#using-the-pip-version-input)
+- [Using the pip-install input](advanced-usage.md#using-the-pip-install-input)
 
 ## Using the `python-version` input
 
@@ -672,3 +673,20 @@ The version of Pip should be specified in the format `major`, `major.minor`, or 
 > The `pip-version` input is supported only with standard Python versions. It is not available when using PyPy or GraalPy.
 
 > Using a specific or outdated version of pip may result in compatibility or security issues and can cause job failures. For best practices and guidance, refer to the official [pip documentation](https://pip.pypa.io/en/stable/).
+
+## Using the pip-install input
+
+The `pip-install` input allows you to install dependencies as part of the Python setup step.
+
+
+```yaml
+      steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          pip-install: -r requirements.txt
+```
+> Note: This feature is intended for standard pip-based dependency installations.
+For complex workflows, or alternative package managers (e.g., poetry, pipenv), we recommend using separate steps to maintain clarity and flexibility.

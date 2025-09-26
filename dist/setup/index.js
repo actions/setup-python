@@ -97944,11 +97944,25 @@ const os = __importStar(__nccwpck_require__(857));
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const cache_factory_1 = __nccwpck_require__(665);
 const utils_1 = __nccwpck_require__(1798);
+const exec_1 = __nccwpck_require__(5236);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy');
 }
 function isGraalPyVersion(versionSpec) {
     return versionSpec.startsWith('graalpy');
+}
+function installPipPackages(pipInstall) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info(`Installing pip packages: ${pipInstall}`);
+        try {
+            const installArgs = pipInstall.trim().split(/\s+/);
+            yield (0, exec_1.exec)('python', ['-m', 'pip', 'install', ...installArgs]);
+            core.info('Successfully installed pip packages');
+        }
+        catch (error) {
+            core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
+        }
+    });
 }
 function cacheDependencies(cache, pythonVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -98037,6 +98051,10 @@ function run() {
                 const cache = core.getInput('cache');
                 if (cache && (0, utils_1.isCacheFeatureAvailable)()) {
                     yield cacheDependencies(cache, pythonVersion);
+                }
+                const pipInstall = core.getInput('pip-install');
+                if (pipInstall) {
+                    yield installPipPackages(pipInstall);
                 }
             }
             else {

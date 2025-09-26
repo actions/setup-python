@@ -31,6 +31,8 @@ inputs:
     default: false
   pip-version:
     description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
+  pip-install:
+    description: "Used to specify the packages to install with pip after setting up Python. Can be a requirements file or package names."
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."

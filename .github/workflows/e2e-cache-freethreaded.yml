@@ -219,3 +219,56 @@ jobs:
           pip-version: '25.0.1'
       - name: Install dependencies
         run: pip install numpy pandas requests
+
+  python-pip-dependencies-caching-with-pip-install:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-22.04,
+            ubuntu-24.04-arm,
+            ubuntu-22.04-arm,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          pip-install: numpy pandas requests
+
+  python-pip-dependencies-caching-path-with-pip-install:
+    name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }}, caching path)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-22.04,
+            ubuntu-24.04-arm,
+            ubuntu-22.04-arm,
+            windows-latest,
+            macos-latest,
+            macos-13
+          ]
+        python-version: [3.13.0t, 3.13.1t, 3.13.2t]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Python
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: __tests__/data/requirements.txt
+          pip-install: numpy pandas requests
