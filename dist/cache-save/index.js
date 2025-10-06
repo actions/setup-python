@@ -87714,22 +87714,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.State = void 0;
 const cache = __importStar(__nccwpck_require__(5116));
@@ -87747,36 +87748,32 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
-    handleLoadedCache() {
-        return __awaiter(this, void 0, void 0, function* () { });
-    }
-    restoreCache() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { primaryKey, restoreKey } = yield this.computeKeys();
-            if (primaryKey.endsWith('-')) {
-                const file = this.packageManager === 'pip'
-                    ? `${this.cacheDependencyPath
-                        .split('\n')
-                        .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
-                    : this.cacheDependencyPath.split('\n').join(',');
-                throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
-            }
-            const cachePath = yield this.getCacheGlobalDirectories();
-            core.saveState(State.CACHE_PATHS, cachePath);
-            let matchedKey;
-            try {
-                matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
-            }
-            catch (err) {
-                const message = err.message;
-                core.info(`[warning]${message}`);
-                core.setOutput('cache-hit', false);
-                return;
-            }
-            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
-            yield this.handleLoadedCache();
-            this.handleMatchResult(matchedKey, primaryKey);
-        });
+    async handleLoadedCache() { }
+    async restoreCache() {
+        const { primaryKey, restoreKey } = await this.computeKeys();
+        if (primaryKey.endsWith('-')) {
+            const file = this.packageManager === 'pip'
+                ? `${this.cacheDependencyPath
+                    .split('\n')
+                    .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
+                : this.cacheDependencyPath.split('\n').join(',');
+            throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
+        }
+        const cachePath = await this.getCacheGlobalDirectories();
+        core.saveState(State.CACHE_PATHS, cachePath);
+        let matchedKey;
+        try {
+            matchedKey = await cache.restoreCache(cachePath, primaryKey, restoreKey);
+        }
+        catch (err) {
+            const message = err.message;
+            core.info(`[warning]${message}`);
+            core.setOutput('cache-hit', false);
+            return;
+        }
+        core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
+        await this.handleLoadedCache();
+        this.handleMatchResult(matchedKey, primaryKey);
     }
     handleMatchResult(matchedKey, primaryKey) {
         if (matchedKey) {
@@ -87827,27 +87824,28 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const cache = __importStar(__nccwpck_require__(5116));
 const fs_1 = __importDefault(__nccwpck_require__(9896));
@@ -87855,62 +87853,57 @@ const cache_distributor_1 = __nccwpck_require__(2326);
 // Added early exit to resolve issue with slow post action step:
 // - https://github.com/actions/setup-node/issues/878
 // https://github.com/actions/cache/pull/1217
-function run(earlyExit) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const cache = core.getInput('cache');
-            if (cache) {
-                yield saveCache(cache);
-                if (earlyExit) {
-                    process.exit(0);
-                }
+async function run(earlyExit) {
+    try {
+        const cache = core.getInput('cache');
+        if (cache) {
+            await saveCache(cache);
+            if (earlyExit) {
+                process.exit(0);
             }
         }
-        catch (error) {
-            const err = error;
-            core.setFailed(err.message);
-        }
-    });
+    }
+    catch (error) {
+        const err = error;
+        core.setFailed(err.message);
+    }
 }
-exports.run = run;
-function saveCache(packageManager) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const cachePathState = core.getState(cache_distributor_1.State.CACHE_PATHS);
-        if (!cachePathState) {
-            core.warning('Cache paths are empty. Please check the previous logs and make sure that the python version is specified');
-            return;
-        }
-        const cachePaths = JSON.parse(cachePathState);
-        core.debug(`paths for caching are ${cachePaths.join(', ')}`);
-        if (!isCacheDirectoryExists(cachePaths)) {
-            core.warning(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`);
-            return;
-        }
-        const primaryKey = core.getState(cache_distributor_1.State.STATE_CACHE_PRIMARY_KEY);
-        const matchedKey = core.getState(cache_distributor_1.State.CACHE_MATCHED_KEY);
-        if (!primaryKey) {
-            core.warning('Error retrieving key from state.');
-            return;
-        }
-        else if (matchedKey === primaryKey) {
-            // no change in target directories
-            core.info(`Cache hit occurred on the primary key ${primaryKey}, not saving cache.`);
-            return;
-        }
-        let cacheId = 0;
-        try {
-            cacheId = yield cache.saveCache(cachePaths, primaryKey);
-        }
-        catch (err) {
-            const message = err.message;
-            core.info(`[warning]${message}`);
-            return;
-        }
-        if (cacheId == -1) {
-            return;
-        }
-        core.info(`Cache saved with the key: ${primaryKey}`);
-    });
+async function saveCache(packageManager) {
+    const cachePathState = core.getState(cache_distributor_1.State.CACHE_PATHS);
+    if (!cachePathState) {
+        core.warning('Cache paths are empty. Please check the previous logs and make sure that the python version is specified');
+        return;
+    }
+    const cachePaths = JSON.parse(cachePathState);
+    core.debug(`paths for caching are ${cachePaths.join(', ')}`);
+    if (!isCacheDirectoryExists(cachePaths)) {
+        core.warning(`Cache folder path is retrieved for ${packageManager} but doesn't exist on disk: ${cachePaths.join(', ')}. This likely indicates that there are no dependencies to cache. Consider removing the cache step if it is not needed.`);
+        return;
+    }
+    const primaryKey = core.getState(cache_distributor_1.State.STATE_CACHE_PRIMARY_KEY);
+    const matchedKey = core.getState(cache_distributor_1.State.CACHE_MATCHED_KEY);
+    if (!primaryKey) {
+        core.warning('Error retrieving key from state.');
+        return;
+    }
+    else if (matchedKey === primaryKey) {
+        // no change in target directories
+        core.info(`Cache hit occurred on the primary key ${primaryKey}, not saving cache.`);
+        return;
+    }
+    let cacheId = 0;
+    try {
+        cacheId = await cache.saveCache(cachePaths, primaryKey);
+    }
+    catch (err) {
+        const message = err.message;
+        core.info(`[warning]${message}`);
+        return;
+    }
+    if (cacheId == -1) {
+        return;
+    }
+    core.info(`Cache saved with the key: ${primaryKey}`);
 }
 function isCacheDirectoryExists(cacheDirectory) {
     const result = cacheDirectory.reduce((previousValue, currentValue) => {

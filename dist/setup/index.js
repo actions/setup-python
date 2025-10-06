@@ -96244,22 +96244,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.State = void 0;
 const cache = __importStar(__nccwpck_require__(5116));
@@ -96277,36 +96278,32 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
         this.CACHE_KEY_PREFIX = 'setup-python';
     }
-    handleLoadedCache() {
-        return __awaiter(this, void 0, void 0, function* () { });
-    }
-    restoreCache() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { primaryKey, restoreKey } = yield this.computeKeys();
-            if (primaryKey.endsWith('-')) {
-                const file = this.packageManager === 'pip'
-                    ? `${this.cacheDependencyPath
-                        .split('\n')
-                        .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
-                    : this.cacheDependencyPath.split('\n').join(',');
-                throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
-            }
-            const cachePath = yield this.getCacheGlobalDirectories();
-            core.saveState(State.CACHE_PATHS, cachePath);
-            let matchedKey;
-            try {
-                matchedKey = yield cache.restoreCache(cachePath, primaryKey, restoreKey);
-            }
-            catch (err) {
-                const message = err.message;
-                core.info(`[warning]${message}`);
-                core.setOutput('cache-hit', false);
-                return;
-            }
-            core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
-            yield this.handleLoadedCache();
-            this.handleMatchResult(matchedKey, primaryKey);
-        });
+    async handleLoadedCache() { }
+    async restoreCache() {
+        const { primaryKey, restoreKey } = await this.computeKeys();
+        if (primaryKey.endsWith('-')) {
+            const file = this.packageManager === 'pip'
+                ? `${this.cacheDependencyPath
+                    .split('\n')
+                    .join(',')} or ${constants_1.CACHE_DEPENDENCY_BACKUP_PATH}`
+                : this.cacheDependencyPath.split('\n').join(',');
+            throw new Error(`No file in ${process.cwd()} matched to [${file}], make sure you have checked out the target repository`);
+        }
+        const cachePath = await this.getCacheGlobalDirectories();
+        core.saveState(State.CACHE_PATHS, cachePath);
+        let matchedKey;
+        try {
+            matchedKey = await cache.restoreCache(cachePath, primaryKey, restoreKey);
+        }
+        catch (err) {
+            const message = err.message;
+            core.info(`[warning]${message}`);
+            core.setOutput('cache-hit', false);
+            return;
+        }
+        core.saveState(State.STATE_CACHE_PRIMARY_KEY, primaryKey);
+        await this.handleLoadedCache();
+        this.handleMatchResult(matchedKey, primaryKey);
     }
     handleMatchResult(matchedKey, primaryKey) {
         if (matchedKey) {
@@ -96333,7 +96330,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCacheDistributor = exports.PackageManagers = void 0;
+exports.PackageManagers = void 0;
+exports.getCacheDistributor = getCacheDistributor;
 const pip_cache_1 = __importDefault(__nccwpck_require__(154));
 const pipenv_cache_1 = __importDefault(__nccwpck_require__(3821));
 const poetry_cache_1 = __importDefault(__nccwpck_require__(8296));
@@ -96355,7 +96353,6 @@ function getCacheDistributor(packageManager, pythonVersion, cacheDependencyPath)
             throw new Error(`Caching for '${packageManager}' is not supported`);
     }
 }
-exports.getCacheDistributor = getCacheDistributor;
 
 
 /***/ }),
@@ -96393,22 +96390,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -96429,58 +96427,54 @@ class PipCache extends cache_distributor_1.default {
         this.pythonVersion = pythonVersion;
         this.cacheDependencyBackupPath = constants_1.CACHE_DEPENDENCY_BACKUP_PATH;
     }
-    getCacheGlobalDirectories() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let exitCode = 1;
-            let stdout = '';
-            let stderr = '';
-            // Add temporary fix for Windows
-            // On windows it is necessary to execute through an exec
-            // because the getExecOutput gives a non zero code or writes to stderr for pip 22.0.2,
-            // or spawn must be started with the shell option enabled for getExecOutput
-            // Related issue: https://github.com/actions/setup-python/issues/328
-            if (utils_1.IS_WINDOWS) {
-                const execPromisify = util_1.default.promisify(child_process.exec);
-                ({ stdout: stdout, stderr: stderr } = yield execPromisify('pip cache dir'));
-            }
-            else {
-                ({
-                    stdout: stdout,
-                    stderr: stderr,
-                    exitCode: exitCode
-                } = yield exec.getExecOutput('pip cache dir'));
-            }
-            if (exitCode && stderr) {
-                throw new Error(`Could not get cache folder path for pip package manager`);
-            }
-            let resolvedPath = stdout.trim();
-            if (resolvedPath.includes('~')) {
-                resolvedPath = path.join(os_1.default.homedir(), resolvedPath.slice(1));
-            }
-            core.debug(`global cache directory path is ${resolvedPath}`);
-            return [resolvedPath];
-        });
+    async getCacheGlobalDirectories() {
+        let exitCode = 1;
+        let stdout = '';
+        let stderr = '';
+        // Add temporary fix for Windows
+        // On windows it is necessary to execute through an exec
+        // because the getExecOutput gives a non zero code or writes to stderr for pip 22.0.2,
+        // or spawn must be started with the shell option enabled for getExecOutput
+        // Related issue: https://github.com/actions/setup-python/issues/328
+        if (utils_1.IS_WINDOWS) {
+            const execPromisify = util_1.default.promisify(child_process.exec);
+            ({ stdout: stdout, stderr: stderr } = await execPromisify('pip cache dir'));
+        }
+        else {
+            ({
+                stdout: stdout,
+                stderr: stderr,
+                exitCode: exitCode
+            } = await exec.getExecOutput('pip cache dir'));
+        }
+        if (exitCode && stderr) {
+            throw new Error(`Could not get cache folder path for pip package manager`);
+        }
+        let resolvedPath = stdout.trim();
+        if (resolvedPath.includes('~')) {
+            resolvedPath = path.join(os_1.default.homedir(), resolvedPath.slice(1));
+        }
+        core.debug(`global cache directory path is ${resolvedPath}`);
+        return [resolvedPath];
     }
-    computeKeys() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const hash = (yield glob.hashFiles(this.cacheDependencyPath)) ||
-                (yield glob.hashFiles(this.cacheDependencyBackupPath));
-            let primaryKey = '';
-            let restoreKey = '';
-            if (utils_1.IS_LINUX) {
-                const osInfo = yield (0, utils_1.getLinuxInfo)();
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
-            }
-            else {
-                primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-                restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
-            }
-            return {
-                primaryKey,
-                restoreKey: [restoreKey]
-            };
-        });
+    async computeKeys() {
+        const hash = (await glob.hashFiles(this.cacheDependencyPath)) ||
+            (await glob.hashFiles(this.cacheDependencyBackupPath));
+        let primaryKey = '';
+        let restoreKey = '';
+        if (utils_1.IS_LINUX) {
+            const osInfo = await (0, utils_1.getLinuxInfo)();
+            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
+        }
+        else {
+            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
+        }
+        return {
+            primaryKey,
+            restoreKey: [restoreKey]
+        };
     }
 }
 exports["default"] = PipCache;
@@ -96509,22 +96503,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -96540,33 +96535,29 @@ class PipenvCache extends cache_distributor_1.default {
         this.pythonVersion = pythonVersion;
         this.patterns = patterns;
     }
-    getCacheGlobalDirectories() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let virtualEnvRelativePath;
-            // Default virtualenv directories are hardcoded,
-            // because pipenv is not preinstalled on hosted images and virtualenv is not created:
-            // https://github.com/pypa/pipenv/blob/1daaa0de9a0b00d386c6baeb809d8d4ee6795cfd/pipenv/utils.py#L1990-L2002
-            if (process.platform === 'win32') {
-                virtualEnvRelativePath = '.virtualenvs';
-            }
-            else {
-                virtualEnvRelativePath = '.local/share/virtualenvs';
-            }
-            const resolvedPath = path.join(os.homedir(), virtualEnvRelativePath);
-            core.debug(`global cache directory path is ${resolvedPath}`);
-            return [resolvedPath];
-        });
+    async getCacheGlobalDirectories() {
+        let virtualEnvRelativePath;
+        // Default virtualenv directories are hardcoded,
+        // because pipenv is not preinstalled on hosted images and virtualenv is not created:
+        // https://github.com/pypa/pipenv/blob/1daaa0de9a0b00d386c6baeb809d8d4ee6795cfd/pipenv/utils.py#L1990-L2002
+        if (process.platform === 'win32') {
+            virtualEnvRelativePath = '.virtualenvs';
+        }
+        else {
+            virtualEnvRelativePath = '.local/share/virtualenvs';
+        }
+        const resolvedPath = path.join(os.homedir(), virtualEnvRelativePath);
+        core.debug(`global cache directory path is ${resolvedPath}`);
+        return [resolvedPath];
     }
-    computeKeys() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.patterns);
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            const restoreKey = undefined;
-            return {
-                primaryKey,
-                restoreKey
-            };
-        });
+    async computeKeys() {
+        const hash = await glob.hashFiles(this.patterns);
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+        const restoreKey = undefined;
+        return {
+            primaryKey,
+            restoreKey
+        };
     }
 }
 exports["default"] = PipenvCache;
@@ -96595,29 +96586,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -96636,90 +96621,66 @@ class PoetryCache extends cache_distributor_1.default {
         this.patterns = patterns;
         this.poetryProjects = poetryProjects;
     }
-    getCacheGlobalDirectories() {
-        return __awaiter(this, void 0, void 0, function* () {
-            var _a, e_1, _b, _c;
-            // Same virtualenvs path may appear for different projects, hence we use a Set
-            const paths = new Set();
-            const globber = yield glob.create(this.patterns);
-            try {
-                for (var _d = true, _e = __asyncValues(globber.globGenerator()), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
-                    _c = _f.value;
-                    _d = false;
-                    const file = _c;
-                    const basedir = path.dirname(file);
-                    core.debug(`Processing Poetry project at ${basedir}`);
-                    this.poetryProjects.add(basedir);
-                    const poetryConfig = yield this.getPoetryConfiguration(basedir);
-                    const cacheDir = poetryConfig['cache-dir'];
-                    const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
-                    paths.add(virtualenvsPath);
-                    if (poetryConfig['virtualenvs.in-project']) {
-                        paths.add(path.join(basedir, '.venv'));
-                    }
-                }
+    async getCacheGlobalDirectories() {
+        // Same virtualenvs path may appear for different projects, hence we use a Set
+        const paths = new Set();
+        const globber = await glob.create(this.patterns);
+        for await (const file of globber.globGenerator()) {
+            const basedir = path.dirname(file);
+            core.debug(`Processing Poetry project at ${basedir}`);
+            this.poetryProjects.add(basedir);
+            const poetryConfig = await this.getPoetryConfiguration(basedir);
+            const cacheDir = poetryConfig['cache-dir'];
+            const virtualenvsPath = poetryConfig['virtualenvs.path'].replace('{cache-dir}', cacheDir);
+            paths.add(virtualenvsPath);
+            if (poetryConfig['virtualenvs.in-project']) {
+                paths.add(path.join(basedir, '.venv'));
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            return [...paths];
-        });
+        }
+        return [...paths];
     }
-    computeKeys() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const hash = yield glob.hashFiles(this.patterns);
-            // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-            const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
-            const restoreKey = undefined;
-            return {
-                primaryKey,
-                restoreKey
-            };
-        });
+    async computeKeys() {
+        const hash = await glob.hashFiles(this.patterns);
+        // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+        const restoreKey = undefined;
+        return {
+            primaryKey,
+            restoreKey
+        };
     }
-    handleLoadedCache() {
-        const _super = Object.create(null, {
-            handleLoadedCache: { get: () => super.handleLoadedCache }
-        });
-        return __awaiter(this, void 0, void 0, function* () {
-            yield _super.handleLoadedCache.call(this);
-            // After the cache is loaded -- make sure virtualenvs use the correct Python version (the one that we have just installed).
-            // This will handle invalid caches, recreating virtualenvs if necessary.
-            const pythonLocation = yield io.which('python');
-            if (pythonLocation) {
-                core.debug(`pythonLocation is ${pythonLocation}`);
+    async handleLoadedCache() {
+        await super.handleLoadedCache();
+        // After the cache is loaded -- make sure virtualenvs use the correct Python version (the one that we have just installed).
+        // This will handle invalid caches, recreating virtualenvs if necessary.
+        const pythonLocation = await io.which('python');
+        if (pythonLocation) {
+            core.debug(`pythonLocation is ${pythonLocation}`);
+        }
+        else {
+            (0, utils_1.logWarning)('python binaries were not found in PATH');
+            return;
+        }
+        for (const poetryProject of this.poetryProjects) {
+            const { exitCode, stderr } = await exec.getExecOutput('poetry', ['env', 'use', pythonLocation], { ignoreReturnCode: true, cwd: poetryProject });
+            if (exitCode) {
+                (0, utils_1.logWarning)(stderr);
             }
-            else {
-                (0, utils_1.logWarning)('python binaries were not found in PATH');
-                return;
-            }
-            for (const poetryProject of this.poetryProjects) {
-                const { exitCode, stderr } = yield exec.getExecOutput('poetry', ['env', 'use', pythonLocation], { ignoreReturnCode: true, cwd: poetryProject });
-                if (exitCode) {
-                    (0, utils_1.logWarning)(stderr);
-                }
-            }
-        });
+        }
     }
-    getPoetryConfiguration(basedir) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr, exitCode } = yield exec.getExecOutput('poetry', ['config', '--list'], { cwd: basedir });
-            if (exitCode && stderr) {
-                throw new Error('Could not get cache folder path for poetry package manager');
-            }
-            const lines = stdout.trim().split('\n');
-            const config = {};
-            for (let line of lines) {
-                line = line.replace(/#.*$/gm, '');
-                const [key, value] = line.split('=').map(part => part.trim());
-                config[key] = JSON.parse(value);
-            }
-            return config;
-        });
+    async getPoetryConfiguration(basedir) {
+        const { stdout, stderr, exitCode } = await exec.getExecOutput('poetry', ['config', '--list'], { cwd: basedir });
+        if (exitCode && stderr) {
+            throw new Error('Could not get cache folder path for poetry package manager');
+        }
+        const lines = stdout.trim().split('\n');
+        const config = {};
+        for (let line of lines) {
+            line = line.replace(/#.*$/gm, '');
+            const [key, value] = line.split('=').map(part => part.trim());
+            config[key] = JSON.parse(value);
+        }
+        return config;
     }
 }
 exports["default"] = PoetryCache;
@@ -96748,76 +96709,76 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseGraalPyVersion = exports.findGraalPyToolCache = exports.findGraalPyVersion = void 0;
+exports.findGraalPyVersion = findGraalPyVersion;
+exports.findGraalPyToolCache = findGraalPyToolCache;
+exports.parseGraalPyVersion = parseGraalPyVersion;
 const path = __importStar(__nccwpck_require__(6928));
 const graalpyInstall = __importStar(__nccwpck_require__(3027));
 const utils_1 = __nccwpck_require__(1798);
 const semver = __importStar(__nccwpck_require__(2088));
 const core = __importStar(__nccwpck_require__(7484));
 const tc = __importStar(__nccwpck_require__(3472));
-function findGraalPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let resolvedGraalPyVersion = '';
-        let installDir;
-        let releases;
-        let graalpyVersionSpec = parseGraalPyVersion(versionSpec);
-        if (checkLatest) {
-            releases = yield graalpyInstall.getAvailableGraalPyVersions();
-            if (releases && releases.length > 0) {
-                const releaseData = graalpyInstall.findRelease(releases, graalpyVersionSpec, architecture, false);
-                if (releaseData) {
-                    core.info(`Resolved as GraalPy ${releaseData.resolvedGraalPyVersion}`);
-                    graalpyVersionSpec = releaseData.resolvedGraalPyVersion;
-                }
-                else {
-                    core.info(`Failed to resolve GraalPy ${graalpyVersionSpec} from manifest`);
-                }
+async function findGraalPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
+    let resolvedGraalPyVersion = '';
+    let installDir;
+    let releases;
+    let graalpyVersionSpec = parseGraalPyVersion(versionSpec);
+    if (checkLatest) {
+        releases = await graalpyInstall.getAvailableGraalPyVersions();
+        if (releases && releases.length > 0) {
+            const releaseData = graalpyInstall.findRelease(releases, graalpyVersionSpec, architecture, false);
+            if (releaseData) {
+                core.info(`Resolved as GraalPy ${releaseData.resolvedGraalPyVersion}`);
+                graalpyVersionSpec = releaseData.resolvedGraalPyVersion;
+            }
+            else {
+                core.info(`Failed to resolve GraalPy ${graalpyVersionSpec} from manifest`);
             }
         }
-        ({ installDir, resolvedGraalPyVersion } = findGraalPyToolCache(graalpyVersionSpec, architecture));
-        if (!installDir) {
-            ({ installDir, resolvedGraalPyVersion } = yield graalpyInstall.installGraalPy(graalpyVersionSpec, architecture, allowPreReleases, releases));
-        }
-        const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
-        const _binDir = path.join(installDir, pipDir);
-        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        const pythonLocation = (0, utils_1.getBinaryDirectory)(installDir);
-        if (updateEnvironment) {
-            core.exportVariable('pythonLocation', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
-            core.exportVariable('Python_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
-            core.exportVariable('Python2_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
-            core.exportVariable('Python3_ROOT_DIR', installDir);
-            core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
-            core.addPath(pythonLocation);
-            core.addPath(_binDir);
-        }
-        core.setOutput('python-version', 'graalpy' + resolvedGraalPyVersion);
-        core.setOutput('python-path', pythonPath);
-        return resolvedGraalPyVersion;
-    });
+    }
+    ({ installDir, resolvedGraalPyVersion } = findGraalPyToolCache(graalpyVersionSpec, architecture));
+    if (!installDir) {
+        ({ installDir, resolvedGraalPyVersion } = await graalpyInstall.installGraalPy(graalpyVersionSpec, architecture, allowPreReleases, releases));
+    }
+    const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
+    const _binDir = path.join(installDir, pipDir);
+    const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+    const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
+    const pythonLocation = (0, utils_1.getBinaryDirectory)(installDir);
+    if (updateEnvironment) {
+        core.exportVariable('pythonLocation', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+        core.exportVariable('Python_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+        core.exportVariable('Python2_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+        core.exportVariable('Python3_ROOT_DIR', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+        core.addPath(pythonLocation);
+        core.addPath(_binDir);
+    }
+    core.setOutput('python-version', 'graalpy' + resolvedGraalPyVersion);
+    core.setOutput('python-path', pythonPath);
+    return resolvedGraalPyVersion;
 }
-exports.findGraalPyVersion = findGraalPyVersion;
 function findGraalPyToolCache(graalpyVersion, architecture) {
     let resolvedGraalPyVersion = '';
     let installDir = tc.find('GraalPy', graalpyVersion, architecture);
@@ -96836,7 +96797,6 @@ function findGraalPyToolCache(graalpyVersion, architecture) {
     }
     return { installDir, resolvedGraalPyVersion };
 }
-exports.findGraalPyToolCache = findGraalPyToolCache;
 function parseGraalPyVersion(versionSpec) {
     const versions = versionSpec.split('-').filter(item => !!item);
     if (/^(graalpy)(.+)/.test(versions[0])) {
@@ -96852,7 +96812,6 @@ function parseGraalPyVersion(versionSpec) {
     }
     return pythonVersion;
 }
-exports.parseGraalPyVersion = parseGraalPyVersion;
 
 
 /***/ }),
@@ -96878,79 +96837,80 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findPyPyInstallDirForWindows = exports.parsePyPyVersion = exports.findPyPyToolCache = exports.findPyPyVersion = void 0;
+exports.findPyPyVersion = findPyPyVersion;
+exports.findPyPyToolCache = findPyPyToolCache;
+exports.parsePyPyVersion = parsePyPyVersion;
+exports.findPyPyInstallDirForWindows = findPyPyInstallDirForWindows;
 const path = __importStar(__nccwpck_require__(6928));
 const pypyInstall = __importStar(__nccwpck_require__(7149));
 const utils_1 = __nccwpck_require__(1798);
 const semver = __importStar(__nccwpck_require__(2088));
 const core = __importStar(__nccwpck_require__(7484));
 const tc = __importStar(__nccwpck_require__(3472));
-function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let resolvedPyPyVersion = '';
-        let resolvedPythonVersion = '';
-        let installDir;
-        let releases;
-        const pypyVersionSpec = parsePyPyVersion(versionSpec);
-        if (checkLatest) {
-            releases = yield pypyInstall.getAvailablePyPyVersions();
-            if (releases && releases.length > 0) {
-                const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture, false);
-                if (releaseData) {
-                    core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
-                    pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
-                    pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
-                }
-                else {
-                    core.info(`Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`);
-                }
+async function findPyPyVersion(versionSpec, architecture, updateEnvironment, checkLatest, allowPreReleases) {
+    let resolvedPyPyVersion = '';
+    let resolvedPythonVersion = '';
+    let installDir;
+    let releases;
+    const pypyVersionSpec = parsePyPyVersion(versionSpec);
+    if (checkLatest) {
+        releases = await pypyInstall.getAvailablePyPyVersions();
+        if (releases && releases.length > 0) {
+            const releaseData = pypyInstall.findRelease(releases, pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture, false);
+            if (releaseData) {
+                core.info(`Resolved as PyPy ${releaseData.resolvedPyPyVersion} with Python (${releaseData.resolvedPythonVersion})`);
+                pypyVersionSpec.pythonVersion = releaseData.resolvedPythonVersion;
+                pypyVersionSpec.pypyVersion = releaseData.resolvedPyPyVersion;
+            }
+            else {
+                core.info(`Failed to resolve PyPy ${pypyVersionSpec.pypyVersion} with Python (${pypyVersionSpec.pythonVersion}) from manifest`);
             }
         }
-        ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
-        if (!installDir) {
-            ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } =
-                yield pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, allowPreReleases, releases));
-        }
-        const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
-        const _binDir = path.join(installDir, pipDir);
-        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        const pythonLocation = (0, utils_1.getBinaryDirectory)(installDir);
-        if (updateEnvironment) {
-            core.exportVariable('pythonLocation', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
-            core.exportVariable('Python_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
-            core.exportVariable('Python2_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
-            core.exportVariable('Python3_ROOT_DIR', installDir);
-            core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
-            core.addPath(pythonLocation);
-            core.addPath(_binDir);
-        }
-        core.setOutput('python-version', `pypy${resolvedPythonVersion}-${resolvedPyPyVersion}`);
-        core.setOutput('python-path', pythonPath);
-        return { resolvedPyPyVersion, resolvedPythonVersion };
-    });
+    }
+    ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } = findPyPyToolCache(pypyVersionSpec.pythonVersion, pypyVersionSpec.pypyVersion, architecture));
+    if (!installDir) {
+        ({ installDir, resolvedPythonVersion, resolvedPyPyVersion } =
+            await pypyInstall.installPyPy(pypyVersionSpec.pypyVersion, pypyVersionSpec.pythonVersion, architecture, allowPreReleases, releases));
+    }
+    const pipDir = utils_1.IS_WINDOWS ? 'Scripts' : 'bin';
+    const _binDir = path.join(installDir, pipDir);
+    const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+    const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
+    const pythonLocation = (0, utils_1.getBinaryDirectory)(installDir);
+    if (updateEnvironment) {
+        core.exportVariable('pythonLocation', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+        core.exportVariable('Python_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+        core.exportVariable('Python2_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+        core.exportVariable('Python3_ROOT_DIR', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+        core.addPath(pythonLocation);
+        core.addPath(_binDir);
+    }
+    core.setOutput('python-version', `pypy${resolvedPythonVersion}-${resolvedPyPyVersion}`);
+    core.setOutput('python-path', pythonPath);
+    return { resolvedPyPyVersion, resolvedPythonVersion };
 }
-exports.findPyPyVersion = findPyPyVersion;
 function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
     let resolvedPyPyVersion = '';
     let resolvedPythonVersion = '';
@@ -96974,7 +96934,6 @@ function findPyPyToolCache(pythonVersion, pypyVersion, architecture) {
     }
     return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
 }
-exports.findPyPyToolCache = findPyPyToolCache;
 function parsePyPyVersion(versionSpec) {
     const versions = versionSpec.split('-').filter(item => !!item);
     if (/^(pypy)(.+)/.test(versions[0])) {
@@ -97003,13 +96962,11 @@ function parsePyPyVersion(versionSpec) {
         pythonVersion: pythonVersion
     };
 }
-exports.parsePyPyVersion = parsePyPyVersion;
 function findPyPyInstallDirForWindows(pythonVersion) {
     let installDir = '';
     utils_1.WINDOWS_ARCHS.forEach(architecture => (installDir = installDir || tc.find('PyPy', pythonVersion, architecture)));
     return installDir;
 }
-exports.findPyPyInstallDirForWindows = findPyPyInstallDirForWindows;
 
 
 /***/ }),
@@ -97035,24 +96992,27 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pythonVersionToSemantic = exports.desugarVersion = exports.useCpythonVersion = void 0;
+exports.useCpythonVersion = useCpythonVersion;
+exports.desugarVersion = desugarVersion;
+exports.pythonVersionToSemantic = pythonVersionToSemantic;
 const os = __importStar(__nccwpck_require__(857));
 const path = __importStar(__nccwpck_require__(6928));
 const utils_1 = __nccwpck_require__(1798);
@@ -97081,148 +97041,142 @@ function binDir(installDir) {
         return path.join(installDir, 'bin');
     }
 }
-function installPip(pythonLocation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const pipVersion = core.getInput('pip-version');
-        // Validate pip-version format: major[.minor][.patch]
-        const versionRegex = /^\d+(\.\d+)?(\.\d+)?$/;
-        if (pipVersion && !versionRegex.test(pipVersion)) {
-            throw new Error(`Invalid pip-version "${pipVersion}". Please specify a version in the format major[.minor][.patch].`);
-        }
-        if (pipVersion) {
-            core.info(`pip-version input is specified. Installing pip version ${pipVersion}`);
-            yield exec.exec(`${pythonLocation}/python -m pip install --upgrade pip==${pipVersion} --disable-pip-version-check --no-warn-script-location`);
-        }
-    });
+async function installPip(pythonLocation) {
+    const pipVersion = core.getInput('pip-version');
+    // Validate pip-version format: major[.minor][.patch]
+    const versionRegex = /^\d+(\.\d+)?(\.\d+)?$/;
+    if (pipVersion && !versionRegex.test(pipVersion)) {
+        throw new Error(`Invalid pip-version "${pipVersion}". Please specify a version in the format major[.minor][.patch].`);
+    }
+    if (pipVersion) {
+        core.info(`pip-version input is specified. Installing pip version ${pipVersion}`);
+        await exec.exec(`${pythonLocation}/python -m pip install --upgrade pip==${pipVersion} --disable-pip-version-check --no-warn-script-location`);
+    }
 }
-function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases, freethreaded) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        let manifest = null;
-        const { version: desugaredVersionSpec, freethreaded: versionFreethreaded } = desugarVersion(version);
-        let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
-        if (versionFreethreaded) {
-            // Use the freethreaded version if it was specified in the input, e.g., 3.13t
-            freethreaded = true;
+async function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases, freethreaded) {
+    var _a;
+    let manifest = null;
+    const { version: desugaredVersionSpec, freethreaded: versionFreethreaded } = desugarVersion(version);
+    let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
+    if (versionFreethreaded) {
+        // Use the freethreaded version if it was specified in the input, e.g., 3.13t
+        freethreaded = true;
+    }
+    core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+    if (freethreaded) {
+        // Free threaded versions use an architecture suffix like `x64-freethreaded`
+        core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
+        architecture += '-freethreaded';
+    }
+    if (checkLatest) {
+        manifest = await installer.getManifest();
+        const resolvedVersion = (_a = (await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
+        if (resolvedVersion) {
+            semanticVersionSpec = resolvedVersion;
+            core.info(`Resolved as '${semanticVersionSpec}'`);
         }
-        core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+        else {
+            core.info(`Failed to resolve version ${semanticVersionSpec} from manifest`);
+        }
+    }
+    let installDir = tc.find('Python', semanticVersionSpec, architecture);
+    if (!installDir) {
+        core.info(`Version ${semanticVersionSpec} was not found in the local cache`);
+        const foundRelease = await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest);
+        if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
+            core.info(`Version ${semanticVersionSpec} is available for downloading`);
+            await installer.installCpythonFromRelease(foundRelease);
+            installDir = tc.find('Python', semanticVersionSpec, architecture);
+        }
+    }
+    if (!installDir) {
+        const osInfo = await (0, utils_1.getOSInfo)();
+        const msg = [
+            `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
+                ? `${osInfo.osName} ${osInfo.osVersion}`
+                : 'this operating system'}.`
+        ];
         if (freethreaded) {
-            // Free threaded versions use an architecture suffix like `x64-freethreaded`
-            core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
-            architecture += '-freethreaded';
+            msg.push(`Free threaded versions are only available for Python 3.13.0 and later.`);
         }
-        if (checkLatest) {
-            manifest = yield installer.getManifest();
-            const resolvedVersion = (_a = (yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
-            if (resolvedVersion) {
-                semanticVersionSpec = resolvedVersion;
-                core.info(`Resolved as '${semanticVersionSpec}'`);
-            }
-            else {
-                core.info(`Failed to resolve version ${semanticVersionSpec} from manifest`);
+        msg.push(`The list of all available versions can be found here: ${installer.MANIFEST_URL}`);
+        throw new Error(msg.join(os.EOL));
+    }
+    const _binDir = binDir(installDir);
+    const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+    const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
+    if (updateEnvironment) {
+        core.exportVariable('pythonLocation', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
+        core.exportVariable('pythonLocation', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
+        core.exportVariable('Python_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
+        core.exportVariable('Python2_ROOT_DIR', installDir);
+        // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
+        core.exportVariable('Python3_ROOT_DIR', installDir);
+        core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
+        if (utils_1.IS_LINUX) {
+            const libPath = process.env.LD_LIBRARY_PATH
+                ? `:${process.env.LD_LIBRARY_PATH}`
+                : '';
+            const pyLibPath = path.join(installDir, 'lib');
+            if (!libPath.split(':').includes(pyLibPath)) {
+                core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
             }
         }
-        let installDir = tc.find('Python', semanticVersionSpec, architecture);
-        if (!installDir) {
-            core.info(`Version ${semanticVersionSpec} was not found in the local cache`);
-            const foundRelease = yield installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest);
-            if (foundRelease && foundRelease.files && foundRelease.files.length > 0) {
-                core.info(`Version ${semanticVersionSpec} is available for downloading`);
-                yield installer.installCpythonFromRelease(foundRelease);
-                installDir = tc.find('Python', semanticVersionSpec, architecture);
+        core.addPath(installDir);
+        core.addPath(_binDir);
+        if (utils_1.IS_WINDOWS) {
+            // Add --user directory
+            // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
+            // Extract version details
+            const version = path.basename(path.dirname(installDir));
+            const major = semver.major(version);
+            const minor = semver.minor(version);
+            const basePath = process.env['APPDATA'] || '';
+            let versionSuffix = `${major}${minor}`;
+            // Append '-32' for x86 architecture if Python version is >= 3.10
+            if (architecture === 'x86' &&
+                (major > 3 || (major === 3 && minor >= 10))) {
+                versionSuffix += '-32';
             }
-        }
-        if (!installDir) {
-            const osInfo = yield (0, utils_1.getOSInfo)();
-            const msg = [
-                `The version '${version}' with architecture '${architecture}' was not found for ${osInfo
-                    ? `${osInfo.osName} ${osInfo.osVersion}`
-                    : 'this operating system'}.`
-            ];
+            else if (architecture === 'arm64') {
+                versionSuffix += '-arm64';
+            }
+            // Append 't' for freethreaded builds
             if (freethreaded) {
-                msg.push(`Free threaded versions are only available for Python 3.13.0 and later.`);
-            }
-            msg.push(`The list of all available versions can be found here: ${installer.MANIFEST_URL}`);
-            throw new Error(msg.join(os.EOL));
-        }
-        const _binDir = binDir(installDir);
-        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        const pythonPath = path.join(utils_1.IS_WINDOWS ? installDir : _binDir, `python${binaryExtension}`);
-        if (updateEnvironment) {
-            core.exportVariable('pythonLocation', installDir);
-            core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
-            core.exportVariable('pythonLocation', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
-            core.exportVariable('Python_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython2.html#module:FindPython2
-            core.exportVariable('Python2_ROOT_DIR', installDir);
-            // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
-            core.exportVariable('Python3_ROOT_DIR', installDir);
-            core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
-            if (utils_1.IS_LINUX) {
-                const libPath = process.env.LD_LIBRARY_PATH
-                    ? `:${process.env.LD_LIBRARY_PATH}`
-                    : '';
-                const pyLibPath = path.join(installDir, 'lib');
-                if (!libPath.split(':').includes(pyLibPath)) {
-                    core.exportVariable('LD_LIBRARY_PATH', pyLibPath + libPath);
-                }
-            }
-            core.addPath(installDir);
-            core.addPath(_binDir);
-            if (utils_1.IS_WINDOWS) {
-                // Add --user directory
-                // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-                // Extract version details
-                const version = path.basename(path.dirname(installDir));
-                const major = semver.major(version);
-                const minor = semver.minor(version);
-                const basePath = process.env['APPDATA'] || '';
-                let versionSuffix = `${major}${minor}`;
-                // Append '-32' for x86 architecture if Python version is >= 3.10
-                if (architecture === 'x86' &&
-                    (major > 3 || (major === 3 && minor >= 10))) {
+                versionSuffix += 't';
+                if (architecture === 'x86-freethreaded') {
                     versionSuffix += '-32';
                 }
-                else if (architecture === 'arm64') {
+                else if (architecture === 'arm64-freethreaded') {
                     versionSuffix += '-arm64';
                 }
-                // Append 't' for freethreaded builds
-                if (freethreaded) {
-                    versionSuffix += 't';
-                    if (architecture === 'x86-freethreaded') {
-                        versionSuffix += '-32';
-                    }
-                    else if (architecture === 'arm64-freethreaded') {
-                        versionSuffix += '-arm64';
-                    }
-                }
-                // Add user Scripts path
-                const userScriptsDir = path.join(basePath, 'Python', `Python${versionSuffix}`, 'Scripts');
-                core.addPath(userScriptsDir);
             }
-            // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
+            // Add user Scripts path
+            const userScriptsDir = path.join(basePath, 'Python', `Python${versionSuffix}`, 'Scripts');
+            core.addPath(userScriptsDir);
         }
-        const installed = versionFromPath(installDir);
-        let pythonVersion = installed;
-        if (freethreaded) {
-            // Add the freethreaded suffix to the version (e.g., 3.13.1t)
-            pythonVersion += 't';
-        }
-        core.setOutput('python-version', pythonVersion);
-        core.setOutput('python-path', pythonPath);
-        const binaryPath = utils_1.IS_WINDOWS ? installDir : _binDir;
-        yield installPip(binaryPath);
-        return { impl: 'CPython', version: pythonVersion };
-    });
+        // On Linux and macOS, pip will create the --user directory and add it to PATH as needed.
+    }
+    const installed = versionFromPath(installDir);
+    let pythonVersion = installed;
+    if (freethreaded) {
+        // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+        pythonVersion += 't';
+    }
+    core.setOutput('python-version', pythonVersion);
+    core.setOutput('python-path', pythonPath);
+    const binaryPath = utils_1.IS_WINDOWS ? installDir : _binDir;
+    await installPip(binaryPath);
+    return { impl: 'CPython', version: pythonVersion };
 }
-exports.useCpythonVersion = useCpythonVersion;
 /* Desugar free threaded and dev versions */
 function desugarVersion(versionSpec) {
     const { version, freethreaded } = desugarFreeThreadedVersion(versionSpec);
     return { version: desugarDevVersion(version), freethreaded };
 }
-exports.desugarVersion = desugarVersion;
 /* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev.
  * Returns the version without the `t` and the architectures suffix, if freethreaded */
 function desugarFreeThreadedVersion(versionSpec) {
@@ -97266,7 +97220,6 @@ function pythonVersionToSemantic(versionSpec, allowPreReleases) {
     }
     return result;
 }
-exports.pythonVersionToSemantic = pythonVersionToSemantic;
 
 
 /***/ }),
@@ -97292,27 +97245,34 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAsset = exports.toGraalPyArchitecture = exports.toGraalPyPlatform = exports.findRelease = exports.graalPyTagToVersion = exports.getAvailableGraalPyVersions = exports.installGraalPy = void 0;
+exports.installGraalPy = installGraalPy;
+exports.getAvailableGraalPyVersions = getAvailableGraalPyVersions;
+exports.graalPyTagToVersion = graalPyTagToVersion;
+exports.findRelease = findRelease;
+exports.toGraalPyPlatform = toGraalPyPlatform;
+exports.toGraalPyArchitecture = toGraalPyArchitecture;
+exports.findAsset = findAsset;
 const os = __importStar(__nccwpck_require__(857));
 const path = __importStar(__nccwpck_require__(6928));
 const core = __importStar(__nccwpck_require__(7484));
@@ -97324,104 +97284,94 @@ const fs_1 = __importDefault(__nccwpck_require__(9896));
 const utils_1 = __nccwpck_require__(1798);
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
-function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let downloadDir;
-        releases = releases !== null && releases !== void 0 ? releases : (yield getAvailableGraalPyVersions());
-        if (!releases || !releases.length) {
-            throw new Error('No release was found in GraalPy version.json');
+async function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
+    let downloadDir;
+    releases = releases !== null && releases !== void 0 ? releases : (await getAvailableGraalPyVersions());
+    if (!releases || !releases.length) {
+        throw new Error('No release was found in GraalPy version.json');
+    }
+    let releaseData = findRelease(releases, graalpyVersion, architecture, false);
+    if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
+        // check for pre-release
+        core.info([
+            `Stable GraalPy version ${graalpyVersion} with arch ${architecture} not found`,
+            `Trying pre-release versions`
+        ].join(os.EOL));
+        releaseData = findRelease(releases, graalpyVersion, architecture, true);
+    }
+    if (!releaseData || !releaseData.foundAsset) {
+        throw new Error(`GraalPy version ${graalpyVersion} with arch ${architecture} not found`);
+    }
+    const { foundAsset, resolvedGraalPyVersion } = releaseData;
+    const downloadUrl = `${foundAsset.browser_download_url}`;
+    core.info(`Downloading GraalPy from "${downloadUrl}" ...`);
+    try {
+        const graalpyPath = await tc.downloadTool(downloadUrl, undefined, AUTH);
+        core.info('Extracting downloaded archive...');
+        downloadDir = await tc.extractTar(graalpyPath);
+        // root folder in archive can have unpredictable name so just take the first folder
+        // downloadDir is unique folder under TEMP and can't contain any other folders
+        const archiveName = fs_1.default.readdirSync(downloadDir)[0];
+        const toolDir = path.join(downloadDir, archiveName);
+        let installDir = toolDir;
+        if (!(0, utils_1.isNightlyKeyword)(resolvedGraalPyVersion)) {
+            installDir = await tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
         }
-        let releaseData = findRelease(releases, graalpyVersion, architecture, false);
-        if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
-            // check for pre-release
-            core.info([
-                `Stable GraalPy version ${graalpyVersion} with arch ${architecture} not found`,
-                `Trying pre-release versions`
-            ].join(os.EOL));
-            releaseData = findRelease(releases, graalpyVersion, architecture, true);
-        }
-        if (!releaseData || !releaseData.foundAsset) {
-            throw new Error(`GraalPy version ${graalpyVersion} with arch ${architecture} not found`);
-        }
-        const { foundAsset, resolvedGraalPyVersion } = releaseData;
-        const downloadUrl = `${foundAsset.browser_download_url}`;
-        core.info(`Downloading GraalPy from "${downloadUrl}" ...`);
-        try {
-            const graalpyPath = yield tc.downloadTool(downloadUrl, undefined, AUTH);
-            core.info('Extracting downloaded archive...');
-            downloadDir = yield tc.extractTar(graalpyPath);
-            // root folder in archive can have unpredictable name so just take the first folder
-            // downloadDir is unique folder under TEMP and can't contain any other folders
-            const archiveName = fs_1.default.readdirSync(downloadDir)[0];
-            const toolDir = path.join(downloadDir, archiveName);
-            let installDir = toolDir;
-            if (!(0, utils_1.isNightlyKeyword)(resolvedGraalPyVersion)) {
-                installDir = yield tc.cacheDir(toolDir, 'GraalPy', resolvedGraalPyVersion, architecture);
+        const binaryPath = (0, utils_1.getBinaryDirectory)(installDir);
+        await createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
+        await installPip(binaryPath);
+        return { installDir, resolvedGraalPyVersion };
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            // Rate limit?
+            if (err instanceof tc.HTTPError &&
+                (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
+                core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
             }
-            const binaryPath = (0, utils_1.getBinaryDirectory)(installDir);
-            yield createGraalPySymlink(binaryPath, resolvedGraalPyVersion);
-            yield installPip(binaryPath);
-            return { installDir, resolvedGraalPyVersion };
-        }
-        catch (err) {
-            if (err instanceof Error) {
-                // Rate limit?
-                if (err instanceof tc.HTTPError &&
-                    (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
-                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
-                }
-                else {
-                    core.info(err.message);
-                }
-                if (err.stack !== undefined) {
-                    core.debug(err.stack);
-                }
+            else {
+                core.info(err.message);
             }
-            throw err;
-        }
-    });
-}
-exports.installGraalPy = installGraalPy;
-function getAvailableGraalPyVersions() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const http = new httpm.HttpClient('tool-cache');
-        const headers = {};
-        if (AUTH) {
-            headers.authorization = AUTH;
-        }
-        let url = 'https://api.github.com/repos/oracle/graalpython/releases';
-        const result = [];
-        do {
-            const response = yield http.getJson(url, headers);
-            if (!response.result) {
-                throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+            if (err.stack !== undefined) {
+                core.debug(err.stack);
             }
-            result.push(...response.result);
-            url = (0, utils_1.getNextPageUrl)(response);
-        } while (url);
-        return result;
-    });
+        }
+        throw err;
+    }
 }
-exports.getAvailableGraalPyVersions = getAvailableGraalPyVersions;
-function createGraalPySymlink(graalpyBinaryPath, graalpyVersion) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const version = semver.coerce(graalpyVersion);
-        const pythonBinaryPostfix = semver.major(version);
-        const pythonMinor = semver.minor(version);
-        const graalpyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
-        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        core.info('Creating symlinks...');
-        (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
-        (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${binaryExtension}`, true);
-        (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `graalpy${graalpyMajorMinorBinaryPostfix}${binaryExtension}`, true);
-    });
+async function getAvailableGraalPyVersions() {
+    const http = new httpm.HttpClient('tool-cache');
+    const headers = {};
+    if (AUTH) {
+        headers.authorization = AUTH;
+    }
+    let url = 'https://api.github.com/repos/oracle/graalpython/releases';
+    const result = [];
+    do {
+        const response = await http.getJson(url, headers);
+        if (!response.result) {
+            throw new Error(`Unable to retrieve the list of available GraalPy versions from '${url}'`);
+        }
+        result.push(...response.result);
+        url = (0, utils_1.getNextPageUrl)(response);
+    } while (url);
+    return result;
 }
-function installPip(pythonLocation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info("Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)");
-        const pythonBinary = path.join(pythonLocation, 'python');
-        yield exec.exec(`${pythonBinary} -m ensurepip --default-pip`);
-    });
+async function createGraalPySymlink(graalpyBinaryPath, graalpyVersion) {
+    const version = semver.coerce(graalpyVersion);
+    const pythonBinaryPostfix = semver.major(version);
+    const pythonMinor = semver.minor(version);
+    const graalpyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+    const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+    core.info('Creating symlinks...');
+    (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
+    (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `python${binaryExtension}`, true);
+    (0, utils_1.createSymlinkInFolder)(graalpyBinaryPath, `graalpy${binaryExtension}`, `graalpy${graalpyMajorMinorBinaryPostfix}${binaryExtension}`, true);
+}
+async function installPip(pythonLocation) {
+    core.info("Installing pip (GraalPy doesn't update pip because it uses a patched version of pip)");
+    const pythonBinary = path.join(pythonLocation, 'python');
+    await exec.exec(`${pythonBinary} -m ensurepip --default-pip`);
 }
 function graalPyTagToVersion(tag) {
     const versionPattern = /.*-(\d+\.\d+\.\d+(?:\.\d+)?)((?:a|b|rc))?(\d*)?/;
@@ -97436,7 +97386,6 @@ function graalPyTagToVersion(tag) {
         return tag.replace(/.*-/, '');
     }
 }
-exports.graalPyTagToVersion = graalPyTagToVersion;
 function findRelease(releases, graalpyVersion, architecture, includePrerelease) {
     const options = { includePrerelease: includePrerelease };
     const filterReleases = releases.filter(item => {
@@ -97454,7 +97403,6 @@ function findRelease(releases, graalpyVersion, architecture, includePrerelease) 
         resolvedGraalPyVersion: graalPyTagToVersion(foundRelease.tag_name)
     };
 }
-exports.findRelease = findRelease;
 function toGraalPyPlatform(platform) {
     switch (platform) {
         case 'win32':
@@ -97464,7 +97412,6 @@ function toGraalPyPlatform(platform) {
     }
     return platform;
 }
-exports.toGraalPyPlatform = toGraalPyPlatform;
 function toGraalPyArchitecture(architecture) {
     switch (architecture) {
         case 'x64':
@@ -97474,7 +97421,6 @@ function toGraalPyArchitecture(architecture) {
     }
     return architecture;
 }
-exports.toGraalPyArchitecture = toGraalPyArchitecture;
 function findAsset(item, architecture, platform) {
     const graalpyArch = toGraalPyArchitecture(architecture);
     const graalpyPlatform = toGraalPyPlatform(platform);
@@ -97486,7 +97432,6 @@ function findAsset(item, architecture, platform) {
     found.sort((f1, f2) => f1.name.length - f2.name.length);
     return found[0];
 }
-exports.findAsset = findAsset;
 
 
 /***/ }),
@@ -97512,27 +97457,35 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAssetForMacOrLinux = exports.findAssetForWindows = exports.isArchPresentForMacOrLinux = exports.isArchPresentForWindows = exports.pypyVersionToSemantic = exports.findRelease = exports.getAvailablePyPyVersions = exports.installPyPy = void 0;
+exports.installPyPy = installPyPy;
+exports.getAvailablePyPyVersions = getAvailablePyPyVersions;
+exports.findRelease = findRelease;
+exports.pypyVersionToSemantic = pypyVersionToSemantic;
+exports.isArchPresentForWindows = isArchPresentForWindows;
+exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
+exports.findAssetForWindows = findAssetForWindows;
+exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
 const os = __importStar(__nccwpck_require__(857));
 const path = __importStar(__nccwpck_require__(6928));
 const core = __importStar(__nccwpck_require__(7484));
@@ -97542,104 +97495,94 @@ const httpm = __importStar(__nccwpck_require__(4844));
 const exec = __importStar(__nccwpck_require__(5236));
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const utils_1 = __nccwpck_require__(1798);
-function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases, releases) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let downloadDir;
-        releases = releases !== null && releases !== void 0 ? releases : (yield getAvailablePyPyVersions());
-        if (!releases || releases.length === 0) {
-            throw new Error('No release was found in PyPy version.json');
+async function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases, releases) {
+    let downloadDir;
+    releases = releases !== null && releases !== void 0 ? releases : (await getAvailablePyPyVersions());
+    if (!releases || releases.length === 0) {
+        throw new Error('No release was found in PyPy version.json');
+    }
+    let releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, false);
+    if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
+        // check for pre-release
+        core.info([
+            `Stable PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`,
+            `Trying pre-release versions`
+        ].join(os.EOL));
+        releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, true);
+    }
+    if (!releaseData || !releaseData.foundAsset) {
+        throw new Error(`PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`);
+    }
+    const { foundAsset, resolvedPythonVersion, resolvedPyPyVersion } = releaseData;
+    const downloadUrl = `${foundAsset.download_url}`;
+    core.info(`Downloading PyPy from "${downloadUrl}" ...`);
+    try {
+        const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+        const pypyPath = await tc.downloadTool(downloadUrl, fileName);
+        core.info('Extracting downloaded archive...');
+        if (utils_1.IS_WINDOWS) {
+            downloadDir = await tc.extractZip(pypyPath);
         }
-        let releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, false);
-        if (allowPreReleases && (!releaseData || !releaseData.foundAsset)) {
-            // check for pre-release
-            core.info([
-                `Stable PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`,
-                `Trying pre-release versions`
-            ].join(os.EOL));
-            releaseData = findRelease(releases, pythonVersion, pypyVersion, architecture, true);
+        else {
+            downloadDir = await tc.extractTar(pypyPath, undefined, 'x');
         }
-        if (!releaseData || !releaseData.foundAsset) {
-            throw new Error(`PyPy version ${pythonVersion} (${pypyVersion}) with arch ${architecture} not found`);
+        // root folder in archive can have unpredictable name so just take the first folder
+        // downloadDir is unique folder under TEMP and can't contain any other folders
+        const archiveName = fs_1.default.readdirSync(downloadDir)[0];
+        const toolDir = path.join(downloadDir, archiveName);
+        let installDir = toolDir;
+        if (!(0, utils_1.isNightlyKeyword)(resolvedPyPyVersion)) {
+            installDir = await tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
         }
-        const { foundAsset, resolvedPythonVersion, resolvedPyPyVersion } = releaseData;
-        const downloadUrl = `${foundAsset.download_url}`;
-        core.info(`Downloading PyPy from "${downloadUrl}" ...`);
-        try {
-            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
-            const pypyPath = yield tc.downloadTool(downloadUrl, fileName);
-            core.info('Extracting downloaded archive...');
-            if (utils_1.IS_WINDOWS) {
-                downloadDir = yield tc.extractZip(pypyPath);
+        (0, utils_1.writeExactPyPyVersionFile)(installDir, resolvedPyPyVersion);
+        const binaryPath = (0, utils_1.getBinaryDirectory)(installDir);
+        await createPyPySymlink(binaryPath, resolvedPythonVersion);
+        await installPip(binaryPath);
+        return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            // Rate limit?
+            if (err instanceof tc.HTTPError &&
+                (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
+                core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
             }
             else {
-                downloadDir = yield tc.extractTar(pypyPath, undefined, 'x');
+                core.info(err.message);
             }
-            // root folder in archive can have unpredictable name so just take the first folder
-            // downloadDir is unique folder under TEMP and can't contain any other folders
-            const archiveName = fs_1.default.readdirSync(downloadDir)[0];
-            const toolDir = path.join(downloadDir, archiveName);
-            let installDir = toolDir;
-            if (!(0, utils_1.isNightlyKeyword)(resolvedPyPyVersion)) {
-                installDir = yield tc.cacheDir(toolDir, 'PyPy', resolvedPythonVersion, architecture);
+            if (err.stack !== undefined) {
+                core.debug(err.stack);
             }
-            (0, utils_1.writeExactPyPyVersionFile)(installDir, resolvedPyPyVersion);
-            const binaryPath = (0, utils_1.getBinaryDirectory)(installDir);
-            yield createPyPySymlink(binaryPath, resolvedPythonVersion);
-            yield installPip(binaryPath);
-            return { installDir, resolvedPythonVersion, resolvedPyPyVersion };
         }
-        catch (err) {
-            if (err instanceof Error) {
-                // Rate limit?
-                if (err instanceof tc.HTTPError &&
-                    (err.httpStatusCode === 403 || err.httpStatusCode === 429)) {
-                    core.info(`Received HTTP status code ${err.httpStatusCode}.  This usually indicates the rate limit has been exceeded`);
-                }
-                else {
-                    core.info(err.message);
-                }
-                if (err.stack !== undefined) {
-                    core.debug(err.stack);
-                }
-            }
-            throw err;
-        }
-    });
+        throw err;
+    }
 }
-exports.installPyPy = installPyPy;
-function getAvailablePyPyVersions() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const url = 'https://downloads.python.org/pypy/versions.json';
-        const http = new httpm.HttpClient('tool-cache');
-        const response = yield http.getJson(url);
-        if (!response.result) {
-            throw new Error(`Unable to retrieve the list of available PyPy versions from '${url}'`);
-        }
-        return response.result;
-    });
+async function getAvailablePyPyVersions() {
+    const url = 'https://downloads.python.org/pypy/versions.json';
+    const http = new httpm.HttpClient('tool-cache');
+    const response = await http.getJson(url);
+    if (!response.result) {
+        throw new Error(`Unable to retrieve the list of available PyPy versions from '${url}'`);
+    }
+    return response.result;
 }
-exports.getAvailablePyPyVersions = getAvailablePyPyVersions;
-function createPyPySymlink(pypyBinaryPath, pythonVersion) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const version = semver.coerce(pythonVersion);
-        const pythonBinaryPostfix = semver.major(version);
-        const pythonMinor = semver.minor(version);
-        const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
-        const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
-        const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
-        core.info('Creating symlinks...');
-        (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
-        (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
-        (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
-    });
+async function createPyPySymlink(pypyBinaryPath, pythonVersion) {
+    const version = semver.coerce(pythonVersion);
+    const pythonBinaryPostfix = semver.major(version);
+    const pythonMinor = semver.minor(version);
+    const pypyBinaryPostfix = pythonBinaryPostfix === 2 ? '' : '3';
+    const pypyMajorMinorBinaryPostfix = `${pythonBinaryPostfix}.${pythonMinor}`;
+    const binaryExtension = utils_1.IS_WINDOWS ? '.exe' : '';
+    core.info('Creating symlinks...');
+    (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${pythonBinaryPostfix}${binaryExtension}`, true);
+    (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `python${binaryExtension}`, true);
+    (0, utils_1.createSymlinkInFolder)(pypyBinaryPath, `pypy${pypyBinaryPostfix}${binaryExtension}`, `pypy${pypyMajorMinorBinaryPostfix}${binaryExtension}`, true);
 }
-function installPip(pythonLocation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info('Installing and updating pip');
-        const pythonBinary = path.join(pythonLocation, 'python');
-        yield exec.exec(`${pythonBinary} -m ensurepip`);
-        yield exec.exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
-    });
+async function installPip(pythonLocation) {
+    core.info('Installing and updating pip');
+    const pythonBinary = path.join(pythonLocation, 'python');
+    await exec.exec(`${pythonBinary} -m ensurepip`);
+    await exec.exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
 }
 function findRelease(releases, pythonVersion, pypyVersion, architecture, includePrerelease) {
     const options = { includePrerelease: includePrerelease };
@@ -97671,32 +97614,26 @@ function findRelease(releases, pythonVersion, pypyVersion, architecture, include
         resolvedPyPyVersion: foundRelease.pypy_version.trim()
     };
 }
-exports.findRelease = findRelease;
 function pypyVersionToSemantic(versionSpec) {
     const prereleaseVersion = /(\d+\.\d+\.\d+)((?:a|b|rc))(\d*)/g;
     return versionSpec.replace(prereleaseVersion, '$1-$2.$3');
 }
-exports.pypyVersionToSemantic = pypyVersionToSemantic;
 function isArchPresentForWindows(item, architecture) {
     architecture = pypyArchitecture(architecture);
     return item.files.some((file) => utils_1.WINDOWS_PLATFORMS.includes(file.platform) && file.arch === architecture);
 }
-exports.isArchPresentForWindows = isArchPresentForWindows;
 function isArchPresentForMacOrLinux(item, architecture, platform) {
     architecture = pypyArchitecture(architecture);
     return item.files.some((file) => file.arch === architecture && file.platform === platform);
 }
-exports.isArchPresentForMacOrLinux = isArchPresentForMacOrLinux;
 function findAssetForWindows(releases, architecture) {
     architecture = pypyArchitecture(architecture);
     return releases.files.find((item) => utils_1.WINDOWS_PLATFORMS.includes(item.platform) && item.arch === architecture);
 }
-exports.findAssetForWindows = findAssetForWindows;
 function findAssetForMacOrLinux(releases, architecture, platform) {
     architecture = pypyArchitecture(architecture);
     return releases.files.find((item) => item.arch === architecture && item.platform === platform);
 }
-exports.findAssetForMacOrLinux = findAssetForMacOrLinux;
 function pypyArchitecture(architecture) {
     if (utils_1.IS_WINDOWS && architecture === 'x32') {
         // convert x32 to x86 because os.arch() returns x32 for 32-bit systems but PyPy releases json has x86 arch value.
@@ -97732,24 +97669,30 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installCpythonFromRelease = exports.getManifestFromURL = exports.getManifestFromRepo = exports.getManifest = exports.findReleaseFromManifest = exports.MANIFEST_URL = void 0;
+exports.MANIFEST_URL = void 0;
+exports.findReleaseFromManifest = findReleaseFromManifest;
+exports.getManifest = getManifest;
+exports.getManifestFromRepo = getManifestFromRepo;
+exports.getManifestFromURL = getManifestFromURL;
+exports.installCpythonFromRelease = installCpythonFromRelease;
 const path = __importStar(__nccwpck_require__(6928));
 const core = __importStar(__nccwpck_require__(7484));
 const tc = __importStar(__nccwpck_require__(3472));
@@ -97762,16 +97705,13 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
-function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!manifest) {
-            manifest = yield getManifest();
-        }
-        const foundRelease = yield tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
-        return foundRelease;
-    });
+async function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
+    if (!manifest) {
+        manifest = await getManifest();
+    }
+    const foundRelease = await tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
+    return foundRelease;
 }
-exports.findReleaseFromManifest = findReleaseFromManifest;
 function isIToolRelease(obj) {
     return (typeof obj === 'object' &&
         obj !== null &&
@@ -97783,113 +97723,104 @@ function isIToolRelease(obj) {
             typeof file.arch === 'string' &&
             typeof file.download_url === 'string'));
 }
-function getManifest() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const repoManifest = yield getManifestFromRepo();
-            if (Array.isArray(repoManifest) &&
-                repoManifest.length &&
-                repoManifest.every(isIToolRelease)) {
-                return repoManifest;
-            }
-            throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
+async function getManifest() {
+    try {
+        const repoManifest = await getManifestFromRepo();
+        if (Array.isArray(repoManifest) &&
+            repoManifest.length &&
+            repoManifest.every(isIToolRelease)) {
+            return repoManifest;
         }
-        catch (err) {
-            core.debug('Fetching the manifest via the API failed.');
-            if (err instanceof Error) {
-                core.debug(err.message);
-            }
-            else {
-                core.error('An unexpected error occurred while fetching the manifest.');
-            }
+        throw new Error('The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.');
+    }
+    catch (err) {
+        core.debug('Fetching the manifest via the API failed.');
+        if (err instanceof Error) {
+            core.debug(err.message);
         }
-        return yield getManifestFromURL();
-    });
+        else {
+            core.error('An unexpected error occurred while fetching the manifest.');
+        }
+    }
+    return await getManifestFromURL();
 }
-exports.getManifest = getManifest;
 function getManifestFromRepo() {
     core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
     return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
 }
-exports.getManifestFromRepo = getManifestFromRepo;
-function getManifestFromURL() {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.debug('Falling back to fetching the manifest using raw URL.');
-        const http = new httpm.HttpClient('tool-cache');
-        const response = yield http.getJson(exports.MANIFEST_URL);
-        if (!response.result) {
-            throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
-        }
-        return response.result;
-    });
+async function getManifestFromURL() {
+    core.debug('Falling back to fetching the manifest using raw URL.');
+    const http = new httpm.HttpClient('tool-cache');
+    const response = await http.getJson(exports.MANIFEST_URL);
+    if (!response.result) {
+        throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
+    }
+    return response.result;
 }
-exports.getManifestFromURL = getManifestFromURL;
-function installPython(workingDirectory) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const options = {
-            cwd: workingDirectory,
-            env: Object.assign(Object.assign({}, process.env), (utils_1.IS_LINUX && { LD_LIBRARY_PATH: path.join(workingDirectory, 'lib') })),
-            silent: true,
-            listeners: {
-                stdout: (data) => {
-                    core.info(data.toString().trim());
-                },
-                stderr: (data) => {
-                    core.error(data.toString().trim());
-                }
+async function installPython(workingDirectory) {
+    const options = {
+        cwd: workingDirectory,
+        env: {
+            ...process.env,
+            ...(utils_1.IS_LINUX && { LD_LIBRARY_PATH: path.join(workingDirectory, 'lib') })
+        },
+        silent: true,
+        listeners: {
+            stdout: (data) => {
+                core.info(data.toString().trim());
+            },
+            stderr: (data) => {
+                core.error(data.toString().trim());
             }
-        };
+        }
+    };
+    if (utils_1.IS_WINDOWS) {
+        await exec.exec('powershell', ['./setup.ps1'], options);
+    }
+    else {
+        await exec.exec('bash', ['./setup.sh'], options);
+    }
+}
+async function installCpythonFromRelease(release) {
+    if (!release.files || release.files.length === 0) {
+        throw new Error('No files found in the release to download.');
+    }
+    const downloadUrl = release.files[0].download_url;
+    core.info(`Download from "${downloadUrl}"`);
+    let pythonPath = '';
+    try {
+        const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
+        pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
+        core.info('Extract downloaded archive');
+        let pythonExtractedFolder;
         if (utils_1.IS_WINDOWS) {
-            yield exec.exec('powershell', ['./setup.ps1'], options);
+            pythonExtractedFolder = await tc.extractZip(pythonPath);
         }
         else {
-            yield exec.exec('bash', ['./setup.sh'], options);
+            pythonExtractedFolder = await tc.extractTar(pythonPath);
         }
-    });
-}
-function installCpythonFromRelease(release) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!release.files || release.files.length === 0) {
-            throw new Error('No files found in the release to download.');
-        }
-        const downloadUrl = release.files[0].download_url;
-        core.info(`Download from "${downloadUrl}"`);
-        let pythonPath = '';
-        try {
-            const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
-            pythonPath = yield tc.downloadTool(downloadUrl, fileName, AUTH);
-            core.info('Extract downloaded archive');
-            let pythonExtractedFolder;
-            if (utils_1.IS_WINDOWS) {
-                pythonExtractedFolder = yield tc.extractZip(pythonPath);
+        core.info('Execute installation script');
+        await installPython(pythonExtractedFolder);
+    }
+    catch (err) {
+        if (err instanceof tc.HTTPError) {
+            // Rate limit?
+            if (err.httpStatusCode === 403) {
+                core.error(`Received HTTP status code 403. This indicates a permission issue or restricted access.`);
+            }
+            else if (err.httpStatusCode === 429) {
+                core.info(`Received HTTP status code 429.  This usually indicates the rate limit has been exceeded`);
             }
             else {
-                pythonExtractedFolder = yield tc.extractTar(pythonPath);
+                core.info(err.message);
             }
-            core.info('Execute installation script');
-            yield installPython(pythonExtractedFolder);
-        }
-        catch (err) {
-            if (err instanceof tc.HTTPError) {
-                // Rate limit?
-                if (err.httpStatusCode === 403) {
-                    core.error(`Received HTTP status code 403. This indicates a permission issue or restricted access.`);
-                }
-                else if (err.httpStatusCode === 429) {
-                    core.info(`Received HTTP status code 429.  This usually indicates the rate limit has been exceeded`);
-                }
-                else {
-                    core.info(err.message);
-                }
-                if (err.stack) {
-                    core.debug(err.stack);
-                }
+            if (err.stack) {
+                core.debug(err.stack);
             }
-            throw err;
         }
-    });
+        throw err;
+    }
 }
-exports.installCpythonFromRelease = installCpythonFromRelease;
 
 
 /***/ }),
@@ -97915,22 +97846,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -97951,25 +97883,21 @@ function isPyPyVersion(versionSpec) {
 function isGraalPyVersion(versionSpec) {
     return versionSpec.startsWith('graalpy');
 }
-function installPipPackages(pipInstall) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info(`Installing pip packages: ${pipInstall}`);
-        try {
-            const installArgs = pipInstall.trim().split(/\s+/);
-            yield (0, exec_1.exec)('python', ['-m', 'pip', 'install', ...installArgs]);
-            core.info('Successfully installed pip packages');
-        }
-        catch (error) {
-            core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
-        }
-    });
+async function installPipPackages(pipInstall) {
+    core.info(`Installing pip packages: ${pipInstall}`);
+    try {
+        const installArgs = pipInstall.trim().split(/\s+/);
+        await (0, exec_1.exec)('python', ['-m', 'pip', 'install', ...installArgs]);
+        core.info('Successfully installed pip packages');
+    }
+    catch (error) {
+        core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
+    }
 }
-function cacheDependencies(cache, pythonVersion) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
-        const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, cacheDependencyPath);
-        yield cacheDistributor.restoreCache();
-    });
+async function cacheDependencies(cache, pythonVersion) {
+    const cacheDependencyPath = core.getInput('cache-dependency-path') || undefined;
+    const cacheDistributor = (0, cache_factory_1.getCacheDistributor)(cache, pythonVersion, cacheDependencyPath);
+    await cacheDistributor.restoreCache();
 }
 function resolveVersionInputFromDefaultFile() {
     const couples = [
@@ -98007,66 +97935,64 @@ function resolveVersionInput() {
     }
     return versions;
 }
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        if (utils_1.IS_MAC) {
-            process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
-        }
-        if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
-            process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
-        }
-        core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
-        try {
-            const versions = resolveVersionInput();
-            const checkLatest = core.getBooleanInput('check-latest');
-            const allowPreReleases = core.getBooleanInput('allow-prereleases');
-            const freethreaded = core.getBooleanInput('freethreaded');
-            if (versions.length) {
-                let pythonVersion = '';
-                const arch = core.getInput('architecture') || os.arch();
-                const updateEnvironment = core.getBooleanInput('update-environment');
-                core.startGroup('Installed versions');
-                for (const version of versions) {
-                    if (isPyPyVersion(version)) {
-                        const installed = yield finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
-                        pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
-                        core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
-                    }
-                    else if (isGraalPyVersion(version)) {
-                        const installed = yield finderGraalPy.findGraalPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
-                        pythonVersion = `${installed}`;
-                        core.info(`Successfully set up GraalPy ${installed}`);
-                    }
-                    else {
-                        if (version.startsWith('2')) {
-                            core.warning('The support for python 2.7 was removed on June 19, 2023. Related issue: https://github.com/actions/setup-python/issues/672');
-                        }
-                        const installed = yield finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases, freethreaded);
-                        pythonVersion = installed.version;
-                        core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
-                    }
+async function run() {
+    var _a;
+    if (utils_1.IS_MAC) {
+        process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
+    }
+    if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
+        process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
+    }
+    core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
+    try {
+        const versions = resolveVersionInput();
+        const checkLatest = core.getBooleanInput('check-latest');
+        const allowPreReleases = core.getBooleanInput('allow-prereleases');
+        const freethreaded = core.getBooleanInput('freethreaded');
+        if (versions.length) {
+            let pythonVersion = '';
+            const arch = core.getInput('architecture') || os.arch();
+            const updateEnvironment = core.getBooleanInput('update-environment');
+            core.startGroup('Installed versions');
+            for (const version of versions) {
+                if (isPyPyVersion(version)) {
+                    const installed = await finderPyPy.findPyPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
+                    pythonVersion = `${installed.resolvedPyPyVersion}-${installed.resolvedPythonVersion}`;
+                    core.info(`Successfully set up PyPy ${installed.resolvedPyPyVersion} with Python (${installed.resolvedPythonVersion})`);
                 }
-                core.endGroup();
-                const cache = core.getInput('cache');
-                if (cache && (0, utils_1.isCacheFeatureAvailable)()) {
-                    yield cacheDependencies(cache, pythonVersion);
+                else if (isGraalPyVersion(version)) {
+                    const installed = await finderGraalPy.findGraalPyVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases);
+                    pythonVersion = `${installed}`;
+                    core.info(`Successfully set up GraalPy ${installed}`);
                 }
-                const pipInstall = core.getInput('pip-install');
-                if (pipInstall) {
-                    yield installPipPackages(pipInstall);
+                else {
+                    if (version.startsWith('2')) {
+                        core.warning('The support for python 2.7 was removed on June 19, 2023. Related issue: https://github.com/actions/setup-python/issues/672');
+                    }
+                    const installed = await finder.useCpythonVersion(version, arch, updateEnvironment, checkLatest, allowPreReleases, freethreaded);
+                    pythonVersion = installed.version;
+                    core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
             }
-            else {
-                core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
+            core.endGroup();
+            const cache = core.getInput('cache');
+            if (cache && (0, utils_1.isCacheFeatureAvailable)()) {
+                await cacheDependencies(cache, pythonVersion);
             }
-            const matchersPath = path.join(__dirname, '../..', '.github');
-            core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
+            const pipInstall = core.getInput('pip-install');
+            if (pipInstall) {
+                await installPipPackages(pipInstall);
+            }
         }
-        catch (err) {
-            core.setFailed(err.message);
+        else {
+            core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
         }
-    });
+        const matchersPath = path.join(__dirname, '../..', '.github');
+        core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
+    }
+    catch (err) {
+        core.setFailed(err.message);
+    }
 }
 run();
 
@@ -98094,27 +98020,48 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadFileName = exports.getNextPageUrl = exports.getBinaryDirectory = exports.getVersionInputFromFile = exports.getVersionInputFromPipfileFile = exports.getVersionInputFromToolVersions = exports.getVersionsInputFromPlainFile = exports.getVersionInputFromTomlFile = exports.getOSInfo = exports.getLinuxInfo = exports.logWarning = exports.isCacheFeatureAvailable = exports.isGhes = exports.validatePythonVersionFormatForPyPy = exports.writeExactPyPyVersionFile = exports.readExactPyPyVersionFile = exports.getPyPyVersionFromPath = exports.isNightlyKeyword = exports.validateVersion = exports.createSymlinkInFolder = exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.WINDOWS_PLATFORMS = exports.WINDOWS_ARCHS = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = void 0;
+exports.createSymlinkInFolder = createSymlinkInFolder;
+exports.validateVersion = validateVersion;
+exports.isNightlyKeyword = isNightlyKeyword;
+exports.getPyPyVersionFromPath = getPyPyVersionFromPath;
+exports.readExactPyPyVersionFile = readExactPyPyVersionFile;
+exports.writeExactPyPyVersionFile = writeExactPyPyVersionFile;
+exports.validatePythonVersionFormatForPyPy = validatePythonVersionFormatForPyPy;
+exports.isGhes = isGhes;
+exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
+exports.logWarning = logWarning;
+exports.getLinuxInfo = getLinuxInfo;
+exports.getOSInfo = getOSInfo;
+exports.getVersionInputFromTomlFile = getVersionInputFromTomlFile;
+exports.getVersionsInputFromPlainFile = getVersionsInputFromPlainFile;
+exports.getVersionInputFromToolVersions = getVersionInputFromToolVersions;
+exports.getVersionInputFromPipfileFile = getVersionInputFromPipfileFile;
+exports.getVersionInputFromFile = getVersionInputFromFile;
+exports.getBinaryDirectory = getBinaryDirectory;
+exports.getNextPageUrl = getNextPageUrl;
+exports.getDownloadFileName = getDownloadFileName;
 /* eslint no-unsafe-finally: "off" */
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
@@ -98144,19 +98091,15 @@ function createSymlinkInFolder(folderPath, sourceName, targetName, setExecutable
         fs_1.default.chmodSync(targetPath, '755');
     }
 }
-exports.createSymlinkInFolder = createSymlinkInFolder;
 function validateVersion(version) {
     return isNightlyKeyword(version) || Boolean(semver.validRange(version));
 }
-exports.validateVersion = validateVersion;
 function isNightlyKeyword(pypyVersion) {
     return pypyVersion === 'nightly';
 }
-exports.isNightlyKeyword = isNightlyKeyword;
 function getPyPyVersionFromPath(installDir) {
     return path.basename(path.dirname(installDir));
 }
-exports.getPyPyVersionFromPath = getPyPyVersionFromPath;
 /**
  * In tool-cache, we put PyPy to '<toolcache_root>/PyPy/<python_version>/x64'
  * There is no easy way to determine what PyPy version is located in specific folder
@@ -98173,12 +98116,10 @@ function readExactPyPyVersionFile(installDir) {
     }
     return pypyVersion;
 }
-exports.readExactPyPyVersionFile = readExactPyPyVersionFile;
 function writeExactPyPyVersionFile(installDir, resolvedPyPyVersion) {
     const pypyFilePath = path.join(installDir, PYPY_VERSION_FILE);
     fs_1.default.writeFileSync(pypyFilePath, resolvedPyPyVersion);
 }
-exports.writeExactPyPyVersionFile = writeExactPyPyVersionFile;
 /**
  * Python version should be specified explicitly like "x.y" (3.10, 3.11, etc)
  * "3.x" or "3" are not supported
@@ -98188,7 +98129,6 @@ function validatePythonVersionFormatForPyPy(version) {
     const re = /^\d+\.\d+$/;
     return re.test(version);
 }
-exports.validatePythonVersionFormatForPyPy = validatePythonVersionFormatForPyPy;
 function isGhes() {
     const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
     const hostname = ghUrl.hostname.trimEnd().toUpperCase();
@@ -98197,7 +98137,6 @@ function isGhes() {
     const isLocalHost = hostname.endsWith('.LOCALHOST');
     return !isGitHubHost && !isGitHubEnterpriseCloudHost && !isLocalHost;
 }
-exports.isGhes = isGhes;
 function isCacheFeatureAvailable() {
     if (cache.isFeatureAvailable()) {
         return true;
@@ -98209,65 +98148,53 @@ function isCacheFeatureAvailable() {
     core.warning('The runner was not able to contact the cache service. Caching will be skipped');
     return false;
 }
-exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 function logWarning(message) {
     const warningPrefix = '[warning]';
     core.info(`${warningPrefix}${message}`);
 }
-exports.logWarning = logWarning;
-function getWindowsInfo() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { stdout } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', undefined, {
-            silent: true
-        });
-        const windowsVersion = stdout.trim().split(' ')[3];
-        return { osName: 'Windows', osVersion: windowsVersion };
+async function getWindowsInfo() {
+    const { stdout } = await exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', undefined, {
+        silent: true
     });
+    const windowsVersion = stdout.trim().split(' ')[3];
+    return { osName: 'Windows', osVersion: windowsVersion };
 }
-function getMacOSInfo() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { stdout } = yield exec.getExecOutput('sw_vers', ['-productVersion'], {
-            silent: true
-        });
-        const macOSVersion = stdout.trim();
-        return { osName: 'macOS', osVersion: macOSVersion };
+async function getMacOSInfo() {
+    const { stdout } = await exec.getExecOutput('sw_vers', ['-productVersion'], {
+        silent: true
     });
+    const macOSVersion = stdout.trim();
+    return { osName: 'macOS', osVersion: macOSVersion };
 }
-function getLinuxInfo() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { stdout } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
-            silent: true
-        });
-        const [osName, osVersion] = stdout.trim().split('\n');
-        core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
-        return { osName: osName, osVersion: osVersion };
+async function getLinuxInfo() {
+    const { stdout } = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+        silent: true
     });
+    const [osName, osVersion] = stdout.trim().split('\n');
+    core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+    return { osName: osName, osVersion: osVersion };
 }
-exports.getLinuxInfo = getLinuxInfo;
-function getOSInfo() {
-    return __awaiter(this, void 0, void 0, function* () {
-        let osInfo;
-        try {
-            if (exports.IS_WINDOWS) {
-                osInfo = yield getWindowsInfo();
-            }
-            else if (exports.IS_LINUX) {
-                osInfo = yield getLinuxInfo();
-            }
-            else if (exports.IS_MAC) {
-                osInfo = yield getMacOSInfo();
-            }
+async function getOSInfo() {
+    let osInfo;
+    try {
+        if (exports.IS_WINDOWS) {
+            osInfo = await getWindowsInfo();
         }
-        catch (err) {
-            const error = err;
-            core.debug(error.message);
+        else if (exports.IS_LINUX) {
+            osInfo = await getLinuxInfo();
         }
-        finally {
-            return osInfo;
+        else if (exports.IS_MAC) {
+            osInfo = await getMacOSInfo();
         }
-    });
+    }
+    catch (err) {
+        const error = err;
+        core.debug(error.message);
+    }
+    finally {
+        return osInfo;
+    }
 }
-exports.getOSInfo = getOSInfo;
 /**
  * Extract a value from an object by following the keys path provided.
  * If the value is present, it is returned. Otherwise undefined is returned.
@@ -98326,7 +98253,6 @@ function getVersionInputFromTomlFile(versionFile) {
     });
     return validatedVersions;
 }
-exports.getVersionInputFromTomlFile = getVersionInputFromTomlFile;
 /**
  * Python versions extracted from a plain text file.
  * - Resolves multiple versions from multiple lines.
@@ -98351,7 +98277,6 @@ function getVersionsInputFromPlainFile(versionFile) {
     core.info(`Resolved ${versionFile} as ${versions.join(', ')}`);
     return versions;
 }
-exports.getVersionsInputFromPlainFile = getVersionsInputFromPlainFile;
 /**
  * Python version extracted from a .tool-versions file.
  */
@@ -98382,7 +98307,6 @@ function getVersionInputFromToolVersions(versionFile) {
         return [];
     }
 }
-exports.getVersionInputFromToolVersions = getVersionInputFromToolVersions;
 /**
  * Python version extracted from the Pipfile file.
  */
@@ -98416,7 +98340,6 @@ function getVersionInputFromPipfileFile(versionFile) {
     core.info(`Extracted ${versions} from ${versionFile}`);
     return versions;
 }
-exports.getVersionInputFromPipfileFile = getVersionInputFromPipfileFile;
 /**
  * Python version extracted from a plain, .tool-versions, Pipfile or TOML file.
  */
@@ -98434,7 +98357,6 @@ function getVersionInputFromFile(versionFile) {
         return getVersionsInputFromPlainFile(versionFile);
     }
 }
-exports.getVersionInputFromFile = getVersionInputFromFile;
 /**
  * Get the directory containing interpreter binary from installation directory of PyPy or GraalPy
  *  - On Linux and macOS, the Python interpreter is in 'bin'.
@@ -98443,7 +98365,6 @@ exports.getVersionInputFromFile = getVersionInputFromFile;
 function getBinaryDirectory(installDir) {
     return exports.IS_WINDOWS ? installDir : path.join(installDir, 'bin');
 }
-exports.getBinaryDirectory = getBinaryDirectory;
 /**
  * Extract next page URL from a HTTP response "link" header. Such headers are used in GitHub APIs.
  */
@@ -98465,7 +98386,6 @@ function getNextPageUrl(response) {
     }
     return null;
 }
-exports.getNextPageUrl = getNextPageUrl;
 /**
  * Add temporary fix for Windows
  * On Windows, it is necessary to retain the .zip extension for proper extraction.
@@ -98479,7 +98399,6 @@ function getDownloadFileName(downloadUrl) {
         ? path.join(tempDir, path.basename(downloadUrl))
         : undefined;
 }
-exports.getDownloadFileName = getDownloadFileName;
 
 
 /***/ }),
