@@ -96273,10 +96273,12 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State || (exports.State = State = {}));
 class CacheDistributor {
+    packageManager;
+    cacheDependencyPath;
+    CACHE_KEY_PREFIX = 'setup-python';
     constructor(packageManager, cacheDependencyPath) {
         this.packageManager = packageManager;
         this.cacheDependencyPath = cacheDependencyPath;
-        this.CACHE_KEY_PREFIX = 'setup-python';
     }
     async handleLoadedCache() { }
     async restoreCache() {
@@ -96422,10 +96424,11 @@ const cache_distributor_1 = __importDefault(__nccwpck_require__(2326));
 const utils_1 = __nccwpck_require__(1798);
 const constants_1 = __nccwpck_require__(565);
 class PipCache extends cache_distributor_1.default {
+    pythonVersion;
+    cacheDependencyBackupPath = constants_1.CACHE_DEPENDENCY_BACKUP_PATH;
     constructor(pythonVersion, cacheDependencyPath = '**/requirements.txt') {
         super('pip', cacheDependencyPath);
         this.pythonVersion = pythonVersion;
-        this.cacheDependencyBackupPath = constants_1.CACHE_DEPENDENCY_BACKUP_PATH;
     }
     async getCacheGlobalDirectories() {
         let exitCode = 1;
@@ -96530,6 +96533,8 @@ const path = __importStar(__nccwpck_require__(6928));
 const core = __importStar(__nccwpck_require__(7484));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(2326));
 class PipenvCache extends cache_distributor_1.default {
+    pythonVersion;
+    patterns;
     constructor(pythonVersion, patterns = '**/Pipfile.lock') {
         super('pipenv', patterns);
         this.pythonVersion = pythonVersion;
@@ -96615,6 +96620,9 @@ const core = __importStar(__nccwpck_require__(7484));
 const cache_distributor_1 = __importDefault(__nccwpck_require__(2326));
 const utils_1 = __nccwpck_require__(1798);
 class PoetryCache extends cache_distributor_1.default {
+    pythonVersion;
+    patterns;
+    poetryProjects;
     constructor(pythonVersion, patterns = '**/poetry.lock', poetryProjects = new Set()) {
         super('poetry', patterns);
         this.pythonVersion = pythonVersion;
@@ -97054,7 +97062,6 @@ async function installPip(pythonLocation) {
     }
 }
 async function useCpythonVersion(version, architecture, updateEnvironment, checkLatest, allowPreReleases, freethreaded) {
-    var _a;
     let manifest = null;
     const { version: desugaredVersionSpec, freethreaded: versionFreethreaded } = desugarVersion(version);
     let semanticVersionSpec = pythonVersionToSemantic(desugaredVersionSpec, allowPreReleases);
@@ -97070,7 +97077,7 @@ async function useCpythonVersion(version, architecture, updateEnvironment, check
     }
     if (checkLatest) {
         manifest = await installer.getManifest();
-        const resolvedVersion = (_a = (await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))) === null || _a === void 0 ? void 0 : _a.version;
+        const resolvedVersion = (await installer.findReleaseFromManifest(semanticVersionSpec, architecture, manifest))?.version;
         if (resolvedVersion) {
             semanticVersionSpec = resolvedVersion;
             core.info(`Resolved as '${semanticVersionSpec}'`);
@@ -97286,7 +97293,7 @@ const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
 async function installGraalPy(graalpyVersion, architecture, allowPreReleases, releases) {
     let downloadDir;
-    releases = releases !== null && releases !== void 0 ? releases : (await getAvailableGraalPyVersions());
+    releases = releases ?? (await getAvailableGraalPyVersions());
     if (!releases || !releases.length) {
         throw new Error('No release was found in GraalPy version.json');
     }
@@ -97497,7 +97504,7 @@ const fs_1 = __importDefault(__nccwpck_require__(9896));
 const utils_1 = __nccwpck_require__(1798);
 async function installPyPy(pypyVersion, pythonVersion, architecture, allowPreReleases, releases) {
     let downloadDir;
-    releases = releases !== null && releases !== void 0 ? releases : (await getAvailablePyPyVersions());
+    releases = releases ?? (await getAvailablePyPyVersions());
     if (!releases || releases.length === 0) {
         throw new Error('No release was found in PyPy version.json');
     }
@@ -97936,11 +97943,10 @@ function resolveVersionInput() {
     return versions;
 }
 async function run() {
-    var _a;
     if (utils_1.IS_MAC) {
         process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
     }
-    if ((_a = process.env.AGENT_TOOLSDIRECTORY) === null || _a === void 0 ? void 0 : _a.trim()) {
+    if (process.env.AGENT_TOOLSDIRECTORY?.trim()) {
         process.env['RUNNER_TOOL_CACHE'] = process.env['AGENT_TOOLSDIRECTORY'];
     }
     core.debug(`Python is expected to be installed into ${process.env['RUNNER_TOOL_CACHE']}`);
@@ -98281,7 +98287,6 @@ function getVersionsInputFromPlainFile(versionFile) {
  * Python version extracted from a .tool-versions file.
  */
 function getVersionInputFromToolVersions(versionFile) {
-    var _a;
     if (!fs_1.default.existsSync(versionFile)) {
         core.warning(`File ${versionFile} does not exist.`);
         return [];
@@ -98296,7 +98301,7 @@ function getVersionInputFromToolVersions(versionFile) {
             }
             const match = line.match(/^\s*python\s*v?\s*(?<version>[^\s]+)\s*$/);
             if (match) {
-                return [((_a = match.groups) === null || _a === void 0 ? void 0 : _a.version.trim()) || ''];
+                return [match.groups?.version.trim() || ''];
             }
         }
         core.warning(`No Python version found in ${versionFile}`);

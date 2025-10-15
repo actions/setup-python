@@ -87743,10 +87743,12 @@ var State;
     State["CACHE_PATHS"] = "cache-paths";
 })(State || (exports.State = State = {}));
 class CacheDistributor {
+    packageManager;
+    cacheDependencyPath;
+    CACHE_KEY_PREFIX = 'setup-python';
     constructor(packageManager, cacheDependencyPath) {
         this.packageManager = packageManager;
         this.cacheDependencyPath = cacheDependencyPath;
-        this.CACHE_KEY_PREFIX = 'setup-python';
     }
     async handleLoadedCache() { }
     async restoreCache() {
