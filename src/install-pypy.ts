@@ -18,6 +18,7 @@ import {
   getBinaryDirectory,
   getDownloadFileName
 } from './utils';
+import {rm} from '@actions/io/lib/io-util';
 
 export async function installPyPy(
   pypyVersion: string,
@@ -80,6 +81,9 @@ export async function installPyPy(
     } else {
       downloadDir = await tc.extractTar(pypyPath, undefined, 'x');
     }
+
+    core.info('Deleting downloaded archive...');
+    await rm(pypyPath);
 
     // root folder in archive can have unpredictable name so just take the first folder
     // downloadDir is unique folder under TEMP and can't contain any other folders

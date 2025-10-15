@@ -18,6 +18,7 @@ import {
   getBinaryDirectory,
   getNextPageUrl
 } from './utils';
+import {rm} from '@actions/io/lib/io-util';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -65,6 +66,9 @@ export async function installGraalPy(
 
     core.info('Extracting downloaded archive...');
     downloadDir = await tc.extractTar(graalpyPath);
+
+    core.info('Deleting downloaded archive...');
+    await rm(graalpyPath);
 
     // root folder in archive can have unpredictable name so just take the first folder
     // downloadDir is unique folder under TEMP and can't contain any other folders
