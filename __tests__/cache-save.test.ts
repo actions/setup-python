@@ -20,7 +20,6 @@ describe('run', () => {
   let debugSpy: jest.SpyInstance;
   let saveStateSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
-  let getInputSpy: jest.SpyInstance;
   let setFailedSpy: jest.SpyInstance;
 
   // cache spy
@@ -29,10 +28,17 @@ describe('run', () => {
   // exec spy
   let getExecOutputSpy: jest.SpyInstance;
 
-  let inputs = {} as any;
+  function setInput(name: string, value: string): void {
+    process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = value;
+  }
 
   beforeEach(() => {
     process.env['RUNNER_OS'] = process.env['RUNNER_OS'] ?? 'linux';
+    for (const key in process.env) {
+      if (key.startsWith('INPUT_')) {
+        delete process.env[key];
+      }
+    }
 
     infoSpy = jest.spyOn(core, 'info');
     infoSpy.mockImplementation(input => undefined);
@@ -56,9 +62,6 @@ describe('run', () => {
 
     setFailedSpy = jest.spyOn(core, 'setFailed');
 
-    getInputSpy = jest.spyOn(core, 'getInput');
-    getInputSpy.mockImplementation(input => inputs[input]);
-
     getExecOutputSpy = jest.spyOn(exec, 'getExecOutput');
     getExecOutputSpy.mockImplementation((input: string) => {
       if (input.includes('pip')) {
@@ -74,10 +77,9 @@ describe('run', () => {
 
   describe('Package manager validation', () => {
     it('Package manager is not provided, skip caching', async () => {
-      inputs['cache'] = '';
+      setInput('cache', '');
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(infoSpy).not.toHaveBeenCalled();
       expect(saveCacheSpy).not.toHaveBeenCalled();
       expect(setFailedSpy).not.toHaveBeenCalled();
@@ -86,12 +88,11 @@ describe('run', () => {
 
   describe('Validate unchanged cache is not saved', () => {
     it('should not save cache for pip', async () => {
-      inputs['cache'] = 'pip';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'pip');
+      setInput('python-version', '3.10.0');
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(debugSpy).toHaveBeenCalledWith(
         `paths for caching are ${__dirname}`
       );
@@ -103,12 +104,11 @@ describe('run', () => {
     });
 
     it('should not save cache for pipenv', async () => {
-      inputs['cache'] = 'pipenv';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'pipenv');
+      setInput('python-version', '3.10.0');
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(debugSpy).toHaveBeenCalledWith(
         `paths for caching are ${__dirname}`
       );
@@ -122,8 +122,8 @@ describe('run', () => {
 
   describe('action saves the cache', () => {
     it('saves cache from pip', async () => {
-      inputs['cache'] = 'pip';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'pip');
+      setInput('python-version', '3.10.0');
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return requirementsHash;
@@ -136,7 +136,6 @@ describe('run', () => {
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith(
         `Cache hit occurred on the primary key ${requirementsHash}, not saving cache.`
@@ -149,8 +148,8 @@ describe('run', () => {
     });
 
     it('saves cache from pipenv', async () => {
-      inputs['cache'] = 'pipenv';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'pipenv');
+      setInput('python-version', '3.10.0');
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return pipFileLockHash;
@@ -163,7 +162,6 @@ describe('run', () => {
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith(
         `Cache hit occurred on the primary key ${pipFileLockHash}, not saving cache.`
@@ -176,8 +174,8 @@ describe('run', () => {
     });
 
     it('saves cache from poetry', async () => {
-      inputs['cache'] = 'poetry';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'poetry');
+      setInput('python-version', '3.10.0');
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.CACHE_MATCHED_KEY) {
           return poetryLockHash;
@@ -190,7 +188,6 @@ describe('run', () => {
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith(
         `Cache hit occurred on the primary key ${poetryLockHash}, not saving cache.`
@@ -203,8 +200,8 @@ describe('run', () => {
     });
 
     it('saves with -1 cacheId , should not fail workflow', async () => {
-      inputs['cache'] = 'poetry';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'poetry');
+      setInput('python-version', '3.10.0');
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.STATE_CACHE_PRIMARY_KEY) {
           return poetryLockHash;
@@ -221,7 +218,6 @@ describe('run', () => {
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalled();
       expect(saveCacheSpy).toHaveBeenCalled();
@@ -232,8 +228,8 @@ describe('run', () => {
     });
 
     it('saves with error from toolkit, should not fail the workflow', async () => {
-      inputs['cache'] = 'npm';
-      inputs['python-version'] = '3.10.0';
+      setInput('cache', 'npm');
+      setInput('python-version', '3.10.0');
       getStateSpy.mockImplementation((name: string) => {
         if (name === State.STATE_CACHE_PRIMARY_KEY) {
           return poetryLockHash;
@@ -250,10 +246,21 @@ describe('run', () => {
 
       await run();
 
-      expect(getInputSpy).toHaveBeenCalled();
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith();
       expect(saveCacheSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not save the cache when requested not to', async () => {
+      setInput('cache', 'pip');
+      setInput('cache-save', 'false');
+      setInput('python-version', '3.10.0');
+      await run();
+      expect(infoSpy).toHaveBeenCalledWith(
+        'Not saving cache since `cache-save` is false'
+      );
+      expect(saveCacheSpy).not.toHaveBeenCalled();
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
   });
@@ -261,6 +268,5 @@ describe('run', () => {
   afterEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
-    inputs = {};
   });
 });
