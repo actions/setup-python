@@ -18,7 +18,7 @@
 - [Hosted tool cache](advanced-usage.md#hosted-tool-cache) 
 - [Using `setup-python` with a self-hosted runner](advanced-usage.md#using-setup-python-with-a-self-hosted-runner)
     - [Windows](advanced-usage.md#windows)
-    - [Linux](advanced-usage.md#linux)
+    - [Ubuntu](advanced-usage.md#Ubuntu)
     - [macOS](advanced-usage.md#macos)
 - [Using `setup-python` on GHES](advanced-usage.md#using-setup-python-on-ghes)
 - [Allow pre-releases](advanced-usage.md#allow-pre-releases)
@@ -578,9 +578,9 @@ If you have a supported self-hosted runner and you would like to use `setup-pyth
 
 >If you are experiencing problems while configuring Python on your self-hosted runner, turn on [step debugging](https://github.com/actions/toolkit/blob/main/docs/action-debugging.md#step-debug-logs) to see additional logs.
 
-### Linux
+### Ubuntu
 
-By default, the runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Linux self-hosted runners:
+By default, the runner downloads and installs tools into the folder set up by `RUNNER_TOOL_CACHE` environment variable. The environment variable called `AGENT_TOOLSDIRECTORY` can be set to change this location for Ubuntu self-hosted runners:
 - In the same shell that your runner is using, type `export AGENT_TOOLSDIRECTORY=/path/to/folder`.
 - More permanent way of setting the environment variable is to create an `.env` file in the same directory as your runner and to add `AGENT_TOOLSDIRECTORY=/path/to/folder`. This ensures the variable is always set if your runner is configured as a service.
 
