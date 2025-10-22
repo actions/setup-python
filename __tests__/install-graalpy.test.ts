@@ -21,24 +21,21 @@ const architecture = 'x64';
 const toolDir = path.join(__dirname, 'runner', 'tools');
 const tempDir = path.join(__dirname, 'runner', 'temp');
 
-/* GraalPy doesn't have a windows release yet */
-const describeSkipOnWindows = IS_WINDOWS ? describe.skip : describe;
-
 describe('graalpyVersionToSemantic', () => {
   it.each([
-    ['23.0.0a1', '23.0.0a1'],
-    ['23.0.0', '23.0.0'],
-    ['23.0.x', '23.0.x'],
-    ['23.x', '23.x']
+    ['graalpy-24.1.0-ea.09', '24.1.0-ea.9'],
+    ['graal-23.0.0', '23.0.0'],
+    ['vm-23.0.x', '23.0.x'],
+    ['graal-23.x', '23.x']
   ])('%s -> %s', (input, expected) => {
     expect(installer.graalPyTagToVersion(input)).toEqual(expected);
   });
 });
 
-describeSkipOnWindows('findRelease', () => {
+describe('findRelease', () => {
   const result = JSON.stringify(manifestData);
   const releases = JSON.parse(result) as IGraalPyManifestRelease[];
-  const extension = 'tar.gz';
+  const extension = IS_WINDOWS ? 'zip' : 'tar.gz';
   const arch = installer.toGraalPyArchitecture(architecture);
   const platform = installer.toGraalPyPlatform(process.platform);
   const extensionName = `${platform}-${arch}.${extension}`;
@@ -47,8 +44,8 @@ describeSkipOnWindows('findRelease', () => {
     browser_download_url: `https://github.com/oracle/graalpython/releases/download/graal-23.0.0/graalpython-23.0.0-${extensionName}`
   };
   const filesRC1: IGraalPyManifestAsset = {
-    name: `graalpython-23.1.0a1-${extensionName}`,
-    browser_download_url: `https://github.com/oracle/graalpython/releases/download/graal-23.1.0a1/graalpython-23.1.0a1-${extensionName}`
+    name: `graalpy-24.1.0-ea.09-${extensionName}`,
+    browser_download_url: `https://github.com/graalvm/graal-languages-ea-builds/releases/download/graalpy-24.1.0-ea.09/graalpy-24.1.0-ea.09-${extensionName}`
   };
 
   let warningSpy: jest.SpyInstance;
@@ -84,15 +81,15 @@ describeSkipOnWindows('findRelease', () => {
   });
 
   it('Preview version of GraalPy is found', () => {
-    const graalpyVersion = installer.graalPyTagToVersion('vm-23.1.0a1');
+    const graalpyVersion = installer.graalPyTagToVersion('vm-24.1.0-ea.09');
     expect(
       installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toMatchObject({
       foundAsset: {
-        name: `graalpython-23.1.0a1-${extensionName}`,
-        browser_download_url: `https://github.com/oracle/graalpython/releases/download/graal-23.1.0a1/graalpython-23.1.0a1-${extensionName}`
+        name: `graalpy-24.1.0-ea.09-${extensionName}`,
+        browser_download_url: `https://github.com/graalvm/graal-languages-ea-builds/releases/download/graalpy-24.1.0-ea.09/graalpy-24.1.0-ea.09-${extensionName}`
       },
-      resolvedGraalPyVersion: '23.1.0-a.1'
+      resolvedGraalPyVersion: '24.1.0-ea.9'
     });
   });
 
@@ -107,7 +104,7 @@ describeSkipOnWindows('findRelease', () => {
   });
 
   it('GraalPy version matches semver (pre-release)', () => {
-    const graalpyVersion = '23.1.x';
+    const graalpyVersion = '24.1.x';
     expect(
       installer.findRelease(releases, graalpyVersion, architecture, false)
     ).toBeNull();
@@ -115,12 +112,12 @@ describeSkipOnWindows('findRelease', () => {
       installer.findRelease(releases, graalpyVersion, architecture, true)
     ).toMatchObject({
       foundAsset: filesRC1,
-      resolvedGraalPyVersion: '23.1.0-a.1'
+      resolvedGraalPyVersion: '24.1.0-ea.9'
     });
   });
 });
 
-describeSkipOnWindows('installGraalPy', () => {
+describe('installGraalPy', () => {
   let tcFind: jest.SpyInstance;
   let warningSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
@@ -232,20 +229,20 @@ describeSkipOnWindows('installGraalPy', () => {
   it('found and install GraalPy, pre-release fallback', async () => {
     spyCacheDir = jest.spyOn(tc, 'cacheDir');
     spyCacheDir.mockImplementation(() =>
-      path.join(toolDir, 'GraalPy', '23.1.0', architecture)
+      path.join(toolDir, 'GraalPy', '24.1.0', architecture)
     );
 
     spyChmodSync = jest.spyOn(fs, 'chmodSync');
     spyChmodSync.mockImplementation(() => undefined);
 
     await expect(
-      installer.installGraalPy('23.1.x', architecture, false, undefined)
+      installer.installGraalPy('24.1.x', architecture, false, undefined)
     ).rejects.toThrow();
     await expect(
-      installer.installGraalPy('23.1.x', architecture, true, undefined)
+      installer.installGraalPy('24.1.x', architecture, true, undefined)
     ).resolves.toEqual({
-      installDir: path.join(toolDir, 'GraalPy', '23.1.0', architecture),
-      resolvedGraalPyVersion: '23.1.0-a.1'
+      installDir: path.join(toolDir, 'GraalPy', '24.1.0', architecture),
+      resolvedGraalPyVersion: '24.1.0-ea.9'
     });
 
     expect(spyHttpClient).toHaveBeenCalled();
