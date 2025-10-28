@@ -44,7 +44,7 @@ runs:
   using: 'node24'
   main: 'dist/setup/index.js'
   post: 'dist/cache-save/index.js'
-  post-if: success()
+  post-if: 'success() && github.event.inputs.cache'
 branding:
   icon: 'code'
   color: 'yellow'
