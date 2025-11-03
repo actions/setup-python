@@ -1,6 +1,7 @@
 sources:
   npm: true
-
+- name: Setup Python
+  uses: actions/setup-python@v6.0.0
 allowed:
   - apache-2.0
   - bsd-2-clause
