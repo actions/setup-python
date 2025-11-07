@@ -307,6 +307,32 @@ describe('findPyPyVersion', () => {
     ).rejects.toThrow();
   });
 
+  it('update PKG_CONFIG_PATH', async () => {
+    process.env['PKG_CONFIG_PATH'] = '/test/dir';
+    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir.mockImplementation(() =>
+      path.join(toolDir, 'PyPy', '3.7.7', architecture)
+    );
+    spyChmodSync = jest.spyOn(fs, 'chmodSync');
+    spyChmodSync.mockImplementation(() => undefined);
+    await expect(
+      finder.findPyPyVersion(
+        'pypy-3.7-v7.3.x',
+        architecture,
+        true,
+        false,
+        false
+      )
+    ).resolves.toEqual({
+      resolvedPythonVersion: '3.7.9',
+      resolvedPyPyVersion: '7.3.3'
+    });
+    expect(spyCoreExportVariable).toHaveBeenCalledWith(
+      'PKG_CONFIG_PATH',
+      expect.stringContaining('/test/dir')
+    );
+  });
+
   it('found and install successfully', async () => {
     spyCacheDir = jest.spyOn(tc, 'cacheDir');
     spyCacheDir.mockImplementation(() =>
