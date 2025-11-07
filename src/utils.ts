@@ -423,16 +423,12 @@ export function getDownloadFileName(downloadUrl: string): string | undefined {
     : undefined;
 }
 
-export function addPkgConfigPathToEnv(path: string): undefined {
+export function addPkgConfigPathToEnv(new_path: string): undefined {
   const pkg_config_path = process.env['PKG_CONFIG_PATH'];
 
   if (pkg_config_path === undefined) {
-    core.exportVariable('PKG_CONFIG_PATH', path);
+    core.exportVariable('PKG_CONFIG_PATH', new_path);
   } else {
-    if (IS_WINDOWS) {
-      core.exportVariable('PKG_CONFIG_PATH', `${path};${pkg_config_path}`);
-    } else {
-      core.exportVariable('PKG_CONFIG_PATH', `${path}:${pkg_config_path}`);
-    }
+    core.exportVariable('PKG_CONFIG_PATH', `${pkg_config_path}${path.delimiter}${new_path}`);
   }
 }
