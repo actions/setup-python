@@ -33,6 +33,12 @@ inputs:
     description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
   pip-install:
     description: "Used to specify the packages to install with pip after setting up Python. Can be a requirements file or package names."
+  preclean-pip:
+    description: "When 'true', removes all existing pip packages before installing new ones."
+    default: false
+  postclean-pip:
+    description: "When 'true', removes all pip packages installed by this action after the action completes."
+    default: false
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."

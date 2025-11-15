@@ -14,6 +14,7 @@ import {
   getVersionsInputFromPlainFile
 } from './utils';
 import {exec} from '@actions/exec';
+import {cleanPipPackages} from './clean-pip';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -159,6 +160,10 @@ async function run() {
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
+      const precleanPip = core.getBooleanInput('preclean-pip');
+      if (precleanPip) {
+        await cleanPipPackages();
+      } 
       const pipInstall = core.getInput('pip-install');
       if (pipInstall) {
         await installPipPackages(pipInstall);
