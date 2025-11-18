@@ -97919,7 +97919,7 @@ async function installPipPackages(pipInstall) {
         await (0, exec_1.exec)('python', ['-m', 'pip', 'install', ...installArgs]);
         core.info('Successfully installed pip packages');
     }
-    catch (error) {
+    catch {
         core.setFailed(`Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`);
     }
 }
