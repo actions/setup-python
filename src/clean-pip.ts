@@ -13,6 +13,6 @@ export async function cleanPipPackages() {
     ]);
     core.info('Successfully cleaned up pip packages');
   } catch (error) {
-    core.setFailed(`Failed to clean up pip packages.`);
+    core.setFailed('Failed to clean up pip packages.');
   }
 }
