@@ -163,7 +163,7 @@ async function run() {
       const precleanPip = core.getBooleanInput('preclean');
       if (precleanPip) {
         await cleanPipPackages();
-      } 
+      }
       const pipInstall = core.getInput('pip-install');
       if (pipInstall) {
         await installPipPackages(pipInstall);
