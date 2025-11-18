@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as cache from '@actions/cache';
+import * as cleanPip from '../src/clean-pip';
 import * as exec from '@actions/exec';
 import {run} from '../src/post-python';
 import {State} from '../src/cache-distributions/cache-distributor';
@@ -26,6 +27,8 @@ describe('run', () => {
 
   // cache spy
   let saveCacheSpy: jest.SpyInstance;
+  // cleanPipPackages spy
+  let cleanPipPackagesSpy: jest.SpyInstance;
 
   // exec spy
   let getExecOutputSpy: jest.SpyInstance;
@@ -74,6 +77,9 @@ describe('run', () => {
 
     saveCacheSpy = jest.spyOn(cache, 'saveCache');
     saveCacheSpy.mockImplementation(() => undefined);
+    
+    cleanPipPackagesSpy = jest.spyOn(cleanPip, 'cleanPipPackages');
+    cleanPipPackagesSpy.mockImplementation(() => undefined);
   });
 
   describe('Package manager validation', () => {
@@ -258,6 +264,55 @@ describe('run', () => {
       expect(getStateSpy).toHaveBeenCalledTimes(3);
       expect(infoSpy).not.toHaveBeenCalledWith();
       expect(saveCacheSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('run with postclean option', () => {
+
+    it('should clean pip packages when postclean is true', async () => {
+      inputs['cache'] = '';
+      inputs['postclean'] = true;
+
+      await run();
+
+      expect(getBooleanInputSpy).toHaveBeenCalledWith('postclean');
+      expect(cleanPipPackagesSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should save cache and clean pip packages when both are enabled', async () => {
+      inputs['cache'] = 'pip';
+      inputs['postclean'] = true;
+      inputs['python-version'] = '3.10.0';
+      getStateSpy.mockImplementation((name: string) => {
+        if (name === State.CACHE_MATCHED_KEY) {
+          return requirementsHash;
+        } else if (name === State.CACHE_PATHS) {
+          return JSON.stringify([__dirname]);
+        } else {
+          return pipFileLockHash;
+        }
+      });
+
+      await run();
+
+      expect(getInputSpy).toHaveBeenCalled();
+      expect(getBooleanInputSpy).toHaveBeenCalledWith('postclean');
+      expect(saveCacheSpy).toHaveBeenCalled();
+      expect(cleanPipPackagesSpy).toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not clean pip packages when postclean is false', async () => {
+      inputs['cache'] = 'pip';
+      inputs['postclean'] = false;
+      inputs['python-version'] = '3.10.0';
+
+      await run();
+
+      expect(getBooleanInputSpy).toHaveBeenCalledWith('postclean');
+      expect(cleanPipPackagesSpy).not.toHaveBeenCalled();
       expect(setFailedSpy).not.toHaveBeenCalled();
     });
   });
