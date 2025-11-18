@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
-import {run} from '../src/cache-save';
+import {run} from '../src/post-python';
 import {State} from '../src/cache-distributions/cache-distributor';
 
 describe('run', () => {
@@ -21,6 +21,7 @@ describe('run', () => {
   let saveStateSpy: jest.SpyInstance;
   let getStateSpy: jest.SpyInstance;
   let getInputSpy: jest.SpyInstance;
+  let getBooleanInputSpy: jest.SpyInstance;
   let setFailedSpy: jest.SpyInstance;
 
   // cache spy
@@ -58,6 +59,9 @@ describe('run', () => {
 
     getInputSpy = jest.spyOn(core, 'getInput');
     getInputSpy.mockImplementation(input => inputs[input]);
+
+    getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
+    getBooleanInputSpy.mockImplementation(input => inputs[input]);
 
     getExecOutputSpy = jest.spyOn(exec, 'getExecOutput');
     getExecOutputSpy.mockImplementation((input: string) => {
