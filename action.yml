@@ -33,10 +33,10 @@ inputs:
     description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
   pip-install:
     description: "Used to specify the packages to install with pip after setting up Python. Can be a requirements file or package names."
-  preclean-pip:
+  preclean:
     description: "When 'true', removes all existing pip packages before installing new ones."
     default: false
-  postclean-pip:
+  postclean:
     description: "When 'true', removes all pip packages installed by this action after the action completes."
     default: false
 outputs:
@@ -49,7 +49,7 @@ outputs:
 runs:
   using: 'node24'
   main: 'dist/setup/index.js'
-  post: 'dist/cache-save/index.js'
+  post: 'dist/post-python/index.js'
   post-if: success()
 branding:
   icon: 'code'

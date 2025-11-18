@@ -19,16 +19,12 @@ export async function run(earlyExit?: boolean) {
       if (earlyExit) {
         process.exit(0);
       }
-      // Optionally clean up pip packages after the post-action if requested.
-      // This mirrors the `preclean-pip` behavior used in the main action.
-      try {
-        const postcleanPip = core.getBooleanInput('postclean-pip');
-        if (postcleanPip) {
-          await cleanPipPackages();
-        }
-      } catch (err) {
-        // getBooleanInput throws if input missing in some contexts; ignore and continue
-      }
+    }
+    // Optionally clean up pip packages after the post-action if requested.
+    // This mirrors the `preclean-pip` behavior used in the main action.
+    const postcleanPip = core.getBooleanInput('postclean');
+    if (postcleanPip) {
+      await cleanPipPackages();
     }
   } catch (error) {
     const err = error as Error;

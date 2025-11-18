@@ -160,7 +160,7 @@ async function run() {
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
       }
-      const precleanPip = core.getBooleanInput('preclean-pip');
+      const precleanPip = core.getBooleanInput('preclean');
       if (precleanPip) {
         await cleanPipPackages();
       } 
