@@ -8,12 +8,12 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-  "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/post-python src/post-python.ts",
+    "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/post-python src/post-python.ts",
     "format": "prettier --no-error-on-unmatched-pattern --config ./.prettierrc.js --write \"**/*.{ts,yml,yaml}\"",
     "format-check": "prettier --no-error-on-unmatched-pattern --config ./.prettierrc.js --check \"**/*.{ts,yml,yaml}\"",
     "lint": "eslint --config ./.eslintrc.js \"**/*.ts\"",
     "lint:fix": "eslint --config ./.eslintrc.js \"**/*.ts\" --fix",
-  "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/post-python src/post-python.ts && git add -f dist/",
+    "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/post-python src/post-python.ts && git add -f dist/",
     "test": "jest --runInBand --coverage"
   },
   "repository": {
