@@ -87855,7 +87855,7 @@ async function cleanPipPackages() {
         // Use a shell so we can pipe the output of pip freeze into xargs
         await (0, exec_1.exec)('bash', [
             '-c',
-            'test $(python -m pip freeze | wc -l) -gt 0 && python -m pip freeze | xargs python -m pip uninstall -y || true'
+            'test $(which python) != "/usr/bin/python" -a $(python -m pip freeze | wc -l) -gt 0 && python -m pip freeze | xargs python -m pip uninstall -y || true'
         ]);
         core.info('Successfully cleaned up pip packages');
     }
