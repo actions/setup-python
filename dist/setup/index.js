@@ -96696,6 +96696,68 @@ exports["default"] = PoetryCache;
 
 /***/ }),
 
+/***/ 8106:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cleanPipPackages = cleanPipPackages;
+const core = __importStar(__nccwpck_require__(7484));
+const exec_1 = __nccwpck_require__(5236);
+// Shared helper to uninstall all pip packages in the current environment.
+async function cleanPipPackages() {
+    core.info('Cleaning up pip packages');
+    try {
+        // uninstall all currently installed packages (if any)
+        // Use a shell so we can pipe the output of pip freeze into xargs
+        await (0, exec_1.exec)('bash', [
+            '-c',
+            'test $(which python) != "/usr/bin/python" -a $(python -m pip freeze | wc -l) -gt 0 && python -m pip freeze | xargs python -m pip uninstall -y || true'
+        ]);
+        core.info('Successfully cleaned up pip packages');
+    }
+    catch (error) {
+        core.setFailed('Failed to clean up pip packages.');
+    }
+}
+
+
+/***/ }),
+
 /***/ 1663:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -97906,6 +97968,7 @@ const fs_1 = __importDefault(__nccwpck_require__(9896));
 const cache_factory_1 = __nccwpck_require__(665);
 const utils_1 = __nccwpck_require__(1798);
 const exec_1 = __nccwpck_require__(5236);
+const clean_pip_1 = __nccwpck_require__(8106);
 function isPyPyVersion(versionSpec) {
     return versionSpec.startsWith('pypy');
 }
@@ -98006,6 +98069,10 @@ async function run() {
             const cache = core.getInput('cache');
             if (cache && (0, utils_1.isCacheFeatureAvailable)()) {
                 await cacheDependencies(cache, pythonVersion);
+            }
+            const precleanPip = core.getBooleanInput('preclean');
+            if (precleanPip) {
+                await (0, clean_pip_1.cleanPipPackages)();
             }
             const pipInstall = core.getInput('pip-install');
             if (pipInstall) {
