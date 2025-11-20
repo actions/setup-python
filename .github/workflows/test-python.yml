@@ -26,7 +26,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -70,7 +70,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -117,7 +117,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -162,7 +162,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -212,7 +212,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -262,7 +262,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -296,7 +296,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -346,7 +346,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -396,7 +396,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -441,7 +441,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - name: Checkout
@@ -478,7 +478,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - name: Checkout
@@ -514,7 +514,7 @@ jobs:
             windows-latest,
             ubuntu-22.04,
             ubuntu-22.04-arm,
-            macos-13,
+            macos-15-intel,
             ubuntu-latest,
             ubuntu-24.04-arm
           ]
@@ -549,7 +549,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
@@ -582,7 +582,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - uses: actions/checkout@v5
