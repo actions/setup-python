@@ -28,7 +28,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
         pypy:
           - 'pypy-2.7'
@@ -85,7 +85,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-13
+          - macos-15-intel
           - macos-14
           - macos-15
           - windows-2022
@@ -144,7 +144,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
         pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly', 'pypy3.11']
 
@@ -178,7 +178,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - uses: actions/checkout@v5
@@ -220,7 +220,7 @@ jobs:
             ubuntu-22.04-arm,
             ubuntu-24.04-arm,
             ubuntu-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - uses: actions/checkout@v5
