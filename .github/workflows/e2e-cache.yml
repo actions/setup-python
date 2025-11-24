@@ -49,7 +49,7 @@ jobs:
             python-version: pypy-3.9-v7.x
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -88,7 +88,7 @@ jobs:
           - os: ubuntu-22.04-arm
             python-version: pypy-3.10-v7.x
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -143,7 +143,7 @@ jobs:
             '3.13'
           ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install poetry
         run: pipx install poetry
       - name: Init pyproject.toml
@@ -189,7 +189,7 @@ jobs:
           - os: macos-latest
             python-version: pypy-3.9-v7.x
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -227,7 +227,7 @@ jobs:
           - os: ubuntu-22.04-arm
             python-version: pypy-3.11-v7.x
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -273,7 +273,7 @@ jobs:
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -301,7 +301,7 @@ jobs:
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -330,7 +330,7 @@ jobs:
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -356,7 +356,7 @@ jobs:
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:

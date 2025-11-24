@@ -33,7 +33,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -77,7 +77,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -124,7 +124,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -169,7 +169,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -219,7 +219,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -272,7 +272,7 @@ jobs:
             python: graalpy-24.1.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-tool-versions-file ${{ matrix.python }}
         run: |
@@ -303,7 +303,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -353,7 +353,7 @@ jobs:
         python: [3.9.13, 3.10.11, 3.11.9, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -402,7 +402,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python 3.14.0-alpha.6
         id: setup-python
@@ -445,7 +445,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python 3.14-dev
         id: setup-python
@@ -482,7 +482,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python 3.14
         id: setup-python
@@ -521,7 +521,7 @@ jobs:
         python: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -553,7 +553,7 @@ jobs:
           ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python and check latest
         uses: ./
         with:
@@ -585,7 +585,7 @@ jobs:
             macos-15-intel
           ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python and check latest
         uses: ./
         with:
