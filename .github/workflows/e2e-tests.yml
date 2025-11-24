@@ -25,7 +25,7 @@ jobs:
             ubuntu-latest,
             ubuntu-24.04-arm,
             macos-latest,
-            macos-13
+            macos-15-intel
           ]
     steps:
       - name: Checkout
