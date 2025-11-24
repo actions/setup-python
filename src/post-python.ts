@@ -1,18 +1,30 @@
 import * as core from '@actions/core';
 import * as cache from '@actions/cache';
+import {cleanPipPackages} from './clean-pip';
 
 import fs from 'fs';
 import {State} from './cache-distributions/cache-distributor';
 
 // Added early exit to resolve issue with slow post action step:
-// - https://github.com/actions/setup-node/issues/878
-// https://github.com/actions/cache/pull/1217
+// See: https://github.com/actions/setup-node/issues/878
+// See: https://github.com/actions/cache/pull/1217
 export async function run(earlyExit?: boolean) {
   try {
     const cache = core.getInput('cache');
-    if (cache) {
-      await saveCache(cache);
+    // Optionally clean up pip packages after the post-action if requested.
+    // This mirrors the `preclean` behavior used in the main action.
+    const postcleanPip = core.getBooleanInput('postclean');
 
+    if (cache || postcleanPip) {
+      if (cache) {
+        await saveCache(cache);
+      }
+      if (postcleanPip) {
+        await cleanPipPackages();
+      }
+      // Preserve early-exit behavior for the post action when requested.
+      // Some CI setups may want the post step to exit early to avoid long-running
+      // processes during cleanup. If enabled, exit with success immediately.
       if (earlyExit) {
         process.exit(0);
       }
@@ -84,4 +96,6 @@ function isCacheDirectoryExists(cacheDirectory: string[]) {
   return result;
 }
 
-run(true);
+// Invoke the post action runner. No early-exit — this must complete so the cache
+// can be saved during the post step.
+run();

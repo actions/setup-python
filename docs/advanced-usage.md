@@ -24,6 +24,7 @@
 - [Allow pre-releases](advanced-usage.md#allow-pre-releases)
 - [Using the pip-version input](advanced-usage.md#using-the-pip-version-input)
 - [Using the pip-install input](advanced-usage.md#using-the-pip-install-input)
+- [Managing pip packages with preclean and postclean](advanced-usage.md#managing-pip-packages-with-preclean-and-postclean)
 
 ## Using the `python-version` input
 
@@ -600,11 +601,11 @@ One quick way to grant access is to change the user and group of the non-default
 ### macOS
 
  The Python packages for macOS that are downloaded from `actions/python-versions` are originally compiled from the source in `/Users/runner/hostedtoolcache`. Due to the fixed shared library path, these Python packages are non-relocatable and require to be installed only in `/Users/runner/hostedtoolcache`. Before the use of `setup-python` on the macOS self-hosted runner:
- 
+
  - Create a directory called `/Users/runner/hostedtoolcache`
  - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access
 
-You can check the current user and group that the runner belongs to by typing `ls -l` inside the runner's root directory.        
+You can check the current user and group that the runner belongs to by typing `ls -l` inside the runner's root directory.
 The runner can be granted write access to the `/Users/runner/hostedtoolcache` directory using a few techniques:
  - The user starting the runner is the owner, and the owner has write permission
  - The user starting the runner is in the owning group, and the owning group has write permission
@@ -692,3 +693,63 @@ The `pip-install` input allows you to install dependencies as part of the Python
 For complex workflows, or alternative package managers (e.g., poetry, pipenv), we recommend using separate steps to maintain clarity and flexibility.
 
 > The `pip-install` input mirrors the flexibility of a standard pip install command and supports most of its arguments.
+
+## Managing pip packages with preclean and postclean
+
+The `preclean` and `postclean` inputs provide control over pip package management during the action lifecycle.
+
+### Using the preclean input
+
+The `preclean` input removes all existing pip packages before installing new ones. This is useful when you want to ensure a clean environment without any pre-existing packages that might conflict with your dependencies.
+
+```yaml
+      steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          pip-install: -r requirements.txt
+          preclean: true
+```
+
+When `preclean` is set to `true`, all pip packages will be removed before any new packages are installed via the `pip-install` input.
+
+### Using the postclean input
+
+The `postclean` input removes all pip packages installed by this action after the action completes. This is useful for cleanup purposes or when you want to ensure that packages installed during setup don't persist beyond the workflow's execution.
+
+```yaml
+      steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          pip-install: pytest requests
+          postclean: true
+      - name: Run tests
+        run: pytest
+```
+
+When `postclean` is set to `true`, packages installed during the setup will be removed after the whole workflow completes successfully.
+
+### Using both preclean and postclean
+
+You can combine both inputs for complete package lifecycle management:
+
+```yaml
+      steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          pip-install: -r requirements.txt
+          preclean: true
+          postclean: true
+      - name: Run your script
+        run: python my_script.py
+```
+
+> Note: Both `preclean` and `postclean` default to `false`. Set them to `true` only when you need explicit package management control.

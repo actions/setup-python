@@ -87805,7 +87805,69 @@ exports.CACHE_DEPENDENCY_BACKUP_PATH = '**/pyproject.toml';
 
 /***/ }),
 
-/***/ 3579:
+/***/ 8106:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cleanPipPackages = cleanPipPackages;
+const core = __importStar(__nccwpck_require__(7484));
+const exec_1 = __nccwpck_require__(5236);
+// Shared helper to uninstall all pip packages in the current environment.
+async function cleanPipPackages() {
+    core.info('Cleaning up pip packages');
+    try {
+        // uninstall all currently installed packages (if any)
+        // Use a shell so we can pipe the output of pip freeze into xargs
+        await (0, exec_1.exec)('bash', [
+            '-c',
+            'test $(which python) != "/usr/bin/python" -a $(python -m pip freeze | wc -l) -gt 0 && python -m pip freeze | xargs python -m pip uninstall -y || true'
+        ]);
+        core.info('Successfully cleaned up pip packages');
+    }
+    catch (error) {
+        core.setFailed('Failed to clean up pip packages.');
+    }
+}
+
+
+/***/ }),
+
+/***/ 3332:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -87850,16 +87912,28 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const cache = __importStar(__nccwpck_require__(5116));
+const clean_pip_1 = __nccwpck_require__(8106);
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const cache_distributor_1 = __nccwpck_require__(2326);
 // Added early exit to resolve issue with slow post action step:
-// - https://github.com/actions/setup-node/issues/878
-// https://github.com/actions/cache/pull/1217
+// See: https://github.com/actions/setup-node/issues/878
+// See: https://github.com/actions/cache/pull/1217
 async function run(earlyExit) {
     try {
         const cache = core.getInput('cache');
-        if (cache) {
-            await saveCache(cache);
+        // Optionally clean up pip packages after the post-action if requested.
+        // This mirrors the `preclean` behavior used in the main action.
+        const postcleanPip = core.getBooleanInput('postclean');
+        if (cache || postcleanPip) {
+            if (cache) {
+                await saveCache(cache);
+            }
+            if (postcleanPip) {
+                await (0, clean_pip_1.cleanPipPackages)();
+            }
+            // Preserve early-exit behavior for the post action when requested.
+            // Some CI setups may want the post step to exit early to avoid long-running
+            // processes during cleanup. If enabled, exit with success immediately.
             if (earlyExit) {
                 process.exit(0);
             }
@@ -87913,7 +87987,9 @@ function isCacheDirectoryExists(cacheDirectory) {
     }, false);
     return result;
 }
-run(true);
+// Invoke the post action runner. No early-exit — this must complete so the cache
+// can be saved during the post step.
+run();
 
 
 /***/ }),
@@ -89867,7 +89943,7 @@ module.exports = /*#__PURE__*/JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(3579);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(3332);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
