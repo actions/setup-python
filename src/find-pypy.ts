@@ -8,7 +8,8 @@ import {
   readExactPyPyVersionFile,
   validatePythonVersionFormatForPyPy,
   IPyPyManifestRelease,
-  getBinaryDirectory
+  getBinaryDirectory,
+  addPkgConfigPathToEnv
 } from './utils';
 
 import * as semver from 'semver';
@@ -92,7 +93,8 @@ export async function findPyPyVersion(
     core.exportVariable('Python2_ROOT_DIR', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
     core.exportVariable('Python3_ROOT_DIR', installDir);
-    core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+    addPkgConfigPathToEnv(pythonLocation + '/lib/pkgconfig');
+
     core.addPath(pythonLocation);
     core.addPath(_binDir);
   }
