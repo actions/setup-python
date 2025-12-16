@@ -17,7 +17,8 @@ import {
   isGhes,
   IS_WINDOWS,
   getDownloadFileName,
-  getVersionInputFromToolVersions
+  getVersionInputFromToolVersions,
+  configurePipRepository
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -376,5 +377,108 @@ describe('isGhes', () => {
   it('returns true when the GITHUB_SERVER_URL environment variable is set to some other URL', async () => {
     process.env['GITHUB_SERVER_URL'] = 'https://src.onpremise.fabrikam.com';
     expect(isGhes()).toBeTruthy();
+  });
+});
+
+describe('configurePipRepository', () => {
+  const originalHome = process.env.HOME;
+  const originalUserProfile = process.env.USERPROFILE;
+  const testHome = path.join(tempDir, 'home');
+
+  beforeEach(() => {
+    // Setup test home directory
+    process.env.HOME = testHome;
+    process.env.USERPROFILE = testHome;
+    if (fs.existsSync(testHome)) {
+      fs.rmSync(testHome, {recursive: true, force: true});
+    }
+    fs.mkdirSync(testHome, {recursive: true});
+  });
+
+  afterEach(() => {
+    // Cleanup
+    if (fs.existsSync(testHome)) {
+      fs.rmSync(testHome, {recursive: true, force: true});
+    }
+    process.env.HOME = originalHome;
+    process.env.USERPROFILE = originalUserProfile;
+  });
+
+  it('creates pip config file with URL only', async () => {
+    const pypiUrl = 'https://nexus.example.com/repository/pypi/simple';
+    await configurePipRepository(pypiUrl);
+
+    const configDir = IS_WINDOWS
+      ? path.join(testHome, 'pip')
+      : path.join(testHome, '.pip');
+    const configFile = IS_WINDOWS ? 'pip.ini' : 'pip.conf';
+    const configPath = path.join(configDir, configFile);
+
+    expect(fs.existsSync(configPath)).toBeTruthy();
+    const content = fs.readFileSync(configPath, 'utf8');
+    expect(content).toContain('[global]');
+    expect(content).toContain(`index-url = ${pypiUrl}`);
+  });
+
+  it('creates pip config file with credentials', async () => {
+    const pypiUrl = 'https://nexus.example.com/repository/pypi/simple';
+    const username = 'testuser';
+    const password = 'testpass';
+    await configurePipRepository(pypiUrl, username, password);
+
+    const configDir = IS_WINDOWS
+      ? path.join(testHome, 'pip')
+      : path.join(testHome, '.pip');
+    const configFile = IS_WINDOWS ? 'pip.ini' : 'pip.conf';
+    const configPath = path.join(configDir, configFile);
+
+    expect(fs.existsSync(configPath)).toBeTruthy();
+    const content = fs.readFileSync(configPath, 'utf8');
+    expect(content).toContain('[global]');
+    expect(content).toContain('index-url = https://testuser:testpass@');
+    expect(content).toContain('nexus.example.com/repository/pypi/simple');
+  });
+
+  it('does nothing when pypiUrl is not provided', async () => {
+    await configurePipRepository('');
+
+    const configDir = IS_WINDOWS
+      ? path.join(testHome, 'pip')
+      : path.join(testHome, '.pip');
+
+    expect(fs.existsSync(configDir)).toBeFalsy();
+  });
+
+  it('warns when only username is provided', async () => {
+    const warningMock = jest.spyOn(core, 'warning');
+    const pypiUrl = 'https://nexus.example.com/repository/pypi/simple';
+    const username = 'testuser';
+    await configurePipRepository(pypiUrl, username);
+
+    expect(warningMock).toHaveBeenCalledWith(
+      'Both pypi-username and pypi-password must be provided for authentication. Configuring without credentials.'
+    );
+  });
+
+  it('warns when only password is provided', async () => {
+    const warningMock = jest.spyOn(core, 'warning');
+    const pypiUrl = 'https://nexus.example.com/repository/pypi/simple';
+    const password = 'testpass';
+    await configurePipRepository(pypiUrl, undefined, password);
+
+    expect(warningMock).toHaveBeenCalledWith(
+      'Both pypi-username and pypi-password must be provided for authentication. Configuring without credentials.'
+    );
+  });
+
+  it('creates config directory if it does not exist', async () => {
+    const pypiUrl = 'https://nexus.example.com/repository/pypi/simple';
+    const configDir = IS_WINDOWS
+      ? path.join(testHome, 'pip')
+      : path.join(testHome, '.pip');
+
+    expect(fs.existsSync(configDir)).toBeFalsy();
+    await configurePipRepository(pypiUrl);
+    expect(fs.existsSync(configDir)).toBeTruthy();
   });
 });
