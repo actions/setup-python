@@ -164,6 +164,8 @@ async function run() {
       if (pypiUrl) {
         const pypiUsername = core.getInput('pypi-username');
         const pypiPassword = core.getInput('pypi-password');
+        core.setSecret(pypiUsername);
+        core.setSecret(pypiPassword);
         await configurePipRepository(pypiUrl, pypiUsername, pypiPassword);
       }
       const pipInstall = core.getInput('pip-install');
