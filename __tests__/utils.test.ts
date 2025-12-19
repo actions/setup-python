@@ -435,7 +435,9 @@ describe('configurePipRepository', () => {
     expect(fs.existsSync(configPath)).toBeTruthy();
     const content = fs.readFileSync(configPath, 'utf8');
     expect(content).toContain('[global]');
-    expect(content).toContain('index-url = https://testuser:testpass@');
+    const encodedUsername = encodeURIComponent(username);
+    const encodedPassword = encodeURIComponent(password);
+    expect(content).toContain(`index-url = https://${encodedUsername}:${encodedPassword}@`);
     expect(content).toContain('nexus.example.com/repository/pypi/simple');
   });
 
