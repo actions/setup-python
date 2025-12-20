@@ -485,7 +485,10 @@ index-url = ${indexUrl}
     fs.writeFileSync(configPath, configContent, {encoding: 'utf8'});
     core.info(`Successfully created pip config file at: ${configPath}`);
 
-    // Mask the password in logs if credentials were used
+    // Mask credentials in logs if they were used
+    if (username) {
+      core.setSecret(username);
+    }
     if (password) {
       core.setSecret(password);
     }
