@@ -122,8 +122,9 @@ steps:
 - run: pip install -r requirements.txt
 ```
 
-The action will create a `pip.conf` (Linux/macOS) or `pip.ini` (Windows) file in the appropriate location with the configured repository URL and credentials. All subsequent pip commands will use the configured repository.
+The action will create or overwrite a `pip.conf` (Linux/macOS) or `pip.ini` (Windows) file in the appropriate location with the configured repository URL and credentials. All subsequent pip commands will use the configured repository.
 
+> **Warning:** If a `pip.conf` or `pip.ini` file already exists at that location, its contents will be overwritten by this action for the duration of the job. Existing settings are not merged or preserved.
 **Input parameters:**
 - `pypi-url`: The URL of your custom PyPI repository (e.g., `https://nexus.example.com/repository/pypi/simple`)
 - `pypi-username` (optional): Username for authentication with the custom repository
