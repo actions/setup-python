@@ -159,7 +159,8 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: python -m pip install pipenv==2022.10.12
+
       - name: Install dependencies
         run: pipenv install requests
 

@@ -18633,17 +18633,14 @@ function useColors() {
 		return false;
 	}
 
-	let m;
-
 	// Is webkit? http://stackoverflow.com/a/16459606/376773
 	// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-	// eslint-disable-next-line no-return-assign
 	return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
 		// Is firebug? http://stackoverflow.com/a/398120/376773
 		(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
 		// Is firefox >= v31?
 		// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-		(typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31) ||
+		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
 		// Double check webkit in userAgent just in case we are in a worker
 		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
 }
@@ -18727,7 +18724,7 @@ function save(namespaces) {
 function load() {
 	let r;
 	try {
-		r = exports.storage.getItem('debug') || exports.storage.getItem('DEBUG') ;
+		r = exports.storage.getItem('debug');
 	} catch (error) {
 		// Swallow
 		// XXX (@Qix-) should we be logging these?
@@ -18953,62 +18950,24 @@ function setup(env) {
 		createDebug.names = [];
 		createDebug.skips = [];
 
-		const split = (typeof namespaces === 'string' ? namespaces : '')
-			.trim()
-			.replace(/\s+/g, ',')
-			.split(',')
-			.filter(Boolean);
+		let i;
+		const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+		const len = split.length;
 
-		for (const ns of split) {
-			if (ns[0] === '-') {
-				createDebug.skips.push(ns.slice(1));
+		for (i = 0; i < len; i++) {
+			if (!split[i]) {
+				// ignore empty strings
+				continue;
+			}
+
+			namespaces = split[i].replace(/\*/g, '.*?');
+
+			if (namespaces[0] === '-') {
+				createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
 			} else {
-				createDebug.names.push(ns);
+				createDebug.names.push(new RegExp('^' + namespaces + '$'));
 			}
 		}
-	}
-
-	/**
-	 * Checks if the given string matches a namespace template, honoring
-	 * asterisks as wildcards.
-	 *
-	 * @param {String} search
-	 * @param {String} template
-	 * @return {Boolean}
-	 */
-	function matchesTemplate(search, template) {
-		let searchIndex = 0;
-		let templateIndex = 0;
-		let starIndex = -1;
-		let matchIndex = 0;
-
-		while (searchIndex < search.length) {
-			if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')) {
-				// Match character or proceed with wildcard
-				if (template[templateIndex] === '*') {
-					starIndex = templateIndex;
-					matchIndex = searchIndex;
-					templateIndex++; // Skip the '*'
-				} else {
-					searchIndex++;
-					templateIndex++;
-				}
-			} else if (starIndex !== -1) { // eslint-disable-line no-negated-condition
-				// Backtrack to the last '*' and try to match more characters
-				templateIndex = starIndex + 1;
-				matchIndex++;
-				searchIndex = matchIndex;
-			} else {
-				return false; // No match
-			}
-		}
-
-		// Handle trailing '*' in template
-		while (templateIndex < template.length && template[templateIndex] === '*') {
-			templateIndex++;
-		}
-
-		return templateIndex === template.length;
 	}
 
 	/**
@@ -19019,8 +18978,8 @@ function setup(env) {
 	*/
 	function disable() {
 		const namespaces = [
-			...createDebug.names,
-			...createDebug.skips.map(namespace => '-' + namespace)
+			...createDebug.names.map(toNamespace),
+			...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
 		].join(',');
 		createDebug.enable('');
 		return namespaces;
@@ -19034,19 +18993,39 @@ function setup(env) {
 	* @api public
 	*/
 	function enabled(name) {
-		for (const skip of createDebug.skips) {
-			if (matchesTemplate(name, skip)) {
+		if (name[name.length - 1] === '*') {
+			return true;
+		}
+
+		let i;
+		let len;
+
+		for (i = 0, len = createDebug.skips.length; i < len; i++) {
+			if (createDebug.skips[i].test(name)) {
 				return false;
 			}
 		}
 
-		for (const ns of createDebug.names) {
-			if (matchesTemplate(name, ns)) {
+		for (i = 0, len = createDebug.names.length; i < len; i++) {
+			if (createDebug.names[i].test(name)) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	* Convert regexp to namespace
+	*
+	* @param {RegExp} regxep
+	* @return {String} namespace
+	* @api private
+	*/
+	function toNamespace(regexp) {
+		return regexp.toString()
+			.substring(2, regexp.toString().length - 2)
+			.replace(/\.\*\?$/, '*');
 	}
 
 	/**
@@ -19290,11 +19269,11 @@ function getDate() {
 }
 
 /**
- * Invokes `util.formatWithOptions()` with the specified arguments and writes to stderr.
+ * Invokes `util.format()` with the specified arguments and writes to stderr.
  */
 
 function log(...args) {
-	return process.stderr.write(util.formatWithOptions(exports.inspectOpts, ...args) + '\n');
+	return process.stderr.write(util.format(...args) + '\n');
 }
 
 /**
@@ -20816,7 +20795,7 @@ var y = d * 365.25;
  * @api public
  */
 
-module.exports = function (val, options) {
+module.exports = function(val, options) {
   options = options || {};
   var type = typeof val;
   if (type === 'string' && val.length > 0) {
@@ -81329,7 +81308,7 @@ Dicer.prototype._write = function (data, encoding, cb) {
   if (this._headerFirst && this._isPreamble) {
     if (!this._part) {
       this._part = new PartStream(this._partOpts)
-      if (this.listenerCount('preamble') !== 0) { this.emit('preamble', this._part) } else { this._ignore() }
+      if (this._events.preamble) { this.emit('preamble', this._part) } else { this._ignore() }
     }
     const r = this._hparser.push(data)
     if (!this._inHeader && r !== undefined && r < data.length) { data = data.slice(r) } else { return cb() }
@@ -81386,7 +81365,7 @@ Dicer.prototype._oninfo = function (isMatch, data, start, end) {
       }
     }
     if (this._dashes === 2) {
-      if ((start + i) < end && this.listenerCount('trailer') !== 0) { this.emit('trailer', data.slice(start + i, end)) }
+      if ((start + i) < end && this._events.trailer) { this.emit('trailer', data.slice(start + i, end)) }
       this.reset()
       this._finished = true
       // no more parts will be added
@@ -81404,13 +81383,7 @@ Dicer.prototype._oninfo = function (isMatch, data, start, end) {
     this._part._read = function (n) {
       self._unpause()
     }
-    if (this._isPreamble && this.listenerCount('preamble') !== 0) {
-      this.emit('preamble', this._part)
-    } else if (this._isPreamble !== true && this.listenerCount('part') !== 0) {
-      this.emit('part', this._part)
-    } else {
-      this._ignore()
-    }
+    if (this._isPreamble && this._events.preamble) { this.emit('preamble', this._part) } else if (this._isPreamble !== true && this._events.part) { this.emit('part', this._part) } else { this._ignore() }
     if (!this._isPreamble) { this._inHeader = true }
   }
   if (data && start < end && !this._ignoreData) {
@@ -82093,7 +82066,7 @@ function Multipart (boy, cfg) {
 
         ++nfiles
 
-        if (boy.listenerCount('file') === 0) {
+        if (!boy._events.file) {
           self.parser._ignore()
           return
         }
@@ -82622,7 +82595,7 @@ const decoders = {
     if (textDecoders.has(this.toString())) {
       try {
         return textDecoders.get(this).decode(data)
-      } catch {}
+      } catch (e) { }
     }
     return typeof data === 'string'
       ? data
