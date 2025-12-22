@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.pypy }}
         id: setup-python
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.pypy }}
         id: setup-python
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.pypy }}
         id: setup-python
@@ -181,7 +181,7 @@ jobs:
             macos-15-intel
           ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup PyPy and check latest
         uses: ./
         with:
@@ -223,7 +223,7 @@ jobs:
             macos-15-intel
           ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup PyPy and check latest
         uses: ./
         with:
