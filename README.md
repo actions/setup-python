@@ -25,7 +25,7 @@ See [action.yml](action.yml)
 **Python**
 ```yaml
 steps:
-- uses: actions/checkout@v5
+- uses: actions/checkout@v6
 - uses: actions/setup-python@v6
   with:
     python-version: '3.13' 
@@ -35,7 +35,7 @@ steps:
 **PyPy**
 ```yaml
 steps:
-- uses: actions/checkout@v5
+- uses: actions/checkout@v6
 - uses: actions/setup-python@v6 
   with:
     python-version: 'pypy3.10' 
@@ -45,7 +45,7 @@ steps:
 **GraalPy**
 ```yaml
 steps:
-- uses: actions/checkout@v5
+- uses: actions/checkout@v6
 - uses: actions/setup-python@v6 
   with:
     python-version: 'graalpy-24.0' 
@@ -55,7 +55,7 @@ steps:
 **Free threaded Python**
 ```yaml
 steps:
-- uses: actions/checkout@v5
+- uses: actions/checkout@v6
 - uses: actions/setup-python@v6
   with:
     python-version: '3.13t'
@@ -90,7 +90,7 @@ The action defaults to searching for a dependency file (`requirements.txt` or `p
 
 ```yaml
 steps:
-- uses: actions/checkout@v5
+- uses: actions/checkout@v6
 - uses: actions/setup-python@v6
   with:
     python-version: '3.13'
