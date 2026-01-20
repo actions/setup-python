@@ -33,7 +33,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -60,7 +60,7 @@ jobs:
           ]
         python-version: [3.13.1t, 3.13.2t, 3.13.5t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -68,9 +68,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-      - name: Install dependencies
-        run: pipenv install requests
+        run: python -m pip install --upgrade pip pipenv
+      - name: Install dependencies on Linux/macOS
+        if: runner.os != 'Windows'
+        run: |
+          export PIPENV_PYTHON=$(which python)
+          pipenv install requests
+      - name: Install dependencies on Windows
+        if: runner.os == 'Windows'
+        run: |
+          # Remove existing virtualenv if any
+          python -m pipenv --rm || echo "No existing env"
+          # Create fresh env using current Python
+          python -m pipenv install --python $(python -c "import sys; print(sys.executable)") requests
 
   python-poetry-dependencies-caching:
     name: Test poetry (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -90,7 +100,7 @@ jobs:
           ]
         python-version: [3.13.0, 3.13.1, 3.13.2]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install poetry
         run: pipx install poetry
       - name: Init pyproject.toml
@@ -122,7 +132,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -150,7 +160,7 @@ jobs:
           ]
         python-version: [3.13.1t, 3.13.2t, 3.13.5t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -159,9 +169,19 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/pipenv-requirements.txt'
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-      - name: Install dependencies
-        run: pipenv install requests
+        run: python -m pip install --upgrade pip pipenv
+      - name: Install dependencies on Linux/macOS
+        if: runner.os != 'Windows'
+        run: |
+          export PIPENV_PYTHON=$(which python)
+          pipenv install requests
+      - name: Install dependencies on Windows
+        if: runner.os == 'Windows'
+        run: |
+          # Remove existing virtualenv if any
+          python -m pipenv --rm || echo "No existing env"
+          # Create fresh env using current Python
+          python -m pipenv install --python $(python -c "import sys; print(sys.executable)") requests
 
   python-pip-dependencies-caching-with-pip-version:
     name: Test pip (Python ${{ matrix.python-version}}, ${{ matrix.os }})
@@ -181,7 +201,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -209,7 +229,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -238,7 +258,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
@@ -264,7 +284,7 @@ jobs:
           ]
         python-version: [3.13.0t, 3.13.1t, 3.13.2t]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./
         with:
