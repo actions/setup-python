@@ -239,15 +239,23 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
 
   if ('project' in pyprojectConfig) {
     // standard project metadata (PEP 621)
-    keys = ['project', 'requires-python'];
+    keys = [['project', 'requires-python']];
   } else {
     // python poetry
-    keys = ['tool', 'poetry', 'dependencies', 'python'];
+    keys = [
+      // implicit group main
+      ['tool', 'poetry', 'dependencies', 'python'],
+      // explicit group main
+      ['tool', 'poetry', 'group', 'main', 'dependencies', 'python']
+    ];
   }
   const versions = [];
-  const version = extractValue(pyprojectConfig, keys);
-  if (version !== undefined) {
-    versions.push(version);
+  for (const key of keys) {
+    const version = extractValue(pyprojectConfig, key);
+    if (version !== undefined) {
+      versions.push(version);
+      break;
+    }
   }
 
   core.info(`Extracted ${versions} from ${versionFile}`);
