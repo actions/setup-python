@@ -73,8 +73,16 @@ jobs:
           python-version: '3.13'
       - name: Verify 3.13
         run: python __tests__/verify-python.py 3.13
+
+      - name: Install pipx (Windows)
+        if: runner. os == 'Windows'
+        run: python -m pip install pipx
+
       - name: Run python-path sample 3.13
         run: pipx run --python '${{ steps.cp313.outputs.python-path }}' nox --version
+        env:
+          PIPX_HOME: '${{ runner.temp }}/pipx'
+          PIPX_BIN_DIR: '${{ runner.temp }}/pipx/bin'
 
       - name: Run with setup-python ==3.13
         uses: ./
