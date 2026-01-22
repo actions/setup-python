@@ -11,7 +11,8 @@ import {
   logWarning,
   IS_MAC,
   getVersionInputFromFile,
-  getVersionsInputFromPlainFile
+  getVersionsInputFromPlainFile,
+  configurePipRepository
 } from './utils';
 import {exec} from '@actions/exec';
 
@@ -158,6 +159,18 @@ async function run() {
       const cache = core.getInput('cache');
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
+      }
+      const pypiUrl = core.getInput('pypi-url');
+      if (pypiUrl) {
+        const pypiUsername = core.getInput('pypi-username');
+        const pypiPassword = core.getInput('pypi-password');
+        if (pypiUsername && pypiUsername.trim()) {
+          core.setSecret(pypiUsername);
+        }
+        if (pypiPassword && pypiPassword.trim()) {
+          core.setSecret(pypiPassword);
+        }
+        await configurePipRepository(pypiUrl, pypiUsername, pypiPassword);
       }
       const pipInstall = core.getInput('pip-install');
       if (pipInstall) {

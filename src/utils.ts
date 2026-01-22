@@ -422,3 +422,79 @@ export function getDownloadFileName(downloadUrl: string): string | undefined {
     ? path.join(tempDir, path.basename(downloadUrl))
     : undefined;
 }
+
+/**
+ * Configure pip to use a custom PyPI repository
+ * Creates a pip.conf (Linux/macOS) or pip.ini (Windows) file with repository and credentials
+ * @param pypiUrl The custom PyPI repository URL
+ * @param username The username for authentication (optional)
+ * @param password The password or token for authentication (optional)
+ */
+export async function configurePipRepository(
+  pypiUrl: string,
+  username?: string,
+  password?: string
+): Promise<void> {
+  if (!pypiUrl) {
+    return;
+  }
+
+  core.info(`Configuring pip to use custom PyPI repository: ${pypiUrl}`);
+
+  // Determine the pip config file location and name based on OS
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+  const configDir = IS_WINDOWS
+    ? path.join(homeDir, 'pip')
+    : path.join(homeDir, '.pip');
+  const configFile = IS_WINDOWS ? 'pip.ini' : 'pip.conf';
+  const configPath = path.join(configDir, configFile);
+
+  // Create the config directory if it doesn't exist
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, {recursive: true});
+  }
+
+  // Build the index URL with credentials if provided
+  let indexUrl = pypiUrl;
+  if (username && password) {
+    // Parse the URL to inject credentials
+    try {
+      const url = new URL(pypiUrl);
+      url.username = encodeURIComponent(username);
+      url.password = encodeURIComponent(password);
+      indexUrl = url.toString();
+    } catch (error) {
+      core.warning(
+        `Failed to parse PyPI URL: ${pypiUrl}. Using URL without credentials.`
+      );
+      indexUrl = pypiUrl;
+    }
+  } else if (username || password) {
+    core.warning(
+      'Both pypi-username and pypi-password must be provided for authentication. Configuring without credentials.'
+    );
+  }
+
+  // Create the pip config content
+  const configContent = `[global]
+index-url = ${indexUrl}
+`;
+
+  // Write the config file
+  try {
+    fs.writeFileSync(configPath, configContent, {encoding: 'utf8'});
+    core.info(`Successfully created pip config file at: ${configPath}`);
+
+    // Mask credentials in logs if they were used
+    if (username) {
+      core.setSecret(username);
+    }
+    if (password) {
+      core.setSecret(password);
+    }
+  } catch (error) {
+    core.setFailed(
+      `Failed to create pip config file at ${configPath}: ${error}`
+    );
+  }
+}
