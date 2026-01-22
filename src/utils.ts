@@ -422,3 +422,13 @@ export function getDownloadFileName(downloadUrl: string): string | undefined {
     ? path.join(tempDir, path.basename(downloadUrl))
     : undefined;
 }
+
+export function addPkgConfigPathToEnv(new_path: string): undefined {
+  const pkg_config_path = process.env['PKG_CONFIG_PATH'];
+
+  if (pkg_config_path === undefined) {
+    core.exportVariable('PKG_CONFIG_PATH', new_path);
+  } else {
+    core.exportVariable('PKG_CONFIG_PATH', `${pkg_config_path}${path.delimiter}${new_path}`);
+  }
+}
