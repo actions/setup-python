@@ -555,8 +555,8 @@ GitHub hosted runners have a tool cache that comes with a few versions of Python
 |**PyPy tool cache**|`RUNNER_TOOL_CACHE/PyPy/*`|
 
 GitHub runner images are set up in [actions/runner-images](https://github.com/actions/runner-images). During the setup, the available versions of Python and PyPy are automatically downloaded, set up and documented.
-- Tool cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/linux/scripts/installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/linux/scripts/installers/Configure-Toolset.ps1)
-- Tool cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/win/scripts/Installers/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/win/scripts/Installers/Configure-Toolset.ps1)
+- Tool cache setup for Ubuntu: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/Configure-Toolset.ps1)
+- Tool cache setup for Windows: [Install-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/windows/scripts/build/Install-Toolset.ps1) [Configure-Toolset.ps1](https://github.com/actions/runner-images/blob/main/images/windows/scripts/build/Configure-Toolset.ps1)
 
 
 ## Using `setup-python` with a self-hosted runner
