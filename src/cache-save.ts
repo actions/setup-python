@@ -9,6 +9,14 @@ import {State} from './cache-distributions/cache-distributor';
 // https://github.com/actions/cache/pull/1217
 export async function run(earlyExit?: boolean) {
   try {
+    const cacheWriteEnabled = core.getInput('cache-write');
+    if (cacheWriteEnabled === 'false') {
+      core.info(
+        'Cache write is disabled (read-only mode). Skipping cache save.'
+      );
+      return;
+    }
+
     const cache = core.getInput('cache');
     if (cache) {
       await saveCache(cache);
