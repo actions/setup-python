@@ -123,6 +123,34 @@ export async function useCpythonVersion(
   }
 
   if (!installDir) {
+    // Try system Python as fallback (e.g., on architectures without pre-built binaries)
+    try {
+      const {exitCode, stdout} = await exec.getExecOutput('python3', [
+        '-c',
+        'import sys; print(sys.prefix)'
+      ]);
+      if (exitCode === 0) {
+        const systemPrefix = stdout.trim();
+        const systemVersion = await exec.getExecOutput('python3', [
+          '-c',
+          'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")'
+        ]);
+        if (
+          systemVersion.exitCode === 0 &&
+          semver.satisfies(systemVersion.stdout.trim(), semanticVersionSpec)
+        ) {
+          installDir = systemPrefix;
+          core.warning(
+            `Pre-built Python not available for architecture '${architecture}'. Using system Python ${systemVersion.stdout.trim()} at ${systemPrefix}.`
+          );
+        }
+      }
+    } catch {
+      // System Python not available, fall through to error
+    }
+  }
+
+  if (!installDir) {
     const osInfo = await getOSInfo();
     const msg = [
       `The version '${version}' with architecture '${architecture}' was not found for ${
