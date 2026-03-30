@@ -6,7 +6,7 @@ Kivy==2.0.0rc3
 Kivy-Garden==0.1.4
 packaging==20.7
 pdf2image==1.12.1
-Pygments==2.6.1
+Pygments==2.20.0
 requests==2.32.4
 urllib3==2.6.3
 xlrd==1.2.0
