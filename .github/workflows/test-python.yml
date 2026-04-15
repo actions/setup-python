@@ -58,6 +58,26 @@ jobs:
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
+  setup-versions-via-mirror-input:
+    name: 'Setup via explicit mirror input: ${{ matrix.os }}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: setup-python with explicit mirror
+        uses: ./
+        with:
+          python-version: 3.12
+          mirror: https://raw.githubusercontent.com/actions/python-versions/main
+
+      - name: Run simple code
+        run: python -c 'import sys; print(sys.version)'
+
   setup-versions-from-file:
     name: Setup ${{ matrix.python }} ${{ matrix.os }} version file
     runs-on: ${{ matrix.os }}

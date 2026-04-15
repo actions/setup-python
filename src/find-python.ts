@@ -137,7 +137,7 @@ export async function useCpythonVersion(
       );
     }
     msg.push(
-      `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
+      `The list of all available versions can be found here: ${installer.getManifestUrl()}`
     );
     throw new Error(msg.join(os.EOL));
   }

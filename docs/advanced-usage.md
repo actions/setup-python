@@ -525,6 +525,41 @@ Such a requirement on side-effect could be because you don't want your composite
 
 >**Note:** Python versions used in this action are generated in the [python-versions](https://github.com/actions/python-versions) repository. For macOS and Ubuntu images, python versions are built from the source code. For Windows, the python-versions repository uses installation executable. For more information please refer to the [python-versions](https://github.com/actions/python-versions) repository.
 
+#### Using a custom mirror
+
+The `mirror` input lets you point `setup-python` at a different location for CPython distributions — a personal fork of `actions/python-versions`, an internal mirror, or any server that hosts a `versions-manifest.json` at its root plus the tarballs referenced by that manifest. Default: `https://raw.githubusercontent.com/actions/python-versions/main`.
+
+The manifest is resolved as follows:
+
+- If `mirror` matches `https://raw.githubusercontent.com/{owner}/{repo}/{branch}`, the manifest is fetched via the GitHub REST API (giving you the 5000/hr authenticated rate limit when a token is present).
+- Otherwise, the action fetches `{mirror}/versions-manifest.json` via a direct HTTP GET.
+
+Authentication:
+
+- `token` is forwarded **only** to `github.com` and hosts under `*.github.com` or `*.githubusercontent.com`. It is never sent to a custom mirror.
+- `mirror-token` takes precedence over `token`: if `mirror-token` is set it is used for every authenticated request (manifest fetch and tarball downloads).
+- If `mirror-token` is empty, `token` is used when the target URL is GitHub-owned.
+- If neither applies, requests are anonymous.
+
+Point at a personal fork of `actions/python-versions` (uses the default `token`, fetched via the GitHub API):
+
+```yaml
+- uses: actions/setup-python@v6
+  with:
+    python-version: '3.12'
+    mirror: https://raw.githubusercontent.com/my-org/python-versions/main
+```
+
+Point at an internal mirror with its own credential:
+
+```yaml
+- uses: actions/setup-python@v6
+  with:
+    python-version: '3.12'
+    mirror: https://python-mirror.internal.example
+    mirror-token: ${{ secrets.PYTHON_MIRROR_TOKEN }}
+```
+
 ### PyPy
 
  `setup-python` is able to configure **PyPy** from two sources:

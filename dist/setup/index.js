@@ -54654,7 +54654,7 @@ async function useCpythonVersion(version, architecture, updateEnvironment, check
         if (freethreaded) {
             msg.push(`Free threaded versions are only available for Python 3.13.0 and later.`);
         }
-        msg.push(`The list of all available versions can be found here: ${installer.MANIFEST_URL}`);
+        msg.push(`The list of all available versions can be found here: ${installer.getManifestUrl()}`);
         throw new Error(msg.join(os.EOL));
     }
     const _binDir = binDir(installDir);
@@ -55264,7 +55264,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MANIFEST_URL = void 0;
+exports.getManifestUrl = getManifestUrl;
 exports.findReleaseFromManifest = findReleaseFromManifest;
 exports.getManifest = getManifest;
 exports.getManifestFromRepo = getManifestFromRepo;
@@ -55276,12 +55276,56 @@ const tc = __importStar(__nccwpck_require__(33472));
 const exec = __importStar(__nccwpck_require__(95236));
 const httpm = __importStar(__nccwpck_require__(54844));
 const utils_1 = __nccwpck_require__(71798);
-const TOKEN = core.getInput('token');
-const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
-const MANIFEST_REPO_OWNER = 'actions';
-const MANIFEST_REPO_NAME = 'python-versions';
-const MANIFEST_REPO_BRANCH = 'main';
-exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
+const DEFAULT_REPO_OWNER = 'actions';
+const DEFAULT_REPO_NAME = 'python-versions';
+const DEFAULT_REPO_BRANCH = 'main';
+const DEFAULT_MIRROR = `https://raw.githubusercontent.com/${DEFAULT_REPO_OWNER}/${DEFAULT_REPO_NAME}/${DEFAULT_REPO_BRANCH}`;
+// Matches https://raw.githubusercontent.com/{owner}/{repo}/{branch}
+const REPO_COORDS_RE = /^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/?$/;
+function getToken() {
+    return core.getInput('token');
+}
+function getMirrorToken() {
+    return core.getInput('mirror-token');
+}
+function getMirror() {
+    const raw = (core.getInput('mirror') || DEFAULT_MIRROR)
+        .trim()
+        .replace(/\/+$/, '');
+    try {
+        new URL(raw);
+    }
+    catch {
+        throw new Error(`Invalid 'mirror' URL: "${raw}"`);
+    }
+    return raw;
+}
+function getManifestUrl() {
+    return `${getMirror()}/versions-manifest.json`;
+}
+function resolveRepoCoords() {
+    const m = REPO_COORDS_RE.exec(getMirror());
+    return m ? { owner: m[1], repo: m[2], branch: m[3] } : null;
+}
+function authForUrl(url) {
+    const mirrorToken = getMirrorToken();
+    if (mirrorToken)
+        return `token ${mirrorToken}`;
+    let host;
+    try {
+        host = new URL(url).host;
+    }
+    catch {
+        return undefined;
+    }
+    const token = getToken();
+    if (token &&
+        (host === 'github.com' ||
+            host.endsWith('.github.com') ||
+            host.endsWith('.githubusercontent.com')))
+        return `token ${token}`;
+    return undefined;
+}
 async function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     if (!manifest) {
         manifest = await getManifest();
@@ -55322,15 +55366,28 @@ async function getManifest() {
     return await getManifestFromURL();
 }
 function getManifestFromRepo() {
-    core.debug(`Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`);
-    return tc.getManifestFromRepo(MANIFEST_REPO_OWNER, MANIFEST_REPO_NAME, AUTH, MANIFEST_REPO_BRANCH);
+    const coords = resolveRepoCoords();
+    if (!coords) {
+        throw new Error(`Mirror "${getMirror()}" is not a GitHub repo URL; falling back to raw URL fetch.`);
+    }
+    core.debug(`Getting manifest from ${coords.owner}/${coords.repo}@${coords.branch}`);
+    // api.github.com is a GitHub-owned URL. Prefer MIRROR_TOKEN (the user provided token), fall back to TOKEN.
+    const token = getToken();
+    const mirrorToken = getMirrorToken();
+    const auth = !mirrorToken
+        ? !token
+            ? undefined
+            : `token ${token}`
+        : `token ${mirrorToken}`;
+    return tc.getManifestFromRepo(coords.owner, coords.repo, auth, coords.branch);
 }
 async function getManifestFromURL() {
     core.debug('Falling back to fetching the manifest using raw URL.');
+    const manifestUrl = getManifestUrl();
     const http = new httpm.HttpClient('tool-cache');
-    const response = await http.getJson(exports.MANIFEST_URL);
+    const response = await http.getJson(manifestUrl);
     if (!response.result) {
-        throw new Error(`Unable to get manifest from ${exports.MANIFEST_URL}`);
+        throw new Error(`Unable to get manifest from ${manifestUrl}`);
     }
     return response.result;
 }
@@ -55367,7 +55424,7 @@ async function installCpythonFromRelease(release) {
     let pythonPath = '';
     try {
         const fileName = (0, utils_1.getDownloadFileName)(downloadUrl);
-        pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
+        pythonPath = await tc.downloadTool(downloadUrl, fileName, authForUrl(downloadUrl));
         core.info('Extract downloaded archive');
         let pythonExtractedFolder;
         if (utils_1.IS_WINDOWS) {

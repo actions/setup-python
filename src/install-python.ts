@@ -7,12 +7,67 @@ import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
 import {IToolRelease} from '@actions/tool-cache';
 
-const TOKEN = core.getInput('token');
-const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
-const MANIFEST_REPO_OWNER = 'actions';
-const MANIFEST_REPO_NAME = 'python-versions';
-const MANIFEST_REPO_BRANCH = 'main';
-export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
+const DEFAULT_REPO_OWNER = 'actions';
+const DEFAULT_REPO_NAME = 'python-versions';
+const DEFAULT_REPO_BRANCH = 'main';
+const DEFAULT_MIRROR = `https://raw.githubusercontent.com/${DEFAULT_REPO_OWNER}/${DEFAULT_REPO_NAME}/${DEFAULT_REPO_BRANCH}`;
+
+// Matches https://raw.githubusercontent.com/{owner}/{repo}/{branch}
+const REPO_COORDS_RE =
+  /^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/?$/;
+
+function getToken(): string {
+  return core.getInput('token');
+}
+
+function getMirrorToken(): string {
+  return core.getInput('mirror-token');
+}
+
+function getMirror(): string {
+  const raw = (core.getInput('mirror') || DEFAULT_MIRROR)
+    .trim()
+    .replace(/\/+$/, '');
+  try {
+    new URL(raw);
+  } catch {
+    throw new Error(`Invalid 'mirror' URL: "${raw}"`);
+  }
+  return raw;
+}
+
+export function getManifestUrl(): string {
+  return `${getMirror()}/versions-manifest.json`;
+}
+
+function resolveRepoCoords(): {
+  owner: string;
+  repo: string;
+  branch: string;
+} | null {
+  const m = REPO_COORDS_RE.exec(getMirror());
+  return m ? {owner: m[1], repo: m[2], branch: m[3]} : null;
+}
+
+function authForUrl(url: string): string | undefined {
+  const mirrorToken = getMirrorToken();
+  if (mirrorToken) return `token ${mirrorToken}`;
+  let host: string;
+  try {
+    host = new URL(url).host;
+  } catch {
+    return undefined;
+  }
+  const token = getToken();
+  if (
+    token &&
+    (host === 'github.com' ||
+      host.endsWith('.github.com') ||
+      host.endsWith('.githubusercontent.com'))
+  )
+    return `token ${token}`;
+  return undefined;
+}
 
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
@@ -73,24 +128,34 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
+  const coords = resolveRepoCoords();
+  if (!coords) {
+    throw new Error(
+      `Mirror "${getMirror()}" is not a GitHub repo URL; falling back to raw URL fetch.`
+    );
+  }
   core.debug(
-    `Getting manifest from ${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}@${MANIFEST_REPO_BRANCH}`
+    `Getting manifest from ${coords.owner}/${coords.repo}@${coords.branch}`
   );
-  return tc.getManifestFromRepo(
-    MANIFEST_REPO_OWNER,
-    MANIFEST_REPO_NAME,
-    AUTH,
-    MANIFEST_REPO_BRANCH
-  );
+  // api.github.com is a GitHub-owned URL. Prefer MIRROR_TOKEN (the user provided token), fall back to TOKEN.
+  const token = getToken();
+  const mirrorToken = getMirrorToken();
+  const auth = !mirrorToken
+    ? !token
+      ? undefined
+      : `token ${token}`
+    : `token ${mirrorToken}`;
+  return tc.getManifestFromRepo(coords.owner, coords.repo, auth, coords.branch);
 }
 
 export async function getManifestFromURL(): Promise<tc.IToolRelease[]> {
   core.debug('Falling back to fetching the manifest using raw URL.');
 
+  const manifestUrl = getManifestUrl();
   const http: httpm.HttpClient = new httpm.HttpClient('tool-cache');
-  const response = await http.getJson<tc.IToolRelease[]>(MANIFEST_URL);
+  const response = await http.getJson<tc.IToolRelease[]>(manifestUrl);
   if (!response.result) {
-    throw new Error(`Unable to get manifest from ${MANIFEST_URL}`);
+    throw new Error(`Unable to get manifest from ${manifestUrl}`);
   }
   return response.result;
 }
@@ -130,7 +195,11 @@ export async function installCpythonFromRelease(release: tc.IToolRelease) {
   let pythonPath = '';
   try {
     const fileName = getDownloadFileName(downloadUrl);
-    pythonPath = await tc.downloadTool(downloadUrl, fileName, AUTH);
+    pythonPath = await tc.downloadTool(
+      downloadUrl,
+      fileName,
+      authForUrl(downloadUrl)
+    );
     core.info('Extract downloaded archive');
     let pythonExtractedFolder;
     if (IS_WINDOWS) {
