@@ -8,16 +8,16 @@ import os from 'os';
 
 import CacheDistributor from './cache-distributor';
 import {getLinuxInfo, IS_LINUX, IS_WINDOWS} from '../utils';
-import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 class PipCache extends CacheDistributor {
-  private cacheDependencyBackupPath: string = CACHE_DEPENDENCY_BACKUP_PATH;
+  private cacheDependencyBackupPath = '**/pyproject.toml';
+  protected readonly packageManager = 'pip';
 
   constructor(
     private pythonVersion: string,
-    cacheDependencyPath = '**/requirements.txt'
+    protected readonly cacheDependencyPath = '**/requirements.txt'
   ) {
-    super('pip', cacheDependencyPath);
+    super();
   }
 
   protected async getCacheGlobalDirectories() {
@@ -59,9 +59,12 @@ class PipCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash =
-      (await glob.hashFiles(this.cacheDependencyPath)) ||
-      (await glob.hashFiles(this.cacheDependencyBackupPath));
+    let cacheDependencyPath = this.cacheDependencyPath;
+    let hash = await glob.hashFiles(this.cacheDependencyPath);
+    if(!hash) {
+      hash = await glob.hashFiles(this.cacheDependencyBackupPath);
+      cacheDependencyPath = this.cacheDependencyBackupPath;
+    }
     let primaryKey = '';
     let restoreKey = '';
 
@@ -76,7 +79,8 @@ class PipCache extends CacheDistributor {
 
     return {
       primaryKey,
-      restoreKey: [restoreKey]
+      restoreKey: [restoreKey],
+      cacheDependencyPath,
     };
   }
 }

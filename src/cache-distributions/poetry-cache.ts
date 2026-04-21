@@ -8,18 +8,21 @@ import CacheDistributor from './cache-distributor';
 import {logWarning} from '../utils';
 
 class PoetryCache extends CacheDistributor {
+  protected readonly packageManager = 'poetry';
+
+
   constructor(
     private pythonVersion: string,
-    protected patterns: string = '**/poetry.lock',
+    protected readonly cacheDependencyPath: string = '**/poetry.lock',
     protected poetryProjects: Set<string> = new Set<string>()
   ) {
-    super('poetry', patterns);
+    super();
   }
 
   protected async getCacheGlobalDirectories() {
     // Same virtualenvs path may appear for different projects, hence we use a Set
     const paths = new Set<string>();
-    const globber = await glob.create(this.patterns);
+    const globber = await glob.create(this.cacheDependencyPath);
 
     for await (const file of globber.globGenerator()) {
       const basedir = path.dirname(file);
@@ -45,13 +48,14 @@ class PoetryCache extends CacheDistributor {
   }
 
   protected async computeKeys() {
-    const hash = await glob.hashFiles(this.patterns);
+    const hash = await glob.hashFiles(this.cacheDependencyPath);
     // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
     const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
     const restoreKey = undefined;
     return {
       primaryKey,
-      restoreKey
+      restoreKey,
+      cacheDependencyPath: this.cacheDependencyPath,
     };
   }
 
