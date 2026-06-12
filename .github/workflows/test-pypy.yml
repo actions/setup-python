@@ -40,7 +40,7 @@ jobs:
           - 'pypy-3.10-v7.3.x'
           - 'pypy-3.10-v7.x'
           - 'pypy-2.7-v7.3.12rc1'
-          - 'pypy-3.10-nightly'
+          - 'pypy-3.11-nightly'
           - 'pypy3.10-v7.3.17'
           - 'pypy3.11-v7.3.19'
 
@@ -146,7 +146,7 @@ jobs:
             ubuntu-latest,
             macos-15-intel
           ]
-        pypy: ['pypy2.7', 'pypy3.9', 'pypy3.10-nightly', 'pypy3.11']
+        pypy: ['pypy2.7', 'pypy3.9', 'pypy3.11-nightly', 'pypy3.11']
 
     steps:
       - name: Checkout

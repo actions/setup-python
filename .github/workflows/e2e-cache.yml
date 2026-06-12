@@ -145,7 +145,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install poetry
-        run: pipx install poetry
+        run: |
+          pipx install poetry
+          pipx inject poetry "packaging<25"
       - name: Init pyproject.toml
         run: mv ./__tests__/data/pyproject.toml .
       - name: Setup Python
