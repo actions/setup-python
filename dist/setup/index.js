@@ -53813,6 +53813,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.State = void 0;
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(37484));
+const utils_1 = __nccwpck_require__(71798);
 const constants_1 = __nccwpck_require__(10565);
 var State;
 (function (State) {
@@ -53829,6 +53830,20 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
     }
     async handleLoadedCache() { }
+    /**
+     * Builds the Linux distro portion of a cache key (e.g. `-26.04-Ubuntu`, `-9-rhel`).
+     * RHEL is keyed by major version since it ships one ABI-stable artifact per major.
+     */
+    async getLinuxInfoKeySegment() {
+        if (!utils_1.IS_LINUX) {
+            return '';
+        }
+        const osInfo = await (0, utils_1.getLinuxInfo)();
+        const osVersion = osInfo.osName === 'rhel'
+            ? osInfo.osVersion.split('.')[0]
+            : osInfo.osVersion;
+        return `-${osVersion}-${osInfo.osName}`;
+    }
     async restoreCache() {
         const { primaryKey, restoreKey } = await this.computeKeys();
         if (primaryKey.endsWith('-')) {
@@ -54011,17 +54026,9 @@ class PipCache extends cache_distributor_1.default {
     async computeKeys() {
         const hash = (await glob.hashFiles(this.cacheDependencyPath)) ||
             (await glob.hashFiles(this.cacheDependencyBackupPath));
-        let primaryKey = '';
-        let restoreKey = '';
-        if (utils_1.IS_LINUX) {
-            const osInfo = await (0, utils_1.getLinuxInfo)();
-            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
-        }
-        else {
-            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
-        }
+        const osSegment = await this.getLinuxInfoKeySegment();
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+        const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}`;
         return {
             primaryKey,
             restoreKey: [restoreKey]
@@ -54105,7 +54112,8 @@ class PipenvCache extends cache_distributor_1.default {
     }
     async computeKeys() {
         const hash = await glob.hashFiles(this.patterns);
-        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+        const osSegment = await this.getLinuxInfoKeySegment();
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
         const restoreKey = undefined;
         return {
             primaryKey,
@@ -54197,8 +54205,9 @@ class PoetryCache extends cache_distributor_1.default {
     }
     async computeKeys() {
         const hash = await glob.hashFiles(this.patterns);
+        const osSegment = await this.getLinuxInfoKeySegment();
         // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
         const restoreKey = undefined;
         return {
             primaryKey,
