@@ -1,6 +1,6 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import {getLinuxInfo, IS_LINUX} from '../utils';
+import {getOSInfo, IS_LINUX} from '../utils';
 import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 export enum State {
@@ -32,7 +32,11 @@ abstract class CacheDistributor {
       return '';
     }
 
-    const osInfo = await getLinuxInfo();
+    const osInfo = await getOSInfo();
+    if (!osInfo) {
+      return '';
+    }
+
     // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
     // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
     const normalizedName = osInfo.osName.toLowerCase();

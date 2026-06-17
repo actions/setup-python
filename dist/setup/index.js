@@ -53838,7 +53838,10 @@ class CacheDistributor {
         if (!utils_1.IS_LINUX) {
             return '';
         }
-        const osInfo = await (0, utils_1.getLinuxInfo)();
+        const osInfo = await (0, utils_1.getOSInfo)();
+        if (!osInfo) {
+            return '';
+        }
         // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
         // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
         const normalizedName = osInfo.osName.toLowerCase();
