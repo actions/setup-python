@@ -53839,10 +53839,15 @@ class CacheDistributor {
             return '';
         }
         const osInfo = await (0, utils_1.getLinuxInfo)();
-        const osVersion = osInfo.osName === 'rhel'
+        // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
+        // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
+        const normalizedName = osInfo.osName.toLowerCase();
+        const isRhel = normalizedName === 'rhel' || normalizedName.includes('redhat');
+        const osName = isRhel ? 'rhel' : osInfo.osName;
+        const osVersion = isRhel
             ? osInfo.osVersion.split('.')[0]
             : osInfo.osVersion;
-        return `-${osVersion}-${osInfo.osName}`;
+        return `-${osVersion}-${osName}`;
     }
     async restoreCache() {
         const { primaryKey, restoreKey } = await this.computeKeys();
@@ -55821,8 +55826,8 @@ async function getLinuxInfo() {
         core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
         return { osName, osVersion };
     }
-    catch {
-        core.debug('lsb_release command not found. Falling back to /etc/os-release.');
+    catch (err) {
+        core.debug(`lsb_release failed (${err.message}). Falling back to /etc/os-release.`);
         const osReleaseContent = fs_1.default.readFileSync('/etc/os-release', 'utf8');
         const osInfo = {};
         osReleaseContent.split('\n').forEach(line => {

@@ -33,12 +33,17 @@ abstract class CacheDistributor {
     }
 
     const osInfo = await getLinuxInfo();
-    const osVersion =
-      osInfo.osName === 'rhel'
-        ? osInfo.osVersion.split('.')[0]
-        : osInfo.osVersion;
+    // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
+    // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
+    const normalizedName = osInfo.osName.toLowerCase();
+    const isRhel =
+      normalizedName === 'rhel' || normalizedName.includes('redhat');
+    const osName = isRhel ? 'rhel' : osInfo.osName;
+    const osVersion = isRhel
+      ? osInfo.osVersion.split('.')[0]
+      : osInfo.osVersion;
 
-    return `-${osVersion}-${osInfo.osName}`;
+    return `-${osVersion}-${osName}`;
   }
 
   public async restoreCache() {

@@ -185,9 +185,9 @@ export async function getLinuxInfo() {
     const [osName, osVersion] = stdout.trim().split('\n');
     core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
     return {osName, osVersion};
-  } catch {
+  } catch (err) {
     core.debug(
-      'lsb_release command not found. Falling back to /etc/os-release.'
+      `lsb_release failed (${(err as Error).message}). Falling back to /etc/os-release.`
     );
 
     const osReleaseContent = fs.readFileSync('/etc/os-release', 'utf8');
