@@ -190,19 +190,12 @@ virtualenvs.path = "{cache-dir}/virtualenvs"  # /Users/patrick/Library/Caches/py
 
         restoredKeys.forEach(restoredKey => {
           if (restoredKey) {
-            if (process.platform === 'linux' && packageManager === 'pip') {
-              expect(infoSpy).toHaveBeenCalledWith(
-                `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-20.04-Ubuntu-python-${pythonVersion}-${packageManager}-${fileHash}`
-              );
-            } else if (packageManager === 'poetry') {
-              expect(infoSpy).toHaveBeenCalledWith(
-                `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-python-${pythonVersion}-${packageManager}-v2-${fileHash}`
-              );
-            } else {
-              expect(infoSpy).toHaveBeenCalledWith(
-                `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}-python-${pythonVersion}-${packageManager}-${fileHash}`
-              );
-            }
+            const osSegment =
+              process.platform === 'linux' ? '-20.04-Ubuntu' : '';
+            const versionSuffix = packageManager === 'poetry' ? '-v2' : '';
+            expect(infoSpy).toHaveBeenCalledWith(
+              `Cache restored from key: setup-python-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${pythonVersion}-${packageManager}${versionSuffix}-${fileHash}`
+            );
           } else {
             expect(infoSpy).toHaveBeenCalledWith(
               `${packageManager} cache is not found`

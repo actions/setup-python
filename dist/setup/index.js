@@ -53813,6 +53813,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.State = void 0;
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(37484));
+const utils_1 = __nccwpck_require__(71798);
 const constants_1 = __nccwpck_require__(10565);
 var State;
 (function (State) {
@@ -53829,6 +53830,28 @@ class CacheDistributor {
         this.cacheDependencyPath = cacheDependencyPath;
     }
     async handleLoadedCache() { }
+    /**
+     * Builds the Linux distro portion of a cache key (e.g. `-26.04-Ubuntu`, `-9-rhel`).
+     * RHEL is keyed by major version since it ships one ABI-stable artifact per major.
+     */
+    async getLinuxInfoKeySegment() {
+        if (!utils_1.IS_LINUX) {
+            return '';
+        }
+        const osInfo = await (0, utils_1.getOSInfo)();
+        if (!osInfo) {
+            return '';
+        }
+        // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
+        // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
+        const normalizedName = osInfo.osName.toLowerCase();
+        const isRhel = normalizedName === 'rhel' || normalizedName.includes('redhat');
+        const osName = isRhel ? 'rhel' : osInfo.osName;
+        const osVersion = isRhel
+            ? osInfo.osVersion.split('.')[0]
+            : osInfo.osVersion;
+        return `-${osVersion}-${osName}`;
+    }
     async restoreCache() {
         const { primaryKey, restoreKey } = await this.computeKeys();
         if (primaryKey.endsWith('-')) {
@@ -54011,17 +54034,9 @@ class PipCache extends cache_distributor_1.default {
     async computeKeys() {
         const hash = (await glob.hashFiles(this.cacheDependencyPath)) ||
             (await glob.hashFiles(this.cacheDependencyBackupPath));
-        let primaryKey = '';
-        let restoreKey = '';
-        if (utils_1.IS_LINUX) {
-            const osInfo = await (0, utils_1.getLinuxInfo)();
-            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
-        }
-        else {
-            primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-            restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
-        }
+        const osSegment = await this.getLinuxInfoKeySegment();
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+        const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}`;
         return {
             primaryKey,
             restoreKey: [restoreKey]
@@ -54105,7 +54120,8 @@ class PipenvCache extends cache_distributor_1.default {
     }
     async computeKeys() {
         const hash = await glob.hashFiles(this.patterns);
-        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+        const osSegment = await this.getLinuxInfoKeySegment();
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
         const restoreKey = undefined;
         return {
             primaryKey,
@@ -54197,8 +54213,9 @@ class PoetryCache extends cache_distributor_1.default {
     }
     async computeKeys() {
         const hash = await glob.hashFiles(this.patterns);
+        const osSegment = await this.getLinuxInfoKeySegment();
         // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+        const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
         const restoreKey = undefined;
         return {
             primaryKey,
@@ -55275,6 +55292,8 @@ const core = __importStar(__nccwpck_require__(37484));
 const tc = __importStar(__nccwpck_require__(33472));
 const exec = __importStar(__nccwpck_require__(95236));
 const httpm = __importStar(__nccwpck_require__(54844));
+const fs = __importStar(__nccwpck_require__(79896));
+const semver = __importStar(__nccwpck_require__(62088));
 const utils_1 = __nccwpck_require__(71798);
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;
@@ -55282,9 +55301,68 @@ const MANIFEST_REPO_OWNER = 'actions';
 const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 exports.MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
+function getLinuxOsRelease() {
+    try {
+        const content = fs.readFileSync('/etc/os-release', 'utf8');
+        const lines = content.split('\n');
+        let id = '';
+        let versionId = '';
+        for (const line of lines) {
+            const parts = line.split('=');
+            if (parts.length === 2) {
+                const key = parts[0].trim();
+                const value = parts[1].trim().replace(/^"/, '').replace(/"$/, '');
+                if (key === 'ID')
+                    id = value;
+                if (key === 'VERSION_ID')
+                    versionId = value;
+            }
+        }
+        if (id && versionId) {
+            return { id, versionId };
+        }
+        return null;
+    }
+    catch {
+        return null;
+    }
+}
+function findRhelRelease(semanticVersionSpec, architecture, manifest, osVersion) {
+    for (const candidate of manifest) {
+        const version = candidate.version;
+        core.debug(`check ${version} satisfies ${semanticVersionSpec}`);
+        if (!semver.satisfies(version, semanticVersionSpec))
+            continue;
+        const file = candidate.files.find(item => {
+            core.debug(`${item.arch}===${architecture} && ${item.platform}===rhel && ${item.platform_version}===${osVersion}`);
+            const archMatch = item.arch === architecture;
+            const platformMatch = item.platform === 'rhel';
+            const versionMatch = !item.platform_version ||
+                item.platform_version === osVersion ||
+                osVersion.startsWith(item.platform_version);
+            return archMatch && platformMatch && versionMatch;
+        });
+        if (file) {
+            core.debug(`matched ${candidate.version}`);
+            const result = Object.assign({}, candidate);
+            result.files = [file];
+            return result;
+        }
+    }
+    return undefined;
+}
 async function findReleaseFromManifest(semanticVersionSpec, architecture, manifest) {
     if (!manifest) {
         manifest = await getManifest();
+    }
+    // On RHEL, tc.findFromManifest() won't match because os.platform() returns 'linux'
+    // but manifest entries use platform 'rhel'. Use custom filtering for RHEL.
+    if (utils_1.IS_LINUX) {
+        const osRelease = getLinuxOsRelease();
+        if (osRelease && osRelease.id === 'rhel') {
+            core.debug(`Detected RHEL ${osRelease.versionId}, using custom manifest filtering`);
+            return findRhelRelease(semanticVersionSpec, architecture, manifest, osRelease.versionId);
+        }
     }
     const foundRelease = await tc.findFromManifest(semanticVersionSpec, false, manifest, architecture);
     return foundRelease;
@@ -55743,12 +55821,29 @@ async function getMacOSInfo() {
     return { osName: 'macOS', osVersion: macOSVersion };
 }
 async function getLinuxInfo() {
-    const { stdout } = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
-        silent: true
-    });
-    const [osName, osVersion] = stdout.trim().split('\n');
-    core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
-    return { osName: osName, osVersion: osVersion };
+    try {
+        const { stdout } = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+            silent: true
+        });
+        const [osName, osVersion] = stdout.trim().split('\n');
+        core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+        return { osName, osVersion };
+    }
+    catch (err) {
+        core.debug(`lsb_release failed (${err.message}). Falling back to /etc/os-release.`);
+        const osReleaseContent = fs_1.default.readFileSync('/etc/os-release', 'utf8');
+        const osInfo = {};
+        osReleaseContent.split('\n').forEach(line => {
+            const [key, value] = line.split('=');
+            if (key && value) {
+                osInfo[key.trim()] = value.trim().replace(/"/g, '');
+            }
+        });
+        const osName = osInfo['ID'] || 'Linux';
+        const osVersion = osInfo['VERSION_ID'] || '';
+        core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+        return { osName, osVersion };
+    }
 }
 async function getOSInfo() {
     let osInfo;
