@@ -54,5 +54,8 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.3.2",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "fast-xml-parser": "^5.9.2"
   }
 }
