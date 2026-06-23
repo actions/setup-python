@@ -56,7 +56,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64', true, false, false);
+    await finder.useCpythonVersion('3.x', 'x64', true, false, false, false);
     expect(spyCoreAddPath).toHaveBeenCalled();
     expect(spyCoreExportVariable).toHaveBeenCalledWith(
       'pythonLocation',
@@ -73,7 +73,7 @@ describe('Finder tests', () => {
     await io.mkdirP(pythonDir);
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('3.x', 'x64', false, false, false);
+    await finder.useCpythonVersion('3.x', 'x64', false, false, false, false);
     expect(spyCoreAddPath).not.toHaveBeenCalled();
     expect(spyCoreExportVariable).not.toHaveBeenCalled();
   });
@@ -96,7 +96,7 @@ describe('Finder tests', () => {
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await expect(
-      finder.useCpythonVersion('1.2.3', 'x64', true, false, false)
+      finder.useCpythonVersion('1.2.3', 'x64', true, false, false, false)
     ).resolves.toEqual({
       impl: 'CPython',
       version: '1.2.3'
@@ -135,7 +135,14 @@ describe('Finder tests', () => {
     });
     // This will throw if it doesn't find it in the manifest (because no such version exists)
     await expect(
-      finder.useCpythonVersion('1.2.4-beta.2', 'x64', false, false, false)
+      finder.useCpythonVersion(
+        '1.2.4-beta.2',
+        'x64',
+        false,
+        false,
+        false,
+        false
+      )
     ).resolves.toEqual({
       impl: 'CPython',
       version: '1.2.4-beta.2'
@@ -186,7 +193,7 @@ describe('Finder tests', () => {
 
     fs.writeFileSync(`${pythonDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
-    await finder.useCpythonVersion('1.2', 'x64', true, true, false);
+    await finder.useCpythonVersion('1.2', 'x64', true, true, false, false);
 
     expect(infoSpy).toHaveBeenCalledWith("Resolved as '1.2.3'");
     expect(infoSpy).toHaveBeenCalledWith(
@@ -197,7 +204,14 @@ describe('Finder tests', () => {
     );
     expect(installSpy).toHaveBeenCalled();
     expect(addPathSpy).toHaveBeenCalledWith(expPath);
-    await finder.useCpythonVersion('1.2.4-beta.2', 'x64', false, true, false);
+    await finder.useCpythonVersion(
+      '1.2.4-beta.2',
+      'x64',
+      false,
+      true,
+      false,
+      false
+    );
     expect(spyCoreAddPath).toHaveBeenCalled();
     expect(spyCoreExportVariable).toHaveBeenCalledWith(
       'pythonLocation',
@@ -224,7 +238,7 @@ describe('Finder tests', () => {
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await expect(
-      finder.useCpythonVersion('1.2', 'x64', false, false, false)
+      finder.useCpythonVersion('1.2', 'x64', false, false, false, false)
     ).resolves.toEqual({
       impl: 'CPython',
       version: '1.2.3'
@@ -251,17 +265,17 @@ describe('Finder tests', () => {
     });
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     await expect(
-      finder.useCpythonVersion('1.1', 'x64', false, false, false)
+      finder.useCpythonVersion('1.1', 'x64', false, false, false, false)
     ).rejects.toThrow();
     await expect(
-      finder.useCpythonVersion('1.1', 'x64', false, false, true)
+      finder.useCpythonVersion('1.1', 'x64', false, false, true, false)
     ).resolves.toEqual({
       impl: 'CPython',
       version: '1.1.0-beta.2'
     });
     // Check 1.1.0 version specifier does not fallback to '1.1.0-beta.2'
     await expect(
-      finder.useCpythonVersion('1.1.0', 'x64', false, false, true)
+      finder.useCpythonVersion('1.1.0', 'x64', false, false, true, false)
     ).rejects.toThrow();
   });
 
@@ -269,7 +283,14 @@ describe('Finder tests', () => {
     // This will throw if it doesn't find it in the cache and in the manifest (because no such version exists)
     let thrown = false;
     try {
-      await finder.useCpythonVersion('3.300000', 'x64', true, false, false);
+      await finder.useCpythonVersion(
+        '3.300000',
+        'x64',
+        true,
+        false,
+        false,
+        false
+      );
     } catch {
       thrown = true;
     }

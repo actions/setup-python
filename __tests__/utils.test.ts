@@ -10,12 +10,14 @@ import {
   validatePythonVersionFormatForPyPy,
   isCacheFeatureAvailable,
   getVersionInputFromFile,
-  getVersionInputFromPlainFile,
+  getVersionsInputFromPlainFile,
   getVersionInputFromTomlFile,
+  getVersionInputFromPipfileFile,
   getNextPageUrl,
   isGhes,
   IS_WINDOWS,
-  getDownloadFileName
+  getDownloadFileName,
+  getVersionInputFromToolVersions
 } from '../src/utils';
 
 jest.mock('@actions/cache');
@@ -23,10 +25,10 @@ jest.mock('@actions/core');
 
 describe('validatePythonVersionFormatForPyPy', () => {
   it.each([
-    ['3.6', true],
-    ['3.7', true],
-    ['3.6.x', false],
-    ['3.7.x', false],
+    ['3.12', true],
+    ['3.13', true],
+    ['3.12.x', false],
+    ['3.13.x', false],
     ['3.x', false],
     ['3', false]
   ])('%s -> %s', (input, expected) => {
@@ -94,15 +96,43 @@ const tempDir = path.join(
 );
 
 describe('Version from file test', () => {
-  it.each([getVersionInputFromPlainFile, getVersionInputFromFile])(
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
     'Version from plain file test',
     async _fn => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'python-version.file';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersionFileContent = '3.7';
+      const pythonVersionFileContent = '3.13';
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersionFileContent]);
+    }
+  );
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
+    'Versions from multiline plain file test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'python-version.file';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent = '3.13\r\n3.12';
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual(['3.13', '3.12']);
+    }
+  );
+  it.each([getVersionsInputFromPlainFile, getVersionInputFromFile])(
+    'Version from complex plain file test',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'python-version.file';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent =
+        '3.13/envs/virtualenv\r# 3.12\n3.11\r\n3.10\r\n 3.9 \r\n';
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([
+        '3.13',
+        '3.11',
+        '3.10',
+        '3.9'
+      ]);
     }
   );
   it.each([getVersionInputFromTomlFile, getVersionInputFromFile])(
@@ -111,7 +141,7 @@ describe('Version from file test', () => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'pyproject.toml';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersion = '>=3.7.0';
+      const pythonVersion = '>=3.13.0';
       const pythonVersionFileContent = `[project]\nrequires-python = "${pythonVersion}"`;
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
@@ -123,7 +153,7 @@ describe('Version from file test', () => {
       await io.mkdirP(tempDir);
       const pythonVersionFileName = 'pyproject.toml';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
-      const pythonVersion = '>=3.7.0';
+      const pythonVersion = '>=3.13.0';
       const pythonVersionFileContent = `[tool.poetry.dependencies]\npython = "${pythonVersion}"`;
       fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
@@ -136,6 +166,120 @@ describe('Version from file test', () => {
       const pythonVersionFileName = 'pyproject.toml';
       const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
       fs.writeFileSync(pythonVersionFilePath, ``);
+      expect(_fn(pythonVersionFilePath)).toEqual([]);
+    }
+  );
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.13.2\nnodejs 16';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.13.2']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with comment',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = '# python 3.13\npython 3.12';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.12']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with whitespace',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = '  python   3.13  ';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.13']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with v prefix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python v3.13.2';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.13.2']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with pypy version',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python pypy3.10-7.3.19';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['pypy3.10-7.3.19']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with alpha Releases',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.14.0a5t';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.14.0a5t']);
+    }
+  );
+
+  it.each([getVersionInputFromToolVersions])(
+    'Version from .tool-versions with dev suffix',
+    async _fn => {
+      const toolVersionFileName = '.tool-versions';
+      const toolVersionFilePath = path.join(tempDir, toolVersionFileName);
+      const toolVersionContent = 'python 3.14t-dev';
+      fs.writeFileSync(toolVersionFilePath, toolVersionContent);
+      expect(_fn(toolVersionFilePath)).toEqual(['3.14t-dev']);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Version from python_version in Pipfile',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '3.13';
+      const pythonVersionFileContent = `[requires]\npython_version = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Version from python_full_version in Pipfile',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersion = '3.13.0';
+      const pythonVersionFileContent = `[requires]\npython_full_version = "${pythonVersion}"`;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
+      expect(_fn(pythonVersionFilePath)).toEqual([pythonVersion]);
+    }
+  );
+
+  it.each([getVersionInputFromPipfileFile, getVersionInputFromFile])(
+    'Pipfile undefined version',
+    async _fn => {
+      await io.mkdirP(tempDir);
+      const pythonVersionFileName = 'Pipfile';
+      const pythonVersionFilePath = path.join(tempDir, pythonVersionFileName);
+      const pythonVersionFileContent = ``;
+      fs.writeFileSync(pythonVersionFilePath, pythonVersionFileContent);
       expect(_fn(pythonVersionFilePath)).toEqual([]);
     }
   );

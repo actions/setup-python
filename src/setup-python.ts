@@ -11,8 +11,9 @@ import {
   logWarning,
   IS_MAC,
   getVersionInputFromFile,
-  getVersionInputFromPlainFile
+  getVersionsInputFromPlainFile
 } from './utils';
+import {exec} from '@actions/exec';
 
 function isPyPyVersion(versionSpec: string) {
   return versionSpec.startsWith('pypy');
@@ -20,6 +21,19 @@ function isPyPyVersion(versionSpec: string) {
 
 function isGraalPyVersion(versionSpec: string) {
   return versionSpec.startsWith('graalpy');
+}
+
+async function installPipPackages(pipInstall: string) {
+  core.info(`Installing pip packages: ${pipInstall}`);
+  try {
+    const installArgs = pipInstall.trim().split(/\s+/);
+    await exec('python', ['-m', 'pip', 'install', ...installArgs]);
+    core.info('Successfully installed pip packages');
+  } catch (error) {
+    core.setFailed(
+      `Failed to install pip packages from "${pipInstall}". Please verify that the package names, versions, or requirements files provided are correct and installable, that the specified packages and versions can be resolved from PyPI or the configured package index, and that your network connection is stable and allows access to the package index.`
+    );
+  }
 }
 
 async function cacheDependencies(cache: string, pythonVersion: string) {
@@ -35,7 +49,7 @@ async function cacheDependencies(cache: string, pythonVersion: string) {
 
 function resolveVersionInputFromDefaultFile(): string[] {
   const couples: [string, (versionFile: string) => string[]][] = [
-    ['.python-version', getVersionInputFromPlainFile]
+    ['.python-version', getVersionsInputFromPlainFile]
   ];
   for (const [versionFile, _fn] of couples) {
     logWarning(
@@ -92,6 +106,7 @@ async function run() {
     const versions = resolveVersionInput();
     const checkLatest = core.getBooleanInput('check-latest');
     const allowPreReleases = core.getBooleanInput('allow-prereleases');
+    const freethreaded = core.getBooleanInput('freethreaded');
 
     if (versions.length) {
       let pythonVersion = '';
@@ -132,7 +147,8 @@ async function run() {
             arch,
             updateEnvironment,
             checkLatest,
-            allowPreReleases
+            allowPreReleases,
+            freethreaded
           );
           pythonVersion = installed.version;
           core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
@@ -142,6 +158,10 @@ async function run() {
       const cache = core.getInput('cache');
       if (cache && isCacheFeatureAvailable()) {
         await cacheDependencies(cache, pythonVersion);
+      }
+      const pipInstall = core.getInput('pip-install');
+      if (pipInstall) {
+        await installPipPackages(pipInstall);
       }
     } else {
       core.warning(

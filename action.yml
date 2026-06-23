@@ -26,6 +26,13 @@ inputs:
   allow-prereleases:
     description: "When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython."
     default: false
+  freethreaded:
+    description: "When 'true', use the freethreaded version of Python."
+    default: false
+  pip-version:
+    description: "Used to specify the version of pip to install with the Python. Supported format: major[.minor][.patch]."
+  pip-install:
+    description: "Used to specify the packages to install with pip after setting up Python. Can be a requirements file or package names."
 outputs:
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
@@ -34,7 +41,7 @@ outputs:
   python-path:
     description: "The absolute path to the Python or PyPy executable."
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/setup/index.js'
   post: 'dist/cache-save/index.js'
   post-if: success()

@@ -24,15 +24,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -67,15 +68,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -113,15 +115,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -157,15 +160,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.0]
+        python: [3.9.13, 3.10.11, 3.11.9, '==3.12.3', 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -206,15 +210,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
-        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.0]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.12.3, 3.13.2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -245,8 +250,8 @@ jobs:
       - name: Run simple code
         run: python -c 'import math; print(math.factorial(5))'
 
-  setup-pre-release-version-from-manifest:
-    name: Setup 3.14.0-alpha.1 ${{ matrix.os }}
+  setup-versions-from-tool-versions-file:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} .tool-versions file
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -255,20 +260,62 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
+        python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.2, 3.14-dev]
+        exclude:
+          - os: windows-latest
+            python: graalpy-24.1.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: setup-python 3.14.0-alpha.1
+      - name: build-tool-versions-file ${{ matrix.python }}
+        run: |
+          echo "python ${{ matrix.python }}" > .tool-versions
+
+      - name: setup-python using .tool-versions ${{ matrix.python }}
+        id: setup-python-tool-versions
+        uses: ./
+        with:
+          python-version-file: .tool-versions
+
+  setup-versions-from-pipfile-with-python_version:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} Pipfile with python_version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.13.2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: build-version-file ${{ matrix.python }}
+        run: |
+          echo '[requires]
+            python_version = "${{ matrix.python }}"
+          ' > Pipfile
+
+      - name: setup-python ${{ matrix.python }}
         id: setup-python
         uses: ./
         with:
-          python-version: '3.14.0-alpha.1'
+          python-version-file: Pipfile
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -277,8 +324,101 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python 3.14.0a1" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.14.0a1"
+          if ("Python ${{ matrix.python }}".replace("==", "") -ne "$pythonVersion"){
+            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+            exit 1
+          }
+          $pythonVersion
+        shell: pwsh
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+  setup-versions-from-pipfile-with-python_full_version:
+    name: Setup ${{ matrix.python }} ${{ matrix.os }} Pipfile with python_full_version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
+          ]
+        python: [3.9.13, 3.10.11, 3.11.9, 3.13.2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: build-version-file ${{ matrix.python }}
+        run: |
+          echo '[requires]
+            python_full_version = "${{ matrix.python }}"
+          ' > Pipfile
+
+      - name: setup-python ${{ matrix.python }}
+        id: setup-python
+        uses: ./
+        with:
+          python-version-file: Pipfile
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
+      - name: Validate version
+        run: |
+          $pythonVersion = (python --version)
+          if ("Python ${{ matrix.python }}".replace("==", "") -ne "$pythonVersion"){
+            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
+            exit 1
+          }
+          $pythonVersion
+        shell: pwsh
+
+      - name: Run simple code
+        run: python -c 'import math; print(math.factorial(5))'
+
+  setup-pre-release-version-from-manifest:
+    name: Setup 3.14.0-alpha.6 ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
+          ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: setup-python 3.14.0-alpha.6
+        id: setup-python
+        uses: ./
+        with:
+          python-version: '3.14.0-alpha.6'
+
+      - name: Check python-path
+        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
+        shell: bash
+
+      - name: Validate version
+        run: |
+          $pythonVersion = (python --version)
+          if ("Python 3.14.0a6" -ne "$pythonVersion"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.14.0a6"
             exit 1
           }
           $pythonVersion
@@ -293,10 +433,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-15-intel
+          ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: setup-python 3.14-dev
         id: setup-python
@@ -321,10 +470,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-15-intel
+          ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: setup-python 3.14
         id: setup-python
@@ -354,15 +512,16 @@ jobs:
           [
             macos-latest,
             windows-latest,
-            ubuntu-20.04,
             ubuntu-22.04,
-            macos-13,
-            ubuntu-latest
+            ubuntu-22.04-arm,
+            macos-15-intel,
+            ubuntu-latest,
+            ubuntu-24.04-arm
           ]
         python: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -382,10 +541,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-15-intel
+          ]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Python and check latest
         uses: ./
         with:
@@ -406,9 +574,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os:
+          [
+            macos-latest,
+            windows-latest,
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04-arm,
+            ubuntu-latest,
+            macos-15-intel
+          ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Python and check latest
         uses: ./
         with:

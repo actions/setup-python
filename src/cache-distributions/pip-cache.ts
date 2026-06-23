@@ -7,7 +7,7 @@ import * as path from 'path';
 import os from 'os';
 
 import CacheDistributor from './cache-distributor';
-import {getLinuxInfo, IS_LINUX, IS_WINDOWS} from '../utils';
+import {IS_WINDOWS} from '../utils';
 import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 class PipCache extends CacheDistributor {
@@ -37,7 +37,8 @@ class PipCache extends CacheDistributor {
       } catch (err) {
         // Pip outputs warnings to stderr (e.g., --no-python-version-warning flag deprecation warning), causing false failure detection
         // Related issue: https://github.com/actions/setup-python/issues/1034
-        // If an error occurs, set exitCode to 1 to indicate failure
+        // If an error occurs, capture stderr and set exitCode to 1 to indicate failure
+        stderr = (err as any).stderr ?? (err as Error).message;
         exitCode = 1;
       }
     } else {
@@ -65,17 +66,9 @@ class PipCache extends CacheDistributor {
     const hash =
       (await glob.hashFiles(this.cacheDependencyPath)) ||
       (await glob.hashFiles(this.cacheDependencyBackupPath));
-    let primaryKey = '';
-    let restoreKey = '';
-
-    if (IS_LINUX) {
-      const osInfo = await getLinuxInfo();
-      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-      restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-${osInfo.osVersion}-${osInfo.osName}-python-${this.pythonVersion}-${this.packageManager}`;
-    } else {
-      primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
-      restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}`;
-    }
+    const osSegment = await this.getLinuxInfoKeySegment();
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-${hash}`;
+    const restoreKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}`;
 
     return {
       primaryKey,

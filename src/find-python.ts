@@ -8,6 +8,7 @@ import * as installer from './install-python';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
+import * as exec from '@actions/exec';
 
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
@@ -30,20 +31,53 @@ function binDir(installDir: string): string {
   }
 }
 
+async function installPip(pythonLocation: string) {
+  const pipVersion = core.getInput('pip-version');
+
+  // Validate pip-version format: major[.minor][.patch]
+  const versionRegex = /^\d+(\.\d+)?(\.\d+)?$/;
+  if (pipVersion && !versionRegex.test(pipVersion)) {
+    throw new Error(
+      `Invalid pip-version "${pipVersion}". Please specify a version in the format major[.minor][.patch].`
+    );
+  }
+
+  if (pipVersion) {
+    core.info(
+      `pip-version input is specified. Installing pip version ${pipVersion}`
+    );
+    await exec.exec(
+      `${pythonLocation}/python -m pip install --upgrade pip==${pipVersion} --disable-pip-version-check --no-warn-script-location`
+    );
+  }
+}
+
 export async function useCpythonVersion(
   version: string,
   architecture: string,
   updateEnvironment: boolean,
   checkLatest: boolean,
-  allowPreReleases: boolean
+  allowPreReleases: boolean,
+  freethreaded: boolean
 ): Promise<InstalledVersion> {
   let manifest: tc.IToolRelease[] | null = null;
-  const desugaredVersionSpec = desugarDevVersion(version);
+  const {version: desugaredVersionSpec, freethreaded: versionFreethreaded} =
+    desugarVersion(version);
   let semanticVersionSpec = pythonVersionToSemantic(
     desugaredVersionSpec,
     allowPreReleases
   );
+  if (versionFreethreaded) {
+    // Use the freethreaded version if it was specified in the input, e.g., 3.13t
+    freethreaded = true;
+  }
+
   core.debug(`Semantic version spec of ${version} is ${semanticVersionSpec}`);
+  if (freethreaded) {
+    // Free threaded versions use an architecture suffix like `x64-freethreaded`
+    core.debug(`Using freethreaded version of ${semanticVersionSpec}`);
+    architecture += '-freethreaded';
+  }
 
   if (checkLatest) {
     manifest = await installer.getManifest();
@@ -90,16 +124,22 @@ export async function useCpythonVersion(
 
   if (!installDir) {
     const osInfo = await getOSInfo();
-    throw new Error(
-      [
-        `The version '${version}' with architecture '${architecture}' was not found for ${
-          osInfo
-            ? `${osInfo.osName} ${osInfo.osVersion}`
-            : 'this operating system'
-        }.`,
-        `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
-      ].join(os.EOL)
+    const msg = [
+      `The version '${version}' with architecture '${architecture}' was not found for ${
+        osInfo
+          ? `${osInfo.osName} ${osInfo.osVersion}`
+          : 'this operating system'
+      }.`
+    ];
+    if (freethreaded) {
+      msg.push(
+        `Free threaded versions are only available for Python 3.13.0 and later.`
+      );
+    }
+    msg.push(
+      `The list of all available versions can be found here: ${installer.MANIFEST_URL}`
     );
+    throw new Error(msg.join(os.EOL));
   }
 
   const _binDir = binDir(installDir);
@@ -136,15 +176,36 @@ export async function useCpythonVersion(
     if (IS_WINDOWS) {
       // Add --user directory
       // `installDir` from tool cache should look like $RUNNER_TOOL_CACHE/Python/<semantic version>/x64/
-      // So if `findLocalTool` succeeded above, we must have a conformant `installDir`
+      // Extract version details
       const version = path.basename(path.dirname(installDir));
       const major = semver.major(version);
       const minor = semver.minor(version);
 
+      const basePath = process.env['APPDATA'] || '';
+      let versionSuffix = `${major}${minor}`;
+      // Append '-32' for x86 architecture if Python version is >= 3.10
+      if (
+        architecture === 'x86' &&
+        (major > 3 || (major === 3 && minor >= 10))
+      ) {
+        versionSuffix += '-32';
+      } else if (architecture === 'arm64') {
+        versionSuffix += '-arm64';
+      }
+      // Append 't' for freethreaded builds
+      if (freethreaded) {
+        versionSuffix += 't';
+        if (architecture === 'x86-freethreaded') {
+          versionSuffix += '-32';
+        } else if (architecture === 'arm64-freethreaded') {
+          versionSuffix += '-arm64';
+        }
+      }
+      // Add user Scripts path
       const userScriptsDir = path.join(
-        process.env['APPDATA'] || '',
+        basePath,
         'Python',
-        `Python${major}${minor}`,
+        `Python${versionSuffix}`,
         'Scripts'
       );
       core.addPath(userScriptsDir);
@@ -153,10 +214,41 @@ export async function useCpythonVersion(
   }
 
   const installed = versionFromPath(installDir);
-  core.setOutput('python-version', installed);
+  let pythonVersion = installed;
+  if (freethreaded) {
+    // Add the freethreaded suffix to the version (e.g., 3.13.1t)
+    pythonVersion += 't';
+  }
+  core.setOutput('python-version', pythonVersion);
   core.setOutput('python-path', pythonPath);
 
-  return {impl: 'CPython', version: installed};
+  const binaryPath = IS_WINDOWS ? installDir : _binDir;
+  await installPip(binaryPath);
+
+  return {impl: 'CPython', version: pythonVersion};
+}
+
+/* Desugar free threaded and dev versions */
+export function desugarVersion(versionSpec: string) {
+  const {version, freethreaded} = desugarFreeThreadedVersion(versionSpec);
+  return {version: desugarDevVersion(version), freethreaded};
+}
+
+/* Identify freethreaded versions like, 3.13t, 3.13.1t, 3.13t-dev.
+ * Returns the version without the `t` and the architectures suffix, if freethreaded */
+function desugarFreeThreadedVersion(versionSpec: string) {
+  const majorMinor = /^(\d+\.\d+(\.\d+)?)(t)$/;
+  if (majorMinor.test(versionSpec)) {
+    return {version: versionSpec.replace(majorMinor, '$1'), freethreaded: true};
+  }
+  const devVersion = /^(\d+\.\d+)(t)(-dev)$/;
+  if (devVersion.test(versionSpec)) {
+    return {
+      version: versionSpec.replace(devVersion, '$1$3'),
+      freethreaded: true
+    };
+  }
+  return {version: versionSpec, freethreaded: false};
 }
 
 /** Convert versions like `3.8-dev` to a version like `~3.8.0-0`. */
