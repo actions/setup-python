@@ -1,6 +1,6 @@
 altgraph==0.17.2
 
-certifi==2020.6.20
+certifi==2024.7.4
 
 chardet==3.0.4
 
