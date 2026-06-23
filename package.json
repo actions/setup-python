@@ -1,6 +1,6 @@
 {
   "name": "setup-python",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "private": true,
   "description": "Setup python action",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^5.0.5",
+    "@actions/cache": "^5.1.0",
     "@actions/core": "^2.0.3",
     "@actions/exec": "^2.0.0",
     "@actions/glob": "^0.5.1",
@@ -54,5 +54,8 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.3.2",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "fast-xml-parser": "^5.9.2"
   }
 }
