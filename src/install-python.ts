@@ -3,6 +3,8 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
+import * as fs from 'fs';
+import * as semver from 'semver';
 import {ExecOptions} from '@actions/exec/lib/interfaces';
 import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
 import {IToolRelease} from '@actions/tool-cache';
@@ -14,6 +16,70 @@ const MANIFEST_REPO_NAME = 'python-versions';
 const MANIFEST_REPO_BRANCH = 'main';
 export const MANIFEST_URL = `https://raw.githubusercontent.com/${MANIFEST_REPO_OWNER}/${MANIFEST_REPO_NAME}/${MANIFEST_REPO_BRANCH}/versions-manifest.json`;
 
+interface LinuxOsRelease {
+  id: string;
+  versionId: string;
+}
+
+function getLinuxOsRelease(): LinuxOsRelease | null {
+  try {
+    const content = fs.readFileSync('/etc/os-release', 'utf8');
+    const lines = content.split('\n');
+    let id = '';
+    let versionId = '';
+    for (const line of lines) {
+      const parts = line.split('=');
+      if (parts.length === 2) {
+        const key = parts[0].trim();
+        const value = parts[1].trim().replace(/^"/, '').replace(/"$/, '');
+        if (key === 'ID') id = value;
+        if (key === 'VERSION_ID') versionId = value;
+      }
+    }
+    if (id && versionId) {
+      return {id, versionId};
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function findRhelRelease(
+  semanticVersionSpec: string,
+  architecture: string,
+  manifest: tc.IToolRelease[],
+  osVersion: string
+): tc.IToolRelease | undefined {
+  for (const candidate of manifest) {
+    const version = candidate.version;
+    core.debug(`check ${version} satisfies ${semanticVersionSpec}`);
+
+    if (!semver.satisfies(version, semanticVersionSpec)) continue;
+
+    const file = candidate.files.find(item => {
+      core.debug(
+        `${item.arch}===${architecture} && ${item.platform}===rhel && ${item.platform_version}===${osVersion}`
+      );
+      const archMatch = item.arch === architecture;
+      const platformMatch = item.platform === 'rhel';
+      const versionMatch =
+        !item.platform_version ||
+        item.platform_version === osVersion ||
+        osVersion.startsWith(item.platform_version);
+      return archMatch && platformMatch && versionMatch;
+    });
+
+    if (file) {
+      core.debug(`matched ${candidate.version}`);
+      const result = Object.assign({}, candidate);
+      result.files = [file];
+      return result;
+    }
+  }
+  return undefined;
+}
+
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
   architecture: string,
@@ -21,6 +87,23 @@ export async function findReleaseFromManifest(
 ): Promise<tc.IToolRelease | undefined> {
   if (!manifest) {
     manifest = await getManifest();
+  }
+
+  // On RHEL, tc.findFromManifest() won't match because os.platform() returns 'linux'
+  // but manifest entries use platform 'rhel'. Use custom filtering for RHEL.
+  if (IS_LINUX) {
+    const osRelease = getLinuxOsRelease();
+    if (osRelease && osRelease.id === 'rhel') {
+      core.debug(
+        `Detected RHEL ${osRelease.versionId}, using custom manifest filtering`
+      );
+      return findRhelRelease(
+        semanticVersionSpec,
+        architecture,
+        manifest,
+        osRelease.versionId
+      );
+    }
   }
 
   const foundRelease = await tc.findFromManifest(
@@ -32,6 +115,7 @@ export async function findReleaseFromManifest(
 
   return foundRelease;
 }
+
 function isIToolRelease(obj: any): obj is IToolRelease {
   return (
     typeof obj === 'object' &&
@@ -48,6 +132,7 @@ function isIToolRelease(obj: any): obj is IToolRelease {
     )
   );
 }
+
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
     const repoManifest = await getManifestFromRepo();

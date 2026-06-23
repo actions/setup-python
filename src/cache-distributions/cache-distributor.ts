@@ -1,5 +1,6 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import {getOSInfo, IS_LINUX} from '../utils';
 import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
 
 export enum State {
@@ -21,6 +22,33 @@ abstract class CacheDistributor {
     restoreKey: string[] | undefined;
   }>;
   protected async handleLoadedCache() {}
+
+  /**
+   * Builds the Linux distro portion of a cache key (e.g. `-26.04-Ubuntu`, `-9-rhel`).
+   * RHEL is keyed by major version since it ships one ABI-stable artifact per major.
+   */
+  protected async getLinuxInfoKeySegment(): Promise<string> {
+    if (!IS_LINUX) {
+      return '';
+    }
+
+    const osInfo = await getOSInfo();
+    if (!osInfo) {
+      return '';
+    }
+
+    // lsb_release reports RHEL as "RedHatEnterpriseLinux" while /etc/os-release
+    // reports it as "rhel"; normalize both to "rhel" so the key is consistent.
+    const normalizedName = osInfo.osName.toLowerCase();
+    const isRhel =
+      normalizedName === 'rhel' || normalizedName.includes('redhat');
+    const osName = isRhel ? 'rhel' : osInfo.osName;
+    const osVersion = isRhel
+      ? osInfo.osVersion.split('.')[0]
+      : osInfo.osVersion;
+
+    return `-${osVersion}-${osName}`;
+  }
 
   public async restoreCache() {
     const {primaryKey, restoreKey} = await this.computeKeys();

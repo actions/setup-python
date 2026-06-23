@@ -173,15 +173,38 @@ async function getMacOSInfo() {
 }
 
 export async function getLinuxInfo() {
-  const {stdout} = await exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
-    silent: true
-  });
+  try {
+    const {stdout} = await exec.getExecOutput(
+      'lsb_release',
+      ['-i', '-r', '-s'],
+      {
+        silent: true
+      }
+    );
 
-  const [osName, osVersion] = stdout.trim().split('\n');
+    const [osName, osVersion] = stdout.trim().split('\n');
+    core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+    return {osName, osVersion};
+  } catch (err) {
+    core.debug(
+      `lsb_release failed (${(err as Error).message}). Falling back to /etc/os-release.`
+    );
 
-  core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+    const osReleaseContent = fs.readFileSync('/etc/os-release', 'utf8');
+    const osInfo: {[key: string]: string} = {};
 
-  return {osName: osName, osVersion: osVersion};
+    osReleaseContent.split('\n').forEach(line => {
+      const [key, value] = line.split('=');
+      if (key && value) {
+        osInfo[key.trim()] = value.trim().replace(/"/g, '');
+      }
+    });
+
+    const osName = osInfo['ID'] || 'Linux';
+    const osVersion = osInfo['VERSION_ID'] || '';
+    core.debug(`OS Name: ${osName}, Version: ${osVersion}`);
+    return {osName, osVersion};
+  }
 }
 
 export async function getOSInfo() {

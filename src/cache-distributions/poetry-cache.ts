@@ -46,8 +46,9 @@ class PoetryCache extends CacheDistributor {
 
   protected async computeKeys() {
     const hash = await glob.hashFiles(this.patterns);
+    const osSegment = await this.getLinuxInfoKeySegment();
     // "v2" is here to invalidate old caches of this cache distributor, which were created broken:
-    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
+    const primaryKey = `${this.CACHE_KEY_PREFIX}-${process.env['RUNNER_OS']}-${process.arch}${osSegment}-python-${this.pythonVersion}-${this.packageManager}-v2-${hash}`;
     const restoreKey = undefined;
     return {
       primaryKey,
