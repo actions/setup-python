@@ -145,7 +145,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install poetry
-        run: pipx install poetry
+        run: |
+          pipx install poetry
       - name: Init pyproject.toml
         run: mv ./__tests__/data/pyproject.toml .
       - name: Setup Python
@@ -153,6 +154,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
+      - name: Bootstrap packaging
+        run: |
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip setuptools wheel packaging
       - name: Install dependencies
         run: poetry install --no-root
 

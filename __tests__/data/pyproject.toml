@@ -9,6 +9,7 @@ python = ">=3.9,<3.14"
 flake8 = "^4.0.1"
 pyinstaller = "6.10.0"
 setuptools = ">=78.1.1" 
+packaging = ">=22.0,<26"
 
 [tool.poetry.dev-dependencies]
 
