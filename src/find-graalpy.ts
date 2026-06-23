@@ -6,6 +6,8 @@ import * as semver from 'semver';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
+import {addPkgConfigPathToEnv} from './utils';
+
 export async function findGraalPyVersion(
   versionSpec: string,
   architecture: string,
@@ -67,7 +69,7 @@ export async function findGraalPyVersion(
     core.exportVariable('Python2_ROOT_DIR', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
     core.exportVariable('Python3_ROOT_DIR', installDir);
-    core.exportVariable('PKG_CONFIG_PATH', pythonLocation + '/lib/pkgconfig');
+    addPkgConfigPathToEnv(pythonLocation + '/lib/pkgconfig');
     core.addPath(pythonLocation);
     core.addPath(_binDir);
   }

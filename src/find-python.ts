@@ -10,6 +10,8 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 
+import {addPkgConfigPathToEnv} from './utils';
+
 // Python has "scripts" or "bin" directories where command-line tools that come with packages are installed.
 // This is where pip is, along with anything that pip installs.
 // There is a separate directory for `pip install --user`.
@@ -150,7 +152,6 @@ export async function useCpythonVersion(
   );
   if (updateEnvironment) {
     core.exportVariable('pythonLocation', installDir);
-    core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
     core.exportVariable('pythonLocation', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython.html#module:FindPython
     core.exportVariable('Python_ROOT_DIR', installDir);
@@ -158,7 +159,8 @@ export async function useCpythonVersion(
     core.exportVariable('Python2_ROOT_DIR', installDir);
     // https://cmake.org/cmake/help/latest/module/FindPython3.html#module:FindPython3
     core.exportVariable('Python3_ROOT_DIR', installDir);
-    core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
+
+    addPkgConfigPathToEnv(installDir + '/lib/pkgconfig');
 
     if (IS_LINUX) {
       const libPath = process.env.LD_LIBRARY_PATH
