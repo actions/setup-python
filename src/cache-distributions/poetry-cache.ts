@@ -4,8 +4,8 @@ import * as path from 'path';
 import * as exec from '@actions/exec';
 import * as core from '@actions/core';
 
-import CacheDistributor from './cache-distributor';
-import {logWarning} from '../utils';
+import CacheDistributor from './cache-distributor.js';
+import {logWarning} from '../utils.js';
 
 class PoetryCache extends CacheDistributor {
   constructor(

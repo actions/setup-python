@@ -6,9 +6,9 @@ import utils from 'util';
 import * as path from 'path';
 import os from 'os';
 
-import CacheDistributor from './cache-distributor';
-import {IS_WINDOWS} from '../utils';
-import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
+import CacheDistributor from './cache-distributor.js';
+import {IS_WINDOWS} from '../utils.js';
+import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants.js';
 
 class PipCache extends CacheDistributor {
   private cacheDependencyBackupPath: string = CACHE_DEPENDENCY_BACKUP_PATH;

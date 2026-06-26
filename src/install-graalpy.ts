@@ -16,7 +16,7 @@ import {
   createSymlinkInFolder,
   isNightlyKeyword,
   getNextPageUrl
-} from './utils';
+} from './utils.js';
 
 const TOKEN = core.getInput('token');
 const AUTH = !TOKEN ? undefined : `token ${TOKEN}`;

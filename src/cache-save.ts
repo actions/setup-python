@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 
 import fs from 'fs';
-import {State} from './cache-distributions/cache-distributor';
+import {State} from './cache-distributions/cache-distributor.js';
 
 // Added early exit to resolve issue with slow post action step:
 // - https://github.com/actions/setup-node/issues/878

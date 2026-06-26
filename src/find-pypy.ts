@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as pypyInstall from './install-pypy';
+import * as pypyInstall from './install-pypy.js';
 import {
   IS_WINDOWS,
   WINDOWS_ARCHS,
@@ -9,7 +9,7 @@ import {
   validatePythonVersionFormatForPyPy,
   IPyPyManifestRelease,
   getBinaryDirectory
-} from './utils';
+} from './utils.js';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';
