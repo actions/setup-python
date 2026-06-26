@@ -1,7 +1,11 @@
+import {jest, describe, it, expect, beforeEach, afterEach} from '@jest/globals';
+import {fileURLToPath} from 'url';
 import * as io from '@actions/io';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const toolDir = path.join(
   __dirname,
@@ -19,26 +23,78 @@ const tempDir = path.join(
 process.env['RUNNER_TOOL_CACHE'] = toolDir;
 process.env['RUNNER_TEMP'] = tempDir;
 
-import * as tc from '@actions/tool-cache';
-import * as core from '@actions/core';
-import * as finder from '../src/find-python';
-import * as installer from '../src/install-python';
+// Mock @actions modules
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+  notice: jest.fn(),
+  setFailed: jest.fn(),
+  setOutput: jest.fn(),
+  getInput: jest.fn(),
+  getBooleanInput: jest.fn(),
+  getMultilineInput: jest.fn(),
+  addPath: jest.fn(),
+  exportVariable: jest.fn(),
+  saveState: jest.fn(),
+  getState: jest.fn(),
+  setSecret: jest.fn(),
+  isDebug: jest.fn(() => false),
+  startGroup: jest.fn(),
+  endGroup: jest.fn(),
+  group: jest.fn((_name: string, fn: () => Promise<unknown>) => fn()),
+  toPlatformPath: jest.fn((p: string) => p),
+  toWin32Path: jest.fn((p: string) => p),
+  toPosixPath: jest.fn((p: string) => p)
+}));
 
-import manifestData from './data/versions-manifest.json';
+// Pre-import real @actions/tool-cache before any mocks
+const realTc = await import('@actions/tool-cache');
+
+jest.unstable_mockModule('@actions/tool-cache', () => ({
+  ...realTc,
+  find: jest.fn(realTc.find),
+  getManifestFromRepo: jest.fn()
+}));
+
+jest.unstable_mockModule('@actions/exec', () => ({
+  exec: jest.fn(),
+  getExecOutput: jest.fn()
+}));
+
+// Pre-import real install-python AFTER all its dependency mocks are registered
+// so it captures the mocked @actions/tool-cache, @actions/core, @actions/exec
+const realInstaller = await import('../src/install-python.js');
+
+// Mock local install-python module - keep real getManifest/findReleaseFromManifest
+jest.unstable_mockModule('../src/install-python.js', () => ({
+  ...realInstaller,
+  installCpythonFromRelease: jest.fn()
+}));
+
+// Dynamic imports after mocking
+const core = await import('@actions/core');
+const tc = await import('@actions/tool-cache');
+const finder = await import('../src/find-python.js');
+const installer = await import('../src/install-python.js');
+
+import manifestData from './data/versions-manifest.json' with {type: 'json'};
 
 describe('Finder tests', () => {
-  let writeSpy: jest.SpyInstance;
-  let spyCoreAddPath: jest.SpyInstance;
-  let spyCoreExportVariable: jest.SpyInstance;
+  let writeSpy: jest.SpiedFunction<typeof process.stdout.write>;
+  let spyCoreAddPath: jest.Mock;
+  let spyCoreExportVariable: jest.Mock;
   const env = process.env;
 
   beforeEach(() => {
     writeSpy = jest.spyOn(process.stdout, 'write');
-    writeSpy.mockImplementation(() => {});
-    jest.resetModules();
+    writeSpy.mockImplementation(() => true);
     process.env = {...env};
-    spyCoreAddPath = jest.spyOn(core, 'addPath');
-    spyCoreExportVariable = jest.spyOn(core, 'exportVariable');
+    spyCoreAddPath = core.addPath as jest.Mock;
+    spyCoreExportVariable = core.exportVariable as jest.Mock;
+    // Restore real tc.find default (cleared by jest.resetAllMocks)
+    (tc.find as jest.Mock).mockImplementation(realTc.find as any);
   });
 
   afterEach(() => {
@@ -49,8 +105,8 @@ describe('Finder tests', () => {
   });
 
   it('Finds Python if it is installed', async () => {
-    const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation(input => false);
+    const getBooleanInputSpy = core.getBooleanInput as jest.Mock;
+    getBooleanInputSpy.mockImplementation(() => false);
 
     const pythonDir: string = path.join(toolDir, 'Python', '3.0.0', 'x64');
     await io.mkdirP(pythonDir);
@@ -79,16 +135,13 @@ describe('Finder tests', () => {
   });
 
   it('Finds stable Python version if it is not installed, but exists in the manifest', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
-    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+    const findSpy = tc.getManifestFromRepo as jest.Mock;
+    findSpy.mockImplementation(() => manifestData);
 
-    const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation(input => false);
+    const getBooleanInputSpy = core.getBooleanInput as jest.Mock;
+    getBooleanInputSpy.mockImplementation(() => false);
 
-    const installSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'installCpythonFromRelease'
-    );
+    const installSpy = installer.installCpythonFromRelease as jest.Mock;
     installSpy.mockImplementation(async () => {
       const pythonDir: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
       await io.mkdirP(pythonDir);
@@ -113,16 +166,13 @@ describe('Finder tests', () => {
   });
 
   it('Finds pre-release Python version in the manifest', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
-    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+    const findSpy = tc.getManifestFromRepo as jest.Mock;
+    findSpy.mockImplementation(() => manifestData);
 
-    const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation(input => false);
+    const getBooleanInputSpy = core.getBooleanInput as jest.Mock;
+    getBooleanInputSpy.mockImplementation(() => false);
 
-    const installSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'installCpythonFromRelease'
-    );
+    const installSpy = installer.installCpythonFromRelease as jest.Mock;
     installSpy.mockImplementation(async () => {
       const pythonDir: string = path.join(
         toolDir,
@@ -150,40 +200,34 @@ describe('Finder tests', () => {
   });
 
   it('Check-latest true, finds the latest version in the manifest', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
-    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+    const findSpy = tc.getManifestFromRepo as jest.Mock;
+    findSpy.mockImplementation(() => manifestData);
 
-    const getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
-    getBooleanInputSpy.mockImplementation(input => true);
+    const getBooleanInputSpy = core.getBooleanInput as jest.Mock;
+    getBooleanInputSpy.mockImplementation(() => true);
 
-    const cnSpy: jest.SpyInstance = jest.spyOn(process.stdout, 'write');
-    cnSpy.mockImplementation(line => {
-      // uncomment to debug
-      // process.stderr.write('write:' + line + '\n');
-    });
+    const cnSpy = jest.spyOn(process.stdout, 'write');
+    cnSpy.mockImplementation(() => true);
 
-    const addPathSpy: jest.SpyInstance = jest.spyOn(core, 'addPath');
+    const addPathSpy = core.addPath as jest.Mock;
     addPathSpy.mockImplementation(() => null);
 
-    const infoSpy: jest.SpyInstance = jest.spyOn(core, 'info');
+    const infoSpy = core.info as jest.Mock;
     infoSpy.mockImplementation(() => {});
 
-    const debugSpy: jest.SpyInstance = jest.spyOn(core, 'debug');
+    const debugSpy = core.debug as jest.Mock;
     debugSpy.mockImplementation(() => {});
 
     const pythonDir: string = path.join(toolDir, 'Python', '1.2.2', 'x64');
     const expPath: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
 
-    const installSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'installCpythonFromRelease'
-    );
+    const installSpy = installer.installCpythonFromRelease as jest.Mock;
     installSpy.mockImplementation(async () => {
       await io.mkdirP(expPath);
       fs.writeFileSync(`${expPath}.complete`, 'hello');
     });
 
-    const tcFindSpy: jest.SpyInstance = jest.spyOn(tc, 'find');
+    const tcFindSpy = tc.find as jest.Mock;
     tcFindSpy
       .mockImplementationOnce(() => '')
       .mockImplementationOnce(() => expPath);
@@ -224,13 +268,10 @@ describe('Finder tests', () => {
   });
 
   it('Finds stable Python version if it is not installed, but exists in the manifest, skipping newer pre-release', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
-    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+    const findSpy = tc.getManifestFromRepo as jest.Mock;
+    findSpy.mockImplementation(() => manifestData);
 
-    const installSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'installCpythonFromRelease'
-    );
+    const installSpy = installer.installCpythonFromRelease as jest.Mock;
     installSpy.mockImplementation(async () => {
       const pythonDir: string = path.join(toolDir, 'Python', '1.2.3', 'x64');
       await io.mkdirP(pythonDir);
@@ -246,13 +287,10 @@ describe('Finder tests', () => {
   });
 
   it('Finds Python version if it is not installed, but exists in the manifest, pre-release fallback', async () => {
-    const findSpy: jest.SpyInstance = jest.spyOn(tc, 'getManifestFromRepo');
-    findSpy.mockImplementation(() => <tc.IToolRelease[]>manifestData);
+    const findSpy = tc.getManifestFromRepo as jest.Mock;
+    findSpy.mockImplementation(() => manifestData);
 
-    const installSpy: jest.SpyInstance = jest.spyOn(
-      installer,
-      'installCpythonFromRelease'
-    );
+    const installSpy = installer.installCpythonFromRelease as jest.Mock;
     installSpy.mockImplementation(async () => {
       const pythonDir: string = path.join(
         toolDir,

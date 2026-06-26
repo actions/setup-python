@@ -1,7 +1,7 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import {getOSInfo, IS_LINUX} from '../utils';
-import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants';
+import {getOSInfo, IS_LINUX} from '../utils.js';
+import {CACHE_DEPENDENCY_BACKUP_PATH} from './constants.js';
 
 export enum State {
   STATE_CACHE_PRIMARY_KEY = 'cache-primary-key',

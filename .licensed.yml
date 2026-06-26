@@ -15,3 +15,5 @@ allowed:
 reviewed:
   npm:
     - "@actions/http-client"
+    - "balanced-match"
+    - "brace-expansion"

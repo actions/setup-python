@@ -1,10 +1,10 @@
 import * as os from 'os';
 import * as path from 'path';
-import {IS_WINDOWS, IS_LINUX, getOSInfo} from './utils';
+import {IS_WINDOWS, IS_LINUX, getOSInfo} from './utils.js';
 
 import * as semver from 'semver';
 
-import * as installer from './install-python';
+import * as installer from './install-python.js';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
