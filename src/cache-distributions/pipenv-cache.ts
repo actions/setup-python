@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as core from '@actions/core';
 
-import CacheDistributor from './cache-distributor';
+import CacheDistributor from './cache-distributor.js';
 
 class PipenvCache extends CacheDistributor {
   constructor(
