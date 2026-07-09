@@ -57,7 +57,6 @@ describe('getManifest', () => {
 
   it('should fall back to URL if repo returns a truncated/empty manifest', async () => {
     jest.useFakeTimers();
-    // Simulate a truncated response that parses to an empty array.
     (tc.getManifestFromRepo as jest.Mock).mockResolvedValue([]);
     (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
       result: mockManifest
@@ -71,9 +70,7 @@ describe('getManifest', () => {
   it('should retry on a transient invalid manifest and then succeed', async () => {
     jest.useFakeTimers();
     (tc.getManifestFromRepo as jest.Mock)
-      // First attempt returns a truncated/empty body.
       .mockResolvedValueOnce([])
-      // Retry returns a valid manifest.
       .mockResolvedValueOnce(mockManifest);
     const promise = getManifest();
     await jest.runAllTimersAsync();
@@ -84,13 +81,12 @@ describe('getManifest', () => {
 
   it('should fail loudly when the manifest is truncated/empty on every source', async () => {
     jest.useFakeTimers();
-    // Both the API and the raw URL keep returning truncated/empty bodies.
     (tc.getManifestFromRepo as jest.Mock).mockResolvedValue([]);
     (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
       result: []
     });
     const promise = getManifest();
-    // Attach a rejection handler before advancing timers to avoid unhandled rejection warnings.
+    // Prevent unhandled rejection before timers advance.
     const catchPromise = promise.catch(() => {});
     await jest.runAllTimersAsync();
     await catchPromise;
@@ -107,8 +103,6 @@ describe('getManifest', () => {
     (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
       result: mockManifest
     });
-    // No fake timers needed: a rate-limit error must short-circuit retries
-    // (and their backoff) and fall straight through to the URL fallback.
     const manifest = await getManifest();
     expect(manifest).toEqual(mockManifest);
     expect(tc.getManifestFromRepo as jest.Mock).toHaveBeenCalledTimes(1);

@@ -151,9 +151,11 @@ function sleep(ms: number): Promise<void> {
 
 // HTTP 403/429 from http-client (`statusCode`) or tool-cache (`httpStatusCode`).
 function isRateLimitError(err: unknown): boolean {
-  const status =
-    (err as {httpStatusCode?: number}).httpStatusCode ??
-    (err as {statusCode?: number}).statusCode;
+  const e = err as
+    | {httpStatusCode?: number; statusCode?: number}
+    | null
+    | undefined;
+  const status = e?.httpStatusCode ?? e?.statusCode;
   return status === 403 || status === 429;
 }
 

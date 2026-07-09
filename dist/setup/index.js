@@ -55725,8 +55725,8 @@ function sleep(ms) {
 }
 // HTTP 403/429 from http-client (`statusCode`) or tool-cache (`httpStatusCode`).
 function isRateLimitError(err) {
-    const status = err.httpStatusCode ??
-        err.statusCode;
+    const e = err;
+    const status = e?.httpStatusCode ?? e?.statusCode;
     return status === 403 || status === 429;
 }
 // Fetches and validates a manifest, retrying transient failures with backoff.
