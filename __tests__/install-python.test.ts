@@ -31,6 +31,10 @@ describe('getManifest', () => {
     jest.resetAllMocks();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should return manifest from repo', async () => {
     (tc.getManifestFromRepo as jest.Mock).mockResolvedValue(mockManifest);
     const manifest = await getManifest();
@@ -38,14 +42,76 @@ describe('getManifest', () => {
   });
 
   it('should return manifest from URL if repo fetch fails', async () => {
+    jest.useFakeTimers();
     (tc.getManifestFromRepo as jest.Mock).mockRejectedValue(
       new Error('Fetch failed')
     );
     (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
       result: mockManifest
     });
+    const promise = getManifest();
+    await jest.runAllTimersAsync();
+    const manifest = await promise;
+    expect(manifest).toEqual(mockManifest);
+  });
+
+  it('should fall back to URL if repo returns a truncated/empty manifest', async () => {
+    jest.useFakeTimers();
+    // Simulate a truncated response that parses to an empty array.
+    (tc.getManifestFromRepo as jest.Mock).mockResolvedValue([]);
+    (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
+      result: mockManifest
+    });
+    const promise = getManifest();
+    await jest.runAllTimersAsync();
+    const manifest = await promise;
+    expect(manifest).toEqual(mockManifest);
+  });
+
+  it('should retry on a transient invalid manifest and then succeed', async () => {
+    jest.useFakeTimers();
+    (tc.getManifestFromRepo as jest.Mock)
+      // First attempt returns a truncated/empty body.
+      .mockResolvedValueOnce([])
+      // Retry returns a valid manifest.
+      .mockResolvedValueOnce(mockManifest);
+    const promise = getManifest();
+    await jest.runAllTimersAsync();
+    const manifest = await promise;
+    expect(manifest).toEqual(mockManifest);
+    expect(tc.getManifestFromRepo as jest.Mock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should fail loudly when the manifest is truncated/empty on every source', async () => {
+    jest.useFakeTimers();
+    // Both the API and the raw URL keep returning truncated/empty bodies.
+    (tc.getManifestFromRepo as jest.Mock).mockResolvedValue([]);
+    (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
+      result: []
+    });
+    const promise = getManifest();
+    // Attach a rejection handler before advancing timers to avoid unhandled rejection warnings.
+    const catchPromise = promise.catch(() => {});
+    await jest.runAllTimersAsync();
+    await catchPromise;
+    await expect(promise).rejects.toThrow(
+      'Failed to fetch the Python versions manifest'
+    );
+  });
+
+  it('should not retry the API on a rate-limit error and fall back to URL immediately', async () => {
+    const rateLimitError = Object.assign(new Error('API rate limit exceeded'), {
+      httpStatusCode: 403
+    });
+    (tc.getManifestFromRepo as jest.Mock).mockRejectedValue(rateLimitError);
+    (httpm.HttpClient.prototype.getJson as jest.Mock).mockResolvedValue({
+      result: mockManifest
+    });
+    // No fake timers needed: a rate-limit error must short-circuit retries
+    // (and their backoff) and fall straight through to the URL fallback.
     const manifest = await getManifest();
     expect(manifest).toEqual(mockManifest);
+    expect(tc.getManifestFromRepo as jest.Mock).toHaveBeenCalledTimes(1);
   });
 });
 

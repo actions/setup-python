@@ -80,6 +80,9 @@ function findRhelRelease(
   return undefined;
 }
 
+const MANIFEST_FETCH_MAX_ATTEMPTS = 3;
+const MANIFEST_FETCH_RETRY_BASE_DELAY_MS = 1000;
+
 export async function findReleaseFromManifest(
   semanticVersionSpec: string,
   architecture: string,
@@ -133,28 +136,93 @@ function isIToolRelease(obj: any): obj is IToolRelease {
   );
 }
 
+// Rejects empty or truncated manifest responses.
+function isValidManifest(manifest: unknown): manifest is tc.IToolRelease[] {
+  return (
+    Array.isArray(manifest) &&
+    manifest.length > 0 &&
+    manifest.every(isIToolRelease)
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// HTTP 403/429 from http-client (`statusCode`) or tool-cache (`httpStatusCode`).
+function isRateLimitError(err: unknown): boolean {
+  const status =
+    (err as {httpStatusCode?: number}).httpStatusCode ??
+    (err as {statusCode?: number}).statusCode;
+  return status === 403 || status === 429;
+}
+
+// Fetches and validates a manifest, retrying transient failures with backoff.
+async function fetchValidManifest(
+  source: string,
+  fetcher: () => Promise<tc.IToolRelease[]>
+): Promise<tc.IToolRelease[]> {
+  let lastError: Error | undefined;
+  let attempts = 0;
+
+  for (let attempt = 1; attempt <= MANIFEST_FETCH_MAX_ATTEMPTS; attempt++) {
+    attempts = attempt;
+    try {
+      const manifest = await fetcher();
+      if (isValidManifest(manifest)) {
+        return manifest;
+      }
+      throw new Error(
+        `The manifest fetched from ${source} is empty, truncated, or does not contain any valid tool release entries.`
+      );
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      core.debug(
+        `Attempt ${attempt}/${MANIFEST_FETCH_MAX_ATTEMPTS} to fetch the manifest from ${source} failed: ${lastError.message}`
+      );
+
+      // Rate limits won't clear within the backoff window; fall back instead.
+      if (isRateLimitError(err)) {
+        core.debug(
+          `${source} is rate-limited; skipping retries for this source.`
+        );
+        break;
+      }
+
+      if (attempt < MANIFEST_FETCH_MAX_ATTEMPTS) {
+        const delay = MANIFEST_FETCH_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
+        core.debug(`Retrying in ${delay}ms...`);
+        await sleep(delay);
+      }
+    }
+  }
+
+  throw new Error(
+    `Failed to fetch a valid manifest from ${source} after ${attempts} attempt(s): ${lastError?.message}`
+  );
+}
+
 export async function getManifest(): Promise<tc.IToolRelease[]> {
   try {
-    const repoManifest = await getManifestFromRepo();
-    if (
-      Array.isArray(repoManifest) &&
-      repoManifest.length &&
-      repoManifest.every(isIToolRelease)
-    ) {
-      return repoManifest;
-    }
-    throw new Error(
-      'The repository manifest is invalid or does not include any valid tool release (IToolRelease) entries.'
-    );
+    return await fetchValidManifest('the GitHub API', getManifestFromRepo);
   } catch (err) {
     core.debug('Fetching the manifest via the API failed.');
     if (err instanceof Error) {
       core.debug(err.message);
     } else {
-      core.error('An unexpected error occurred while fetching the manifest.');
+      core.debug('An unexpected error occurred while fetching the manifest.');
     }
   }
-  return await getManifestFromURL();
+
+  try {
+    return await fetchValidManifest('the raw URL', getManifestFromURL);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    // Fail loudly so the action doesn't exit 0 without installing Python.
+    throw new Error(
+      `Failed to fetch the Python versions manifest. The response was empty, truncated, or invalid, and all retries were exhausted. ${message}`
+    );
+  }
 }
 
 export function getManifestFromRepo(): Promise<tc.IToolRelease[]> {
