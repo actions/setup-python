@@ -28,10 +28,9 @@ jobs:
             macos-15-intel
           ]
         graalpy:
-          - 'graalpy-22.3'
-          - 'graalpy-23.0'
           - 'graalpy-23.1'
-          - 'graalpy-24.1'
+          - 'graalpy-24.2'
+          - 'graalpy-25.0'
 
     steps:
       - name: Checkout
@@ -82,7 +81,7 @@ jobs:
             ubuntu-latest,
             macos-15-intel
           ]
-        graalpy: ['graalpy22.3', 'graalpy23.0', 'graalpy23.1', 'graalpy24.1']
+        graalpy: ['graalpy23.1', 'graalpy24.2', 'graalpy25.0']
 
     steps:
       - name: Checkout
@@ -113,7 +112,7 @@ jobs:
         uses: ./
         id: graalpy
         with:
-          python-version: 'graalpy-24.x'
+          python-version: 'graalpy-25.x'
           check-latest: true
       - name: GraalPy and Python version
         run: python --version
