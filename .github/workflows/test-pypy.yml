@@ -236,13 +236,13 @@ jobs:
         run: |
           EXECUTABLE="pypy-3.11-v7.3.x"
           EXECUTABLE=${EXECUTABLE/-/}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
-          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffix
           ${EXECUTABLE} --version
         shell: bash
       - name: Assert expected binaries (or symlinks) are present
         run: |
           EXECUTABLE='pypy-3.10-v7.3.x'
           EXECUTABLE=${EXECUTABLE/pypy-/pypy}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
-          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffixe
+          EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffix
           ${EXECUTABLE} --version
         shell: bash
