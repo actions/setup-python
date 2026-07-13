@@ -55759,7 +55759,13 @@ async function installPython(workingDirectory) {
                 core.info(data.toString().trim());
             },
             stderr: (data) => {
-                core.error(data.toString().trim());
+                const msg = data.toString().trim();
+                if (/^WARNING:/im.test(msg)) {
+                    core.warning(msg);
+                }
+                else {
+                    core.error(msg);
+                }
             }
         }
     };
