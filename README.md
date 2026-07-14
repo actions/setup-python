@@ -10,7 +10,8 @@ This action provides the following functionality for GitHub Actions users:
 - Installing a version of Python or PyPy and (by default) adding it to the PATH
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
-## Breaking changes in V7
+
+## What's new in V7
 
 - Migrated action internals to ESM for compatibility with latest `@actions/*` packages. No changes to action inputs, outputs, or behavior.
 

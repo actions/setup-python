@@ -1,4 +1,4 @@
-import {jest, describe, it, expect, beforeEach} from '@jest/globals';
+import {jest, describe, it, expect, beforeEach, afterEach} from '@jest/globals';
 
 class MockHttpClientError extends Error {
   statusCode: number;
@@ -159,7 +159,9 @@ describe('getManifest', () => {
     const rateLimitError = Object.assign(new Error('API rate limit exceeded'), {
       httpStatusCode: 403
     });
-    (tc.getManifestFromRepo as jest.Mock<any>).mockRejectedValue(rateLimitError);
+    (tc.getManifestFromRepo as jest.Mock<any>).mockRejectedValue(
+      rateLimitError
+    );
     (httpm.HttpClient as jest.Mock<any>).mockImplementation(() => ({
       getJson: jest.fn(async () => ({result: mockManifest}))
     }));
