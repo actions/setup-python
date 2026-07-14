@@ -12,7 +12,7 @@ This action provides the following functionality for GitHub Actions users:
 - Registering problem matchers for error output
 ## Breaking changes in V7
 
-- **Migrated to ESM** to enable support for the latest `@actions/*` package versions.
+- Migrated action internals to ESM for compatibility with latest `@actions/*` packages. No changes to action inputs, outputs, or behavior.
 
 ## Breaking changes in V6
 
