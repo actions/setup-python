@@ -1,4 +1,5 @@
-import {desugarVersion, pythonVersionToSemantic} from '../src/find-python';
+import {describe, it, expect} from '@jest/globals';
+import {desugarVersion, pythonVersionToSemantic} from '../src/find-python.js';
 
 describe('desugarVersion', () => {
   it.each([

@@ -1,20 +1,75 @@
+import {jest, describe, it, expect, beforeEach, afterEach} from '@jest/globals';
+import {fileURLToPath} from 'url';
 import fs from 'fs';
-
-import {HttpClient} from '@actions/http-client';
-import * as ifm from '@actions/http-client/lib/interfaces';
-import * as tc from '@actions/tool-cache';
-import * as exec from '@actions/exec';
-import * as core from '@actions/core';
 import * as path from 'path';
 
-import * as installer from '../src/install-graalpy';
-import {
-  IGraalPyManifestRelease,
-  IGraalPyManifestAsset,
-  IS_WINDOWS
-} from '../src/utils';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-import manifestData from './data/graalpy.json';
+// Mock @actions modules
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+  notice: jest.fn(),
+  setFailed: jest.fn(),
+  setOutput: jest.fn(),
+  getInput: jest.fn(),
+  getBooleanInput: jest.fn(),
+  getMultilineInput: jest.fn(),
+  addPath: jest.fn(),
+  exportVariable: jest.fn(),
+  saveState: jest.fn(),
+  getState: jest.fn(),
+  setSecret: jest.fn(),
+  isDebug: jest.fn(() => false),
+  startGroup: jest.fn(),
+  endGroup: jest.fn(),
+  group: jest.fn((_name: string, fn: () => Promise<unknown>) => fn()),
+  toPlatformPath: jest.fn((p: string) => p),
+  toWin32Path: jest.fn((p: string) => p),
+  toPosixPath: jest.fn((p: string) => p)
+}));
+
+jest.unstable_mockModule('@actions/tool-cache', () => ({
+  find: jest.fn(),
+  findAllVersions: jest.fn(),
+  downloadTool: jest.fn(),
+  extractZip: jest.fn(),
+  extractTar: jest.fn(),
+  extract7z: jest.fn(),
+  extractXar: jest.fn(),
+  cacheDir: jest.fn(),
+  cacheFile: jest.fn(),
+  getManifestFromRepo: jest.fn(),
+  findFromManifest: jest.fn(),
+  evaluateVersions: jest.fn()
+}));
+
+jest.unstable_mockModule('@actions/exec', () => ({
+  exec: jest.fn(),
+  getExecOutput: jest.fn()
+}));
+
+// Dynamic imports after mocking
+const core = await import('@actions/core');
+const tc = await import('@actions/tool-cache');
+const exec = await import('@actions/exec');
+
+// Non-mocked imports
+import {HttpClient} from '@actions/http-client';
+import type * as ifm from '@actions/http-client/lib/interfaces';
+
+const installer = await import('../src/install-graalpy.js');
+const utils = await import('../src/utils.js');
+
+import type {
+  IGraalPyManifestRelease,
+  IGraalPyManifestAsset
+} from '../src/utils.js';
+import manifestData from './data/graalpy.json' with {type: 'json'};
+
+const IS_WINDOWS = utils.IS_WINDOWS;
 
 const architecture = 'x64';
 
@@ -48,18 +103,18 @@ describe('findRelease', () => {
     browser_download_url: `https://github.com/graalvm/graal-languages-ea-builds/releases/download/graalpy-24.1.0-ea.09/graalpy-24.1.0-ea.09-${extensionName}`
   };
 
-  let warningSpy: jest.SpyInstance;
-  let debugSpy: jest.SpyInstance;
-  let infoSpy: jest.SpyInstance;
+  let warningSpy: jest.Mock;
+  let debugSpy: jest.Mock;
+  let infoSpy: jest.Mock;
 
   beforeEach(() => {
-    infoSpy = jest.spyOn(core, 'info');
+    infoSpy = core.info as jest.Mock;
     infoSpy.mockImplementation(() => {});
 
-    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy = core.warning as jest.Mock;
     warningSpy.mockImplementation(() => null);
 
-    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy = core.debug as jest.Mock;
     debugSpy.mockImplementation(() => null);
   });
 
@@ -115,51 +170,57 @@ describe('findRelease', () => {
       resolvedGraalPyVersion: '24.1.0-ea.9'
     });
   });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
 });
 
 describe('installGraalPy', () => {
-  let tcFind: jest.SpyInstance;
-  let warningSpy: jest.SpyInstance;
-  let debugSpy: jest.SpyInstance;
-  let infoSpy: jest.SpyInstance;
-  let spyExtractZip: jest.SpyInstance;
-  let spyExtractTar: jest.SpyInstance;
-  let spyFsReadDir: jest.SpyInstance;
-  let spyFsWriteFile: jest.SpyInstance;
-  let spyHttpClient: jest.SpyInstance;
-  let spyExistsSync: jest.SpyInstance;
-  let spyExec: jest.SpyInstance;
-  let spySymlinkSync: jest.SpyInstance;
-  let spyDownloadTool: jest.SpyInstance;
-  let spyCacheDir: jest.SpyInstance;
-  let spyChmodSync: jest.SpyInstance;
+  let tcFind: jest.Mock;
+  let infoSpy: jest.Mock;
+  let warningSpy: jest.Mock;
+  let debugSpy: jest.Mock;
+  let spyExtractZip: jest.Mock;
+  let spyExtractTar: jest.Mock;
+  let spyFsReadDir: jest.SpiedFunction<typeof fs.readdirSync>;
+  let spyFsWriteFile: jest.SpiedFunction<typeof fs.writeFileSync>;
+  let spyHttpClient: jest.SpiedFunction<typeof HttpClient.prototype.getJson>;
+  let spyExistsSync: jest.SpiedFunction<typeof fs.existsSync>;
+  let spyExec: jest.Mock;
+  let spySymlinkSync: jest.SpiedFunction<typeof fs.symlinkSync>;
+  let spyDownloadTool: jest.Mock;
+  let spyCacheDir: jest.Mock;
+  let spyChmodSync: jest.SpiedFunction<typeof fs.chmodSync>;
 
   beforeEach(() => {
-    tcFind = jest.spyOn(tc, 'find');
+    tcFind = tc.find as jest.Mock;
     tcFind.mockImplementation(() =>
       path.join('GraalPy', '3.6.12', architecture)
     );
 
-    spyDownloadTool = jest.spyOn(tc, 'downloadTool');
+    spyDownloadTool = tc.downloadTool as jest.Mock;
     spyDownloadTool.mockImplementation(() => path.join(tempDir, 'GraalPy'));
 
-    spyExtractZip = jest.spyOn(tc, 'extractZip');
+    spyExtractZip = tc.extractZip as jest.Mock;
     spyExtractZip.mockImplementation(() => tempDir);
 
-    spyExtractTar = jest.spyOn(tc, 'extractTar');
+    spyExtractTar = tc.extractTar as jest.Mock;
     spyExtractTar.mockImplementation(() => tempDir);
 
-    infoSpy = jest.spyOn(core, 'info');
+    infoSpy = core.info as jest.Mock;
     infoSpy.mockImplementation(() => {});
 
-    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy = core.warning as jest.Mock;
     warningSpy.mockImplementation(() => null);
 
-    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy = core.debug as jest.Mock;
     debugSpy.mockImplementation(() => null);
 
     spyFsReadDir = jest.spyOn(fs, 'readdirSync');
-    spyFsReadDir.mockImplementation(() => ['GraalPyTest']);
+    spyFsReadDir.mockImplementation(() => ['GraalPyTest'] as any);
 
     spyFsWriteFile = jest.spyOn(fs, 'writeFileSync');
     spyFsWriteFile.mockImplementation(() => undefined);
@@ -176,7 +237,7 @@ describe('installGraalPy', () => {
       }
     );
 
-    spyExec = jest.spyOn(exec, 'exec');
+    spyExec = exec.exec as jest.Mock;
     spyExec.mockImplementation(() => undefined);
 
     spySymlinkSync = jest.spyOn(fs, 'symlinkSync');
@@ -205,7 +266,7 @@ describe('installGraalPy', () => {
   });
 
   it('found and install GraalPy', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'GraalPy', '21.3.0', architecture)
     );
@@ -227,7 +288,7 @@ describe('installGraalPy', () => {
   });
 
   it('found and install GraalPy, pre-release fallback', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'GraalPy', '24.1.0', architecture)
     );

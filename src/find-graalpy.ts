@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as graalpyInstall from './install-graalpy';
-import {IS_WINDOWS, validateVersion, IGraalPyManifestRelease} from './utils';
+import * as graalpyInstall from './install-graalpy.js';
+import {IS_WINDOWS, validateVersion, IGraalPyManifestRelease} from './utils.js';
 
 import * as semver from 'semver';
 import * as core from '@actions/core';

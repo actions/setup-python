@@ -1,23 +1,83 @@
+import {jest, describe, it, expect, beforeEach, afterEach} from '@jest/globals';
+import {fileURLToPath} from 'url';
 import fs from 'fs';
-
-import * as utils from '../src/utils';
-import {HttpClient} from '@actions/http-client';
-import * as ifm from '@actions/http-client/lib/interfaces';
-import * as tc from '@actions/tool-cache';
-import * as exec from '@actions/exec';
-import * as core from '@actions/core';
-
 import * as path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import * as semver from 'semver';
 
-import * as finder from '../src/find-pypy';
-import {
-  IPyPyManifestRelease,
-  IS_WINDOWS,
-  getPyPyVersionFromPath
-} from '../src/utils';
+// Mock @actions modules
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+  notice: jest.fn(),
+  setFailed: jest.fn(),
+  setOutput: jest.fn(),
+  getInput: jest.fn(),
+  getBooleanInput: jest.fn(),
+  getMultilineInput: jest.fn(),
+  addPath: jest.fn(),
+  exportVariable: jest.fn(),
+  saveState: jest.fn(),
+  getState: jest.fn(),
+  setSecret: jest.fn(),
+  isDebug: jest.fn(() => false),
+  startGroup: jest.fn(),
+  endGroup: jest.fn(),
+  group: jest.fn((_name: string, fn: () => Promise<unknown>) => fn()),
+  toPlatformPath: jest.fn((p: string) => p),
+  toWin32Path: jest.fn((p: string) => p),
+  toPosixPath: jest.fn((p: string) => p)
+}));
 
-import manifestData from './data/pypy.json';
+jest.unstable_mockModule('@actions/tool-cache', () => ({
+  find: jest.fn(),
+  findAllVersions: jest.fn(),
+  downloadTool: jest.fn(),
+  extractZip: jest.fn(),
+  extractTar: jest.fn(),
+  extract7z: jest.fn(),
+  extractXar: jest.fn(),
+  cacheDir: jest.fn(),
+  cacheFile: jest.fn(),
+  getManifestFromRepo: jest.fn(),
+  findFromManifest: jest.fn(),
+  evaluateVersions: jest.fn()
+}));
+
+jest.unstable_mockModule('@actions/exec', () => ({
+  exec: jest.fn(),
+  getExecOutput: jest.fn()
+}));
+
+// Import real utils BEFORE mock registration to get real function references
+const realUtils = await import('../src/utils.js');
+
+// Mock local utils module for readExactPyPyVersionFile/writeExactPyPyVersionFile
+jest.unstable_mockModule('../src/utils.js', () => ({
+  ...realUtils,
+  readExactPyPyVersionFile: jest.fn(),
+  writeExactPyPyVersionFile: jest.fn()
+}));
+
+// Dynamic imports after mocking
+const core = await import('@actions/core');
+const tc = await import('@actions/tool-cache');
+const exec = await import('@actions/exec');
+const utils = await import('../src/utils.js');
+const finder = await import('../src/find-pypy.js');
+
+// Non-mocked imports
+import {HttpClient} from '@actions/http-client';
+import type * as ifm from '@actions/http-client/lib/interfaces';
+
+import type {IPyPyManifestRelease} from '../src/utils.js';
+import manifestData from './data/pypy.json' with {type: 'json'};
+
+const IS_WINDOWS = utils.IS_WINDOWS;
+const getPyPyVersionFromPath = utils.getPyPyVersionFromPath;
 
 let architecture: string;
 
@@ -79,43 +139,45 @@ describe('findPyPyToolCache', () => {
   const actualPythonVersion = '3.6.17';
   const actualPyPyVersion = '7.5.4';
   const pypyPath = path.join('PyPy', actualPythonVersion, architecture);
-  let tcFind: jest.SpyInstance;
-  let spyReadExactPyPyVersion: jest.SpyInstance;
-  let infoSpy: jest.SpyInstance;
-  let warningSpy: jest.SpyInstance;
-  let debugSpy: jest.SpyInstance;
-  let addPathSpy: jest.SpyInstance;
-  let exportVariableSpy: jest.SpyInstance;
-  let setOutputSpy: jest.SpyInstance;
+  let tcFind: jest.Mock;
+  let spyReadExactPyPyVersion: jest.Mock;
+  let infoSpy: jest.Mock;
+  let warningSpy: jest.Mock;
+  let debugSpy: jest.Mock;
+  let addPathSpy: jest.Mock;
+  let exportVariableSpy: jest.Mock;
+  let setOutputSpy: jest.Mock;
 
   beforeEach(() => {
-    tcFind = jest.spyOn(tc, 'find');
-    tcFind.mockImplementation((toolname: string, pythonVersion: string) => {
-      const semverVersion = new semver.Range(pythonVersion);
-      return semver.satisfies(actualPythonVersion, semverVersion)
-        ? pypyPath
-        : '';
-    });
+    tcFind = tc.find as jest.Mock;
+    (tcFind as jest.Mock<typeof tc.find>).mockImplementation(
+      (toolname: string, pythonVersion: string) => {
+        const semverVersion = new semver.Range(pythonVersion);
+        return semver.satisfies(actualPythonVersion, semverVersion)
+          ? pypyPath
+          : '';
+      }
+    );
 
-    spyReadExactPyPyVersion = jest.spyOn(utils, 'readExactPyPyVersionFile');
+    spyReadExactPyPyVersion = utils.readExactPyPyVersionFile as jest.Mock;
     spyReadExactPyPyVersion.mockImplementation(() => actualPyPyVersion);
 
-    infoSpy = jest.spyOn(core, 'info');
+    infoSpy = core.info as jest.Mock;
     infoSpy.mockImplementation(() => null);
 
-    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy = core.warning as jest.Mock;
     warningSpy.mockImplementation(() => null);
 
-    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy = core.debug as jest.Mock;
     debugSpy.mockImplementation(() => null);
 
-    addPathSpy = jest.spyOn(core, 'addPath');
+    addPathSpy = core.addPath as jest.Mock;
     addPathSpy.mockImplementation(() => null);
 
-    exportVariableSpy = jest.spyOn(core, 'exportVariable');
+    exportVariableSpy = core.exportVariable as jest.Mock;
     exportVariableSpy.mockImplementation(() => null);
 
-    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy = core.setOutput as jest.Mock;
     setOutputSpy.mockImplementation(() => null);
   });
 
@@ -159,84 +221,82 @@ describe('findPyPyToolCache', () => {
 });
 
 describe('findPyPyVersion', () => {
-  let getBooleanInputSpy: jest.SpyInstance;
-  let warningSpy: jest.SpyInstance;
-  let debugSpy: jest.SpyInstance;
-  let infoSpy: jest.SpyInstance;
-  let addPathSpy: jest.SpyInstance;
-  let exportVariableSpy: jest.SpyInstance;
-  let setOutputSpy: jest.SpyInstance;
-  let tcFind: jest.SpyInstance;
-  let spyExtractZip: jest.SpyInstance;
-  let spyExtractTar: jest.SpyInstance;
-  let spyHttpClient: jest.SpyInstance;
-  let spyExistsSync: jest.SpyInstance;
-  let spyExec: jest.SpyInstance;
-  let spySymlinkSync: jest.SpyInstance;
-  let spyDownloadTool: jest.SpyInstance;
-  let spyReadExactPyPyVersion: jest.SpyInstance;
-  let spyFsReadDir: jest.SpyInstance;
-  let spyWriteExactPyPyVersionFile: jest.SpyInstance;
-  let spyCacheDir: jest.SpyInstance;
-  let spyChmodSync: jest.SpyInstance;
-  let spyCoreAddPath: jest.SpyInstance;
-  let spyCoreExportVariable: jest.SpyInstance;
+  let getBooleanInputSpy: jest.Mock;
+  let warningSpy: jest.Mock;
+  let debugSpy: jest.Mock;
+  let infoSpy: jest.Mock;
+  let addPathSpy: jest.Mock;
+  let exportVariableSpy: jest.Mock;
+  let setOutputSpy: jest.Mock;
+  let tcFind: jest.Mock;
+  let spyExtractZip: jest.Mock;
+  let spyExtractTar: jest.Mock;
+  let spyHttpClient: jest.SpiedFunction<typeof HttpClient.prototype.getJson>;
+  let spyExistsSync: jest.SpiedFunction<typeof fs.existsSync>;
+  let spyExec: jest.Mock;
+  let spySymlinkSync: jest.SpiedFunction<typeof fs.symlinkSync>;
+  let spyDownloadTool: jest.Mock;
+  let spyReadExactPyPyVersion: jest.Mock;
+  let spyFsReadDir: jest.SpiedFunction<typeof fs.readdirSync>;
+  let spyWriteExactPyPyVersionFile: jest.Mock;
+  let spyCacheDir: jest.Mock;
+  let spyChmodSync: jest.SpiedFunction<typeof fs.chmodSync>;
+  let spyCoreAddPath: jest.Mock;
+  let spyCoreExportVariable: jest.Mock;
   const env = process.env;
 
   beforeEach(() => {
-    getBooleanInputSpy = jest.spyOn(core, 'getBooleanInput');
+    getBooleanInputSpy = core.getBooleanInput as jest.Mock;
     getBooleanInputSpy.mockImplementation(() => false);
 
-    infoSpy = jest.spyOn(core, 'info');
+    infoSpy = core.info as jest.Mock;
     infoSpy.mockImplementation(() => {});
 
-    warningSpy = jest.spyOn(core, 'warning');
+    warningSpy = core.warning as jest.Mock;
     warningSpy.mockImplementation(() => null);
 
-    debugSpy = jest.spyOn(core, 'debug');
+    debugSpy = core.debug as jest.Mock;
     debugSpy.mockImplementation(() => null);
 
-    addPathSpy = jest.spyOn(core, 'addPath');
+    addPathSpy = core.addPath as jest.Mock;
     addPathSpy.mockImplementation(() => null);
 
-    exportVariableSpy = jest.spyOn(core, 'exportVariable');
+    exportVariableSpy = core.exportVariable as jest.Mock;
     exportVariableSpy.mockImplementation(() => null);
 
-    setOutputSpy = jest.spyOn(core, 'setOutput');
+    setOutputSpy = core.setOutput as jest.Mock;
     setOutputSpy.mockImplementation(() => null);
 
-    jest.resetModules();
     process.env = {...env};
-    tcFind = jest.spyOn(tc, 'find');
-    tcFind.mockImplementation((tool: string, version: string) => {
-      const semverRange = new semver.Range(version);
-      let pypyPath = '';
-      if (semver.satisfies('3.6.12', semverRange)) {
-        pypyPath = path.join(toolDir, 'PyPy', '3.6.12', architecture);
+    tcFind = tc.find as jest.Mock;
+    (tcFind as jest.Mock<typeof tc.find>).mockImplementation(
+      (tool: string, version: string) => {
+        const semverRange = new semver.Range(version);
+        let pypyPath = '';
+        if (semver.satisfies('3.6.12', semverRange)) {
+          pypyPath = path.join(toolDir, 'PyPy', '3.6.12', architecture);
+        }
+        return pypyPath;
       }
-      return pypyPath;
-    });
-
-    spyWriteExactPyPyVersionFile = jest.spyOn(
-      utils,
-      'writeExactPyPyVersionFile'
     );
+
+    spyWriteExactPyPyVersionFile = utils.writeExactPyPyVersionFile as jest.Mock;
     spyWriteExactPyPyVersionFile.mockImplementation(() => null);
 
-    spyReadExactPyPyVersion = jest.spyOn(utils, 'readExactPyPyVersionFile');
+    spyReadExactPyPyVersion = utils.readExactPyPyVersionFile as jest.Mock;
     spyReadExactPyPyVersion.mockImplementation(() => '7.3.3');
 
-    spyDownloadTool = jest.spyOn(tc, 'downloadTool');
+    spyDownloadTool = tc.downloadTool as jest.Mock;
     spyDownloadTool.mockImplementation(() => path.join(tempDir, 'PyPy'));
 
-    spyExtractZip = jest.spyOn(tc, 'extractZip');
+    spyExtractZip = tc.extractZip as jest.Mock;
     spyExtractZip.mockImplementation(() => tempDir);
 
-    spyExtractTar = jest.spyOn(tc, 'extractTar');
+    spyExtractTar = tc.extractTar as jest.Mock;
     spyExtractTar.mockImplementation(() => tempDir);
 
     spyFsReadDir = jest.spyOn(fs, 'readdirSync');
-    spyFsReadDir.mockImplementation((directory: string) => ['PyPyTest']);
+    spyFsReadDir.mockImplementation(() => ['PyPyTest'] as any);
 
     spyHttpClient = jest.spyOn(HttpClient.prototype, 'getJson');
     spyHttpClient.mockImplementation(
@@ -250,7 +310,7 @@ describe('findPyPyVersion', () => {
       }
     );
 
-    spyExec = jest.spyOn(exec, 'exec');
+    spyExec = exec.exec as jest.Mock;
     spyExec.mockImplementation(() => undefined);
 
     spySymlinkSync = jest.spyOn(fs, 'symlinkSync');
@@ -259,9 +319,9 @@ describe('findPyPyVersion', () => {
     spyExistsSync = jest.spyOn(fs, 'existsSync');
     spyExistsSync.mockReturnValue(true);
 
-    spyCoreAddPath = jest.spyOn(core, 'addPath');
+    spyCoreAddPath = core.addPath as jest.Mock;
 
-    spyCoreExportVariable = jest.spyOn(core, 'exportVariable');
+    spyCoreExportVariable = core.exportVariable as jest.Mock;
   });
 
   afterEach(() => {
@@ -308,7 +368,7 @@ describe('findPyPyVersion', () => {
   });
 
   it('found and install successfully', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'PyPy', '3.7.7', architecture)
     );
@@ -338,7 +398,7 @@ describe('findPyPyVersion', () => {
   });
 
   it('found and install successfully without environment update', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'PyPy', '3.7.7', architecture)
     );
@@ -394,7 +454,7 @@ describe('findPyPyVersion', () => {
   });
 
   it('check-latest enabled version found and install successfully', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'PyPy', '3.7.7', architecture)
     );
@@ -418,14 +478,16 @@ describe('findPyPyVersion', () => {
   });
 
   it('check-latest enabled version is not found and used from toolcache', async () => {
-    tcFind.mockImplementationOnce((tool: string, version: string) => {
-      const semverRange = new semver.Range(version);
-      let pypyPath = '';
-      if (semver.satisfies('3.8.8', semverRange)) {
-        pypyPath = path.join(toolDir, 'PyPy', '3.8.8', architecture);
+    (tcFind as jest.Mock<typeof tc.find>).mockImplementationOnce(
+      (tool: string, version: string) => {
+        const semverRange = new semver.Range(version);
+        let pypyPath = '';
+        if (semver.satisfies('3.8.8', semverRange)) {
+          pypyPath = path.join(toolDir, 'PyPy', '3.8.8', architecture);
+        }
+        return pypyPath;
       }
-      return pypyPath;
-    });
+    );
     await expect(
       finder.findPyPyVersion(
         'pypy-3.8-v7.3.x',
@@ -445,7 +507,7 @@ describe('findPyPyVersion', () => {
   });
 
   it('found and install successfully, pre-release fallback', async () => {
-    spyCacheDir = jest.spyOn(tc, 'cacheDir');
+    spyCacheDir = tc.cacheDir as jest.Mock;
     spyCacheDir.mockImplementation(() =>
       path.join(toolDir, 'PyPy', '3.8.12', architecture)
     );

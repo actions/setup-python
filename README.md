@@ -11,6 +11,10 @@ This action provides the following functionality for GitHub Actions users:
 - Optionally caching dependencies for pip, pipenv and poetry
 - Registering problem matchers for error output
 
+## What's new in V7
+
+- Migrated action internals to ESM for compatibility with latest `@actions/*` packages. No changes to action inputs, outputs, or behavior.
+
 ## Breaking changes in V6
 
 - Upgraded action from node20 to node24

@@ -17,7 +17,7 @@ import {
   writeExactPyPyVersionFile,
   getBinaryDirectory,
   getDownloadFileName
-} from './utils';
+} from './utils.js';
 
 export async function installPyPy(
   pypyVersion: string,
