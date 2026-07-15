@@ -222,7 +222,8 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
     const message = err instanceof Error ? err.message : String(err);
     // Fail loudly so the action doesn't exit 0 without installing Python.
     throw new Error(
-      `Failed to fetch the Python versions manifest. The response was empty, truncated, or invalid, and all retries were exhausted. ${message}`
+      `Failed to fetch the Python versions manifest. The response was empty, truncated, or invalid, and all retries were exhausted. ${message}`,
+      {cause: err}
     );
   }
 }
