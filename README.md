@@ -104,7 +104,35 @@ steps:
 >The `setup-python` action does not handle authentication for pip when installing packages from private repositories. For help, refer [pip’s VCS support documentation](https://pip.pypa.io/en/stable/topics/vcs-support/) or visit the [pip repository](https://github.com/pypa/pip).
 
 See examples of using `cache` and `cache-dependency-path` for `pipenv` and `poetry` in the section: [Caching packages](docs/advanced-usage.md#caching-packages) of the [Advanced usage](docs/advanced-usage.md) guide.
+## Configuring a custom PyPI repository
 
+The action supports configuring pip to use a custom PyPI repository (e.g., a private Nexus, Artifactory, or other PyPI-compatible repository). This is useful in enterprise environments where the public PyPI may be blocked by a firewall, or where you need to use security-scanned packages from an internal repository.
+
+**Configure custom PyPI repository:**
+
+```yaml
+steps:
+- uses: actions/checkout@v5
+- uses: actions/setup-python@v6
+  with:
+    python-version: '3.13'
+    pypi-url: ${{ secrets.PYPI_REPO_URL }}
+    pypi-username: ${{ secrets.PYPI_USER }}
+    pypi-password: ${{ secrets.PYPI_PASSWORD }}
+- run: pip install -r requirements.txt
+```
+
+The action will create or overwrite a `pip.conf` (Linux/macOS) or `pip.ini` (Windows) file in the appropriate location with the configured repository URL and credentials. All subsequent pip commands will use the configured repository.
+
+> **Warning:** If a `pip.conf` or `pip.ini` file already exists at that location, its contents will be overwritten by this action for the duration of the job. Existing settings are not merged or preserved.
+**Input parameters:**
+- `pypi-url`: The URL of your custom PyPI repository (e.g., `https://nexus.example.com/repository/pypi/simple`)
+- `pypi-username` (optional): Username for authentication with the custom repository
+- `pypi-password` (optional): Password or token for authentication with the custom repository
+
+>**Note:** Both `pypi-username` and `pypi-password` must be provided together for authentication. If only one is provided, the action will configure pip without credentials.
+
+>**Security Note:** Always use GitHub secrets to store sensitive information like usernames and passwords. Never hardcode credentials in your workflow files.
 ## Advanced usage
 
 - [Using the python-version input](docs/advanced-usage.md#using-the-python-version-input)
