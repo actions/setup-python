@@ -21,6 +21,7 @@ process.env['RUNNER_TEMP'] = tempDir;
 
 import * as tc from '@actions/tool-cache';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import * as finder from '../src/find-python';
 import * as installer from '../src/install-python';
 
@@ -297,5 +298,134 @@ describe('Finder tests', () => {
     expect(thrown).toBeTruthy();
     expect(spyCoreAddPath).not.toHaveBeenCalled();
     expect(spyCoreExportVariable).not.toHaveBeenCalled();
+  });
+
+  describe('System Python fallback', () => {
+    let execSpy: jest.SpyInstance;
+    let manifestSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock the manifest to return entries only for x64, not riscv64
+      manifestSpy = jest.spyOn(installer, 'getManifest');
+      manifestSpy.mockImplementation(
+        async () => <tc.IToolRelease[]>manifestData
+      );
+    });
+
+    it('Falls back to system Python on unsupported architecture', async () => {
+      execSpy = jest.spyOn(exec, 'getExecOutput');
+      execSpy.mockImplementation(async () => ({
+        exitCode: 0,
+        stdout:
+          '/usr/bin/python3\n3.12.0\n/usr\n/usr/bin\n',
+        stderr: ''
+      }));
+
+      const result = await finder.useCpythonVersion(
+        '3.12',
+        'riscv64',
+        true,
+        false,
+        false,
+        false
+      );
+
+      expect(result).toEqual({impl: 'CPython', version: '3.12.0'});
+      expect(spyCoreAddPath).toHaveBeenCalledWith('/usr/bin');
+      expect(spyCoreExportVariable).toHaveBeenCalledWith(
+        'pythonLocation',
+        '/usr'
+      );
+    });
+
+    it('Does not fall back on supported architecture with missing version', async () => {
+      // x64 has manifest entries, so fallback should NOT trigger
+      let thrown = false;
+      try {
+        await finder.useCpythonVersion(
+          '3.300000',
+          'x64',
+          true,
+          false,
+          false,
+          false
+        );
+      } catch {
+        thrown = true;
+      }
+      expect(thrown).toBeTruthy();
+    });
+
+    it('Does not fall back when system Python version does not match', async () => {
+      execSpy = jest.spyOn(exec, 'getExecOutput');
+      execSpy.mockImplementation(async () => ({
+        exitCode: 0,
+        stdout:
+          '/usr/bin/python3\n3.11.5\n/usr\n/usr/bin\n',
+        stderr: ''
+      }));
+
+      let thrown = false;
+      try {
+        await finder.useCpythonVersion(
+          '3.12',
+          'riscv64',
+          true,
+          false,
+          false,
+          false
+        );
+      } catch {
+        thrown = true;
+      }
+      expect(thrown).toBeTruthy();
+    });
+
+    it('Does not fall back for freethreaded builds', async () => {
+      execSpy = jest.spyOn(exec, 'getExecOutput');
+      execSpy.mockImplementation(async () => ({
+        exitCode: 0,
+        stdout:
+          '/usr/bin/python3\n3.13.0\n/usr\n/usr/bin\n',
+        stderr: ''
+      }));
+
+      let thrown = false;
+      try {
+        await finder.useCpythonVersion(
+          '3.13t',
+          'riscv64',
+          true,
+          false,
+          false,
+          false
+        );
+      } catch {
+        thrown = true;
+      }
+      expect(thrown).toBeTruthy();
+    });
+
+    it('Handles missing system Python gracefully', async () => {
+      execSpy = jest.spyOn(exec, 'getExecOutput');
+      execSpy.mockImplementation(async () => {
+        throw new Error('python3 not found');
+      });
+
+      let thrown = false;
+      try {
+        await finder.useCpythonVersion(
+          '3.12',
+          'riscv64',
+          true,
+          false,
+          false,
+          false
+        );
+      } catch {
+        thrown = true;
+      }
+      expect(thrown).toBeTruthy();
+    });
   });
 });

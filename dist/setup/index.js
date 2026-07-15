@@ -54995,6 +54995,45 @@ async function useCpythonVersion(version, architecture, updateEnvironment, check
             installDir = tc.find('Python', semanticVersionSpec, architecture);
         }
     }
+    if (!installDir && !freethreaded) {
+        // Try system Python as fallback, but only for architectures that have
+        // no pre-built binaries in the manifest at all. This prevents the
+        // fallback from firing when a specific version is missing on a
+        // supported architecture (e.g., requesting Python 3.99 on x86_64).
+        const baseArchitecture = architecture.replace('-freethreaded', '');
+        if (!manifest) {
+            manifest = await installer.getManifest();
+        }
+        const archHasManifestEntries = manifest?.some(release => release.files?.some((file) => file.arch === baseArchitecture));
+        if (!archHasManifestEntries) {
+            try {
+                const sysInfo = await exec.getExecOutput('python3', [
+                    '-c',
+                    'import sys, os; print(sys.executable + "\\n" + f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}" + "\\n" + sys.prefix + "\\n" + os.path.dirname(sys.executable))'
+                ]);
+                if (sysInfo.exitCode === 0) {
+                    const [sysExecutable, sysVersion, sysPrefix, sysBinDir] = sysInfo.stdout.trim().split('\n');
+                    if (semver.satisfies(sysVersion, semanticVersionSpec)) {
+                        core.warning(`Pre-built Python not available for architecture '${baseArchitecture}'. Using system Python ${sysVersion} at ${sysExecutable}.`);
+                        if (updateEnvironment) {
+                            core.exportVariable('pythonLocation', sysPrefix);
+                            core.exportVariable('PKG_CONFIG_PATH', sysPrefix + '/lib/pkgconfig');
+                            core.exportVariable('Python_ROOT_DIR', sysPrefix);
+                            core.exportVariable('Python2_ROOT_DIR', sysPrefix);
+                            core.exportVariable('Python3_ROOT_DIR', sysPrefix);
+                            core.addPath(sysBinDir);
+                        }
+                        core.setOutput('python-version', sysVersion);
+                        core.setOutput('python-path', sysExecutable);
+                        return { impl: 'CPython', version: sysVersion };
+                    }
+                }
+            }
+            catch {
+                // System Python not available, fall through to error
+            }
+        }
+    }
     if (!installDir) {
         const osInfo = await (0, utils_1.getOSInfo)();
         const msg = [
