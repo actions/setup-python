@@ -29,7 +29,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Run with setup-python 3.10.11
         if: matrix.operating-system != 'windows-11-arm'
