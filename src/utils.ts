@@ -258,7 +258,7 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
   pyprojectFile = pyprojectFile.replace(/\r\n/g, '\n');
 
   const pyprojectConfig = toml.parse(pyprojectFile);
-  let keys = [];
+  let keys: string[] = [];
 
   if ('project' in pyprojectConfig) {
     // standard project metadata (PEP 621)
@@ -267,7 +267,7 @@ export function getVersionInputFromTomlFile(versionFile: string): string[] {
     // python poetry
     keys = ['tool', 'poetry', 'dependencies', 'python'];
   }
-  const versions = [];
+  const versions: string[] = [];
   const version = extractValue(pyprojectConfig, keys);
   if (version !== undefined) {
     versions.push(version);
@@ -376,7 +376,7 @@ export function getVersionInputFromPipfileFile(versionFile: string): string[] {
   } else {
     keys.push('python_version');
   }
-  const versions = [];
+  const versions: string[] = [];
   const version = extractValue(pipfileConfig, keys);
   if (version !== undefined) {
     versions.push(version);

@@ -2,11 +2,11 @@ import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
+import {ExecOptions} from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import {ExecOptions} from '@actions/exec/lib/interfaces';
-import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils';
+import {IS_WINDOWS, IS_LINUX, getDownloadFileName} from './utils.js';
 import {IToolRelease} from '@actions/tool-cache';
 
 const TOKEN = core.getInput('token');
@@ -222,7 +222,8 @@ export async function getManifest(): Promise<tc.IToolRelease[]> {
     const message = err instanceof Error ? err.message : String(err);
     // Fail loudly so the action doesn't exit 0 without installing Python.
     throw new Error(
-      `Failed to fetch the Python versions manifest. The response was empty, truncated, or invalid, and all retries were exhausted. ${message}`
+      `Failed to fetch the Python versions manifest. The response was empty, truncated, or invalid, and all retries were exhausted. ${message}`,
+      {cause: err}
     );
   }
 }

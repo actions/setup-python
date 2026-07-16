@@ -1,6 +1,6 @@
-import PipCache from './pip-cache';
-import PipenvCache from './pipenv-cache';
-import PoetryCache from './poetry-cache';
+import PipCache from './pip-cache.js';
+import PipenvCache from './pipenv-cache.js';
+import PoetryCache from './poetry-cache.js';
 
 export enum PackageManagers {
   Pip = 'pip',
