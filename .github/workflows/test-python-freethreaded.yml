@@ -33,7 +33,7 @@ jobs:
         python: [3.13.14t, 3.14.6t]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -70,7 +70,7 @@ jobs:
         python: [3.13.14t, 3.14.6t]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -110,7 +110,7 @@ jobs:
         python: [3.13.14t, 3.14.6t]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: echo ${{ matrix.python }} > .python-version
@@ -148,7 +148,7 @@ jobs:
         python: [3.13.14, 3.14.6]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -189,7 +189,7 @@ jobs:
         python: [3.13.14, 3.14.6]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -230,7 +230,7 @@ jobs:
         python: [3.13.14t, 3.14.6t, 3.15t-dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-tool-versions-file ${{ matrix.python }}
         run: |
@@ -261,7 +261,7 @@ jobs:
         python: [3.13t, 3.15t-dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -301,7 +301,7 @@ jobs:
         python: [3.13.14t, 3.14.6t, 3.15t-dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: build-version-file ${{ matrix.python }}
         run: |
@@ -340,7 +340,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: setup-python 3.15.0-beta.3
         id: setup-python
@@ -377,7 +377,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: setup-python 3.15t-dev
         id: setup-python
@@ -414,7 +414,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: setup-python 3.15t
         id: setup-python
@@ -453,7 +453,7 @@ jobs:
         python: [3.13.14t, 3.14.6t]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: setup-python ${{ matrix.python }}
         id: setup-python
@@ -485,7 +485,7 @@ jobs:
           ]
         python-version: [3.13t, 3.15t-dev]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python and check latest
         id: setup-python
         uses: ./
@@ -511,7 +511,7 @@ jobs:
             macos-latest
           ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup multiple Python versions
         id: setup-python
         uses: ./
@@ -542,7 +542,7 @@ jobs:
         python: [3.13.14, 3.14.6, 3.15-dev, 3.15.0-beta.3]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: setup-python ${{ matrix.python }}
         id: setup-python
         uses: ./

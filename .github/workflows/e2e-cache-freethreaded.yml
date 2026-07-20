@@ -36,7 +36,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         uses: ./
         with:
@@ -66,7 +66,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -106,7 +106,7 @@ jobs:
           ]
         python-version: [3.13.14, 3.14.6]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Install poetry
         run: pipx install poetry
       - name: Init pyproject.toml
@@ -141,7 +141,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         uses: ./
         with:
@@ -172,7 +172,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         id: cache-pipenv
         uses: ./
@@ -216,7 +216,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         uses: ./
         with:
@@ -247,7 +247,7 @@ jobs:
           - os: windows-11-arm
             python-version: 3.13.14t
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Python
         uses: ./
         with:
