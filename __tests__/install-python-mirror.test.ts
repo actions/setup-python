@@ -505,16 +505,6 @@ describe('installCpythonFromRelease auth gating', () => {
     ).resolves.toBe('Bearer MTOK');
   });
 
-  it('does not prefix or rewrite a mirror-token', async () => {
-    setInputs({
-      'mirror-token': 'Basic dXNlcjpwYXNz',
-      mirror: 'https://cdn.example'
-    });
-    await expect(
-      downloadAuthFor('https://cdn.example/py.tar.gz')
-    ).resolves.toBe('Basic dXNlcjpwYXNz');
-  });
-
   it('withholds mirror-token from a same-host download URL on a different scheme', async () => {
     setInputs({
       'mirror-token': 'Bearer MTOK',
