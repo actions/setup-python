@@ -4,13 +4,16 @@
             "owner": "python",
             "pattern": [
                 {
-                    "regexp": "^\\s*File\\s\\\"(.*)\\\",\\sline\\s(\\d+),\\sin\\s(.*)$",
+                    "regexp": "^  File \"([^\"]*)\", line (\\d+).*",
                     "file": 1,
                     "line": 2
                 },
                 {
-                    "regexp": "^\\s*raise\\s(.*)\\(\\'(.*)\\'\\)$",
-                    "message": 2
+                    "regexp": "^    .*$"
+                },
+                {
+                    "regexp": "^(?!  File)(.*)\\s*$",
+                    "message": 1
                 }
             ]
         }
