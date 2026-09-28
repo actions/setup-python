@@ -1,6 +1,6 @@
 {
   "name": "setup-python",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "type": "module",
   "private": true,
   "description": "Setup python action",
@@ -56,7 +56,7 @@
     "eslint-plugin-n": "^18.1.0",
     "globals": "^17.7.0",
     "jest": "^30.4.2",
-    "prettier": "^3.8.4",
+    "prettier": "^3.9.9",
     "ts-jest": "^29.4.11",
     "typescript": "^6.0.3"
   }
