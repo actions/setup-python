@@ -1,6 +1,6 @@
 ---
 name: "@nodable/entities"
-version: 3.0.0
+version: 3.1.0
 type: npm
 summary: Entity parser for XML, HTML, External entites with security and NCR control
 homepage:

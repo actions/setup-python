@@ -10,7 +10,7 @@ allowed:
   - cc0-1.0
   - unlicense
   - 0bsd
-  - blueoak-1.0.0
+  - BlueOak-1.0.0
 
 reviewed:
   npm:
