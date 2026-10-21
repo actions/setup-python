@@ -177,9 +177,8 @@ async function installPip(pythonLocation: string) {
   const pythonBinary = path.join(pythonLocation, 'python');
   await exec.exec(`${pythonBinary} -m ensurepip`);
 
-  await exec.exec(
-    `${pythonLocation}/python -m pip install --ignore-installed pip`
-  );
+  // Do not use --ignore-installed; pip must remove files from previous versions.
+  await exec.exec(`${pythonLocation}/python -m pip install --upgrade pip`);
 }
 
 export function findRelease(
