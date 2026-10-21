@@ -99820,7 +99820,8 @@ async function install_pypy_installPip(pythonLocation) {
     info('Installing and updating pip');
     const pythonBinary = external_path_.join(pythonLocation, 'python');
     await exec_exec(`${pythonBinary} -m ensurepip`);
-    await exec_exec(`${pythonLocation}/python -m pip install --ignore-installed pip`);
+    // Do not use --ignore-installed; pip must remove files from previous versions.
+    await exec_exec(`${pythonLocation}/python -m pip install --upgrade pip`);
 }
 function findRelease(releases, pythonVersion, pypyVersion, architecture, includePrerelease) {
     const options = { includePrerelease: includePrerelease };
