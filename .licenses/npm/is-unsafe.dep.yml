@@ -1,6 +1,6 @@
 ---
 name: is-unsafe
-version: 2.0.0
+version: 2.0.2
 type: npm
 summary: Zero-dependency, DOM-free, pure predicate for detecting unsafe strings across
   HTML, XML, SVG, SQL, SHELL, and REGEX contexts
