@@ -9,7 +9,9 @@
     "node": ">=24.0.0"
   },
   "overrides": {
-    "brace-expansion": "^5.0.8"
+    "brace-expansion": "^5.0.8",
+    "undici@6": "6.29.1",
+    "handlebars@4": "4.7.10"
   },
   "scripts": {
     "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
