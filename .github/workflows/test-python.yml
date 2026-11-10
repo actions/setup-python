@@ -14,53 +14,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-versions-from-manifest:
-    name: Setup ${{ matrix.python }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [
-            ubuntu-22.04,
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            windows-latest,
-            windows-11-arm,
-            macos-15-intel,
-            macos-latest
-          ]
-        python: [3.10.11, 3.11.9, 3.12.10, 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: setup-python ${{ matrix.python }}
-        id: setup-python
-        uses: ./
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Check python-path
-        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
-        shell: bash
-
-      - name: Validate version
-        run: |
-          $pythonVersion = (python --version)
-          if ("Python ${{ matrix.python }}" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is ${{ matrix.python }}"
-            exit 1
-          }
-          $pythonVersion
-        shell: pwsh
-
-      - name: Run simple code
-        run: python -c 'import math; print(math.factorial(5))'
-
   setup-versions-via-mirror-input:
     name: 'Setup via explicit mirror input: ${{ matrix.os }}'
     runs-on: ${{ matrix.os }}
@@ -103,10 +56,16 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, 3.12.10, 3.13.14, 3.14.6]
+        python: [3.11.17, 3.12.16, 3.13.14, 3.14.6, 3.15.2]
         exclude:
           - os: windows-11-arm
-            python: 3.10.11
+            python: '3.11.17'
+          - os: windows-11-arm
+            python: '3.12.16'
+          - os: windows-latest
+            python: '3.11.17'
+          - os: windows-latest
+            python: '3.12.16'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -146,17 +105,13 @@ jobs:
         os:
           [
             ubuntu-22.04,
-            ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
             windows-11-arm,
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, 3.12.10, 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
+        python: [3.11.9, 3.12.10, 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -201,10 +156,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, '==3.12.10', 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
+        python: [ 3.11.9, '==3.12.10', 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -254,10 +206,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, 3.12.10, 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
+        python: [3.11.9, 3.12.10, 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -307,7 +256,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.14, 3.15-dev]
+        python: [pypy3.11-7.3.18, graalpy-24.1.2, 3.13.14, 3.15.2]
         exclude:
           - os: windows-latest
             python: graalpy-24.1.2
@@ -345,10 +294,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
+        python: [3.11.9, 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -398,10 +344,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [3.10.11, 3.11.9, 3.13.14, 3.14.6]
-        exclude:
-          - os: windows-11-arm
-            python: 3.10.11
+        python: [3.11.9, 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -436,7 +379,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-pre-release-version-from-manifest:
-    name: Setup 3.15.0-beta.3 ${{ matrix.os }}
+    name: Setup 3.16.0-alpha.1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -455,11 +398,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: setup-python 3.15.0-beta.3
+      - name: setup-python 3.16.0-alpha.1
         id: setup-python
         uses: ./
         with:
-          python-version: '3.15.0-beta.3'
+          python-version: '3.16.0-alpha.1'
 
       - name: Check python-path
         run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
@@ -468,7 +411,7 @@ jobs:
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("Python 3.15.0b3" -ne "$pythonVersion"){
+          if ("Python 3.16.0a1" -ne "$pythonVersion"){
             Write-Host "The current version is $pythonVersion; expected version is 3.15.0b3"
             exit 1
           }
@@ -516,7 +459,7 @@ jobs:
         run: python -c 'import math; print(math.factorial(5))'
 
   setup-prerelease-version:
-    name: Setup 3.15 ${{ matrix.os }}
+    name: Setup 3.16 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -535,11 +478,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: setup-python 3.15
+      - name: setup-python 3.16
         id: setup-python
         uses: ./
         with:
-          python-version: '3.15'
+          python-version: '3.16'
           allow-prereleases: true
 
       - name: Check python-path
@@ -547,7 +490,7 @@ jobs:
         shell: bash
 
       - name: Validate version
-        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.15.') }}
+        run: ${{ startsWith(steps.setup-python.outputs.python-version, '3.16.') }}
         shell: bash
 
       - name: Run simple code
@@ -569,10 +512,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        exclude:
-          - os: windows-11-arm
-            python: '3.10'
+        python: ['3.11', '3.12', '3.13', '3.14', '3.15']
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -605,10 +545,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        exclude:
-          - os: windows-11-arm
-            python-version: '3.10'
+        python-version: ['3.11', '3.12', '3.13', '3.14', '3.15']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Python and check latest
@@ -651,12 +588,13 @@ jobs:
             3.12
             3.13
             3.14
+            3.15
           check-latest: true
       - name: Validate version
         run: |
           $pythonVersion = (python --version)
-          if ("$pythonVersion" -NotMatch "3.14"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.14"
+          if ("$pythonVersion" -NotMatch "3.15"){
+            Write-Host "The current version is $pythonVersion; expected version is 3.15"
             exit 1
           }
           $pythonVersion

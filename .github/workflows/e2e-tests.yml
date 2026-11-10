@@ -31,14 +31,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Run with setup-python 3.10.11
+      - name: Run with setup-python 3.15.2
         if: matrix.operating-system != 'windows-11-arm'
         uses: ./
         with:
-          python-version: 3.10.11
-      - name: Verify 3.10.11
+          python-version: 3.15.2
+      - name: Verify 3.15.2
         if: matrix.operating-system != 'windows-11-arm'
-        run: python __tests__/verify-python.py 3.10.11
+        run: python __tests__/verify-python.py 3.15.2
 
       - name: Run with setup-python 3.11.9
         uses: ./
