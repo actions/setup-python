@@ -66,6 +66,14 @@ jobs:
             python: '3.11.17'
           - os: windows-latest
             python: '3.12.16'
+          - os: macos-15-intel
+            python: '3.11.17'
+          - os: macos-15-intel
+            python: '3.12.16'
+          - os: macos-latest
+            python: '3.11.17'
+          - os: macos-latest
+            python: '3.12.16'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -149,7 +157,6 @@ jobs:
         os:
           [
             ubuntu-22.04,
-            ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
             windows-11-arm,
@@ -207,6 +214,11 @@ jobs:
             macos-latest
           ]
         python: [3.11.9, 3.12.10, 3.13.14, 3.14.6, 3.15.2]
+        exclude:
+          - os: ubuntu-latest
+            python: '3.11.9'
+          - os: ubuntu-latest
+            python: '3.12.10'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -295,6 +307,9 @@ jobs:
             macos-latest
           ]
         python: [3.11.9, 3.13.14, 3.14.6, 3.15.2]
+        exclude:
+          - os: ubuntu-latest
+            python: '3.11.9'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -345,6 +360,9 @@ jobs:
             macos-latest
           ]
         python: [3.11.9, 3.13.14, 3.14.6, 3.15.2]
+        exclude:
+          - os: ubuntu-latest
+            python: '3.11.9'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
