@@ -38,8 +38,6 @@ jobs:
             python-version: pypy-3.11-v7.x
           - os: windows-11-arm
             python-version: pypy-3.11-v7.x
-          - os: windows-11-arm
-            python-version: '3.10'
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,7 +65,8 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python-version: ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
+        python-version:
+          ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
         exclude:
           - os: windows-latest
             python-version: pypy-3.11-v7.x
@@ -197,7 +196,8 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python-version: ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
+        python-version:
+          ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
         exclude:
           - os: windows-latest
             python-version: pypy-3.11-v7.x
@@ -258,7 +258,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          pip-version: '25.0.1'
+          pip-version: '26.2.2'
       - name: Install dependencies
         run: pip install numpy pandas requests
 
@@ -287,6 +287,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: __tests__/data/requirements.txt
-          pip-version: '25.0.1'
+          pip-version: '26.2.2'
       - name: Install dependencies
         run: pip install numpy pandas requests

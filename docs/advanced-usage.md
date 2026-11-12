@@ -161,8 +161,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - 'pypy3.10' # the latest available version of PyPy that supports Python 3.10
-        - 'pypy3.10-v7.3.17' # Python 3.10 and PyPy 7.3.17
+        - 'pypy3.11' # the latest available version of PyPy that supports Python 3.10
+        - 'pypy3.11-v7.3.23' # Python 3.10 and PyPy 7.3.17
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
@@ -260,12 +260,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9', '3.10', '3.11', 'pypy3.9']
+        python-version: ['3.11','3.14', 'pypy3.9']
         exclude:
-          - os: macos-latest
-            python-version: '3.9'
-          - os: windows-latest
-            python-version: '3.9'
+          - os: ubuntu-latest
+            python-version: '3.11'
+
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python

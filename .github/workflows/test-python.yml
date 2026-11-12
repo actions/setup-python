@@ -163,7 +163,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python: [ 3.11.9, '==3.12.10', 3.13.14, 3.14.6, 3.15.2]
+        python: [3.11.9, '==3.12.10', 3.13.14, 3.14.6, 3.15.2]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
