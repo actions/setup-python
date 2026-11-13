@@ -65,15 +65,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python-version:
-          ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
-        exclude:
-          - os: windows-latest
-            python-version: pypy-3.11-v7.x
-          - os: ubuntu-22.04
-            python-version: pypy-3.11-v7.x
-          - os: windows-11-arm
-            python-version: pypy-3.11-v7.x
+        python-version: ['3.12', '3.13', '3.14', '3.15']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Python
@@ -196,15 +188,7 @@ jobs:
             macos-15-intel,
             macos-latest
           ]
-        python-version:
-          ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14', '3.15']
-        exclude:
-          - os: windows-latest
-            python-version: pypy-3.11-v7.x
-          - os: ubuntu-22.04
-            python-version: pypy-3.11-v7.x
-          - os: windows-11-arm
-            python-version: pypy-3.11-v7.x
+        python-version: ['3.12', '3.13', '3.14', '3.15']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Python
