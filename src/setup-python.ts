@@ -94,7 +94,12 @@ function resolveVersionInput() {
 }
 
 async function run() {
-  if (IS_MAC) {
+  if (IS_MAC && !process.env.AGENT_TOOLSDIRECTORY?.trim()) {
+    // Default to the hosted-images location only when the runner did not
+    // provide one. Self-hosted macOS runners export their own
+    // AGENT_TOOLSDIRECTORY; overwriting it unconditionally makes the action
+    // mkdir /Users/runner/hostedtoolcache, which fails on hosts where the
+    // `runner` user does not exist (#914).
     process.env['AGENT_TOOLSDIRECTORY'] = '/Users/runner/hostedtoolcache';
   }
 
