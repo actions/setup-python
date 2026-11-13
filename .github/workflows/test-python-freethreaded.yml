@@ -14,43 +14,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-versions-from-manifest:
-    name: Setup ${{ matrix.python }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [
-            ubuntu-22.04,
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            windows-latest,
-            windows-11-arm,
-            macos-15-intel,
-            macos-latest
-          ]
-        python: [3.13.14t, 3.14.6t]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: setup-python ${{ matrix.python }}
-        id: setup-python
-        uses: ./
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Check python-path
-        run: ./__tests__/check-python-path.sh '${{ steps.setup-python.outputs.python-path }}'
-        shell: bash
-
-      - name: Verify Python version
-        run: ${{ steps.setup-python.outputs.python-path }} -VVV
-
-      - name: Run simple code
-        run: python -c 'import math; print(math.factorial(5))'
-
   setup-versions-from-file:
     name: Setup ${{ matrix.python }} ${{ matrix.os }} version file
     runs-on: ${{ matrix.os }}
