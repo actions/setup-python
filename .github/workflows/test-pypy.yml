@@ -218,7 +218,7 @@ jobs:
         with:
           python-version: |
             pypy-3.11-v7.3.x
-            pypy-3.10-v7.3.x
+            pypy-3.12-v8.0.x
           check-latest: true
       - name: PyPy and Python version
         run: python --version
@@ -241,7 +241,7 @@ jobs:
         shell: bash
       - name: Assert expected binaries (or symlinks) are present
         run: |
-          EXECUTABLE='pypy-3.10-v7.3.x'
+          EXECUTABLE='pypy-3.12-v8.0.x'
           EXECUTABLE=${EXECUTABLE/pypy-/pypy}  # remove the first '-' in "pypy-X.Y" -> "pypyX.Y" to match executable name
           EXECUTABLE=${EXECUTABLE%%-*}  # remove any -* suffix
           ${EXECUTABLE} --version

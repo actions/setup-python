@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The refs/heads/ form serves the same manifest as the default mirror and
       # exercises the refs/heads/{branch} -> {branch} parsing on the API path.
@@ -113,6 +113,7 @@ jobs:
         os:
           [
             ubuntu-22.04,
+            ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
             windows-11-arm,
@@ -120,6 +121,11 @@ jobs:
             macos-latest
           ]
         python: [3.11.9, 3.12.10, 3.13.14, 3.14.6, 3.15.2]
+        exclude:
+          - os: ubuntu-latest
+            python: '3.11.9'
+          - os: ubuntu-latest
+            python: '3.12.10'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -157,6 +163,7 @@ jobs:
         os:
           [
             ubuntu-22.04,
+            ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
             windows-11-arm,
@@ -164,6 +171,11 @@ jobs:
             macos-latest
           ]
         python: [3.11.9, '==3.12.10', 3.13.14, 3.14.6, 3.15.2]
+        exclude:
+          - os: ubuntu-latest
+            python: '3.11.9'
+          - os: ubuntu-latest
+            python: '3.12.10'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -430,7 +442,7 @@ jobs:
         run: |
           $pythonVersion = (python --version)
           if ("Python 3.16.0a1" -ne "$pythonVersion"){
-            Write-Host "The current version is $pythonVersion; expected version is 3.15.0b3"
+            Write-Host "The current version is $pythonVersion; expected version is 3.16.0a1"
             exit 1
           }
           $pythonVersion

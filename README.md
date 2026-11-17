@@ -42,7 +42,7 @@ steps:
 - uses: actions/checkout@v7
 - uses: actions/setup-python@v7 
   with:
-    python-version: 'pypy3.10' 
+    python-version: 'pypy3.11' 
 - run: python my_script.py
 ```
 

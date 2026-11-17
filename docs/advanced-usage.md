@@ -63,7 +63,7 @@ steps:
 - uses: actions/checkout@v7
 - uses: actions/setup-python@v7
   with:
-    python-version: '3.14.0-alpha.1'
+    python-version: '3.16.0-alpha.1'
 - run: python my_script.py
 ```
 
@@ -112,7 +112,7 @@ steps:
 - uses: actions/checkout@v7
 - uses: actions/setup-python@v7
   with:
-    python-version: '>=3.9 <3.14'
+    python-version: '>=3.11 <3.15'
 - run: python my_script.py
 ```
 
@@ -144,12 +144,11 @@ The version of PyPy should be specified in the format `pypy<python_version>[-v<p
 The `-v<pypy_version>` parameter is optional and can be skipped. The latest PyPy version will be used in this case.
 
 ```
-pypy3.10 or pypy-3.10 # the latest available version of PyPy that supports Python 3.10
-pypy3.9 or pypy-3.9 # the latest available version of PyPy that supports Python 3.9
-pypy3.7-v7.3.3 or pypy-3.7-v7.3.3 # Python 3.7 and PyPy 7.3.3
-pypy3.7-v7.x or pypy-3.7-v7.x # Python 3.7 and the latest available PyPy 7.x
-pypy3.7-v7.3.3rc1 or pypy-3.7-v7.3.3rc1 # Python 3.7 and preview version of PyPy
-pypy3.7-nightly or pypy-3.7-nightly # Python 3.7 and nightly PyPy
+pypy3.11 or pypy-3.11 # the latest available version of PyPy that supports Python 3.11
+pypy3.11-v7.3.23 or pypy-3.11-v7.3.23 # Python 3.11 and PyPy 7.3.23
+pypy3.11-v7.x or pypy-3.11-v7.x # Python 3.11 and the latest available PyPy 7.x
+pypy3.10-v7.3.12rc1 or pypy-3.10-v7.3.12rc1 # Python 3.10 and preview version of PyPy
+pypy3.11-nightly or pypy-3.11-nightly # Python 3.11 and nightly PyPy
 ```
 
 Download and set up PyPy:
@@ -161,8 +160,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - 'pypy3.11' # the latest available version of PyPy that supports Python 3.10
-        - 'pypy3.11-v7.3.23' # Python 3.10 and PyPy 7.3.17
+        - 'pypy3.11' # the latest available version of PyPy that supports Python 3.11
+        - 'pypy3.11-v7.3.23' # Python 3.11 and PyPy 7.3.23
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
@@ -203,9 +202,8 @@ jobs:
     - uses: actions/setup-python@v7
       with:
         python-version: |
-            pypy-3.10-v7.3.x
-            pypy3.10-nightly
-            pypy3.9
+            pypy-3.11-v7.3.x
+            pypy3.11-nightly
     - run: python my_script.py
 ```
 
@@ -222,8 +220,8 @@ jobs:
         python-version: |
             3.11
             3.12
-            pypy3.10-nightly
-            pypy3.10
+            pypy3.11-nightly
+            pypy3.11
             3.13
     - run: python my_script.py
 ```
@@ -238,7 +236,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.x', 'pypy3.8', 'pypy3.9' ]
+        python-version: ['3.x', 'pypy3.11', 'pypy3.12' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v7
@@ -260,7 +258,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11','3.14', 'pypy3.9']
+        python-version: ['3.11','3.14', 'pypy3.11']
         exclude:
           - os: ubuntu-latest
             python-version: '3.11'
@@ -272,7 +270,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
-        if: ${{ matrix.python-version != 'pypy3.9' }}  # Use single quotes in expressions for input `python-version`
+        if: ${{ matrix.python-version != 'pypy3.11' }}  # Use single quotes in expressions for input `python-version`
         run: python --version
 ```
 
@@ -427,7 +425,7 @@ steps:
 
 ### `python-version`
 
-Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.9.0 - 3.12.0, 3.x ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
+Using **python-version** output, it's possible to get the precise Python or PyPy version installed by the action. This output is useful when the input `python-version` is given as a range (e.g. 3.11.0 - 3.14.0, 3.x ), but down the line you need to operate (such as in an `if:` statement) with the exact installed version (e.g. 3.12.0). 
 
 ```yaml
 jobs:
@@ -438,7 +436,7 @@ jobs:
     - uses: actions/setup-python@v7
       id: cp312
       with:
-        python-version: "3.9.0 - 3.12.0"
+        python-version: "3.11.0 - 3.14.0"
     - run: echo '${{ steps.cp312.outputs.python-version }}'
 ```
 
@@ -542,7 +540,7 @@ Authentication is decided by the host of each request, so neither credential rea
 Point at a personal fork of `actions/python-versions` (uses the default `token`, fetched via the GitHub API):
 
 ```yaml
-- uses: actions/setup-python@v6
+- uses: actions/setup-python@v7
   with:
     python-version: '3.12'
     mirror: https://raw.githubusercontent.com/my-org/python-versions/main
@@ -551,7 +549,7 @@ Point at a personal fork of `actions/python-versions` (uses the default `token`,
 Point at an internal mirror with its own credential:
 
 ```yaml
-- uses: actions/setup-python@v6
+- uses: actions/setup-python@v7
   with:
     python-version: '3.12'
     mirror: https://python-mirror.internal.example
@@ -570,7 +568,7 @@ Caveats:
 - Preinstalled versions of PyPy in the tool cache on GitHub-hosted runners
   - For detailed information regarding the available versions of PyPy that are installed, see [Supported software](https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners#supported-software).
   - For the latest PyPy release, all versions of Python are cached.
-  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy3.10` or `pypy-3.10`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy3.10-v7.3.17` or `pypy-3.10-v7.3.17`.
+  - Cache is updated with a 1-2 week delay. If you specify the PyPy version as `pypy3.11` or `pypy-3.11`, the cached version will be used although a newer version is available. If you need to start using the recently released version right after release, you should specify the exact PyPy version using `pypy3.11-v7.3.23` or `pypy-3.11-v7.3.23`.
 
 - Downloadable PyPy versions from the [official PyPy site](https://downloads.python.org/pypy/).
   - All available versions that we can download are listed in [versions.json](https://downloads.python.org/pypy/versions.json) file.
