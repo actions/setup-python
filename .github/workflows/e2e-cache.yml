@@ -111,6 +111,8 @@ jobs:
         python-version:
           ['3.11', 'pypy-3.11-v7.x', '3.12', '3.13', '3.14']
         exclude:
+          - os: ubuntu-22.04
+            python-version: pypy-3.11-v7.x
           - os: windows-11-arm
             python-version: pypy-3.11-v7.x
     steps:
