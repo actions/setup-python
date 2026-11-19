@@ -640,6 +640,8 @@ One quick way to grant access is to change the user and group of the non-default
  - Create a directory called `/Users/runner/hostedtoolcache`
  - Change the permissions of `/Users/runner/hostedtoolcache` so that the runner has write access
 
+Some macOS Python distributions are delivered as `.pkg` installers. Their setup scripts use `sudo installer -pkg`, which cannot prompt for a password when the runner is running as a service. For these distributions, configure the runner's service account to run `/usr/sbin/installer` without an interactive password, or use a Python distribution that does not require the `.pkg` installer. Write access to the tool cache alone is not sufficient for this installation path.
+
 You can check the current user and group that the runner belongs to by typing `ls -l` inside the runner's root directory.        
 The runner can be granted write access to the `/Users/runner/hostedtoolcache` directory using a few techniques:
  - The user starting the runner is the owner, and the owner has write permission
