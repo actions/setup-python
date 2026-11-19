@@ -9,15 +9,17 @@
     "node": ">=24.0.0"
   },
   "overrides": {
-    "brace-expansion": "^5.0.8"
+    "brace-expansion": "^5.0.8",
+    "undici@6": "6.29.1",
+    "handlebars@4": "4.7.10"
   },
   "scripts": {
-    "build": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
+    "build": "node .lsf-source/verify-installed-deepmerge.mjs && ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts",
     "format": "prettier --no-error-on-unmatched-pattern --write \"**/*.{ts,yml,yaml}\"",
     "format-check": "prettier --no-error-on-unmatched-pattern --check \"**/*.{ts,yml,yaml}\"",
     "lint": "eslint \"**/*.ts\"",
     "lint:fix": "eslint \"**/*.ts\" --fix",
-    "release": "ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
+    "release": "node .lsf-source/verify-installed-deepmerge.mjs && ncc build -o dist/setup src/setup-python.ts && ncc build -o dist/cache-save src/cache-save.ts && git add -f dist/",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --coverage"
   },
   "repository": {
@@ -50,6 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^8.71.1",
     "@typescript-eslint/parser": "^8.70.0",
     "@vercel/ncc": "^0.45.0",
+    "deepmerge": "file:.lsf-source/deepmerge-4.3.1-lsf-prototype-v1.tar",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-jest": "^29.16.6",
