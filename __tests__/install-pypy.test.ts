@@ -380,7 +380,15 @@ describe('installPyPy', () => {
     expect(spyDownloadTool).toHaveBeenCalled();
     expect(spyExistsSync).toHaveBeenCalled();
     expect(spyCacheDir).toHaveBeenCalled();
-    expect(spyExec).toHaveBeenCalled();
+    expect(spyExec).toHaveBeenCalledTimes(2);
+    expect(spyExec).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/ -m ensurepip$/)
+    );
+    expect(spyExec).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/ -m pip install --upgrade pip$/)
+    );
   });
 
   it('found and install PyPy, pre-release fallback', async () => {
